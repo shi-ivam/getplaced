@@ -38,7 +38,8 @@ const AnalyzeResume = () => {
             setAnalysis(response.data.analysis);
         } catch (error) {
             console.error("Error analyzing resume:", error);
-            setError("❌ Failed to analyze the resume. Please try again.");
+            const serverMessage = error.response?.data?.detail || "Failed to analyze the resume. Please try again.";
+            setError(`❌ ${serverMessage}`);
         }
 
         setLoading(false);
