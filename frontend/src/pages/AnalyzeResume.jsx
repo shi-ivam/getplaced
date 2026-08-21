@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import jsPDF from "jspdf";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import {
   FileText,
   UploadCloud,
   Sparkles,
   CheckCircle2,
   AlertTriangle,
-  ArrowRight,
+  ArrowUpRight,
   Copy,
   Check,
   Download,
   History,
   Edit3,
-  Layers,
   Search,
   Plus,
   Trash2,
@@ -23,7 +24,10 @@ import {
   Zap,
   Briefcase,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  SlidersHorizontal,
+  X,
+  FileCode
 } from "lucide-react";
 import { PY_API_URL } from "@/config/api";
 
@@ -38,7 +42,7 @@ const INITIAL_BUILDER_DATA = {
     linkedin: "linkedin.com/in/alexrivera-dev",
     github: "github.com/alexrivera"
   },
-  summary: "Results-driven Software Engineer with 2+ years of experience engineering scalable web applications and distributed backend microservices. Proven track record in optimizing API latency and driving cloud deployments.",
+  summary: "Software Engineer with 2+ years designing resilient web platforms and microservices. Focused on low-latency APIs and cloud deployment workflows.",
   experience: [
     {
       id: "exp-1",
@@ -48,8 +52,8 @@ const INITIAL_BUILDER_DATA = {
       startDate: "Jun 2024",
       endDate: "Present",
       bullets: [
-        "Architected 12+ RESTful microservices using Node.js & Redis, reducing P99 API response latency by 42% under peak 10k RPM load.",
-        "Engineered responsive frontend dashboards using React and Tailwind CSS, increasing candidate onboarding completion by 28%."
+        "Engineered 12 RESTful microservices with Node.js & Redis, reducing P99 latency by 42% at 10k RPM peak.",
+        "Built dynamic onboarding dashboards using React and Tailwind CSS, increasing onboarding completion by 28%."
       ]
     },
     {
@@ -60,8 +64,8 @@ const INITIAL_BUILDER_DATA = {
       startDate: "Jan 2023",
       endDate: "May 2024",
       bullets: [
-        "Implemented automated CI/CD deployment pipelines using Docker and GitHub Actions, cutting staging deployment cycle time by 50%.",
-        "Designed MongoDB indexing strategies and aggregation pipelines to process 500,000+ daily telemetry records."
+        "Created automated Docker CI/CD pipelines with GitHub Actions, reducing release cycle time by 50%.",
+        "Optimized MongoDB aggregations and indexing to process 500k+ daily operational events."
       ]
     }
   ],
@@ -71,29 +75,20 @@ const INITIAL_BUILDER_DATA = {
       name: "Distributed Task Scheduler",
       techStack: "Go, Redis, Docker, gRPC",
       bullets: [
-        "Engineered high-throughput job queue supporting 25,000 concurrent tasks with automated exponential backoff retries.",
-        "Implemented Redis Raft distributed leader election protocol ensuring zero single-point-of-failure."
-      ]
-    },
-    {
-      id: "proj-2",
-      name: "AI Placement Analytics Engine",
-      techStack: "React, Python, FastAPI, Tailwind CSS",
-      bullets: [
-        "Developed full-stack interview intelligence platform analyzing candidate readiness across 7 core dimensions.",
-        "Integrated OCR and semantic keyword extraction achieving 96% resume parsing accuracy."
+        "Constructed job queue handling 25k concurrent tasks with automated exponential backoff retries.",
+        "Implemented Redis Raft leader election ensuring zero single-point failure."
       ]
     }
   ],
   skills: {
-    languages: ["JavaScript", "TypeScript", "Python", "Go", "Java", "SQL"],
-    frameworks: ["React", "Node.js", "Express", "FastAPI", "Next.js", "Tailwind CSS"],
-    toolsDatabases: ["PostgreSQL", "MongoDB", "Redis", "Docker", "Kubernetes", "Git", "AWS"]
+    languages: ["JavaScript", "TypeScript", "Python", "Go", "SQL"],
+    frameworks: ["React", "Node.js", "Express", "FastAPI", "Tailwind CSS"],
+    toolsDatabases: ["PostgreSQL", "MongoDB", "Redis", "Docker", "Git", "AWS"]
   },
   education: [
     {
       id: "edu-1",
-      degree: "B.S. in Computer Science",
+      degree: "B.S. Computer Science",
       institution: "Northeastern University",
       gradYear: "2025",
       gpa: "3.85 / 4.0"
@@ -102,13 +97,16 @@ const INITIAL_BUILDER_DATA = {
 };
 
 export default function AnalyzeResume() {
+  const containerRef = useRef(null);
   const [activeTab, setActiveTab] = useState("analyzer"); // 'analyzer' | 'history' | 'builder'
   
   // Analyzer state
   const [file, setFile] = useState(null);
   const [rawText, setRawText] = useState("");
+  const [inputMode, setInputMode] = useState("pdf"); // 'pdf' | 'text'
   const [jobDescription, setJobDescription] = useState("");
   const [targetRole, setTargetRole] = useState("Software Engineer");
+  const [showJdInput, setShowJdInput] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [copiedIndex, setCopiedIndex] = useState(null);
@@ -125,9 +123,18 @@ export default function AnalyzeResume() {
 
   // Builder State
   const [builderData, setBuilderData] = useState(INITIAL_BUILDER_DATA);
-  const [improvingBulletIndex, setImprovingBulletIndex] = useState(null);
+  const [improvingBulletKey, setImprovingBulletKey] = useState(null);
   const [bulletImprovementModal, setBulletImprovementModal] = useState(null);
   const [isImprovingSection, setIsImprovingSection] = useState(false);
+
+  // GSAP Smooth Tab & Results Entrance
+  useGSAP(() => {
+    gsap.fromTo(
+      ".tab-content-panel",
+      { opacity: 0, y: 12 },
+      { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
+    );
+  }, { dependencies: [activeTab, evaluation], scope: containerRef });
 
   // Load versions from localStorage on mount
   useEffect(() => {
@@ -136,31 +143,30 @@ export default function AnalyzeResume() {
       if (saved) {
         setVersions(JSON.parse(saved));
       } else {
-        // Seed an initial demo version for instant value
         const demoVersion = {
           id: "ver-demo-1",
-          name: "V1 - Initial Draft Resume",
-          timestamp: new Date(Date.now() - 86400000 * 3).toISOString(),
+          name: "V1 Benchmark Candidate Draft",
+          timestamp: new Date(Date.now() - 86400000 * 2).toISOString(),
           targetRole: "Full Stack Developer",
           targetCompany: "General Tech",
-          atsScore: 68,
+          atsScore: 72,
           tier: "Competitive",
           categoryScores: {
-            formatting_structure: 75,
-            keyword_relevance: 62,
-            impact_metrics: 55,
-            skills_alignment: 78,
-            experience_relevance: 70
+            formatting_structure: 78,
+            keyword_relevance: 68,
+            impact_metrics: 62,
+            skills_alignment: 80,
+            experience_relevance: 72
           },
-          matchedCount: 8,
-          missingCount: 6,
-          summaryCritique: "Good technical foundation with standard project mentions. Lacks quantifiable metric impact."
+          matchedCount: 9,
+          missingCount: 4,
+          summaryCritique: "Solid foundational competencies. Requires higher concentration of quantified impact metrics."
         };
         setVersions([demoVersion]);
         localStorage.setItem(STORAGE_KEY, JSON.stringify([demoVersion]));
       }
     } catch (e) {
-      console.error("Failed to load versions from localStorage:", e);
+      console.error("Failed to load versions from storage:", e);
     }
   }, []);
 
@@ -197,7 +203,7 @@ export default function AnalyzeResume() {
 
   const handleAnalyze = async () => {
     if (!file && !rawText.trim()) {
-      setError("Please upload a PDF resume or paste resume text to analyze.");
+      setError("Provide a PDF resume or text payload to analyze.");
       return;
     }
 
@@ -228,10 +234,9 @@ export default function AnalyzeResume() {
       }
 
       setEvaluation(evalData);
-      saveEvaluationToHistory(evalData, file ? `${file.name.replace(".pdf", "")} (Analyzed)` : null);
+      saveEvaluationToHistory(evalData, file ? `${file.name.replace(".pdf", "")}` : null);
     } catch (err) {
       console.error("Resume analysis error:", err);
-      // Fallback direct legacy request if modern route has network error
       try {
         const legacyRes = await axios.post(`${PY_API_URL}/analyze-resume/`, {
           file: file
@@ -240,10 +245,10 @@ export default function AnalyzeResume() {
           setEvaluation(legacyRes.data.data);
           saveEvaluationToHistory(legacyRes.data.data);
         } else {
-          setError("Analysis completed with basic summary. Please check your network or API keys.");
+          setError("Analysis engine returned minimal output. Verify network connectivity.");
         }
       } catch (fallbackErr) {
-        setError(err.response?.data?.detail || "Failed to analyze resume. Please verify API connections.");
+        setError(err.response?.data?.detail || "Analysis request failed. Verify backend services.");
       }
     } finally {
       setLoading(false);
@@ -259,102 +264,97 @@ export default function AnalyzeResume() {
   const handleDownloadReport = () => {
     if (!evaluation) return;
     const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
-    const marginLeft = 40;
-    let yPos = 50;
+    const marginLeft = 45;
+    let yPos = 55;
 
-    // Header
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.setTextColor(124, 58, 237); // Violet
-    doc.text("getPlaced ATS Resume Intelligence Report", marginLeft, yPos);
-    yPos += 25;
+    doc.setFontSize(20);
+    doc.setTextColor(17, 24, 39);
+    doc.text("Resume ATS Audit Report", marginLeft, yPos);
+    yPos += 20;
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Generated: ${new Date().toLocaleDateString()} | Target Role: ${targetRole || "Software Engineer"}`, marginLeft, yPos);
+    doc.setTextColor(107, 114, 128);
+    doc.text(`Generated ${new Date().toLocaleDateString()} | Target: ${targetRole || "Software Engineer"}`, marginLeft, yPos);
     yPos += 30;
 
-    // Score Banner
-    doc.setFillColor(243, 244, 246);
-    doc.roundedRect(marginLeft, yPos, 515, 60, 4, 4, "F");
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(marginLeft, yPos, 505, 55, 6, 6, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.setTextColor(17, 24, 39);
-    doc.text(`Overall ATS Score: ${evaluation.ats_score}/100 (${evaluation.score_tier || "Strong"})`, marginLeft + 15, yPos + 25);
-    
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(75, 85, 99);
-    const summaryLines = doc.splitTextToSize(evaluation.summary_critique || "", 485);
-    doc.text(summaryLines, marginLeft + 15, yPos + 45);
-    yPos += 80;
+    doc.setFontSize(15);
+    doc.setTextColor(15, 23, 42);
+    doc.text(`ATS Score: ${evaluation.ats_score}/100 (${evaluation.score_tier || "Standard"})`, marginLeft + 16, yPos + 22);
 
-    // Category Breakdown
+    doc.setFontSize(9.5);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(71, 85, 105);
+    const summaryLines = doc.splitTextToSize(evaluation.summary_critique || "", 475);
+    doc.text(summaryLines, marginLeft + 16, yPos + 40);
+    yPos += 75;
+
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.setTextColor(17, 24, 39);
-    doc.text("Category Breakdown", marginLeft, yPos);
+    doc.setFontSize(12);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Category Metrics", marginLeft, yPos);
     yPos += 18;
 
-    doc.setFontSize(10);
+    doc.setFontSize(9.5);
     doc.setFont("helvetica", "normal");
     const cats = evaluation.category_scores || {};
     Object.entries(cats).forEach(([key, val]) => {
       const label = key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-      doc.text(`• ${label}: ${val}%`, marginLeft + 10, yPos);
+      doc.text(`${label}: ${val}%`, marginLeft + 8, yPos);
       yPos += 14;
     });
     yPos += 15;
 
-    // Matched & Missing Keywords
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
+    doc.setFontSize(12);
     doc.text("Keyword Alignment", marginLeft, yPos);
     yPos += 18;
 
-    doc.setFontSize(10);
+    doc.setFontSize(9.5);
     doc.setFont("helvetica", "normal");
     const matchedStr = (evaluation.matched_keywords || []).map((k) => k.keyword).join(", ");
     const missingStr = (evaluation.missing_keywords || []).map((k) => k.keyword).join(", ");
-    
-    doc.text(`Matched (${evaluation.matched_keywords?.length || 0}): ${matchedStr || "None detected"}`, marginLeft + 10, yPos, { maxWidth: 490 });
-    yPos += 30;
-    doc.text(`Missing (${evaluation.missing_keywords?.length || 0}): ${missingStr || "None"}`, marginLeft + 10, yPos, { maxWidth: 490 });
-    yPos += 35;
 
-    // Bullet Improvements
+    doc.text(`Matched (${evaluation.matched_keywords?.length || 0}): ${matchedStr || "None"}`, marginLeft + 8, yPos, { maxWidth: 490 });
+    yPos += 26;
+    doc.text(`Missing (${evaluation.missing_keywords?.length || 0}): ${missingStr || "None"}`, marginLeft + 8, yPos, { maxWidth: 490 });
+    yPos += 30;
+
     if (evaluation.bullet_improvements?.length) {
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(13);
-      doc.text("Recommended XYZ Bullet Rewrites", marginLeft, yPos);
+      doc.setFontSize(12);
+      doc.text("Google XYZ Bullet Optimizations", marginLeft, yPos);
       yPos += 18;
 
-      evaluation.bullet_improvements.slice(0, 2).forEach((b) => {
+      evaluation.bullet_improvements.slice(0, 3).forEach((b) => {
         doc.setFontSize(9);
         doc.setFont("helvetica", "italic");
-        doc.setTextColor(185, 28, 28);
-        doc.text(`Before: ${b.original}`, marginLeft + 10, yPos, { maxWidth: 490 });
-        yPos += 20;
+        doc.setTextColor(156, 163, 175);
+        doc.text(`Original: ${b.original}`, marginLeft + 8, yPos, { maxWidth: 490 });
+        yPos += 18;
 
         doc.setFont("helvetica", "bold");
-        doc.setTextColor(22, 101, 52);
-        doc.text(`After (XYZ): ${b.improved_xyz}`, marginLeft + 10, yPos, { maxWidth: 490 });
-        yPos += 30;
+        doc.setTextColor(16, 185, 129);
+        doc.text(`Optimized: ${b.improved_xyz}`, marginLeft + 8, yPos, { maxWidth: 490 });
+        yPos += 26;
       });
     }
 
-    doc.save(`Resume_ATS_Report_${targetRole.replace(/\s+/g, "_")}.pdf`);
+    doc.save(`ATS_Report_${(targetRole || "Candidate").replace(/\s+/g, "_")}.pdf`);
   };
 
-  // AI Bullet Improvement Handler for Builder
   const handleAIImproveBullet = async (bulletText, expIndex, bulletIndex) => {
-    setImprovingBulletIndex(`${expIndex}-${bulletIndex}`);
+    const key = `${expIndex}-${bulletIndex}`;
+    setImprovingBulletKey(key);
     try {
       const res = await axios.post(`${PY_API_URL}/api/resume/improve-bullet`, {
         bullet: bulletText,
         target_role: targetRole,
-        keywords: ["REST APIs", "Scalability", "Optimization", "Latency"]
+        keywords: ["Architecture", "Scalability", "Optimization", "Latency"]
       });
       setBulletImprovementModal({
         expIndex,
@@ -363,9 +363,9 @@ export default function AnalyzeResume() {
         data: res.data
       });
     } catch (e) {
-      console.error("Failed to improve bullet with AI:", e);
+      console.error("AI bullet improvement error:", e);
     } finally {
-      setImprovingBulletIndex(null);
+      setImprovingBulletKey(null);
     }
   };
 
@@ -378,7 +378,6 @@ export default function AnalyzeResume() {
     setBulletImprovementModal(null);
   };
 
-  // AI Summary Optimizer
   const handleAISummaryOptimize = async () => {
     setIsImprovingSection(true);
     try {
@@ -392,13 +391,12 @@ export default function AnalyzeResume() {
         setBuilderData({ ...builderData, summary: res.data.optimized_content });
       }
     } catch (e) {
-      console.error("Failed to optimize summary:", e);
+      console.error("AI summary optimization error:", e);
     } finally {
       setIsImprovingSection(false);
     }
   };
 
-  // Export Builder Resume
   const handleExportBuilderJSON = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(builderData, null, 2));
     const downloadAnchor = document.createElement("a");
@@ -410,316 +408,374 @@ export default function AnalyzeResume() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0f12] text-gray-100 p-4 md:p-8 font-sans">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <main ref={containerRef} className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#07080c] text-neutral-200">
+      
+      {/* Ambient Lighting Backdrops */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-violet-600/10 via-emerald-500/5 to-transparent blur-[120px] rounded-full" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 space-y-10">
         
-        {/* Top Header & Navigation Tabs */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-5">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-violet-950/60 border border-violet-700/50 rounded-xl text-violet-400">
-                <FileText className="w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-                  Resume Intelligence Suite
-                </h1>
-                <p className="text-sm text-gray-400">
-                  ATS evaluation, Google XYZ bullet rewriting, version tracking, and interactive resume optimization.
-                </p>
-              </div>
+        {/* Minimal Navigation & Title Strip */}
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/[0.07] pb-7">
+          <div className="space-y-1.5 max-w-2xl">
+            <div className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">Intelligence Matrix</span>
             </div>
+            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">
+              Resume Intelligence
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-400 font-normal">
+              ATS algorithmic scoring, Google XYZ bullet formulation, and version diffing.
+            </p>
           </div>
 
-          {/* Navigation Pills */}
-          <div className="flex items-center bg-gray-900/80 border border-gray-800 p-1.5 rounded-xl self-start md:self-auto">
+          {/* Minimal Floating Segmented Pill */}
+          <nav className="inline-flex p-1 bg-white/[0.03] border border-white/[0.08] rounded-xl backdrop-blur-md shadow-2xl">
             <button
               onClick={() => setActiveTab("analyzer")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${
                 activeTab === "analyzer"
-                  ? "bg-violet-600 text-white shadow-lg shadow-violet-600/30"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800/60"
+                  ? "bg-white text-black font-semibold shadow-sm"
+                  : "text-neutral-400 hover:text-white"
               }`}
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-3.5 h-3.5" />
               ATS Analyzer
             </button>
             <button
               onClick={() => setActiveTab("history")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${
                 activeTab === "history"
-                  ? "bg-violet-600 text-white shadow-lg shadow-violet-600/30"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800/60"
+                  ? "bg-white text-black font-semibold shadow-sm"
+                  : "text-neutral-400 hover:text-white"
               }`}
             >
-              <History className="w-4 h-4" />
-              Version History ({versions.length})
+              <History className="w-3.5 h-3.5" />
+              History ({versions.length})
             </button>
             <button
               onClick={() => setActiveTab("builder")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${
                 activeTab === "builder"
-                  ? "bg-violet-600 text-white shadow-lg shadow-violet-600/30"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800/60"
+                  ? "bg-white text-black font-semibold shadow-sm"
+                  : "text-neutral-400 hover:text-white"
               }`}
             >
-              <Edit3 className="w-4 h-4" />
-              Interactive Builder
+              <Edit3 className="w-3.5 h-3.5" />
+              Builder
             </button>
-          </div>
-        </div>
+          </nav>
+        </header>
 
         {/* TAB 1: ATS ANALYZER */}
         {activeTab === "analyzer" && (
-          <div className="space-y-6">
-            {/* Input Form Panel */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-1 bg-gray-900/70 border border-gray-800 rounded-2xl p-5 space-y-4">
-                <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                  <UploadCloud className="w-5 h-5 text-violet-400" />
-                  Upload or Paste Resume
-                </h2>
+          <div className="tab-content-panel space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              
+              {/* Left Control Card (4 cols) */}
+              <div className="lg:col-span-4 bg-white/[0.02] border border-white/[0.08] rounded-2xl p-5 sm:p-6 space-y-5 backdrop-blur-xl">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-mono text-[11px]">
+                    Input Payload
+                  </h2>
+                  <div className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/[0.05]">
+                    <button
+                      onClick={() => setInputMode("pdf")}
+                      className={`px-2.5 py-1 rounded text-[11px] font-medium transition ${
+                        inputMode === "pdf" ? "bg-white/10 text-white" : "text-neutral-400 hover:text-neutral-200"
+                      }`}
+                    >
+                      PDF
+                    </button>
+                    <button
+                      onClick={() => setInputMode("text")}
+                      className={`px-2.5 py-1 rounded text-[11px] font-medium transition ${
+                        inputMode === "text" ? "bg-white/10 text-white" : "text-neutral-400 hover:text-neutral-200"
+                      }`}
+                    >
+                      Text
+                    </button>
+                  </div>
+                </div>
 
-                {/* Target Role & Preset */}
-                <div>
-                  <label className="text-xs font-medium text-gray-400 block mb-1.5">Target Job Role</label>
+                {/* Target Role Field */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] uppercase tracking-wider text-neutral-400 font-mono">
+                    Target Role
+                  </label>
                   <input
                     type="text"
                     value={targetRole}
                     onChange={(e) => setTargetRole(e.target.value)}
-                    placeholder="e.g. Full Stack Developer, SDE-1"
-                    className="w-full px-3.5 py-2 bg-gray-800/80 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500 transition"
+                    placeholder="e.g. Senior Software Engineer"
+                    className="w-full px-3.5 py-2.5 bg-black/40 border border-white/[0.09] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white/30 transition font-sans"
                   />
                 </div>
 
-                {/* PDF File Upload Zone */}
-                <div>
-                  <label className="text-xs font-medium text-gray-400 block mb-1.5">Resume File (PDF)</label>
-                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-700 hover:border-violet-500 rounded-xl p-5 bg-gray-800/40 cursor-pointer transition">
-                    <UploadCloud className="w-8 h-8 text-gray-400 mb-2" />
-                    <span className="text-sm font-medium text-gray-300">
-                      {file ? file.name : "Click to select PDF resume"}
-                    </span>
-                    <span className="text-xs text-gray-500 mt-1">Supports OCR for scanned documents</span>
-                    <input
-                      type="file"
-                      accept="application/pdf"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-
-                {/* Or Raw Text Input */}
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-medium text-gray-400">Or Paste Plain Text</label>
-                    {rawText && (
-                      <button
-                        onClick={() => setRawText("")}
-                        className="text-xs text-gray-500 hover:text-red-400"
-                      >
-                        Clear
-                      </button>
+                {/* Input Modes: PDF vs Text */}
+                {inputMode === "pdf" ? (
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] uppercase tracking-wider text-neutral-400 font-mono">
+                      Resume File
+                    </label>
+                    <label className="group flex flex-col items-center justify-center border border-dashed border-white/15 hover:border-white/40 rounded-xl p-6 bg-black/20 cursor-pointer transition text-center relative overflow-hidden">
+                      <UploadCloud className="w-6 h-6 text-neutral-400 group-hover:text-white transition-colors mb-2" />
+                      <span className="text-xs font-medium text-neutral-200 truncate max-w-full px-2">
+                        {file ? file.name : "Select or drop PDF resume"}
+                      </span>
+                      <span className="text-[10px] text-neutral-500 mt-1 font-mono">
+                        Vector parsing & OCR enabled
+                      </span>
+                      <input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                    </label>
+                    {file && (
+                      <div className="flex items-center justify-between text-[11px] text-neutral-400 pt-1">
+                        <span className="truncate">Selected: {file.name}</span>
+                        <button
+                          onClick={() => setFile(null)}
+                          className="text-neutral-400 hover:text-rose-400 transition"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     )}
                   </div>
-                  <textarea
-                    rows={4}
-                    value={rawText}
-                    onChange={(e) => {
-                      setRawText(e.target.value);
-                      if (file) setFile(null);
-                    }}
-                    placeholder="Paste resume markdown or plain text here..."
-                    className="w-full px-3.5 py-2 bg-gray-800/80 border border-gray-700 rounded-xl text-xs text-gray-200 focus:outline-none focus:border-violet-500 transition resize-none"
-                  />
-                </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] uppercase tracking-wider text-neutral-400 font-mono">
+                        Raw Resume Text
+                      </label>
+                      {rawText && (
+                        <button
+                          onClick={() => setRawText("")}
+                          className="text-[10px] text-neutral-400 hover:text-rose-400"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    <textarea
+                      rows={5}
+                      value={rawText}
+                      onChange={(e) => {
+                        setRawText(e.target.value);
+                        if (file) setFile(null);
+                      }}
+                      placeholder="Paste markdown or plain text resume content..."
+                      className="w-full px-3.5 py-2.5 bg-black/40 border border-white/[0.09] rounded-xl text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-white/30 transition resize-none font-mono text-[11px]"
+                    />
+                  </div>
+                )}
 
-                {/* Optional Job Description */}
-                <div>
-                  <label className="text-xs font-medium text-gray-400 block mb-1.5">
-                    Target Job Description (Optional for keyword matching)
-                  </label>
-                  <textarea
-                    rows={4}
-                    value={jobDescription}
-                    onChange={(e) => setJobDescription(e.target.value)}
-                    placeholder="Paste target job posting description..."
-                    className="w-full px-3.5 py-2 bg-gray-800/80 border border-gray-700 rounded-xl text-xs text-gray-200 focus:outline-none focus:border-violet-500 transition resize-none"
-                  />
+                {/* Collapsible Target JD Input */}
+                <div className="space-y-2 pt-1 border-t border-white/[0.06]">
+                  <button
+                    type="button"
+                    onClick={() => setShowJdInput(!showJdInput)}
+                    className="flex items-center justify-between w-full text-[11px] text-neutral-400 hover:text-neutral-200 font-mono uppercase"
+                  >
+                    <span>Target Job Description</span>
+                    <span className="text-xs">{showJdInput ? "-" : "+"}</span>
+                  </button>
+                  {showJdInput && (
+                    <textarea
+                      rows={4}
+                      value={jobDescription}
+                      onChange={(e) => setJobDescription(e.target.value)}
+                      placeholder="Paste target job spec to align semantic keyword matching..."
+                      className="w-full px-3.5 py-2 bg-black/40 border border-white/[0.09] rounded-xl text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-white/30 transition resize-none font-sans"
+                    />
+                  )}
                 </div>
 
                 {error && (
-                  <div className="p-3 bg-red-950/50 border border-red-800/60 rounded-xl text-xs text-red-300 flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 shrink-0 text-red-400" />
+                  <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-300 flex items-start gap-2.5">
+                    <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
                     <span>{error}</span>
                   </div>
                 )}
 
+                {/* Primary Action Button */}
                 <button
                   onClick={handleAnalyze}
                   disabled={loading}
-                  className={`w-full py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-lg transition-all ${
+                  className={`w-full py-3 px-4 rounded-xl font-medium text-xs flex items-center justify-center gap-2 transition-all duration-200 ${
                     loading
-                      ? "bg-violet-800/60 text-gray-300 cursor-not-allowed"
-                      : "bg-violet-600 hover:bg-violet-500 text-white shadow-violet-600/30 active:scale-[0.99]"
+                      ? "bg-white/10 text-neutral-400 cursor-not-allowed"
+                      : "bg-white text-black hover:bg-neutral-200 active:scale-[0.99] shadow-lg shadow-white/5 font-semibold"
                   }`}
                 >
                   {loading ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      Analyzing with AI Engine...
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      Evaluating ATS Vectors...
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4" />
-                      Evaluate ATS Readiness
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Run ATS Readiness Analysis
                     </>
                   )}
                 </button>
               </div>
 
-              {/* Evaluation Output Panel */}
-              <div className="lg:col-span-2 space-y-6">
+              {/* Right Output Deck (8 cols) */}
+              <div className="lg:col-span-8 space-y-6">
                 {evaluation ? (
-                  <div className="space-y-6 animate-fadeIn">
+                  <div className="space-y-6">
                     
-                    {/* Top ATS Score Summary Card */}
-                    <div className="bg-gray-900/80 border border-gray-800 rounded-2xl p-6 relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
-                      
-                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
-                        <div className="flex items-center gap-5">
+                    {/* Score Overview Card */}
+                    <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 sm:p-7 backdrop-blur-xl relative overflow-hidden">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                        <div className="flex items-center gap-6">
                           {/* Radial Gauge */}
-                          <div className="relative w-24 h-24 flex items-center justify-center">
+                          <div className="relative w-24 h-24 shrink-0 flex items-center justify-center">
                             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                               <path
-                                className="text-gray-800"
-                                strokeWidth="3.5"
+                                className="text-white/[0.06]"
+                                strokeWidth="3"
                                 stroke="currentColor"
                                 fill="none"
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                               />
                               <path
                                 className={
-                                  evaluation.ats_score >= 85
-                                    ? "text-emerald-500"
-                                    : evaluation.ats_score >= 70
-                                    ? "text-violet-500"
-                                    : "text-amber-500"
+                                  evaluation.ats_score >= 80
+                                    ? "text-emerald-400"
+                                    : evaluation.ats_score >= 65
+                                    ? "text-violet-400"
+                                    : "text-amber-400"
                                 }
                                 strokeDasharray={`${evaluation.ats_score}, 100`}
-                                strokeWidth="3.5"
+                                strokeWidth="3"
                                 strokeLinecap="round"
                                 stroke="currentColor"
                                 fill="none"
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                               />
                             </svg>
-                            <div className="absolute flex flex-col items-center">
-                              <span className="text-2xl font-bold text-white leading-none">
+                            <div className="absolute flex flex-col items-center justify-center">
+                              <span className="text-2xl font-semibold tracking-tight text-white leading-none">
                                 {evaluation.ats_score}
                               </span>
-                              <span className="text-[10px] text-gray-400 font-medium mt-0.5">/ 100</span>
+                              <span className="text-[9px] font-mono text-neutral-400 mt-0.5">/ 100</span>
                             </div>
                           </div>
 
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="text-xl font-bold text-white">ATS Placement Score</h3>
-                              <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full border ${
-                                evaluation.ats_score >= 85
-                                  ? "bg-emerald-950/80 text-emerald-300 border-emerald-800"
-                                  : evaluation.ats_score >= 70
-                                  ? "bg-violet-950/80 text-violet-300 border-violet-800"
-                                  : "bg-amber-950/80 text-amber-300 border-amber-800"
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-base font-semibold text-white">ATS Placement Index</h3>
+                              <span className={`px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md border ${
+                                evaluation.ats_score >= 80
+                                  ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                                  : evaluation.ats_score >= 65
+                                  ? "bg-violet-500/10 text-violet-300 border-violet-500/30"
+                                  : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                               }`}>
                                 {evaluation.score_tier || "Evaluated"}
                               </span>
                             </div>
-                            <p className="text-xs text-gray-300 max-w-lg leading-relaxed">
+                            <p className="text-xs text-neutral-300 leading-relaxed max-w-xl">
                               {evaluation.summary_critique}
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-                          <button
-                            onClick={handleDownloadReport}
-                            className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-xl text-xs font-medium border border-gray-700 transition"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                            Download PDF Report
-                          </button>
-                        </div>
+                        <button
+                          onClick={handleDownloadReport}
+                          className="self-start sm:self-center shrink-0 flex items-center gap-2 px-3.5 py-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-xl text-xs font-medium text-neutral-200 transition"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Export PDF Report
+                        </button>
                       </div>
 
-                      {/* 5-Category Breakdown Progress Bars */}
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-6 pt-6 border-t border-gray-800/80">
-                        {evaluation.category_scores && Object.entries(evaluation.category_scores).map(([catKey, score]) => {
-                          const label = catKey.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-                          return (
-                            <div key={catKey} className="bg-gray-800/40 p-3 rounded-xl border border-gray-800">
-                              <div className="flex items-center justify-between text-xs mb-1.5">
-                                <span className="text-gray-400 truncate">{label}</span>
-                                <span className="font-semibold text-white">{score}%</span>
+                      {/* Gapless Category Breakdown Matrix */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-7 pt-6 border-t border-white/[0.06] grid-flow-dense">
+                        {evaluation.category_scores &&
+                          Object.entries(evaluation.category_scores).map(([catKey, score]) => {
+                            const label = catKey.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+                            return (
+                              <div key={catKey} className="bg-black/30 p-3 rounded-xl border border-white/[0.05]">
+                                <div className="flex items-center justify-between text-[11px] mb-1.5">
+                                  <span className="text-neutral-400 truncate">{label}</span>
+                                  <span className="font-mono text-white font-medium">{score}%</span>
+                                </div>
+                                <div className="w-full bg-white/[0.06] rounded-full h-1 overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full ${
+                                      score >= 80 ? "bg-emerald-400" : score >= 65 ? "bg-violet-400" : "bg-amber-400"
+                                    }`}
+                                    style={{ width: `${score}%` }}
+                                  />
+                                </div>
                               </div>
-                              <div className="w-full bg-gray-700/60 rounded-full h-1.5 overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full ${
-                                    score >= 80 ? "bg-emerald-500" : score >= 65 ? "bg-violet-500" : "bg-amber-500"
-                                  }`}
-                                  style={{ width: `${score}%` }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
                       </div>
                     </div>
 
                     {/* Keywords Section: Matched vs Missing */}
-                    <div className="bg-gray-900/70 border border-gray-800 rounded-2xl p-6 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                          <Award className="w-4 h-4 text-violet-400" />
-                          Keyword Match Breakdown
-                        </h3>
-                        <div className="flex items-center gap-1 bg-gray-800/80 p-1 rounded-lg text-xs">
+                    <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 space-y-4 backdrop-blur-xl">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <Award className="w-4 h-4 text-neutral-400" />
+                          <h3 className="text-xs font-semibold uppercase tracking-wider text-white font-mono">
+                            Keyword Alignment Matrix
+                          </h3>
+                        </div>
+                        <div className="flex items-center gap-1 bg-black/40 p-1 rounded-lg border border-white/[0.06] self-start sm:self-auto">
                           <button
                             onClick={() => setKeywordFilter("all")}
-                            className={`px-2.5 py-1 rounded-md transition ${keywordFilter === "all" ? "bg-violet-600 text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`px-2.5 py-1 rounded text-[11px] transition ${
+                              keywordFilter === "all" ? "bg-white/10 text-white font-medium" : "text-neutral-400 hover:text-neutral-200"
+                            }`}
                           >
                             All ({ (evaluation.matched_keywords?.length || 0) + (evaluation.missing_keywords?.length || 0) })
                           </button>
                           <button
                             onClick={() => setKeywordFilter("matched")}
-                            className={`px-2.5 py-1 rounded-md transition ${keywordFilter === "matched" ? "bg-emerald-700 text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`px-2.5 py-1 rounded text-[11px] transition ${
+                              keywordFilter === "matched" ? "bg-emerald-500/20 text-emerald-300 font-medium" : "text-neutral-400 hover:text-neutral-200"
+                            }`}
                           >
                             Matched ({ evaluation.matched_keywords?.length || 0 })
                           </button>
                           <button
                             onClick={() => setKeywordFilter("missing")}
-                            className={`px-2.5 py-1 rounded-md transition ${keywordFilter === "missing" ? "bg-amber-700 text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`px-2.5 py-1 rounded text-[11px] transition ${
+                              keywordFilter === "missing" ? "bg-amber-500/20 text-amber-300 font-medium" : "text-neutral-400 hover:text-neutral-200"
+                            }`}
                           >
                             Missing ({ evaluation.missing_keywords?.length || 0 })
                           </button>
                         </div>
                       </div>
 
-                      <div className="space-y-3">
+                      <div className="space-y-4 pt-1">
                         {(keywordFilter === "all" || keywordFilter === "matched") && evaluation.matched_keywords?.length > 0 && (
-                          <div>
-                            <span className="text-xs font-semibold text-emerald-400 block mb-2">✅ Matched Keywords in Resume:</span>
+                          <div className="space-y-2">
+                            <span className="text-[11px] font-mono text-emerald-400 uppercase tracking-wider block">
+                              Verified Skills & Keywords
+                            </span>
                             <div className="flex flex-wrap gap-2">
                               {evaluation.matched_keywords.map((k, i) => (
                                 <span
                                   key={i}
-                                  className="px-3 py-1 bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 rounded-lg text-xs font-medium flex items-center gap-1.5"
+                                  className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-lg text-xs font-medium flex items-center gap-1.5"
                                 >
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  <Check className="w-3 h-3 text-emerald-400" />
                                   {k.keyword}
-                                  {k.category && <span className="text-[10px] text-emerald-500">({k.category})</span>}
+                                  {k.category && <span className="text-[10px] text-emerald-400/60 font-mono">({k.category})</span>}
                                 </span>
                               ))}
                             </div>
@@ -727,24 +783,25 @@ export default function AnalyzeResume() {
                         )}
 
                         {(keywordFilter === "all" || keywordFilter === "missing") && evaluation.missing_keywords?.length > 0 && (
-                          <div className="pt-2">
-                            <span className="text-xs font-semibold text-amber-400 block mb-2">⚠️ Missing Critical Skills / Keywords:</span>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div className="space-y-2">
+                            <span className="text-[11px] font-mono text-amber-400 uppercase tracking-wider block">
+                              Target Skill Gaps
+                            </span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                               {evaluation.missing_keywords.map((k, i) => (
                                 <div
                                   key={i}
-                                  className="p-2.5 bg-amber-950/30 border border-amber-800/50 rounded-xl flex items-start gap-2 text-xs"
+                                  className="p-3 bg-black/40 border border-amber-500/20 rounded-xl space-y-1"
                                 >
-                                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                                  <div>
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-semibold text-amber-200">{k.keyword}</span>
-                                      <span className="px-1.5 py-0.2 text-[10px] bg-amber-900/60 text-amber-300 rounded">
-                                        {k.importance || "High"}
-                                      </span>
-                                    </div>
-                                    {k.reason && <p className="text-[11px] text-gray-400 mt-0.5">{k.reason}</p>}
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-xs font-semibold text-amber-200">{k.keyword}</span>
+                                    <span className="px-1.5 py-0.5 text-[9px] font-mono uppercase bg-amber-500/10 text-amber-300 rounded border border-amber-500/20">
+                                      {k.importance || "Required"}
+                                    </span>
                                   </div>
+                                  {k.reason && (
+                                    <p className="text-[11px] text-neutral-400 leading-normal">{k.reason}</p>
+                                  )}
                                 </div>
                               ))}
                             </div>
@@ -755,46 +812,42 @@ export default function AnalyzeResume() {
 
                     {/* Google XYZ Bullet Point Rewrites */}
                     {evaluation.bullet_improvements?.length > 0 && (
-                      <div className="bg-gray-900/70 border border-gray-800 rounded-2xl p-6 space-y-4">
+                      <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 space-y-4 backdrop-blur-xl">
                         <div className="flex items-center justify-between">
                           <div>
-                            <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                              <Zap className="w-4 h-4 text-amber-400" />
-                              Actionable Google XYZ Bullet Rewrites
+                            <h3 className="text-xs font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
+                              <Zap className="w-3.5 h-3.5 text-amber-400" />
+                              Actionable Google XYZ Bullet Optimizations
                             </h3>
-                            <p className="text-xs text-gray-400 mt-0.5">
-                              Formula: Accomplished [X], as measured by [Y], by doing [Z].
+                            <p className="text-[11px] text-neutral-400 font-mono mt-0.5">
+                              Formula: Accomplished [X], as measured by [Y], by doing [Z]
                             </p>
                           </div>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3.5">
                           {evaluation.bullet_improvements.map((item, i) => (
                             <div
                               key={i}
-                              className="bg-gray-800/50 border border-gray-700/60 rounded-xl p-4 space-y-3"
+                              className="bg-black/40 border border-white/[0.07] rounded-xl p-4 space-y-3"
                             >
-                              {/* Original */}
                               <div className="space-y-1">
-                                <span className="text-[11px] font-semibold text-rose-400 flex items-center gap-1">
-                                  <span className="w-2 h-2 rounded-full bg-rose-500 inline-block" />
-                                  Original Weak Bullet:
+                                <span className="text-[10px] uppercase font-mono tracking-wider text-rose-400">
+                                  Current Formulation
                                 </span>
-                                <p className="text-xs text-gray-400 italic pl-3 border-l-2 border-rose-500/50">
+                                <p className="text-xs text-neutral-400 italic pl-3 border-l border-rose-500/40">
                                   "{item.original}"
                                 </p>
                               </div>
 
-                              {/* Improved */}
                               <div className="space-y-1.5">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                                    Optimized High-Impact (XYZ):
+                                  <span className="text-[10px] uppercase font-mono tracking-wider text-emerald-400">
+                                    Optimized High-Impact XYZ
                                   </span>
                                   <button
                                     onClick={() => handleCopyBullet(item.improved_xyz, i)}
-                                    className="flex items-center gap-1 text-xs text-gray-400 hover:text-white bg-gray-700/50 hover:bg-gray-700 px-2 py-1 rounded transition"
+                                    className="flex items-center gap-1 text-[11px] text-neutral-400 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] px-2 py-1 rounded transition font-mono"
                                   >
                                     {copiedIndex === i ? (
                                       <>
@@ -809,25 +862,24 @@ export default function AnalyzeResume() {
                                     )}
                                   </button>
                                 </div>
-                                <p className="text-xs text-white font-medium pl-3 border-l-2 border-emerald-500 bg-emerald-950/20 py-2 rounded-r-lg">
+                                <p className="text-xs text-white font-medium pl-3 border-l border-emerald-400 bg-emerald-500/[0.04] py-2 rounded-r-lg">
                                   {item.improved_xyz}
                                 </p>
                               </div>
 
-                              {/* Metric & Action Verb metadata */}
                               <div className="flex flex-wrap items-center gap-2 pt-1">
                                 {item.metric_added && (
-                                  <span className="text-[11px] bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 px-2 py-0.5 rounded">
-                                    📈 Metric: {item.metric_added}
+                                  <span className="text-[10px] font-mono bg-white/[0.04] border border-white/[0.08] text-emerald-300 px-2 py-0.5 rounded">
+                                    Metric: {item.metric_added}
                                   </span>
                                 )}
                                 {item.action_verb_used && (
-                                  <span className="text-[11px] bg-violet-950/60 border border-violet-800/60 text-violet-300 px-2 py-0.5 rounded">
-                                    ⚡ Verb: {item.action_verb_used}
+                                  <span className="text-[10px] font-mono bg-white/[0.04] border border-white/[0.08] text-violet-300 px-2 py-0.5 rounded">
+                                    Verb: {item.action_verb_used}
                                   </span>
                                 )}
                                 {item.explanation && (
-                                  <span className="text-[11px] text-gray-400">
+                                  <span className="text-[11px] text-neutral-400">
                                     {item.explanation}
                                   </span>
                                 )}
@@ -838,17 +890,17 @@ export default function AnalyzeResume() {
                       </div>
                     )}
 
-                    {/* Actionable Next Steps */}
+                    {/* Actionable Recommendations */}
                     {evaluation.actionable_recommendations?.length > 0 && (
-                      <div className="bg-gray-900/70 border border-gray-800 rounded-2xl p-6 space-y-3">
-                        <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                          Recommended Next Steps to Reach 90+
+                      <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 space-y-3 backdrop-blur-xl">
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          Recommended Next Actions
                         </h3>
                         <ul className="space-y-2">
                           {evaluation.actionable_recommendations.map((rec, idx) => (
-                            <li key={idx} className="flex items-start gap-2.5 text-xs text-gray-300">
-                              <ChevronRight className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
+                            <li key={idx} className="flex items-start gap-2.5 text-xs text-neutral-300">
+                              <ChevronRight className="w-3.5 h-3.5 text-neutral-500 shrink-0 mt-0.5" />
                               <span>{rec}</span>
                             </li>
                           ))}
@@ -859,35 +911,36 @@ export default function AnalyzeResume() {
                   </div>
                 ) : (
                   /* Empty state placeholder */
-                  <div className="bg-gray-900/40 border border-gray-800/80 rounded-2xl p-12 text-center flex flex-col items-center justify-center space-y-4 min-h-[420px]">
-                    <div className="w-16 h-16 rounded-2xl bg-gray-800/60 border border-gray-700 flex items-center justify-center text-violet-400">
-                      <Sparkles className="w-8 h-8" />
+                  <div className="bg-white/[0.01] border border-dashed border-white/[0.1] rounded-2xl p-12 text-center flex flex-col items-center justify-center space-y-4 min-h-[420px]">
+                    <div className="w-12 h-12 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-neutral-400">
+                      <Sparkles className="w-5 h-5" />
                     </div>
                     <div className="max-w-md space-y-1">
-                      <h3 className="text-lg font-semibold text-white">Ready for Deep ATS Analysis</h3>
-                      <p className="text-xs text-gray-400">
-                        Upload your PDF resume on the left to receive instant ATS scoring, keyword match evaluation, Google XYZ bullet improvements, and actionable steps.
+                      <h3 className="text-base font-semibold text-white">Awaiting Input Payload</h3>
+                      <p className="text-xs text-neutral-400 font-normal">
+                        Submit a resume file or plaintext on the left to trigger full ATS evaluation, keyword matching, and Google XYZ suggestions.
                       </p>
                     </div>
                   </div>
                 )}
               </div>
+
             </div>
           </div>
         )}
 
         {/* TAB 2: RESUME VERSION TRACKING & DIFFING */}
         {activeTab === "history" && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className="bg-gray-900/70 border border-gray-800 rounded-2xl p-6 space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="tab-content-panel space-y-6">
+            <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 sm:p-7 backdrop-blur-xl space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <History className="w-5 h-5 text-violet-400" />
-                    Resume Version History & Score Diffing
+                  <h2 className="text-sm font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
+                    <History className="w-4 h-4 text-neutral-400" />
+                    Version Timeline & Score Trajectory
                   </h2>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Track the iterative progress of your resume scores across drafts and target companies.
+                  <p className="text-xs text-neutral-400 mt-1">
+                    Iterative progression of ATS scoring and category improvements across revisions.
                   </p>
                 </div>
 
@@ -898,40 +951,40 @@ export default function AnalyzeResume() {
                       setCompareVersionB(versions[0]);
                       setCompareModalOpen(true);
                     }}
-                    className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-violet-600/30 transition"
+                    className="flex items-center gap-2 px-3.5 py-2 bg-white text-black font-semibold rounded-xl text-xs shadow-sm hover:bg-neutral-200 transition"
                   >
-                    <TrendingUp className="w-4 h-4" />
-                    Compare Versions (Score Diff)
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    Score Diff (Latest vs Prior)
                   </button>
                 )}
               </div>
 
-              {/* Version Timeline Table */}
+              {/* Version List */}
               <div className="space-y-3">
                 {versions.map((ver, idx) => (
                   <div
                     key={ver.id || idx}
-                    className="bg-gray-800/40 border border-gray-800 hover:border-gray-700 p-4 rounded-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition"
+                    className="bg-black/30 border border-white/[0.06] hover:border-white/[0.15] p-4 rounded-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-violet-950/60 border border-violet-800/50 flex flex-col items-center justify-center shrink-0">
-                        <span className="text-sm font-bold text-violet-300 leading-none">{ver.atsScore}</span>
-                        <span className="text-[9px] text-gray-400">Score</span>
+                      <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex flex-col items-center justify-center shrink-0">
+                        <span className="text-sm font-bold text-white font-mono leading-none">{ver.atsScore}</span>
+                        <span className="text-[8px] font-mono text-neutral-400 uppercase mt-0.5">Score</span>
                       </div>
 
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-semibold text-white">{ver.name}</h4>
-                          <span className={`px-2 py-0.5 text-[10px] rounded-full border ${
-                            ver.atsScore >= 85
-                              ? "bg-emerald-950 text-emerald-300 border-emerald-800"
-                              : "bg-violet-950 text-violet-300 border-violet-800"
+                          <h4 className="text-xs font-semibold text-white">{ver.name}</h4>
+                          <span className={`px-2 py-0.5 text-[9px] font-mono uppercase rounded border ${
+                            ver.atsScore >= 80
+                              ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                              : "bg-white/[0.04] text-neutral-300 border-white/[0.08]"
                           }`}>
                             {ver.tier || "Evaluated"}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-400">
-                          Target: <span className="text-gray-300">{ver.targetRole}</span> • {new Date(ver.timestamp).toLocaleDateString()} at {new Date(ver.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        <p className="text-[11px] text-neutral-400">
+                          Target: <span className="text-neutral-300">{ver.targetRole}</span> • {new Date(ver.timestamp).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
@@ -943,9 +996,9 @@ export default function AnalyzeResume() {
                             setEvaluation(ver.fullEvaluation);
                             setActiveTab("analyzer");
                           }}
-                          className="px-3 py-1.5 bg-gray-700/60 hover:bg-gray-700 text-gray-200 rounded-lg text-xs font-medium transition"
+                          className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] text-neutral-200 rounded-lg text-xs font-medium transition"
                         >
-                          View Report
+                          Load in Analyzer
                         </button>
                       )}
                       <button
@@ -954,7 +1007,7 @@ export default function AnalyzeResume() {
                           setCompareVersionB(versions[0]);
                           setCompareModalOpen(true);
                         }}
-                        className="px-3 py-1.5 bg-violet-950/60 hover:bg-violet-900 border border-violet-700/50 text-violet-300 rounded-lg text-xs font-medium transition"
+                        className="px-3 py-1.5 bg-white/[0.08] hover:bg-white/[0.14] border border-white/[0.1] text-white rounded-lg text-xs font-medium transition"
                       >
                         Diff vs Latest
                       </button>
@@ -968,40 +1021,40 @@ export default function AnalyzeResume() {
 
         {/* TAB 3: INTERACTIVE RESUME BUILDER & OPTIMIZER */}
         {activeTab === "builder" && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className="bg-gray-900/70 border border-gray-800 rounded-2xl p-6 space-y-6">
+          <div className="tab-content-panel space-y-6">
+            <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 sm:p-7 backdrop-blur-xl space-y-6">
               
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <Edit3 className="w-5 h-5 text-violet-400" />
-                    Interactive Resume Builder & AI Optimizer
+                  <h2 className="text-sm font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
+                    <Edit3 className="w-4 h-4 text-neutral-400" />
+                    Interactive Resume Builder & AI Polish
                   </h2>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    Live resume workspace with in-line Google XYZ bullet point enhancer, AI summary polish, and export.
+                  <p className="text-xs text-neutral-400 mt-1">
+                    Direct resume authoring with in-line Google XYZ bullet enhancers and ATS export.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-start sm:self-auto">
                   <button
                     onClick={handleExportBuilderJSON}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 rounded-xl text-xs font-medium transition"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-white/[0.04] hover:bg-white/[0.08] text-neutral-200 border border-white/[0.08] rounded-xl text-xs font-medium transition"
                   >
                     <Download className="w-3.5 h-3.5" />
                     Export JSON
                   </button>
                   <button
                     onClick={() => {
-                      // Send formatted builder data to analyzer
                       let compiledText = `${builderData.personalInfo.fullName}\n${builderData.summary}\n\nExperience:\n`;
                       builderData.experience.forEach((exp) => {
                         compiledText += `${exp.role} at ${exp.company}\n`;
                         exp.bullets.forEach((b) => (compiledText += `• ${b}\n`));
                       });
                       setRawText(compiledText);
+                      setInputMode("text");
                       setActiveTab("analyzer");
                     }}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-violet-600/30 transition"
+                    className="flex items-center gap-1.5 px-3.5 py-2 bg-white text-black font-semibold rounded-xl text-xs shadow-sm hover:bg-neutral-200 transition"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     Evaluate in ATS Engine
@@ -1009,83 +1062,89 @@ export default function AnalyzeResume() {
                 </div>
               </div>
 
-              {/* Personal Info Grid */}
+              {/* Personal Information */}
               <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-300">Personal Information</h3>
+                <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400">
+                  Personal Information
+                </span>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <input
                     type="text"
                     value={builderData.personalInfo.fullName}
                     onChange={(e) => setBuilderData({ ...builderData, personalInfo: { ...builderData.personalInfo, fullName: e.target.value } })}
                     placeholder="Full Name"
-                    className="px-3.5 py-2 bg-gray-800/80 border border-gray-700 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+                    className="px-3.5 py-2 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-white/30"
                   />
                   <input
                     type="email"
                     value={builderData.personalInfo.email}
                     onChange={(e) => setBuilderData({ ...builderData, personalInfo: { ...builderData.personalInfo, email: e.target.value } })}
                     placeholder="Email"
-                    className="px-3.5 py-2 bg-gray-800/80 border border-gray-700 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+                    className="px-3.5 py-2 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-white/30"
                   />
                   <input
                     type="text"
                     value={builderData.personalInfo.linkedin}
                     onChange={(e) => setBuilderData({ ...builderData, personalInfo: { ...builderData.personalInfo, linkedin: e.target.value } })}
-                    placeholder="LinkedIn Profile"
-                    className="px-3.5 py-2 bg-gray-800/80 border border-gray-700 rounded-xl text-xs text-white focus:outline-none focus:border-violet-500"
+                    placeholder="LinkedIn Handle or URL"
+                    className="px-3.5 py-2 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-white/30"
                   />
                 </div>
               </div>
 
               {/* Professional Summary with AI Optimizer */}
-              <div className="space-y-2">
+              <div className="space-y-2 pt-2 border-t border-white/[0.06]">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-gray-300">Professional Summary</h3>
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400">
+                    Professional Summary
+                  </span>
                   <button
                     onClick={handleAISummaryOptimize}
                     disabled={isImprovingSection}
-                    className="flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 bg-violet-950/50 border border-violet-800/60 px-3 py-1 rounded-lg transition"
+                    className="flex items-center gap-1 text-[11px] text-neutral-300 hover:text-white bg-white/[0.05] border border-white/[0.08] px-2.5 py-1 rounded-lg transition font-mono"
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    {isImprovingSection ? "Polishing with AI..." : "AI Summary Polish"}
+                    <Sparkles className="w-3 h-3 text-emerald-400" />
+                    {isImprovingSection ? "Optimizing..." : "AI Polish"}
                   </button>
                 </div>
                 <textarea
                   rows={3}
                   value={builderData.summary}
                   onChange={(e) => setBuilderData({ ...builderData, summary: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-gray-800/80 border border-gray-700 rounded-xl text-xs text-gray-200 focus:outline-none focus:border-violet-500 resize-none"
+                  className="w-full px-3.5 py-2.5 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-neutral-200 focus:outline-none focus:border-white/30 resize-none font-sans"
                 />
               </div>
 
               {/* Work Experience Section with In-line AI Bullet Enhancer */}
-              <div className="space-y-4">
+              <div className="space-y-4 pt-2 border-t border-white/[0.06]">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-gray-300">Work Experience & Achievements</h3>
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400">
+                    Work Experience & Impact Bullets
+                  </span>
                   <button
                     onClick={() => {
                       const newExp = {
                         id: `exp-${Date.now()}`,
-                        role: "New Role",
-                        company: "Company Name",
-                        location: "City, State",
+                        role: "Software Engineer",
+                        company: "Tech Enterprise",
+                        location: "Remote",
                         startDate: "2024",
                         endDate: "Present",
-                        bullets: ["Engineered scalable service improving metrics by 20%."]
+                        bullets: ["Engineered scalable backend service improving response time by 25%."]
                       };
                       setBuilderData({ ...builderData, experience: [...builderData.experience, newExp] });
                     }}
-                    className="flex items-center gap-1 text-xs text-gray-300 hover:text-white bg-gray-800 px-2.5 py-1 rounded-lg border border-gray-700 transition"
+                    className="flex items-center gap-1 text-[11px] text-neutral-300 hover:text-white bg-white/[0.05] px-2.5 py-1 rounded-lg border border-white/[0.08] transition"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Experience
+                    <Plus className="w-3 h-3" />
+                    Add Role
                   </button>
                 </div>
 
                 <div className="space-y-4">
                   {builderData.experience.map((exp, expIdx) => (
-                    <div key={exp.id || expIdx} className="bg-gray-800/40 border border-gray-800 p-4 rounded-xl space-y-3">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div key={exp.id || expIdx} className="bg-black/30 border border-white/[0.06] p-4 rounded-xl space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <input
                           type="text"
                           value={exp.role}
@@ -1094,7 +1153,8 @@ export default function AnalyzeResume() {
                             updated.experience[expIdx].role = e.target.value;
                             setBuilderData(updated);
                           }}
-                          className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-xs font-medium text-white focus:outline-none focus:border-violet-500"
+                          placeholder="Role / Title"
+                          className="px-3 py-1.5 bg-black/40 border border-white/[0.08] rounded-lg text-xs font-medium text-white focus:outline-none focus:border-white/30"
                         />
                         <input
                           type="text"
@@ -1104,13 +1164,16 @@ export default function AnalyzeResume() {
                             updated.experience[expIdx].company = e.target.value;
                             setBuilderData(updated);
                           }}
-                          className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-xs font-medium text-gray-300 focus:outline-none focus:border-violet-500"
+                          placeholder="Organization"
+                          className="px-3 py-1.5 bg-black/40 border border-white/[0.08] rounded-lg text-xs font-medium text-neutral-300 focus:outline-none focus:border-white/30"
                         />
                       </div>
 
                       {/* Bullets List */}
                       <div className="space-y-2 pt-1">
-                        <span className="text-[11px] font-semibold text-gray-400 block">Bullet Points:</span>
+                        <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider block">
+                          Impact Bullet Points:
+                        </span>
                         {exp.bullets.map((bullet, bIdx) => (
                           <div key={bIdx} className="flex items-center gap-2">
                             <input
@@ -1121,15 +1184,15 @@ export default function AnalyzeResume() {
                                 updated.experience[expIdx].bullets[bIdx] = e.target.value;
                                 setBuilderData(updated);
                               }}
-                              className="flex-1 px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-xs text-gray-200 focus:outline-none focus:border-violet-500"
+                              className="flex-1 px-3 py-1.5 bg-black/40 border border-white/[0.08] rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-white/30"
                             />
                             <button
                               onClick={() => handleAIImproveBullet(bullet, expIdx, bIdx)}
-                              disabled={improvingBulletIndex === `${expIdx}-${bIdx}`}
-                              className="flex items-center gap-1 px-2.5 py-1.5 bg-violet-950/60 hover:bg-violet-900 border border-violet-700/60 text-violet-300 rounded-lg text-xs font-medium shrink-0 transition"
+                              disabled={improvingBulletKey === `${expIdx}-${bIdx}`}
+                              className="flex items-center gap-1 px-2.5 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-neutral-200 rounded-lg text-[11px] font-medium shrink-0 transition font-mono"
                             >
-                              <Sparkles className="w-3 h-3" />
-                              {improvingBulletIndex === `${expIdx}-${bIdx}` ? "..." : "AI Improve (XYZ)"}
+                              <Sparkles className="w-3 h-3 text-emerald-400" />
+                              {improvingBulletKey === `${expIdx}-${bIdx}` ? "..." : "AI Improve (XYZ)"}
                             </button>
                           </div>
                         ))}
@@ -1143,140 +1206,143 @@ export default function AnalyzeResume() {
           </div>
         )}
 
-        {/* MODAL 1: Compare Versions / Score Diffing */}
-        {compareModalOpen && compareVersionA && compareVersionB && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 animate-scaleUp">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-violet-400" />
-                  Resume Version Comparison & Score Diff
-                </h3>
-                <button
-                  onClick={() => setCompareModalOpen(false)}
-                  className="text-gray-400 hover:text-white text-sm"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* Version A */}
-                <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/60 space-y-2">
-                  <span className="text-xs text-gray-400">Baseline Version</span>
-                  <h4 className="text-sm font-semibold text-white truncate">{compareVersionA.name}</h4>
-                  <div className="text-2xl font-bold text-violet-400">{compareVersionA.atsScore} / 100</div>
-                  <span className="text-[11px] text-gray-400 block">{new Date(compareVersionA.timestamp).toLocaleDateString()}</span>
-                </div>
-
-                {/* Version B */}
-                <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/60 space-y-2">
-                  <span className="text-xs text-gray-400">Current / Target Version</span>
-                  <h4 className="text-sm font-semibold text-white truncate">{compareVersionB.name}</h4>
-                  <div className="text-2xl font-bold text-emerald-400 flex items-center gap-2">
-                    {compareVersionB.atsScore} / 100
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      compareVersionB.atsScore >= compareVersionA.atsScore
-                        ? "bg-emerald-950 text-emerald-300 border border-emerald-800"
-                        : "bg-rose-950 text-rose-300 border border-rose-800"
-                    }`}>
-                      {compareVersionB.atsScore >= compareVersionA.atsScore ? "+" : ""}
-                      {compareVersionB.atsScore - compareVersionA.atsScore} pts
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-gray-400 block">{new Date(compareVersionB.timestamp).toLocaleDateString()}</span>
-                </div>
-              </div>
-
-              {/* Category Diffs */}
-              <div className="space-y-2">
-                <span className="text-xs font-semibold text-gray-300">Category Improvements:</span>
-                {compareVersionB.categoryScores && Object.keys(compareVersionB.categoryScores).map((key) => {
-                  const valA = compareVersionA.categoryScores?.[key] || 0;
-                  const valB = compareVersionB.categoryScores?.[key] || 0;
-                  const diff = valB - valA;
-                  const label = key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-                  return (
-                    <div key={key} className="flex items-center justify-between text-xs py-1 border-b border-gray-800">
-                      <span className="text-gray-400">{label}</span>
-                      <div className="flex items-center gap-3">
-                        <span className="text-gray-400">{valA}% → <strong className="text-white">{valB}%</strong></span>
-                        <span className={`font-semibold ${diff >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                          {diff >= 0 ? `+${diff}%` : `${diff}%`}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="pt-2 flex justify-end">
-                <button
-                  onClick={() => setCompareModalOpen(false)}
-                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-xl text-xs font-medium transition"
-                >
-                  Close Comparison
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* MODAL 2: In-line Bullet Improvement Options */}
-        {bulletImprovementModal && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl max-w-xl w-full p-6 space-y-4 animate-scaleUp">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-3">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-amber-400" />
-                  Select Google XYZ Rewrite
-                </h3>
-                <button
-                  onClick={() => setBulletImprovementModal(null)}
-                  className="text-gray-400 hover:text-white text-sm"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                <span className="text-xs text-gray-400">Primary High-Impact Version:</span>
-                <div
-                  onClick={() => applyImprovedBullet(bulletImprovementModal.data.improved_xyz)}
-                  className="p-3 bg-emerald-950/30 border border-emerald-800/60 hover:border-emerald-500 rounded-xl cursor-pointer transition text-xs text-emerald-200 font-medium"
-                >
-                  {bulletImprovementModal.data.improved_xyz}
-                </div>
-
-                {bulletImprovementModal.data.alternative_versions?.length > 0 && (
-                  <div className="space-y-2 pt-2">
-                    <span className="text-xs text-gray-400">Alternative Angles:</span>
-                    {bulletImprovementModal.data.alternative_versions.map((alt, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() => applyImprovedBullet(alt)}
-                        className="p-3 bg-gray-800/60 border border-gray-700 hover:border-violet-500 rounded-xl cursor-pointer transition text-xs text-gray-300"
-                      >
-                        {alt}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-end pt-2">
-                <button
-                  onClick={() => setBulletImprovementModal(null)}
-                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
       </div>
-    </div>
+
+      {/* MODAL 1: Compare Versions / Score Diffing */}
+      {compareModalOpen && compareVersionA && compareVersionB && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0b0d13] border border-white/[0.12] rounded-2xl max-w-xl w-full p-6 space-y-5 shadow-2xl animate-scaleUp">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-neutral-400" />
+                Score Trajectory Diff
+              </h3>
+              <button
+                onClick={() => setCompareModalOpen(false)}
+                className="text-neutral-400 hover:text-white text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white/[0.02] p-4 rounded-xl border border-white/[0.06] space-y-1">
+                <span className="text-[10px] font-mono uppercase text-neutral-400">Baseline</span>
+                <h4 className="text-xs font-semibold text-white truncate">{compareVersionA.name}</h4>
+                <div className="text-2xl font-bold font-mono text-neutral-200">{compareVersionA.atsScore}</div>
+              </div>
+
+              <div className="bg-white/[0.02] p-4 rounded-xl border border-white/[0.06] space-y-1">
+                <span className="text-[10px] font-mono uppercase text-neutral-400">Target Revision</span>
+                <h4 className="text-xs font-semibold text-white truncate">{compareVersionB.name}</h4>
+                <div className="text-2xl font-bold font-mono text-emerald-400 flex items-center gap-2">
+                  {compareVersionB.atsScore}
+                  <span className={`text-[11px] font-sans px-2 py-0.5 rounded-full ${
+                    compareVersionB.atsScore >= compareVersionA.atsScore
+                      ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/30"
+                      : "bg-rose-500/10 text-rose-300 border border-rose-500/30"
+                  }`}>
+                    {compareVersionB.atsScore >= compareVersionA.atsScore ? "+" : ""}
+                    {compareVersionB.atsScore - compareVersionA.atsScore} pts
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Category Diffs */}
+            <div className="space-y-2 pt-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block">
+                Category Deltas:
+              </span>
+              {compareVersionB.categoryScores && Object.keys(compareVersionB.categoryScores).map((key) => {
+                const valA = compareVersionA.categoryScores?.[key] || 0;
+                const valB = compareVersionB.categoryScores?.[key] || 0;
+                const diff = valB - valA;
+                const label = key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+                return (
+                  <div key={key} className="flex items-center justify-between text-xs py-1.5 border-b border-white/[0.04]">
+                    <span className="text-neutral-400">{label}</span>
+                    <div className="flex items-center gap-3 font-mono text-xs">
+                      <span className="text-neutral-400">{valA}% → <strong className="text-white">{valB}%</strong></span>
+                      <span className={`font-semibold ${diff >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                        {diff >= 0 ? `+${diff}%` : `${diff}%`}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                onClick={() => setCompareModalOpen(false)}
+                className="px-4 py-2 bg-white/[0.06] hover:bg-white/[0.12] text-white rounded-xl text-xs font-medium transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: In-line Bullet Improvement Options */}
+      {bulletImprovementModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0b0d13] border border-white/[0.12] rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl animate-scaleUp">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
+                <Zap className="w-3.5 h-3.5 text-amber-400" />
+                Select Google XYZ Rewrite
+              </h3>
+              <button
+                onClick={() => setBulletImprovementModal(null)}
+                className="text-neutral-400 hover:text-white text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400 block">
+                Primary High-Impact Formulation:
+              </span>
+              <div
+                onClick={() => applyImprovedBullet(bulletImprovementModal.data.improved_xyz)}
+                className="p-3.5 bg-emerald-500/[0.06] border border-emerald-500/30 hover:border-emerald-400 rounded-xl cursor-pointer transition text-xs text-emerald-200 font-medium"
+              >
+                {bulletImprovementModal.data.improved_xyz}
+              </div>
+
+              {bulletImprovementModal.data.alternative_versions?.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block">
+                    Alternative Angle Options:
+                  </span>
+                  {bulletImprovementModal.data.alternative_versions.map((alt, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => applyImprovedBullet(alt)}
+                      className="p-3 bg-black/40 border border-white/[0.08] hover:border-white/30 rounded-xl cursor-pointer transition text-xs text-neutral-300"
+                    >
+                      {alt}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setBulletImprovementModal(null)}
+                className="px-4 py-2 bg-white/[0.06] hover:bg-white/[0.1] text-neutral-300 rounded-xl text-xs transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </main>
   );
 }
