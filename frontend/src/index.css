@@ -1,21 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --font-dmsans: 'DM Sans', sans-serif;
-  --font-title: 'DM Sans', sans-serif;
   --font-inter: 'Inter', sans-serif;
-  --font-sans: 'Inter', sans-serif;
+  --font-dmsans: 'DM Sans', sans-serif;
+  --font-heading: 'Inter', sans-serif;
+  --font-sans: 'DM Sans', sans-serif;
 }
 
-:root {
-  font-family: 'Inter', sans-serif;
-}
-
-body {
-  font-family: 'Inter', sans-serif;
+html, body, #root {
+  background-color: #05060d;
+  color: #f8fafc;
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'DM Sans', sans-serif;
-  letter-spacing: -0.01em;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.02em;
 }

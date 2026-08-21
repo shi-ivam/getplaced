@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler"
 import User from "../models/userModel.js"
 import generateToken from "../utils/generateToken.js"
+import { normalizeIdentifier } from "../models/companyRequirementModel.js"
 
 // @desc user token
 // route /api/users/auth
@@ -75,6 +76,11 @@ const getUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).select("-password")
 
   if (user) {
+    const targetJobRole = user.targetJobRole || ""
+    const targetCompany = user.targetCompany || ""
+    const targetRoleNormalized = user.targetRoleNormalized || normalizeIdentifier(targetJobRole)
+    const targetCompanyNormalized = user.targetCompanyNormalized || normalizeIdentifier(targetCompany)
+
     res.status(200).json({
       _id: user._id,
       name: user.name,
@@ -85,8 +91,11 @@ const getUserProfile = asyncHandler(async (req, res) => {
       cgpa: user.cgpa ?? null,
       tenthPercentage: user.tenthPercentage ?? null,
       twelfthPercentage: user.twelfthPercentage ?? null,
-      targetJobRole: user.targetJobRole || "",
-      targetCompany: user.targetCompany || "",
+      targetJobRole,
+      targetRole: targetJobRole,
+      targetRoleNormalized,
+      targetCompany,
+      targetCompanyNormalized,
       locationPreference: user.locationPreference || "",
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
@@ -118,6 +127,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     tenthPercentage,
     twelfthPercentage,
     targetJobRole,
+    targetRole,
     targetCompany,
     locationPreference,
     password,
@@ -187,12 +197,14 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     user.twelfthPercentage = null
   }
 
-  if (targetJobRole !== undefined) {
-    if (typeof targetJobRole !== "string" || !targetJobRole.trim()) {
+  const roleInput = targetJobRole !== undefined ? targetJobRole : targetRole
+  if (roleInput !== undefined) {
+    if (typeof roleInput !== "string" || !roleInput.trim()) {
       res.status(400)
       throw new Error("Target job role is required")
     }
-    user.targetJobRole = targetJobRole.trim()
+    user.targetJobRole = roleInput.trim()
+    user.targetRoleNormalized = normalizeIdentifier(roleInput)
   }
 
   if (targetCompany !== undefined) {
@@ -201,6 +213,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       throw new Error("Target company is required")
     }
     user.targetCompany = targetCompany.trim()
+    user.targetCompanyNormalized = normalizeIdentifier(targetCompany)
   }
 
   if (locationPreference !== undefined) {
@@ -217,6 +230,11 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
   const updatedUser = await user.save()
 
+  const finalJobRole = updatedUser.targetJobRole || ""
+  const finalCompany = updatedUser.targetCompany || ""
+  const finalRoleNormalized = updatedUser.targetRoleNormalized || normalizeIdentifier(finalJobRole)
+  const finalCompanyNormalized = updatedUser.targetCompanyNormalized || normalizeIdentifier(finalCompany)
+
   res.status(200).json({
     _id: updatedUser._id,
     name: updatedUser.name,
@@ -227,8 +245,11 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     cgpa: updatedUser.cgpa ?? null,
     tenthPercentage: updatedUser.tenthPercentage ?? null,
     twelfthPercentage: updatedUser.twelfthPercentage ?? null,
-    targetJobRole: updatedUser.targetJobRole || "",
-    targetCompany: updatedUser.targetCompany || "",
+    targetJobRole: finalJobRole,
+    targetRole: finalJobRole,
+    targetRoleNormalized: finalRoleNormalized,
+    targetCompany: finalCompany,
+    targetCompanyNormalized: finalCompanyNormalized,
     locationPreference: updatedUser.locationPreference || "",
     createdAt: updatedUser.createdAt,
     updatedAt: updatedUser.updatedAt,

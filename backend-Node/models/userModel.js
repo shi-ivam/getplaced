@@ -50,7 +50,17 @@ const userSchema = mongoose.Schema(
       trim: true,
       default: "",
     },
+    targetRoleNormalized: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     targetCompany: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    targetCompanyNormalized: {
       type: String,
       trim: true,
       default: "",

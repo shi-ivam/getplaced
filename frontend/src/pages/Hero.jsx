@@ -43,17 +43,25 @@ const Hero = () => {
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="flex flex-col items-center text-center">
           
-          {/* Main Editorial H1 (Strict 2-Line Iron Rule) */}
+          {/* Top Pill Chip */}
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs md:text-sm font-semibold tracking-wide shadow-[0_0_20px_rgba(168,85,247,0.25)]"
+          >
+            <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
+            <span>AI Feedback Engine</span>
+          </motion.div>
+
+          {/* Main Editorial H1 */}
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white max-w-6xl tracking-tight leading-[1.06] mb-8 font-sans"
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white max-w-6xl tracking-tight leading-[1.06] mb-8"
           >
-            Master Every Interview.{" "}
-            <span className="inline-flex items-center px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-sm md:text-xl font-mono align-middle mx-1.5 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-              <Sparkles className="w-4 h-4 mr-1.5 text-purple-400 animate-pulse" /> AI Feedback Engine
-            </span>{" "}
+            Master Every Interview. <br className="hidden sm:inline" />
             Land Your Dream Role.
           </motion.h1>
 

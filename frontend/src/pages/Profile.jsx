@@ -4,16 +4,21 @@ import {
   User,
   GraduationCap,
   Briefcase,
+  Building2,
   CheckCircle2,
   AlertCircle,
   Loader2,
   Sparkles,
+  Target,
+  ArrowRight,
+  BadgeCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import SearchableCombobox from "@/components/ui/SearchableCombobox";
 import { NODE_API_URL } from "@/config/api";
 
 const DEGREE_OPTIONS = [
@@ -36,12 +41,26 @@ const JOB_ROLE_OPTIONS = [
   "Backend Developer",
   "Data Scientist",
   "Data Analyst",
+  "Machine Learning Engineer",
+  "AI/ML Engineer",
   "DevOps Engineer",
   "Cloud Engineer",
-  "AI/ML Engineer",
   "Mobile App Developer",
   "Cybersecurity Analyst",
-  "Other",
+  "Product Manager",
+  "QA / Automation Test Engineer",
+  "Systems Engineer",
+  "Site Reliability Engineer (SRE)",
+  "Blockchain Developer",
+];
+
+const POPULAR_ROLES_QUICK = [
+  "Software Development Engineer",
+  "Full Stack Developer",
+  "Frontend Developer",
+  "Backend Developer",
+  "Data Scientist",
+  "DevOps Engineer",
 ];
 
 const COMPANY_SUGGESTIONS = [
@@ -50,10 +69,49 @@ const COMPANY_SUGGESTIONS = [
   "Amazon",
   "Apple",
   "Meta",
+  "Netflix",
   "TCS",
   "Infosys",
   "Accenture",
   "Wipro",
+  "Oracle",
+  "Uber",
+  "Adobe",
+  "Salesforce",
+  "Cisco",
+  "IBM",
+  "Goldman Sachs",
+  "JPMorgan Chase",
+  "Nvidia",
+  "Qualcomm",
+  "Intel",
+  "Flipkart",
+  "Swiggy",
+  "Zomato",
+  "Razorpay",
+  "Paytm",
+  "Atlassian",
+  "Stripe",
+  "LinkedIn",
+  "Spotify",
+  "Intuit",
+  "Morgan Stanley",
+  "PayPal",
+  "Walmart",
+  "Capgemini",
+  "Cognizant",
+  "HCLTech",
+  "Deloitte",
+];
+
+const POPULAR_COMPANIES_QUICK = [
+  "Microsoft",
+  "Google",
+  "Amazon",
+  "Meta",
+  "TCS",
+  "Infosys",
+  "Accenture",
   "Oracle",
 ];
 
@@ -71,10 +129,20 @@ const LOCATION_SUGGESTIONS = [
 const CURRENT_YEAR = new Date().getFullYear();
 const GRADUATION_YEARS = Array.from({ length: 15 }, (_, i) => CURRENT_YEAR - 5 + i);
 
+export const normalizeIdentifier = (str) => {
+  if (!str || typeof str !== "string") return "";
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
 export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [targetConfirmation, setTargetConfirmation] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [errors, setErrors] = useState({});
 
@@ -90,7 +158,6 @@ export default function Profile() {
     tenthPercentage: "",
     twelfthPercentage: "",
     targetJobRole: "",
-    customJobRole: "",
     targetCompany: "",
     locationPreference: "",
   });
@@ -106,7 +173,7 @@ export default function Profile() {
         });
 
         const data = response.data || {};
-        
+
         // Handle custom degree
         const degreeIsStandard = DEGREE_OPTIONS.filter((d) => d !== "Other").includes(data.degree);
         const degreeValue = data.degree
@@ -115,15 +182,6 @@ export default function Profile() {
             : "Other"
           : "";
         const customDegreeVal = data.degree && !degreeIsStandard ? data.degree : "";
-
-        // Handle custom job role
-        const roleIsStandard = JOB_ROLE_OPTIONS.filter((r) => r !== "Other").includes(data.targetJobRole);
-        const roleValue = data.targetJobRole
-          ? roleIsStandard
-            ? data.targetJobRole
-            : "Other"
-          : "";
-        const customRoleVal = data.targetJobRole && !roleIsStandard ? data.targetJobRole : "";
 
         setFormData({
           name: data.name || "",
@@ -141,8 +199,7 @@ export default function Profile() {
             data.twelfthPercentage !== null && data.twelfthPercentage !== undefined
               ? String(data.twelfthPercentage)
               : "",
-          targetJobRole: roleValue,
-          customJobRole: customRoleVal,
+          targetJobRole: data.targetJobRole || "",
           targetCompany: data.targetCompany || "",
           locationPreference: data.locationPreference || "",
         });
@@ -162,8 +219,19 @@ export default function Profile() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
+
     // Clear inline error on change
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
+
+  const handleCustomFieldChange = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => {
         const next = { ...prev };
@@ -176,7 +244,6 @@ export default function Profile() {
   // Profile completion calculation based on required foundational attributes
   const completion = useMemo(() => {
     const effectiveDegree = formData.degree === "Other" ? formData.customDegree : formData.degree;
-    const effectiveJobRole = formData.targetJobRole === "Other" ? formData.customJobRole : formData.targetJobRole;
 
     const requiredChecks = [
       Boolean(formData.name?.trim()),
@@ -184,7 +251,7 @@ export default function Profile() {
       Boolean(effectiveDegree?.trim()),
       Boolean(formData.graduationYear),
       Boolean(formData.cgpa !== "" && !isNaN(Number(formData.cgpa))),
-      Boolean(effectiveJobRole?.trim()),
+      Boolean(formData.targetJobRole?.trim()),
       Boolean(formData.targetCompany?.trim()),
     ];
 
@@ -236,8 +303,7 @@ export default function Profile() {
       }
     }
 
-    const effectiveJobRole = formData.targetJobRole === "Other" ? formData.customJobRole : formData.targetJobRole;
-    if (!effectiveJobRole?.trim()) {
+    if (!formData.targetJobRole?.trim()) {
       newErrors.targetJobRole = "Target job role is required";
     }
 
@@ -252,6 +318,7 @@ export default function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSuccessMessage("");
+    setTargetConfirmation("");
     setErrorMessage("");
 
     if (!validate()) {
@@ -261,8 +328,10 @@ export default function Profile() {
 
     setSaving(true);
     try {
-      const effectiveDegree = formData.degree === "Other" ? formData.customDegree.trim() : formData.degree.trim();
-      const effectiveJobRole = formData.targetJobRole === "Other" ? formData.customJobRole.trim() : formData.targetJobRole.trim();
+      const effectiveDegree =
+        formData.degree === "Other" ? formData.customDegree.trim() : formData.degree.trim();
+      const targetCompanyTrimmed = formData.targetCompany.trim();
+      const targetJobRoleTrimmed = formData.targetJobRole.trim();
 
       const payload = {
         name: formData.name.trim(),
@@ -271,9 +340,10 @@ export default function Profile() {
         graduationYear: Number(formData.graduationYear),
         cgpa: Number(formData.cgpa),
         tenthPercentage: formData.tenthPercentage !== "" ? Number(formData.tenthPercentage) : null,
-        twelfthPercentage: formData.twelfthPercentage !== "" ? Number(formData.twelfthPercentage) : null,
-        targetJobRole: effectiveJobRole,
-        targetCompany: formData.targetCompany.trim(),
+        twelfthPercentage:
+          formData.twelfthPercentage !== "" ? Number(formData.twelfthPercentage) : null,
+        targetJobRole: targetJobRoleTrimmed,
+        targetCompany: targetCompanyTrimmed,
         locationPreference: formData.locationPreference.trim(),
       };
 
@@ -283,6 +353,11 @@ export default function Profile() {
 
       if (response.data) {
         setSuccessMessage("Your profile has been successfully saved!");
+        if (targetCompanyTrimmed && targetJobRoleTrimmed) {
+          setTargetConfirmation(
+            `Target updated: Preparing for ${targetCompanyTrimmed} — ${targetJobRoleTrimmed}`
+          );
+        }
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (err) {
@@ -295,6 +370,9 @@ export default function Profile() {
       setSaving(false);
     }
   };
+
+  const normalizedCompanyId = normalizeIdentifier(formData.targetCompany);
+  const normalizedRoleId = normalizeIdentifier(formData.targetJobRole);
 
   if (loading) {
     return (
@@ -330,9 +408,19 @@ export default function Profile() {
 
       {/* Notifications */}
       {successMessage && (
-        <div className="flex items-center gap-3 bg-emerald-950/60 border border-emerald-600/50 text-emerald-300 px-4 py-3 rounded-xl shadow-lg">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-          <span className="text-sm font-medium">{successMessage}</span>
+        <div className="space-y-2">
+          <div className="flex items-center gap-3 bg-emerald-950/70 border border-emerald-600/60 text-emerald-200 px-4 py-3 rounded-xl shadow-lg">
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+            <div className="text-sm font-medium">
+              <div>{successMessage}</div>
+              {targetConfirmation && (
+                <div className="text-xs text-emerald-300/90 font-semibold mt-0.5 flex items-center gap-1.5">
+                  <Target className="w-3.5 h-3.5 text-emerald-400" />
+                  {targetConfirmation}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
@@ -595,93 +683,97 @@ export default function Profile() {
           <CardHeader className="pb-4 border-b border-gray-800/60">
             <div className="flex items-center gap-2">
               <Briefcase className="w-5 h-5 text-purple-400" />
-              <CardTitle className="text-lg text-white">Career Target</CardTitle>
+              <CardTitle className="text-lg text-white">Target Company & Role Selection</CardTitle>
             </div>
             <CardDescription className="text-gray-400 text-xs">
-              Roles and companies you are targeting for placement preparation
+              Select your primary target company and role. This active combination establishes your baseline for skill-gap and requirement intelligence.
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Target Job Role */}
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="targetJobRole" className="text-gray-300 text-sm font-medium">
-                  Target Job Role <span className="text-red-400">*</span>
-                </Label>
-                <select
-                  id="targetJobRole"
-                  name="targetJobRole"
-                  value={formData.targetJobRole}
-                  onChange={handleChange}
-                  className={`w-full h-10 px-3 rounded-md bg-[#1c1c1c] border border-gray-700 text-white text-sm focus:outline-none focus:border-purple-500 ${
-                    errors.targetJobRole ? "border-red-500" : ""
-                  }`}
-                >
-                  <option value="" disabled>Select target role</option>
-                  {JOB_ROLE_OPTIONS.map((role) => (
-                    <option key={role} value={role} className="bg-[#1c1c1c] text-white">
-                      {role}
-                    </option>
-                  ))}
-                </select>
-                {formData.targetJobRole === "Other" && (
-                  <Input
-                    name="customJobRole"
-                    value={formData.customJobRole}
-                    onChange={handleChange}
-                    placeholder="Enter custom role title (e.g. Embedded Systems Engineer)"
-                    className="mt-2 bg-[#1c1c1c] border-gray-700 text-white placeholder:text-gray-500 focus:border-purple-500"
-                  />
-                )}
-                {errors.targetJobRole && (
-                  <p className="text-red-400 text-xs">{errors.targetJobRole}</p>
-                )}
-              </div>
-
-              {/* Target Company */}
-              <div className="space-y-2">
-                <Label htmlFor="targetCompany" className="text-gray-300 text-sm font-medium">
-                  Target Company <span className="text-red-400">*</span>
-                </Label>
-                <Input
-                  id="targetCompany"
-                  name="targetCompany"
-                  value={formData.targetCompany}
-                  onChange={handleChange}
-                  placeholder="e.g. Microsoft, Google, TCS"
-                  className={`bg-[#1c1c1c] border-gray-700 text-white placeholder:text-gray-500 focus:border-purple-500 ${
-                    errors.targetCompany ? "border-red-500 focus:border-red-500" : ""
-                  }`}
-                />
-                {/* Company Quick-Picks */}
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {COMPANY_SUGGESTIONS.slice(0, 5).map((comp) => (
-                    <button
-                      key={comp}
-                      type="button"
-                      onClick={() => {
-                        setFormData((prev) => ({ ...prev, targetCompany: comp }));
-                        if (errors.targetCompany) {
-                          setErrors((prev) => {
-                            const next = { ...prev };
-                            delete next.targetCompany;
-                            return next;
-                          });
-                        }
-                      }}
-                      className="text-[11px] px-2 py-0.5 rounded bg-gray-800/80 hover:bg-purple-900/50 hover:text-purple-300 text-gray-400 border border-gray-700/60 transition-colors"
-                    >
-                      {comp}
-                    </button>
-                  ))}
+            {/* Active Target Banner / Live Preview */}
+            <div className="bg-gradient-to-r from-purple-950/40 via-[#181818] to-indigo-950/30 border border-purple-900/50 rounded-xl p-4 md:p-5">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div className="flex items-start md:items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-purple-400 shrink-0 mt-0.5 md:mt-0">
+                    <Target className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] uppercase tracking-wider font-bold text-purple-400">
+                        Active Target Combination
+                      </span>
+                      {formData.targetCompany && formData.targetJobRole && (
+                        <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-medium">
+                          <BadgeCheck className="w-3 h-3 text-emerald-400" />
+                          Ready
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-base font-semibold text-white mt-0.5">
+                      {formData.targetCompany && formData.targetJobRole ? (
+                        <span>
+                          {formData.targetCompany} <span className="text-purple-400 mx-1">—</span> {formData.targetJobRole}
+                        </span>
+                      ) : formData.targetCompany ? (
+                        <span>
+                          {formData.targetCompany} <span className="text-gray-500 italic text-xs">(Select a role below)</span>
+                        </span>
+                      ) : formData.targetJobRole ? (
+                        <span>
+                          <span className="text-gray-500 italic text-xs">(Select a company below)</span> <span className="text-purple-400 mx-1">—</span> {formData.targetJobRole}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-sm font-normal">
+                          No target selected yet. Search or enter your target company & role below.
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                {errors.targetCompany && (
-                  <p className="text-red-400 text-xs">{errors.targetCompany}</p>
+
+                {formData.targetCompany && formData.targetJobRole && (
+                  <div className="text-right text-[11px] text-gray-500 font-mono self-start md:self-auto bg-black/40 px-2.5 py-1 rounded border border-gray-800">
+                    id: <span className="text-purple-300">{normalizedCompanyId}</span> / <span className="text-indigo-300">{normalizedRoleId}</span>
+                  </div>
                 )}
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Target Company Combobox */}
+              <SearchableCombobox
+                id="targetCompany"
+                name="targetCompany"
+                label="Target Company"
+                required
+                icon={Building2}
+                value={formData.targetCompany}
+                onChange={(val) => handleCustomFieldChange("targetCompany", val)}
+                options={COMPANY_SUGGESTIONS}
+                quickSuggestions={POPULAR_COMPANIES_QUICK}
+                placeholder="Search or enter target company (e.g. Microsoft, Google, TCS)..."
+                error={errors.targetCompany}
+                customPromptPrefix="Use company"
+              />
+
+              {/* Target Job Role Combobox */}
+              <SearchableCombobox
+                id="targetJobRole"
+                name="targetJobRole"
+                label="Target Job Role"
+                required
+                icon={Briefcase}
+                value={formData.targetJobRole}
+                onChange={(val) => handleCustomFieldChange("targetJobRole", val)}
+                options={JOB_ROLE_OPTIONS}
+                quickSuggestions={POPULAR_ROLES_QUICK}
+                placeholder="Search or enter target role (e.g. Software Development Engineer)..."
+                error={errors.targetJobRole}
+                customPromptPrefix="Use role"
+              />
 
               {/* Location Preference */}
-              <div className="space-y-2">
+              <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="locationPreference" className="text-gray-300 text-sm font-medium flex items-center justify-between">
                   <span>Location Preference</span>
                   <span className="text-[11px] text-gray-500 font-normal">Optional</span>
@@ -691,21 +783,29 @@ export default function Profile() {
                   name="locationPreference"
                   value={formData.locationPreference}
                   onChange={handleChange}
-                  placeholder="e.g. Bangalore, Chennai, Remote"
+                  placeholder="e.g. Bangalore, Hyderabad, Chennai, Remote"
                   className="bg-[#1c1c1c] border-gray-700 text-white placeholder:text-gray-500 focus:border-purple-500"
                 />
                 {/* Location Quick-Picks */}
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {LOCATION_SUGGESTIONS.slice(0, 5).map((loc) => (
-                    <button
-                      key={loc}
-                      type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, locationPreference: loc }))}
-                      className="text-[11px] px-2 py-0.5 rounded bg-gray-800/80 hover:bg-purple-900/50 hover:text-purple-300 text-gray-400 border border-gray-700/60 transition-colors"
-                    >
-                      {loc}
-                    </button>
-                  ))}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] text-gray-500 font-medium mr-0.5">Popular:</span>
+                  {LOCATION_SUGGESTIONS.map((loc) => {
+                    const isSelected = formData.locationPreference === loc;
+                    return (
+                      <button
+                        key={loc}
+                        type="button"
+                        onClick={() => handleCustomFieldChange("locationPreference", loc)}
+                        className={`text-[11px] px-2 py-0.5 rounded transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-purple-600 text-white font-semibold shadow-sm shadow-purple-900/50"
+                            : "bg-gray-800/80 hover:bg-purple-900/50 hover:text-purple-300 text-gray-400 border border-gray-700/60"
+                        }`}
+                      >
+                        {loc}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
