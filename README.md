@@ -38,55 +38,101 @@ A sleek and personalized career development dashboard built with *React*. Design
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- Node.js (v16+)
-- npm (v8+)
-- MongoDB Atlas account
+### Option 1: Docker (Recommended) 🐳
 
-### Installation
+The entire platform (Frontend, Node.js API, Python AI/OCR Service, and MongoDB) is containerized and ready to run with Docker Compose.
+
+#### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/) (v20+)
+- [Docker Compose](https://docs.docker.com/compose/) (v2+)
+
+#### Steps
+
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/Tejas-Santosh-Nalawade/Dev-Clash.git
-   cd Finally-Placed
+   cd Dev-Clash
    ```
 
-2. **Install Frontend Dependencies:**
+2. **Configure Environment Variables:**
+   Copy the example environment configuration:
    ```bash
-   cd frontend
-   npm install
+   cp .env.example .env
    ```
-
-3. **Install Backend Dependencies:**
-   ```bash
-   cd ../backend-Node
-   npm install
-   ```
-
-4. **Environment Configuration:**
-   Create `.env` files in both frontend and backend directories:
-   
-   **Backend `.env`:**
+   Edit `.env` to supply your API keys:
    ```env
-   MONGO_URI=your_mongodb_connection_string
+   # Database & Auth
+   MONGO_URI=mongodb://mongodb:27017/getplaced
    JWT_SECRET=your_jwt_secret
+
+   # AI & External APIs
+   GOOGLE_API_KEY=your_gemini_api_key
    RAPIDAPI_KEY=your_rapidapi_key
-   GEMINI_API_KEY=your_gemini_api_key
+   ADZUNA_API_ID=your_adzuna_api_id
+   ADZUNA_API_KEY=your_adzuna_api_key
+
+   # Frontend API endpoints
+   VITE_NODE_API_URL=http://localhost:3000
+   VITE_PY_API_URL=http://localhost:8000
    ```
 
-5. **Start Development Servers:**
+3. **Start All Services:**
    ```bash
-   # Backend (Terminal 1)
-   cd backend-Node
-   npm start
-   
-   # Frontend (Terminal 2)
-   cd frontend
-   npm run dev
+   docker compose up --build -d
    ```
 
-6. **Access the Application:**
-   - Frontend: `http://localhost:5173`
-   - Backend API: `http://localhost:3000`
+4. **Verify Running Services:**
+   ```bash
+   docker compose ps
+   ```
+
+5. **Access the Application:**
+   - **Frontend UI:** [http://localhost](http://localhost) (Port 80)
+   - **Node.js Backend:** [http://localhost:3000](http://localhost:3000)
+   - **Python FastAPI Backend:** [http://localhost:8000](http://localhost:8000) (Interactive Swagger docs at `http://localhost:8000/docs`)
+   - **MongoDB:** `localhost:27017`
+
+6. **Stopping the Services:**
+   ```bash
+   docker compose down
+   # To stop and wipe persistent database volumes:
+   docker compose down -v
+   ```
+
+---
+
+### Option 2: Local Manual Setup 💻
+
+#### Prerequisites
+- Node.js (v18+)
+- Python (v3.10+) with `tesseract-ocr` & `poppler-utils` installed
+- MongoDB instance (Local or MongoDB Atlas)
+
+#### 1. Backend (Node.js)
+```bash
+cd backend-Node
+npm install
+# Create backend-Node/.env with MONGO_URI, JWT_SECRET, RAPIDAPI_KEY
+npm start
+```
+
+#### 2. Backend (Python AI / Resume Analyzer)
+```bash
+cd backend-Py
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt uvicorn
+# Create backend-Py/.env with GOOGLE_API_KEY, RAPIDAPI_KEY
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+#### 3. Frontend (React + Vite)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Access at `http://localhost:5173`.
 
 ---
 
