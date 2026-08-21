@@ -8,7 +8,7 @@ import pdfplumber
 import pytesseract
 from pdf2image import convert_from_path
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -28,6 +28,25 @@ from services.leetcode_service import (
 from services.code_runner import run_sample_tests, submit_solution
 from services.ai_assistant import get_ai_code_assistance
 
+# Import Group-B Intelligence Services
+from services.resume_service import (
+    analyze_resume_comprehensive,
+    improve_bullet_point,
+    optimize_resume_section
+)
+from services.interview_service import (
+    generate_interview_questions,
+    evaluate_interview_answer,
+    generate_session_report
+)
+from services.communication_service import (
+    analyze_communication_skills
+)
+from services.company_intelligence_service import (
+    get_company_intelligence,
+    list_featured_companies
+)
+
 # Load environment variables
 load_dotenv(override=True)
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"), override=True)
@@ -41,7 +60,7 @@ if api_key:
         print(f"Warning: Gemini config error: {e}")
 
 # Initialize FastAPI app
-app = FastAPI(title="GetPlaced AI & LeetCode Coding Platform API")
+app = FastAPI(title="getPlaced AI & Intelligence Platform API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -63,7 +82,6 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    # Initialize SQLite database from LeetCode dataset on start
     try:
         init_db()
     except Exception as e:
@@ -82,9 +100,11 @@ async def unhandled_exception_handler(request, exc):
     )
 
 
-# ---------- Resume Analysis Logic ----------
+# ==========================================
+# 1. Resume Intelligence API Endpoints
+# ==========================================
 
-def extract_text_from_pdf(pdf_path):
+def extract_text_from_pdf(pdf_path: str) -> str:
     text = ""
     try:
         with pdfplumber.open(pdf_path) as pdf:
@@ -105,100 +125,243 @@ def extract_text_from_pdf(pdf_path):
 
     return text.strip()
 
-def clean_gemini_output(text):
-    if not text:
-        return ""
-    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
-    text = re.sub(r"[*•📚⚠️💼✅🔹🔸📊🛠️📝⬇️🚀🔍]+", "", text)
-    text = re.sub(r"#+\s?", "", text)
-    text = re.sub(r"[-–—]{1,3}\s?", "", text)
-    text = re.sub(r"\n{2,}", "\n\n", text)
-    return text.strip()
+class ResumeAnalyzeJsonRequest(BaseModel):
+    resume_text: str
+    job_description: Optional[str] = None
+    target_role: Optional[str] = None
 
-def analyze_resume_text(resume_text, job_description=None):
-    load_dotenv(override=True)
-    load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"), override=True)
-    current_key = (os.getenv("GOOGLE_API_KEY") or "").strip()
-    if not current_key:
-        raise HTTPException(
-            status_code=500,
-            detail="Google Gemini API key is missing. Please set GOOGLE_API_KEY in .env"
-        )
+class BulletImproveRequest(BaseModel):
+    bullet: str
+    target_role: Optional[str] = "Software Engineer"
+    keywords: Optional[List[str]] = None
 
-    genai.configure(api_key=current_key)
-
-    prompt = f"""
-Assume you are a professional resume analyst and career coach.
-You are tasked with analyzing a resume and providing a detailed report.
-
-Analyze the following resume and provide report including:
-- Overall profile strength
-- Key skills
-- Areas for improvement
-- Recommended courses
-- ATS Score (between 0 and 100)
-- Job recommendations
-
-give brief and concise answers.
-
-Resume:
-{resume_text if resume_text else "[Note: No textual content could be extracted from the resume PDF. Provide guidance on formatting and ATS-friendly PDF design.]"}
-"""
-
-    if job_description:
-        prompt += f"\n\nCompare with this job description:\n{job_description}"
-
-    models_to_try = [
-        "gemini-flash-latest",
-        "gemini-3.7-flash",
-        "gemini-3.6-flash",
-        "gemini-2.5-flash",
-        "gemini-1.5-flash",
-    ]
-
-    last_error = None
-    for model_name in models_to_try:
-        try:
-            model = genai.GenerativeModel(model_name)
-            response = model.generate_content(prompt)
-            if hasattr(response, "text") and response.text:
-                return clean_gemini_output(response.text)
-            elif hasattr(response, "candidates") and response.candidates:
-                parts = response.candidates[0].content.parts
-                combined = "".join(getattr(p, "text", "") for p in parts)
-                return clean_gemini_output(combined)
-        except Exception as e:
-            last_error = e
-            print(f"Model '{model_name}' failed: {e}")
-            continue
-
-    raise HTTPException(
-        status_code=500,
-        detail=f"Gemini AI generation failed: {last_error}"
-    )
+class SectionOptimizeRequest(BaseModel):
+    section_type: str
+    content: str
+    target_role: Optional[str] = "Software Engineer"
+    job_description: Optional[str] = None
 
 @app.post("/analyze-resume/")
-async def analyze_resume_api(file: UploadFile = File(...), job_description: str = Form("")):
+async def analyze_resume_legacy(file: UploadFile = File(...), job_description: str = Form("")):
+    """Legacy compatibility endpoint returning analysis and detailed JSON payload."""
     temp_dir = tempfile.mkdtemp()
     try:
         file_path = os.path.join(temp_dir, file.filename or "resume.pdf")
-
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
         resume_text = extract_text_from_pdf(file_path)
-        analysis = analyze_resume_text(resume_text, job_description)
+        result = analyze_resume_comprehensive(resume_text, job_description)
 
-        return {"analysis": analysis}
+        # Formulate readable text for legacy clients
+        text_summary = f"""ATS Score: {result.get('ats_score')}/100 ({result.get('score_tier')})
+Summary: {result.get('summary_critique')}
+
+Category Scores:
+- Formatting & Structure: {result.get('category_scores', {}).get('formatting_structure')}%
+- Keyword Match: {result.get('category_scores', {}).get('keyword_relevance')}%
+- Impact & Metrics: {result.get('category_scores', {}).get('impact_metrics')}%
+- Skills Alignment: {result.get('category_scores', {}).get('skills_alignment')}%
+- Experience Match: {result.get('category_scores', {}).get('experience_relevance')}%
+
+Matched Keywords: {', '.join([k['keyword'] for k in result.get('matched_keywords', [])])}
+Missing Keywords: {', '.join([k['keyword'] for k in result.get('missing_keywords', [])])}
+
+Top Recommendations:
+{chr(10).join(['• ' + rec for rec in result.get('actionable_recommendations', [])])}
+"""
+        return {
+            "analysis": text_summary,
+            "data": result,
+            "extracted_text": resume_text
+        }
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error in analyze_resume_api: {e}")
+        print(f"Error in analyze_resume_legacy: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to analyze resume: {str(e)}")
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
 
-# ---------- Job Recommendations Logic ----------
+@app.post("/api/resume/analyze-upload")
+async def analyze_resume_upload_api(
+    file: UploadFile = File(...),
+    job_description: str = Form(""),
+    target_role: str = Form("")
+):
+    """Multipart PDF upload endpoint for rich ATS evaluation."""
+    temp_dir = tempfile.mkdtemp()
+    try:
+        file_path = os.path.join(temp_dir, file.filename or "resume.pdf")
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        resume_text = extract_text_from_pdf(file_path)
+        analysis_data = analyze_resume_comprehensive(resume_text, job_description)
+        return {
+            "success": True,
+            "filename": file.filename,
+            "extracted_text": resume_text,
+            "evaluation": analysis_data
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to process resume file: {str(e)}")
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+@app.post("/api/resume/analyze-text")
+def analyze_resume_text_api(req: ResumeAnalyzeJsonRequest):
+    """Direct JSON payload ATS evaluation."""
+    try:
+        analysis_data = analyze_resume_comprehensive(req.resume_text, req.job_description)
+        return {
+            "success": True,
+            "evaluation": analysis_data
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Resume analysis failed: {str(e)}")
+
+@app.post("/api/resume/improve-bullet")
+def improve_bullet_api(req: BulletImproveRequest):
+    """Rewrites a weak bullet point into high-impact Google XYZ formula."""
+    try:
+        result = improve_bullet_point(req.bullet, req.target_role, req.keywords)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Bullet improvement failed: {str(e)}")
+
+@app.post("/api/resume/optimize-section")
+def optimize_section_api(req: SectionOptimizeRequest):
+    """Optimizes a resume section (Summary, Experience, Projects, Skills) with keyword injection."""
+    try:
+        result = optimize_resume_section(req.section_type, req.content, req.target_role, req.job_description)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Section optimization failed: {str(e)}")
+
+
+# ==========================================
+# 2. AI Mock Interview & HR Prep API Endpoints
+# ==========================================
+
+class GenerateQuestionsRequest(BaseModel):
+    company: Optional[str] = "Generic Tech"
+    role: Optional[str] = "Software Engineer"
+    interview_type: Optional[str] = "Mixed"  # HR, Behavioral, Technical, Mixed, System Design
+    difficulty: Optional[str] = "Medium"
+    count: Optional[int] = 5
+    resume_text: Optional[str] = None
+
+class EvaluateAnswerRequest(BaseModel):
+    question: str
+    answer: str
+    company: Optional[str] = "Tech Company"
+    role: Optional[str] = "Software Engineer"
+    interview_type: Optional[str] = "behavioral"
+    audio_duration_seconds: Optional[float] = None
+
+class SessionReportRequest(BaseModel):
+    company: str
+    role: str
+    interview_type: str
+    answers: List[Dict[str, Any]]
+
+@app.post("/api/interview/generate-questions")
+def generate_questions_api(req: GenerateQuestionsRequest):
+    """Generates personalized interview questions tailored to company & role."""
+    try:
+        questions = generate_interview_questions(
+            company=req.company,
+            role=req.role,
+            interview_type=req.interview_type,
+            difficulty=req.difficulty,
+            count=req.count or 5,
+            resume_text=req.resume_text
+        )
+        return {"questions": questions}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Question generation failed: {str(e)}")
+
+@app.post("/api/interview/evaluate-answer")
+def evaluate_answer_api(req: EvaluateAnswerRequest):
+    """Evaluates candidate's answer with STAR compliance, communication metrics & dynamic follow-up."""
+    try:
+        result = evaluate_interview_answer(
+            question=req.question,
+            answer=req.answer,
+            company=req.company,
+            role=req.role,
+            interview_type=req.interview_type,
+            audio_duration_seconds=req.audio_duration_seconds
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Answer evaluation failed: {str(e)}")
+
+@app.post("/api/interview/session-report")
+def session_report_api(req: SessionReportRequest):
+    """Generates comprehensive post-session hiring report and radar scores."""
+    try:
+        report = generate_session_report(
+            company=req.company,
+            role=req.role,
+            interview_type=req.interview_type,
+            answers=req.answers
+        )
+        return report
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
+
+
+# ==========================================
+# 3. Communication Skill Analysis API
+# ==========================================
+
+class CommunicationAnalyzeRequest(BaseModel):
+    text: str
+    audio_duration_seconds: Optional[float] = None
+    target_context: Optional[str] = "Technical / Behavioral Interview"
+
+@app.post("/api/communication/analyze")
+def analyze_communication_api(req: CommunicationAnalyzeRequest):
+    """Deep communication analysis: filler words, STAR compliance, clarity, confidence, WPM."""
+    try:
+        result = analyze_communication_skills(
+            text=req.text,
+            audio_duration_seconds=req.audio_duration_seconds,
+            target_context=req.target_context
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Communication analysis failed: {str(e)}")
+
+
+# ==========================================
+# 4. Company Research & Intelligence API
+# ==========================================
+
+@app.get("/api/company/featured")
+def list_featured_companies_api():
+    """Lists curated top tech companies with quick metrics."""
+    try:
+        companies = list_featured_companies()
+        return {"companies": companies}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to list companies: {str(e)}")
+
+@app.get("/api/company/intelligence")
+def get_company_intelligence_api(company: str = Query("Google", description="Company name or slug")):
+    """Fetches deep profile, tech stack, interview rounds, and commonly asked patterns."""
+    try:
+        intel = get_company_intelligence(company)
+        return intel
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Company intelligence lookup failed: {str(e)}")
+
+
+# ==========================================
+# 5. Job Recommendations & LeetCode Platform
+# ==========================================
 
 @app.get("/job-recommendations")
 def get_jobs():
@@ -217,8 +380,6 @@ def get_jobs():
         print(f"Error in job-recommendations: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch jobs: {str(e)}")
 
-
-# ---------- LeetCode Platform Endpoints ----------
 
 class CodeRunRequest(BaseModel):
     code: str
@@ -242,7 +403,6 @@ def list_problems(
     sort_by: str = Query("question_id"),
     sort_order: str = Query("asc")
 ):
-    """Returns paginated problems list filtered by search, difficulty, tag."""
     try:
         return get_problems(
             page=page,
@@ -258,7 +418,6 @@ def list_problems(
 
 @app.get("/api/problems/tags")
 def list_tags():
-    """Returns all available problem tags with their counts."""
     try:
         return {"tags": get_tags()}
     except Exception as e:
@@ -266,7 +425,6 @@ def list_tags():
 
 @app.get("/api/problems/stats")
 def problem_stats():
-    """Returns problem count totals across difficulties."""
     try:
         return get_stats()
     except Exception as e:
@@ -274,7 +432,6 @@ def problem_stats():
 
 @app.get("/api/problems/random")
 def random_problem(difficulty: Optional[str] = None, tag: Optional[str] = None):
-    """Returns a random problem matching criteria."""
     try:
         prob = get_random_problem(difficulty=difficulty, tag=tag)
         if not prob:
@@ -287,7 +444,6 @@ def random_problem(difficulty: Optional[str] = None, tag: Optional[str] = None):
 
 @app.get("/api/problems/{slug_or_id}")
 def get_single_problem(slug_or_id: str):
-    """Fetches details for a single problem by slug or ID."""
     prob = get_problem_by_slug_or_id(slug_or_id)
     if not prob:
         raise HTTPException(status_code=404, detail=f"Problem '{slug_or_id}' not found.")
@@ -295,7 +451,6 @@ def get_single_problem(slug_or_id: str):
 
 @app.get("/api/problems/{slug_or_id}/solution")
 def get_problem_solution_endpoint(slug_or_id: str):
-    """Fetches reference solution and editorial explanation."""
     sol = get_solution(slug_or_id)
     if not sol:
         raise HTTPException(status_code=404, detail=f"Solution for '{slug_or_id}' not found.")
@@ -303,11 +458,9 @@ def get_problem_solution_endpoint(slug_or_id: str):
 
 @app.post("/api/problems/{slug_or_id}/run")
 def run_problem_code(slug_or_id: str, req: CodeRunRequest):
-    """Runs code against sample or custom test cases."""
     prob = get_problem_internal(slug_or_id)
     if not prob:
         raise HTTPException(status_code=404, detail=f"Problem '{slug_or_id}' not found.")
-    
     try:
         result = run_sample_tests(prob, req.code, req.custom_cases)
         return result
@@ -316,11 +469,9 @@ def run_problem_code(slug_or_id: str, req: CodeRunRequest):
 
 @app.post("/api/problems/{slug_or_id}/submit")
 def submit_problem_code(slug_or_id: str, req: CodeSubmitRequest):
-    """Submits code against the full assertion test suite."""
     prob = get_problem_internal(slug_or_id)
     if not prob:
         raise HTTPException(status_code=404, detail=f"Problem '{slug_or_id}' not found.")
-    
     try:
         result = submit_solution(prob, req.code)
         return result
@@ -329,11 +480,9 @@ def submit_problem_code(slug_or_id: str, req: CodeSubmitRequest):
 
 @app.post("/api/problems/{slug_or_id}/ai-assist")
 def ai_assist_endpoint(slug_or_id: str, req: AIAssistRequest):
-    """Provides AI hints, explanations, debugging, or optimization."""
     prob = get_problem_by_slug_or_id(slug_or_id)
     if not prob:
         raise HTTPException(status_code=404, detail=f"Problem '{slug_or_id}' not found.")
-    
     try:
         feedback = get_ai_code_assistance(
             problem_title=prob["title"],
@@ -346,8 +495,6 @@ def ai_assist_endpoint(slug_or_id: str, req: AIAssistRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI Assistance failed: {str(e)}")
 
-
-# Optional: Run server directly
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
