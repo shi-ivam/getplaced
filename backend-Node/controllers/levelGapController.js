@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 import CompanyRequirement, { normalizeIdentifier } from "../models/companyRequirementModel.js";
+import LeetCodeProfile from "../models/leetcodeProfileModel.js";
 import { buildLevelComparison } from "../services/levelGapService.js";
 import mongoose from "mongoose";
 
@@ -40,7 +41,17 @@ export const getGapAnalysis = asyncHandler(async (req, res) => {
     }
   }
 
-  const comparisonData = buildLevelComparison(user, companyRequirement);
+  // Attempt to load LeetCode profile if connected
+  let leetcodeProfile = null;
+  if (mongoose.connection?.readyState === 1) {
+    try {
+      leetcodeProfile = await LeetCodeProfile.findOne({ userId: req.user._id }).lean();
+    } catch (err) {
+      console.warn("Could not query LeetCodeProfile in levelGapController:", err.message);
+    }
+  }
+
+  const comparisonData = buildLevelComparison(user, companyRequirement, leetcodeProfile);
 
   res.status(200).json(comparisonData);
 });

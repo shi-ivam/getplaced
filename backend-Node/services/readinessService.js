@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import CompanyRequirement, { normalizeIdentifier } from "../models/companyRequirementModel.js";
+import LeetCodeProfile from "../models/leetcodeProfileModel.js";
+import { calculateLeetCodeDsaScore } from "./leetcodeService.js";
 import {
   READINESS_WEIGHTS,
   STATUS_LEVELS,
@@ -51,6 +53,17 @@ export const calculatePlacementReadiness = async (user) => {
     }
   }
 
+  // Attempt to load LeetCode profile if connected
+  let leetcodeProfile = null;
+  const userId = user._id || user.id;
+  if (userId && mongoose.connection?.readyState === 1) {
+    try {
+      leetcodeProfile = await LeetCodeProfile.findOne({ userId }).lean();
+    } catch (err) {
+      console.warn("Could not query LeetCodeProfile in readinessService:", err.message);
+    }
+  }
+
   // Target overall benchmark based on company tier or custom requirement
   const targetBenchmarkScore = getCompanyTargetBenchmark(targetCompany);
 
@@ -67,7 +80,7 @@ export const calculatePlacementReadiness = async (user) => {
   dimensions.resume = evaluateResumeDimension(user);
 
   // 4. DSA Dimension (Weight: 25%)
-  dimensions.dsa = evaluateDsaDimension(user, companyRequirement);
+  dimensions.dsa = evaluateDsaDimension(user, companyRequirement, leetcodeProfile);
 
   // 5. Projects Dimension (Weight: 15%)
   dimensions.projects = evaluateProjectsDimension(user);
@@ -145,6 +158,17 @@ export const calculatePlacementReadiness = async (user) => {
     targetJobRole: targetJobRole || "Not Selected",
     targetCompanyNormalized,
     targetRoleNormalized,
+    leetcodeProfile: leetcodeProfile
+      ? {
+          username: leetcodeProfile.username,
+          totalSolved: leetcodeProfile.totalSolved,
+          easySolved: leetcodeProfile.easySolved,
+          mediumSolved: leetcodeProfile.mediumSolved,
+          hardSolved: leetcodeProfile.hardSolved,
+          ranking: leetcodeProfile.ranking,
+          acceptanceRate: leetcodeProfile.acceptanceRate,
+        }
+      : null,
     dimensions,
     topGaps,
     explainability: {
@@ -304,7 +328,7 @@ const evaluateResumeDimension = (user) => {
 /**
  * 4. DSA Dimension (Weight: 25%)
  */
-const evaluateDsaDimension = (user, companyRequirement) => {
+const evaluateDsaDimension = (user, companyRequirement, leetcodeProfile = null) => {
   let reqScore = 85;
   const dsaLevel = companyRequirement?.dsaExpectation?.level;
   if (dsaLevel === "Hard" || dsaLevel === "Very Hard") {
@@ -313,6 +337,37 @@ const evaluateDsaDimension = (user, companyRequirement) => {
     reqScore = 70;
   }
 
+  // Priority 1: Connected & Synced LeetCode Profile
+  if (
+    leetcodeProfile &&
+    leetcodeProfile.syncStatus === "synced" &&
+    (leetcodeProfile.totalSolved > 0 || leetcodeProfile.username)
+  ) {
+    const rawScore = calculateLeetCodeDsaScore(leetcodeProfile);
+    const score = Math.min(100, Math.max(0, rawScore));
+    const statusObj = getStatusFromScore(score);
+    return {
+      score,
+      status: statusObj.key,
+      statusLabel: statusObj.label,
+      dataAvailability: "available",
+      requiredScore: reqScore,
+      gap: Math.max(0, reqScore - score),
+      notes: `Synced from LeetCode (@${leetcodeProfile.username}): ${leetcodeProfile.totalSolved} solved (${leetcodeProfile.easySolved}E / ${leetcodeProfile.mediumSolved}M / ${leetcodeProfile.hardSolved}H)${leetcodeProfile.ranking ? ` · Global #${leetcodeProfile.ranking.toLocaleString()}` : ""}.`,
+      source: "leetcode",
+      leetcodeSummary: {
+        username: leetcodeProfile.username,
+        totalSolved: leetcodeProfile.totalSolved,
+        easySolved: leetcodeProfile.easySolved,
+        mediumSolved: leetcodeProfile.mediumSolved,
+        hardSolved: leetcodeProfile.hardSolved,
+        ranking: leetcodeProfile.ranking,
+        acceptanceRate: leetcodeProfile.acceptanceRate,
+      },
+    };
+  }
+
+  // Priority 2: Stored/Curriculum DSA score
   if (user.dsaScore !== undefined && user.dsaScore !== null && !isNaN(Number(user.dsaScore))) {
     const score = Math.min(100, Math.max(0, Math.round(Number(user.dsaScore))));
     const statusObj = getStatusFromScore(score);
@@ -324,6 +379,7 @@ const evaluateDsaDimension = (user, companyRequirement) => {
       requiredScore: reqScore,
       gap: Math.max(0, reqScore - score),
       notes: "Computed from completed DSA problem-solving modules.",
+      source: "manual",
     };
   }
 
@@ -334,7 +390,8 @@ const evaluateDsaDimension = (user, companyRequirement) => {
     dataAvailability: "not_started",
     requiredScore: reqScore,
     gap: null,
-    notes: "Practice DSA curriculum problems to benchmark algorithmic readiness.",
+    notes: "Connect your LeetCode account or solve curriculum problems to benchmark algorithmic readiness.",
+    source: null,
   };
 };
 

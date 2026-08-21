@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 import CompanyRequirement, { normalizeIdentifier } from "../models/companyRequirementModel.js";
+import {
+  calculateLeetCodeDsaLevel,
+  getTopicProblemsSolved,
+} from "./leetcodeService.js";
 
 /**
  * Calculates the exact numerical gap between candidate current level and required level.
@@ -208,7 +212,7 @@ const getRoleTechStack = (targetJobRole, tier = "tier2") => {
  * @param {Object|null} companyRequirement - Specific company requirements from DB (optional)
  * @returns {Object} Structured level comparison & gap analysis payload
  */
-export const buildLevelComparison = (user, companyRequirement = null) => {
+export const buildLevelComparison = (user, companyRequirement = null, leetcodeProfile = null) => {
   const targetCompany = user?.targetCompany?.trim() || "General Industry Target";
   const targetJobRole = user?.targetJobRole?.trim() || "Software Development Engineer";
   const targetCompanyNormalized =
@@ -270,10 +274,48 @@ export const buildLevelComparison = (user, companyRequirement = null) => {
       ? Math.round((Number(user.resumeScore) / 10) * 10) / 10
       : null;
 
-  const dsaLevel =
-    user?.dsaScore !== undefined && user?.dsaScore !== null && !isNaN(Number(user.dsaScore))
-      ? Math.round((Number(user.dsaScore) / 10) * 10) / 10
-      : null;
+  // DSA Level determination: Priority 1 = LeetCode connected snapshot, Priority 2 = user.dsaScore
+  let dsaLevel = null;
+  let dsaIsFromLeetcode = false;
+
+  if (leetcodeProfile && leetcodeProfile.syncStatus === "synced" && (leetcodeProfile.totalSolved > 0 || leetcodeProfile.username)) {
+    dsaLevel = calculateLeetCodeDsaLevel(leetcodeProfile);
+    dsaIsFromLeetcode = true;
+  } else if (
+    user?.dsaScore !== undefined &&
+    user?.dsaScore !== null &&
+    !isNaN(Number(user.dsaScore))
+  ) {
+    dsaLevel = Math.round((Number(user.dsaScore) / 10) * 10) / 10;
+  }
+
+  // Calculate LeetCode topic problem counts if connected
+  const arraySolved = dsaIsFromLeetcode
+    ? getTopicProblemsSolved(leetcodeProfile, ["array", "two-pointers", "hash-table", "sliding-window", "prefix-sum", "string"])
+    : 0;
+  const bsSolved = dsaIsFromLeetcode
+    ? getTopicProblemsSolved(leetcodeProfile, ["binary-search", "sorting"])
+    : 0;
+  const treeSolved = dsaIsFromLeetcode
+    ? getTopicProblemsSolved(leetcodeProfile, ["tree", "binary-tree", "binary-search-tree", "trie"])
+    : 0;
+  const graphSolved = dsaIsFromLeetcode
+    ? getTopicProblemsSolved(leetcodeProfile, ["graph", "breadth-first-search", "depth-first-search", "union-find", "shortest-path"])
+    : 0;
+  const dpSolved = dsaIsFromLeetcode
+    ? getTopicProblemsSolved(leetcodeProfile, ["dynamic-programming", "memoization", "recursion"])
+    : 0;
+
+  const getTopicLevel = (solvedCount, baselineModifier = 0) => {
+    if (!dsaIsFromLeetcode) {
+      return dsaLevel !== null ? Math.min(10, Math.max(0, Math.round((dsaLevel + baselineModifier) * 10) / 10)) : null;
+    }
+    if (solvedCount >= 40) return Math.min(10, Math.max(8.5, Math.round((dsaLevel + 0.5) * 10) / 10));
+    if (solvedCount >= 20) return Math.min(10, Math.max(7.5, Math.round(dsaLevel * 10) / 10));
+    if (solvedCount >= 8) return Math.min(10, Math.max(6.0, Math.round((dsaLevel - 0.4) * 10) / 10));
+    if (solvedCount > 0) return Math.min(10, Math.max(4.5, Math.round((dsaLevel - 0.8) * 10) / 10));
+    return dsaLevel !== null ? Math.max(0, Math.round((dsaLevel - 1.2) * 10) / 10) : null;
+  };
 
   const projectsLevel =
     user?.projectsScore !== undefined && user?.projectsScore !== null && !isNaN(Number(user.projectsScore))
@@ -327,23 +369,36 @@ export const buildLevelComparison = (user, companyRequirement = null) => {
           requiredLevel: dsaReqBenchmark,
           currentLevel: dsaLevel,
           importance: "Required",
-          evidence: dsaLevel !== null
+          evidence: dsaIsFromLeetcode
+            ? [
+                `LeetCode (@${leetcodeProfile.username}): ${leetcodeProfile.totalSolved} solved (${leetcodeProfile.easySolved} Easy, ${leetcodeProfile.mediumSolved} Medium, ${leetcodeProfile.hardSolved} Hard).`,
+                leetcodeProfile.ranking ? `Global Ranking: #${leetcodeProfile.ranking.toLocaleString()}` : "Active problem solver.",
+                `Acceptance Rate: ${leetcodeProfile.acceptanceRate}%.`,
+              ]
+            : dsaLevel !== null
             ? [`Evaluated algorithmic problem-solving score: ${dsaLevel}/10.`, `Covers core problem solving and time/space complexity analysis.`]
-            : ["No DSA practice session or coding challenge recorded yet."],
-          improvementSteps: [
-            `Solve 50+ LeetCode Medium/Hard problems focused on ${targetCompany} interview patterns.`,
-            "Practice writing clean code within 25-minute mock coding time limits.",
-          ],
-          actionLink: "/app/interview",
-          actionLabel: "Practice DSA",
+            : ["No LeetCode profile connected or coding challenge recorded yet."],
+          improvementSteps: dsaIsFromLeetcode
+            ? [
+                `Solve more Medium/Hard problems on LeetCode focused on ${targetCompany} interview patterns.`,
+                "Practice writing clean code within 25-minute mock coding time limits.",
+              ]
+            : [
+                `Connect your LeetCode profile in Profile settings to sync real verified stats.`,
+                `Solve 50+ LeetCode Medium/Hard problems focused on ${targetCompany} interview patterns.`,
+              ],
+          actionLink: dsaIsFromLeetcode ? "/app/interview" : "/app/profile",
+          actionLabel: dsaIsFromLeetcode ? "Practice DSA" : "Connect LeetCode",
         },
         {
           id: "dsa-arrays-pointers",
           name: "Arrays, Hashing & Two Pointers",
           requiredLevel: tierReq(8.5),
-          currentLevel: dsaLevel !== null ? Math.min(10, dsaLevel + 0.5) : null,
+          currentLevel: getTopicLevel(arraySolved, 0.4),
           importance: "Required",
-          evidence: dsaLevel !== null
+          evidence: dsaIsFromLeetcode
+            ? [`LeetCode verified: ${arraySolved} problems solved across Arrays, Hash Table & Two Pointers.`]
+            : dsaLevel !== null
             ? ["Linear traversal, hash maps, prefix sums, and sliding window patterns."]
             : ["Unassessed array manipulation and frequency mapping."],
           improvementSteps: [
@@ -357,9 +412,11 @@ export const buildLevelComparison = (user, companyRequirement = null) => {
           id: "dsa-binary-search",
           name: "Binary Search & Sorting",
           requiredLevel: tierReq(8.0),
-          currentLevel: dsaLevel !== null ? dsaLevel : null,
+          currentLevel: getTopicLevel(bsSolved, 0.0),
           importance: "Required",
-          evidence: dsaLevel !== null
+          evidence: dsaIsFromLeetcode
+            ? [`LeetCode verified: ${bsSolved} problems solved in Binary Search & Sorting.`]
+            : dsaLevel !== null
             ? ["Logarithmic search space reductions and monotonic predicates."]
             : ["Unassessed binary search on answer spaces."],
           improvementSteps: [
@@ -373,9 +430,11 @@ export const buildLevelComparison = (user, companyRequirement = null) => {
           id: "dsa-trees-bst",
           name: "Trees & Binary Search Trees",
           requiredLevel: tierReq(8.5),
-          currentLevel: dsaLevel !== null ? Math.max(0, dsaLevel - 0.3) : null,
+          currentLevel: getTopicLevel(treeSolved, -0.3),
           importance: "Required",
-          evidence: dsaLevel !== null
+          evidence: dsaIsFromLeetcode
+            ? [`LeetCode verified: ${treeSolved} problems solved in Trees & Binary Search Trees.`]
+            : dsaLevel !== null
             ? ["Tree traversals (inorder, preorder, postorder, level-order) and recursion."]
             : ["Unassessed binary tree reconstruction and BST properties."],
           improvementSteps: [
@@ -389,9 +448,11 @@ export const buildLevelComparison = (user, companyRequirement = null) => {
           id: "dsa-graphs",
           name: "Graphs (BFS, DFS & Shortest Path)",
           requiredLevel: tierReq(8.5),
-          currentLevel: dsaLevel !== null ? Math.max(0, dsaLevel - 0.6) : null,
+          currentLevel: getTopicLevel(graphSolved, -0.5),
           importance: "Required",
-          evidence: dsaLevel !== null
+          evidence: dsaIsFromLeetcode
+            ? [`LeetCode verified: ${graphSolved} problems solved in Graphs, BFS & DFS.`]
+            : dsaLevel !== null
             ? ["Adjacency lists, cycle detection, and connected components."]
             : ["Graph traversals and shortest-path algorithms not yet verified."],
           improvementSteps: [
@@ -405,9 +466,11 @@ export const buildLevelComparison = (user, companyRequirement = null) => {
           id: "dsa-dynamic-programming",
           name: "Dynamic Programming & Recursion",
           requiredLevel: tierReq(8.5),
-          currentLevel: dsaLevel !== null ? Math.max(0, dsaLevel - 0.8) : null,
+          currentLevel: getTopicLevel(dpSolved, -0.7),
           importance: "Required",
-          evidence: dsaLevel !== null
+          evidence: dsaIsFromLeetcode
+            ? [`LeetCode verified: ${dpSolved} problems solved in Dynamic Programming.`]
+            : dsaLevel !== null
             ? ["Optimal substructure and overlapping subproblems."]
             : ["DP state transition modeling not yet benchmarked."],
           improvementSteps: [
@@ -1027,5 +1090,18 @@ export const buildLevelComparison = (user, companyRequirement = null) => {
     },
     categories,
     allItems,
+    leetcodeProfile: leetcodeProfile
+      ? {
+          username: leetcodeProfile.username,
+          profileUrl: leetcodeProfile.profileUrl || `https://leetcode.com/u/${leetcodeProfile.username}/`,
+          ranking: leetcodeProfile.ranking,
+          totalSolved: leetcodeProfile.totalSolved,
+          easySolved: leetcodeProfile.easySolved,
+          mediumSolved: leetcodeProfile.mediumSolved,
+          hardSolved: leetcodeProfile.hardSolved,
+          acceptanceRate: leetcodeProfile.acceptanceRate,
+          syncStatus: leetcodeProfile.syncStatus,
+        }
+      : null,
   };
 };

@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import SearchableCombobox from "@/components/ui/SearchableCombobox";
+import LeetCodeConnectCard from "@/components/leetcode/LeetCodeConnectCard";
 import { NODE_API_URL } from "@/config/api";
 
 const DEGREE_OPTIONS = [
@@ -811,6 +812,9 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
+
+        {/* 4. Coding & Platforms Section */}
+        <LeetCodeConnectCard />
 
         {/* Action Button */}
         <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-800/80">
