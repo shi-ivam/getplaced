@@ -3,7 +3,9 @@ import {
   extractGitHubUsername,
   calculateGitHubProjectScore,
   formatGitHubProfileResponse,
+  verifyLiveUrl,
 } from "./services/githubService.js";
+
 import {
   calculateTopicLevel,
   calculateTopicConfidence,
@@ -106,6 +108,16 @@ async function runAllTests() {
     assert.equal(formatted.scoreTier, "Solid");
     assert.equal(formatted.topLanguage.languageName, "JavaScript");
   });
+
+  await test("verifyLiveUrl handles empty and malformed URLs gracefully", async () => {
+    const emptyResult = await verifyLiveUrl("");
+    assert.equal(emptyResult.isValid, false);
+    assert.equal(emptyResult.isLive, false);
+
+    const nullResult = await verifyLiveUrl(null);
+    assert.equal(nullResult.isValid, false);
+  });
+
 
   // 2. DSA Taxonomy and Analysis Tests
   console.log("\n[2] DSA Taxonomy & Analysis Service Tests");

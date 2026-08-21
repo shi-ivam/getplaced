@@ -388,3 +388,71 @@ export const formatGitHubProfileResponse = (profile) => {
     updatedAt: doc.updatedAt,
   };
 };
+
+/**
+ * Pings and verifies if a project demo URL is active, reachable, and returns 2xx/3xx HTTP status.
+ *
+ * @param {string} rawUrl - Candidate project live URL
+ * @returns {Promise<Object>} Verification status object with status code, latency, and accessibility
+ */
+export const verifyLiveUrl = async (rawUrl) => {
+  if (!rawUrl || typeof rawUrl !== "string") {
+    return {
+      isValid: false,
+      url: "",
+      isLive: false,
+      statusCode: null,
+      statusText: "Invalid URL",
+      latencyMs: null,
+      accessible: false,
+    };
+  }
+
+  let formattedUrl = rawUrl.trim();
+  if (!formattedUrl.startsWith("http://") && !formattedUrl.startsWith("https://")) {
+    formattedUrl = `https://${formattedUrl}`;
+  }
+
+  try {
+    const startTime = Date.now();
+    const response = await axios.get(formattedUrl, {
+      timeout: 8000,
+      headers: {
+        "User-Agent": "getPlaced-Project-Verifier/1.0",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      },
+      validateStatus: () => true,
+      maxRedirects: 5,
+    });
+    const latencyMs = Date.now() - startTime;
+
+    const statusCode = response.status;
+    const isAccessible = statusCode >= 200 && statusCode < 400;
+
+    return {
+      isValid: true,
+      url: formattedUrl,
+      isLive: isAccessible,
+      statusCode,
+      statusText: response.statusText || (isAccessible ? "OK" : "HTTP Error"),
+      latencyMs,
+      accessible: isAccessible,
+      contentType: response.headers?.["content-type"] || "",
+      server: response.headers?.["server"] || "",
+      checkedAt: new Date().toISOString(),
+    };
+  } catch (err) {
+    return {
+      isValid: true,
+      url: formattedUrl,
+      isLive: false,
+      statusCode: err.response?.status || null,
+      statusText: err.message || "Connection Failed",
+      latencyMs: null,
+      accessible: false,
+      error: err.message,
+      checkedAt: new Date().toISOString(),
+    };
+  }
+};
+

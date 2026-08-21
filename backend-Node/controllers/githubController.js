@@ -4,7 +4,9 @@ import {
   fetchGitHubUserData,
   extractGitHubUsername,
   formatGitHubProfileResponse,
+  verifyLiveUrl,
 } from "../services/githubService.js";
+
 
 /**
  * @desc    Get connected GitHub profile and statistics for authenticated user
@@ -256,3 +258,22 @@ export const getGitHubRepositories = asyncHandler(async (req, res) => {
     repositories: repos,
   });
 });
+
+/**
+ * @desc    Verify if a repository live demo URL is accessible and responding
+ * @route   GET /api/github/verify-live
+ * @access  Private
+ */
+export const verifyProjectLiveUrl = asyncHandler(async (req, res) => {
+  const { url } = req.query;
+
+  if (!url || typeof url !== "string" || !url.trim()) {
+    res.status(400);
+    throw new Error("URL query parameter is required for live verification");
+  }
+
+  const result = await verifyLiveUrl(url);
+
+  res.status(200).json(result);
+});
+
