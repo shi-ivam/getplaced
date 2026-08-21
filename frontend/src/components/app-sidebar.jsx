@@ -42,11 +42,6 @@ const mainItems = [
     icon: Home,
   },
   {
-    title: "AI Career Coach",
-    url: "/app/coach",
-    icon: Sparkles,
-  },
-  {
     title: "Placement Roadmap",
     url: "/app/roadmap",
     icon: Target,
@@ -65,26 +60,6 @@ const mainItems = [
     title: "AI Mock Interview",
     url: "/app/interview",
     icon: BrainCog,
-  },
-  {
-    title: "HR Prep Hub",
-    url: "/app/hr-prep",
-    icon: BookOpen,
-  },
-  {
-    title: "Communication Lab",
-    url: "/app/communication",
-    icon: Mic,
-  },
-  {
-    title: "Company Intelligence",
-    url: "/app/company-intel",
-    icon: Building,
-  },
-  {
-    title: "Resume Intelligence",
-    url: "/app/resume",
-    icon: FileText,
   },
   {
     title: "Academics & Eligibility",
@@ -112,7 +87,32 @@ const mainItems = [
     icon: Swords,
   },
   {
-    title: "Job Recommendations",
+    title: "Resume Intelligence",
+    url: "/app/resume",
+    icon: FileText,
+  },
+  {
+    title: "HR Prep Hub",
+    url: "/app/hr-prep",
+    icon: BookOpen,
+  },
+  {
+    title: "Communication Lab",
+    url: "/app/communication",
+    icon: Mic,
+  },
+  {
+    title: "Company Intelligence",
+    url: "/app/company-intel",
+    icon: Building,
+  },
+  {
+    title: "AI Career Coach",
+    url: "/app/coach",
+    icon: Sparkles,
+  },
+  {
+    title: "Job Recommendation",
     url: "/app/job",
     icon: Briefcase,
   },

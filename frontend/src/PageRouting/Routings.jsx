@@ -58,7 +58,7 @@ function Routings() {
             <Route path="job" element={<JobRecommendations />} />
             <Route path="profile" element={<Profile />} />
 
-            {/* Group C Surfaces */}
+            {/* New Group C Surfaces */}
             <Route path="academics" element={<Academics />} />
             <Route path="progress" element={<ProgressTracker />} />
             <Route path="milestones" element={<Milestones />} />
