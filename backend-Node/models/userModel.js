@@ -70,6 +70,12 @@ const userSchema = mongoose.Schema(
       trim: true,
       default: "",
     },
+    savedJobs: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
   },
   {
     timestamps: true,
