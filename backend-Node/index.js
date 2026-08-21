@@ -15,6 +15,8 @@ import studyLibraryRoutes from "./routes/studyLibraryRoutes.js"
 import arenaRoutes from "./routes/arenaRoutes.js"
 import coachRoutes from "./routes/coachRoutes.js"
 import vtopRoutes from "./routes/vtopRoutes.js"
+import jobRoutes from "./routes/jobRoutes.js"
+import { seedJobsIfNeeded } from "./services/jobService.js"
 
 import cookieParser from "cookie-parser"
 import cors from "cors"
@@ -23,7 +25,9 @@ const PORT = process.env.PORT || 3000
 import axios from "axios"
 import connectDB from "./config/db.js"
 
-connectDB()
+connectDB().then(() => {
+  seedJobsIfNeeded()
+})
 
 const app = express()
 
@@ -72,6 +76,7 @@ app.use("/api/study-library", studyLibraryRoutes)
 app.use("/api/arena", arenaRoutes)
 app.use("/api/coach", coachRoutes)
 app.use("/api/vtop", vtopRoutes)
+app.use("/api/jobs", jobRoutes)
 
 const CURATED_TECH_JOBS = [
   {

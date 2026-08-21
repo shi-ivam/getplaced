@@ -41,7 +41,8 @@ function Routings() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/coding" element={<CodingArena />} />
-          <Route path="/coding/:slug" element={<CodingWorkspace />} />
+          <Route path="/job" element={<JobRecommendations />} />
+          <Route path="/jobs" element={<JobRecommendations />} />
 
           {/* Authenticated Dashboard App Shell */}
           <Route path="/app" element={<Layout />}>
@@ -57,6 +58,7 @@ function Routings() {
             <Route path="communication" element={<CommunicationLab />} />
             <Route path="company-intel" element={<CompanyIntelligence />} />
             <Route path="job" element={<JobRecommendations />} />
+            <Route path="jobs" element={<JobRecommendations />} />
             <Route path="profile" element={<Profile />} />
 
             {/* New Group C Surfaces */}
