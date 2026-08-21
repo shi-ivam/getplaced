@@ -11,6 +11,9 @@ import {
   Settings,
   HelpCircle,
   LogOut,
+  Building,
+  Mic,
+  BookOpen
 } from "lucide-react";
 
 import {
@@ -41,15 +44,29 @@ const mainItems = [
     icon: Code2,
   },
   {
-    title: "Interview",
+    title: "AI Mock Interview",
     url: "/app/interview",
     icon: BrainCog,
-    active: true,
   },
   {
-    title: "Resume",
+    title: "Resume Intelligence",
     url: "/app/resume",
     icon: FileText,
+  },
+  {
+    title: "HR Prep Hub",
+    url: "/app/hr-prep",
+    icon: BookOpen,
+  },
+  {
+    title: "Communication Lab",
+    url: "/app/communication",
+    icon: Mic,
+  },
+  {
+    title: "Company Intelligence",
+    url: "/app/company-intel",
+    icon: Building,
   },
   {
     title: "Job Recommendation",
