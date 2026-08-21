@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import jsPDF from "jspdf";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import {
   BrainCog,
   Mic,
@@ -16,17 +18,19 @@ import {
   AlertTriangle,
   RotateCcw,
   ArrowRight,
-  TrendingUp,
-  Award,
   Download,
   HelpCircle,
   Clock,
   Building,
   User,
-  ShieldAlert,
+  ShieldCheck,
   BarChart2,
+  Zap,
+  Activity,
+  Layers,
   ChevronRight,
-  Zap
+  Sliders,
+  Check
 } from "lucide-react";
 import { PY_API_URL } from "@/config/api";
 
@@ -68,27 +72,42 @@ export default function MockInterview() {
   const [currentAnswer, setCurrentAnswer] = useState("");
   const [answersHistory, setAnswersHistory] = useState([]);
   const [sessionReport, setSessionReport] = useState(null);
-  
+
   // Media & Telemetry State
   const [cameraActive, setCameraActive] = useState(true);
   const [isRecordingAudio, setIsRecordingAudio] = useState(false);
   const [interviewerSpeaking, setInterviewerSpeaking] = useState(false);
   const [audioMuted, setAudioMuted] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(120); // 2 minutes per question
-  
+  const [timeRemaining, setTimeRemaining] = useState(120);
+
   // Telemetry indicators
-  const [postureStatus, setPostureStatus] = useState("Good Posture");
+  const [postureStatus, setPostureStatus] = useState("Optimal Posture");
   const [eyeContactScore, setEyeContactScore] = useState(94);
-  
+
   // Live Feedback modal
   const [evaluatingAnswer, setEvaluatingAnswer] = useState(false);
   const [liveFeedback, setLiveFeedback] = useState(null);
   const [showHint, setShowHint] = useState(false);
 
+  const containerRef = useRef(null);
   const videoRef = useRef(null);
   const recognitionRef = useRef(null);
   const timerRef = useRef(null);
   const synthRef = useRef(null);
+
+  // GSAP Animations on phase change
+  useGSAP(
+    () => {
+      gsap.from(".gsap-fade-in", {
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        stagger: 0.08,
+        ease: "power2.out"
+      });
+    },
+    { dependencies: [phase, currentIndex, liveFeedback], scope: containerRef }
+  );
 
   // Initialize Speech Synthesis and Media Streams
   useEffect(() => {
@@ -96,8 +115,8 @@ export default function MockInterview() {
       synthRef.current = window.speechSynthesis;
     }
 
-    // Set up Web Speech Recognition if available
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
@@ -110,7 +129,6 @@ export default function MockInterview() {
           transcript += event.results[i][0].transcript;
         }
         setCurrentAnswer((prev) => {
-          // If interim result matches, update
           return transcript.trim() ? transcript : prev;
         });
       };
@@ -134,7 +152,8 @@ export default function MockInterview() {
   useEffect(() => {
     let stream = null;
     if (phase === "room" && cameraActive) {
-      navigator.mediaDevices?.getUserMedia({ video: true, audio: false })
+      navigator.mediaDevices
+        ?.getUserMedia({ video: true, audio: false })
         .then((s) => {
           stream = s;
           if (videoRef.current) {
@@ -154,7 +173,7 @@ export default function MockInterview() {
     };
   }, [phase, cameraActive]);
 
-  // Handle Question Timer & Telemetry Jitter
+  // Handle Question Timer & Telemetry
   useEffect(() => {
     if (phase === "room" && !evaluatingAnswer) {
       setTimeRemaining(120);
@@ -167,13 +186,11 @@ export default function MockInterview() {
           return prev - 1;
         });
 
-        // Simulate natural live eye contact / posture readings
         if (Math.random() > 0.7) {
-          setEyeContactScore(Math.floor(88 + Math.random() * 10));
+          setEyeContactScore(Math.floor(90 + Math.random() * 8));
         }
       }, 1000);
 
-      // Read question aloud
       if (questions[currentIndex] && !audioMuted) {
         speakQuestion(questions[currentIndex].question);
       }
@@ -286,18 +303,17 @@ export default function MockInterview() {
       setLiveFeedback(answeredItem);
     } catch (e) {
       console.error("Failed to evaluate answer:", e);
-      // Fallback evaluation
       const fallbackItem = {
         questionId: qObj.id,
         question: qObj.question,
         category: qObj.category,
         answer: currentAnswer,
-        score: 78,
-        technical_depth_score: 75,
-        communication: { overall_communication_score: 75, filler_words: { total_count: 2 } },
-        star_compliance: { score: 70, star_feedback: "Well-structured response." },
-        strengths: ["Clear logical flow."],
-        areas_for_improvement: ["Quantify impact with numbers."],
+        score: 80,
+        technical_depth_score: 78,
+        communication: { overall_communication_score: 78, filler_words: { total_count: 1 } },
+        star_compliance: { score: 75, star_feedback: "Structured STAR progression." },
+        strengths: ["Clear logical formulation of engineering actions."],
+        areas_for_improvement: ["State measurable system or team outcomes."],
         suggested_better_answer: currentAnswer,
         follow_up_question: null
       };
@@ -316,7 +332,6 @@ export default function MockInterview() {
     if (currentIndex + 1 < questions.length) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      // Completed all questions -> Generate Final Session Report
       generateFinalReport();
     }
   };
@@ -335,19 +350,28 @@ export default function MockInterview() {
     } catch (e) {
       console.error("Failed to generate session report:", e);
       setSessionReport({
-        overall_score: 82,
+        overall_score: 84,
         recommendation: "Strong Hire",
-        hiring_verdict_summary: `Candidate demonstrated solid technical readiness and structured articulation for ${selectedCompany}.`,
+        hiring_verdict_summary: `Candidate demonstrated solid technical readiness, clear STAR narrative control, and structured articulation for ${selectedCompany}.`,
         radar_scores: {
-          Communication: 80,
-          "STAR Structure": 75,
-          "Technical Depth": 85,
-          "Problem Solving": 84,
-          "Culture Fit": 82
+          Communication: 82,
+          "STAR Structure": 80,
+          "Technical Depth": 86,
+          "Problem Solving": 85,
+          "Culture Fit": 84
         },
-        strengths: ["Clear explanation of technical design", "Structured STAR approach"],
-        key_growth_areas: ["Reduce filler word pauses", "Add more quantifiable metrics"],
-        next_prep_steps: ["Practice 2 more mock interviews", "Review system design caching patterns"]
+        strengths: [
+          "Consistent articulation and logical structuring across questions.",
+          "Demonstrated relevant technical background and problem-solving intuition."
+        ],
+        key_growth_areas: [
+          "Incorporate quantifiable metrics in the Result phase of STAR.",
+          "Minimize verbal filler pauses to project higher authority."
+        ],
+        next_prep_steps: [
+          `Practice 2-3 more mock sessions targeting ${selectedCompany} culture principles.`,
+          "Time answers to stay within the optimal 90-120 second window per question."
+        ]
       });
       setPhase("report");
     } finally {
@@ -362,178 +386,216 @@ export default function MockInterview() {
     const margin = 40;
 
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.setTextColor(124, 58, 237);
-    doc.text("getPlaced AI Mock Interview Report Card", margin, y);
-    y += 25;
+    doc.setFontSize(20);
+    doc.setTextColor(20, 20, 20);
+    doc.text("getPlaced Mock Interview Executive Assessment", margin, y);
+    y += 24;
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Company: ${selectedCompany} | Role: ${selectedRole} | Date: ${new Date().toLocaleDateString()}`, margin, y);
-    y += 30;
+    doc.setTextColor(90, 90, 90);
+    doc.text(
+      `Company: ${selectedCompany} | Role: ${selectedRole} | Round: ${interviewType} | Date: ${new Date().toLocaleDateString()}`,
+      margin,
+      y
+    );
+    y += 28;
 
-    // Verdict Box
-    doc.setFillColor(243, 244, 246);
+    doc.setFillColor(245, 245, 247);
     doc.roundedRect(margin, y, 515, 60, 4, 4, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.setTextColor(17, 24, 39);
-    doc.text(`Overall Score: ${sessionReport.overall_score}/100 — Verdict: ${sessionReport.recommendation}`, margin + 15, y + 25);
+    doc.setFontSize(14);
+    doc.setTextColor(20, 20, 20);
+    doc.text(
+      `Overall Score: ${sessionReport.overall_score}/100 — Verdict: ${sessionReport.recommendation}`,
+      margin + 16,
+      y + 24
+    );
 
-    doc.setFontSize(10);
+    doc.setFontSize(9.5);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(75, 85, 99);
-    doc.text(doc.splitTextToSize(sessionReport.hiring_verdict_summary || "", 485), margin + 15, y + 45);
-    y += 85;
+    doc.setTextColor(70, 70, 70);
+    doc.text(
+      doc.splitTextToSize(sessionReport.hiring_verdict_summary || "", 480),
+      margin + 16,
+      y + 44
+    );
+    y += 80;
 
-    // Competency Scores
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.setTextColor(17, 24, 39);
+    doc.setFontSize(12);
+    doc.setTextColor(20, 20, 20);
     doc.text("Competency Breakdown", margin, y);
-    y += 18;
+    y += 16;
 
-    doc.setFontSize(10);
+    doc.setFontSize(9.5);
     doc.setFont("helvetica", "normal");
     if (sessionReport.radar_scores) {
       Object.entries(sessionReport.radar_scores).forEach(([comp, sc]) => {
-        doc.text(`• ${comp}: ${sc}%`, margin + 10, y);
-        y += 15;
+        doc.text(`${comp}: ${sc}%`, margin + 12, y);
+        y += 14;
       });
     }
-    y += 15;
+    y += 14;
 
-    // Questions Summary
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.text("Question-by-Question Performance", margin, y);
+    doc.setFontSize(12);
+    doc.text("Question Transcripts and Evaluations", margin, y);
     y += 18;
 
     answersHistory.forEach((ans, i) => {
-      doc.setFontSize(10);
+      doc.setFontSize(9.5);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(124, 58, 237);
-      doc.text(`Q${i + 1}: ${ans.question}`, margin + 10, y, { maxWidth: 490 });
-      y += 20;
+      doc.setTextColor(20, 20, 20);
+      doc.text(`Question ${i + 1}: ${ans.question}`, margin + 12, y, { maxWidth: 485 });
+      y += 18;
 
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(30, 41, 59);
-      doc.text(`Score: ${ans.score}/100 | Answer Excerpt: "${ans.answer.slice(0, 120)}..."`, margin + 10, y, { maxWidth: 490 });
-      y += 25;
+      doc.setTextColor(60, 60, 60);
+      doc.text(
+        `Score: ${ans.score}/100 | Answer: "${ans.answer.slice(0, 140)}..."`,
+        margin + 12,
+        y,
+        { maxWidth: 485 }
+      );
+      y += 24;
     });
 
-    doc.save(`Interview_Report_${selectedCompany}_${selectedRole.replace(/\s+/g, "_")}.pdf`);
+    doc.save(`Interview_Assessment_${selectedCompany}_${selectedRole.replace(/\s+/g, "_")}.pdf`);
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0f12] text-gray-100 p-4 md:p-8 font-sans">
-      <div className="max-w-7xl mx-auto space-y-6">
-
+    <main
+      ref={containerRef}
+      className="overflow-x-hidden w-full max-w-full bg-[#08090c] text-neutral-100 min-h-screen font-sans selection:bg-neutral-800 selection:text-neutral-100"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8">
         {/* PHASE 1: LOBBY & SETUP */}
         {phase === "lobby" && (
-          <div className="space-y-8 animate-fadeIn max-w-4xl mx-auto">
-            <div className="text-center space-y-3">
-              <div className="inline-flex p-3 bg-violet-950/60 border border-violet-700/50 rounded-2xl text-violet-400 mb-2">
-                <BrainCog className="w-8 h-8" />
+          <div className="space-y-10 max-w-5xl mx-auto">
+            {/* Attention / Cinematic Wide Hero */}
+            <div className="text-center space-y-4 gsap-fade-in">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/90 text-xs font-mono text-neutral-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Adaptive Technical & Behavioral Evaluation Chamber
               </div>
-              <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-                AI Interactive Mock Interview Room
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight max-w-5xl mx-auto leading-tight">
+                Simulated Technical & Culture Interview Environment
               </h1>
-              <p className="text-sm md:text-base text-gray-400 max-w-xl mx-auto">
-                Live simulated interview experience with voice synthesis, camera posture tracking, real-time STAR evaluation, and dynamic follow-up questioning.
+              <p className="text-sm md:text-base text-neutral-400 max-w-3xl mx-auto leading-relaxed">
+                Full-fidelity AI interviewer with voice synthesis, camera posture tracking, real-time STAR evaluation metrics, and dynamic probe questioning.
               </p>
             </div>
 
-            {/* Configuration Card */}
-            <div className="bg-gray-900/80 border border-gray-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
-              <h2 className="text-lg font-semibold text-white border-b border-gray-800 pb-3 flex items-center gap-2">
-                <Building className="w-5 h-5 text-violet-400" />
-                Configure Your Interview Session
-              </h2>
+            {/* Interest / Dense Gapless Bento Configuration */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 grid-flow-dense gsap-fade-in">
+              {/* Target Company Card */}
+              <div className="col-span-12 md:col-span-6 bg-neutral-900/70 border border-neutral-800/80 rounded-2xl p-6 space-y-3">
+                <label className="text-xs uppercase tracking-wider font-mono text-neutral-400 flex items-center gap-2">
+                  <Building className="w-4 h-4 text-neutral-300" />
+                  Target Enterprise
+                </label>
+                <select
+                  value={selectedCompany}
+                  onChange={(e) => setSelectedCompany(e.target.value)}
+                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm font-medium text-white focus:outline-none focus:border-neutral-500 transition"
+                >
+                  {TARGET_COMPANIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-neutral-500">
+                  Calibrates interview evaluation bars and company-specific principles.
+                </p>
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Company Select */}
-                <div>
-                  <label className="text-xs font-semibold text-gray-400 block mb-2">Target Company</label>
-                  <select
-                    value={selectedCompany}
-                    onChange={(e) => setSelectedCompany(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-gray-800/90 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500 transition"
-                  >
-                    {TARGET_COMPANIES.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
+              {/* Target Role Card */}
+              <div className="col-span-12 md:col-span-6 bg-neutral-900/70 border border-neutral-800/80 rounded-2xl p-6 space-y-3">
+                <label className="text-xs uppercase tracking-wider font-mono text-neutral-400 flex items-center gap-2">
+                  <User className="w-4 h-4 text-neutral-300" />
+                  Target Engineering Role
+                </label>
+                <select
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm font-medium text-white focus:outline-none focus:border-neutral-500 transition"
+                >
+                  {TARGET_ROLES.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-neutral-500">
+                  Selects role-specific technical depth and domain expectations.
+                </p>
+              </div>
 
-                {/* Role Select */}
-                <div>
-                  <label className="text-xs font-semibold text-gray-400 block mb-2">Target Role</label>
-                  <select
-                    value={selectedRole}
-                    onChange={(e) => setSelectedRole(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-gray-800/90 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500 transition"
-                  >
-                    {TARGET_ROLES.map((r) => (
-                      <option key={r} value={r}>{r}</option>
-                    ))}
-                  </select>
-                </div>
+              {/* Round Type Card */}
+              <div className="col-span-12 md:col-span-6 lg:col-span-6 bg-neutral-900/70 border border-neutral-800/80 rounded-2xl p-6 space-y-3">
+                <label className="text-xs uppercase tracking-wider font-mono text-neutral-400 flex items-center gap-2">
+                  <Sliders className="w-4 h-4 text-neutral-300" />
+                  Interview Round Track
+                </label>
+                <select
+                  value={interviewType}
+                  onChange={(e) => setInterviewType(e.target.value)}
+                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm font-medium text-white focus:outline-none focus:border-neutral-500 transition"
+                >
+                  <option value="Mixed">Mixed (System Architecture + Behavioral + Culture)</option>
+                  <option value="HR">Behavioral & Leadership Principles (STAR Focus)</option>
+                  <option value="Technical">Technical Execution & Distributed Concepts</option>
+                  <option value="System Design">System Design & Tradeoff Formulation</option>
+                </select>
+              </div>
 
-                {/* Interview Round Type */}
-                <div>
-                  <label className="text-xs font-semibold text-gray-400 block mb-2">Interview Round Type</label>
-                  <select
-                    value={interviewType}
-                    onChange={(e) => setInterviewType(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-gray-800/90 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500 transition"
-                  >
-                    <option value="Mixed">Mixed (Technical + Behavioral + Culture)</option>
-                    <option value="HR">HR & Behavioral (STAR Focus)</option>
-                    <option value="Technical">Technical Breadth & Architecture</option>
-                    <option value="System Design">System Design & Problem Solving</option>
-                  </select>
-                </div>
-
-                {/* Difficulty & Count */}
+              {/* Difficulty & Question Count */}
+              <div className="col-span-12 md:col-span-6 lg:col-span-6 bg-neutral-900/70 border border-neutral-800/80 rounded-2xl p-6 space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-gray-400 block mb-2">Difficulty</label>
+                    <label className="text-xs uppercase tracking-wider font-mono text-neutral-400 block mb-2">
+                      Difficulty
+                    </label>
                     <select
                       value={difficulty}
                       onChange={(e) => setDifficulty(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-gray-800/90 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500 transition"
+                      className="w-full px-3.5 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm font-medium text-white focus:outline-none focus:border-neutral-500 transition"
                     >
-                      <option value="Easy">Standard / Intern</option>
+                      <option value="Easy">Standard / Associate</option>
                       <option value="Medium">Mid-Level / SDE-1</option>
                       <option value="Hard">Senior / Tier-1 Bar</option>
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-gray-400 block mb-2">Question Count</label>
+                    <label className="text-xs uppercase tracking-wider font-mono text-neutral-400 block mb-2">
+                      Question Count
+                    </label>
                     <select
                       value={questionCount}
                       onChange={(e) => setQuestionCount(Number(e.target.value))}
-                      className="w-full px-3 py-2.5 bg-gray-800/90 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500 transition"
+                      className="w-full px-3.5 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm font-medium text-white focus:outline-none focus:border-neutral-500 transition"
                     >
-                      <option value={3}>3 Questions (Express)</option>
-                      <option value={4}>4 Questions (Standard)</option>
-                      <option value={6}>6 Questions (Deep Dive)</option>
+                      <option value={3}>3 Questions</option>
+                      <option value={4}>4 Questions</option>
+                      <option value={6}>6 Questions</option>
                     </select>
                   </div>
                 </div>
               </div>
 
-              {/* Start Button */}
-              <div className="pt-4 border-t border-gray-800">
+              {/* Action / High Contrast Enter Button */}
+              <div className="col-span-12 pt-2">
                 <button
                   onClick={handleStartInterview}
                   disabled={evaluatingAnswer}
-                  className="w-full py-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-bold rounded-2xl text-base shadow-xl shadow-violet-600/30 flex items-center justify-center gap-2 active:scale-[0.99] transition-all"
+                  className="w-full py-4 bg-white hover:bg-neutral-200 text-neutral-950 font-bold rounded-xl text-sm shadow-xl flex items-center justify-center gap-2 active:scale-[0.99] transition"
                 >
-                  <Play className="w-5 h-5 fill-current" />
-                  {evaluatingAnswer ? "Synthesizing AI Interview Room..." : "Enter Live Mock Interview Room"}
+                  <Play className="w-4 h-4 fill-current" />
+                  {evaluatingAnswer
+                    ? "Initializing Chamber..."
+                    : "Enter Live Mock Interview Chamber"}
                 </button>
               </div>
             </div>
@@ -542,126 +604,138 @@ export default function MockInterview() {
 
         {/* PHASE 2: LIVE SIMULATED INTERVIEW ROOM */}
         {phase === "room" && questions.length > 0 && (
-          <div className="space-y-6 animate-fadeIn">
-            
+          <div className="space-y-6 max-w-6xl mx-auto">
             {/* Top Status Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 bg-gray-900/80 border border-gray-800 px-5 py-3 rounded-2xl">
+            <div className="flex flex-wrap items-center justify-between gap-4 bg-neutral-900/90 border border-neutral-800 px-5 py-3 rounded-2xl gsap-fade-in">
               <div className="flex items-center gap-3">
-                <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-sm font-semibold text-white">
-                  Live Session: {selectedCompany} • {selectedRole}
+                  {selectedCompany} • {selectedRole}
                 </span>
-                <span className="text-xs px-2.5 py-0.5 bg-violet-950 text-violet-300 border border-violet-800/60 rounded-full font-medium">
-                  Q {currentIndex + 1} of {questions.length}
+                <span className="text-xs px-2.5 py-0.5 bg-neutral-800 text-neutral-300 border border-neutral-700 rounded-full font-mono">
+                  Question {currentIndex + 1} of {questions.length}
                 </span>
               </div>
 
-              <div className="flex items-center gap-4 text-xs font-medium">
-                {/* Timer */}
-                <div className="flex items-center gap-1.5 bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700 text-gray-300">
-                  <Clock className="w-4 h-4 text-violet-400" />
-                  <span>{Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, "0")}</span>
+              <div className="flex items-center gap-3 text-xs font-mono">
+                <div className="flex items-center gap-1.5 bg-neutral-950 px-3 py-1.5 rounded-xl border border-neutral-800 text-neutral-300">
+                  <Clock className="w-3.5 h-3.5 text-neutral-400" />
+                  <span>
+                    {Math.floor(timeRemaining / 60)}:
+                    {(timeRemaining % 60).toString().padStart(2, "0")}
+                  </span>
                 </div>
 
                 <button
                   onClick={() => setAudioMuted(!audioMuted)}
-                  className={`p-2 rounded-lg border transition ${
-                    audioMuted ? "bg-red-950/60 border-red-800 text-red-400" : "bg-gray-800 border-gray-700 text-gray-300 hover:text-white"
+                  className={`p-2 rounded-xl border transition ${
+                    audioMuted
+                      ? "bg-red-950/40 border-red-900 text-red-400"
+                      : "bg-neutral-950 border-neutral-800 text-neutral-300 hover:text-white"
                   }`}
-                  title={audioMuted ? "Unmute AI Voice" : "Mute AI Voice"}
+                  title={audioMuted ? "Unmute Interviewer Voice" : "Mute Interviewer Voice"}
                 >
-                  {audioMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  {audioMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
                 </button>
               </div>
             </div>
 
             {/* 2-Column Split: AI Interviewer (Left) & Candidate Feed (Right) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
-              {/* LEFT: AI INTERVIEWER AVATAR & QUESTION CARD */}
-              <div className="bg-gray-900/80 border border-gray-800 rounded-3xl p-6 flex flex-col justify-between space-y-6 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-80 h-80 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
-
-                <div>
-                  {/* Interviewer Status Badge */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 grid-flow-dense">
+              {/* LEFT: AI INTERVIEWER TERMINAL */}
+              <div className="col-span-12 lg:col-span-6 bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 flex flex-col justify-between space-y-6 gsap-fade-in">
+                <div className="space-y-4">
+                  {/* Interviewer State Header */}
+                  <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center text-white font-mono text-xs font-bold">
                         AI
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-white">Principal AI Interviewer</h3>
-                        <span className="text-[11px] text-gray-400">
-                          {interviewerSpeaking ? "Speaking question aloud..." : "Listening to response..."}
+                        <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                          Senior Hiring Committee Evaluator
+                        </h3>
+                        <span className="text-[11px] text-neutral-400 font-mono">
+                          {interviewerSpeaking
+                            ? "Voice synthesis broadcasting..."
+                            : "Listening to candidate audio..."}
                         </span>
                       </div>
                     </div>
 
                     {interviewerSpeaking && (
                       <div className="flex items-center gap-1">
-                        <span className="w-1.5 h-4 bg-violet-500 rounded-full animate-bounce" />
-                        <span className="w-1.5 h-6 bg-purple-500 rounded-full animate-bounce delay-100" />
-                        <span className="w-1.5 h-3 bg-violet-400 rounded-full animate-bounce delay-200" />
+                        <span className="w-1 h-3 bg-neutral-400 rounded-full animate-bounce" />
+                        <span className="w-1 h-5 bg-neutral-200 rounded-full animate-bounce delay-100" />
+                        <span className="w-1 h-2 bg-neutral-500 rounded-full animate-bounce delay-200" />
                       </div>
                     )}
                   </div>
 
-                  {/* Question Box */}
-                  <div className="bg-gray-800/60 border border-gray-700/80 rounded-2xl p-5 space-y-3">
+                  {/* Question Container */}
+                  <div className="bg-neutral-950 border border-neutral-800/90 rounded-xl p-5 space-y-3">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-violet-400 font-semibold uppercase tracking-wider">
-                        {questions[currentIndex]?.category || "Behavioral & Technical Question"}
+                      <span className="text-neutral-400 font-mono uppercase tracking-wider">
+                        {questions[currentIndex]?.category || "Technical & Behavioral"}
                       </span>
-                      <span className="text-gray-400">Level: {questions[currentIndex]?.difficulty || difficulty}</span>
+                      <span className="text-neutral-500 font-mono">
+                        Level: {questions[currentIndex]?.difficulty || difficulty}
+                      </span>
                     </div>
 
-                    <h2 className="text-base md:text-lg font-semibold text-white leading-snug">
+                    <h2 className="text-base sm:text-lg font-bold text-white leading-snug">
                       "{questions[currentIndex]?.question}"
                     </h2>
 
                     {questions[currentIndex]?.what_to_look_for && (
-                      <p className="text-xs text-gray-400 border-t border-gray-700/60 pt-2">
-                        💡 <strong className="text-gray-300">Interviewer focus:</strong> {questions[currentIndex]?.what_to_look_for}
-                      </p>
+                      <div className="text-xs text-neutral-400 border-t border-neutral-900 pt-2.5 space-y-1">
+                        <span className="text-neutral-300 font-semibold block">
+                          Evaluation Criteria:
+                        </span>
+                        <p className="text-neutral-400">
+                          {questions[currentIndex]?.what_to_look_for}
+                        </p>
+                      </div>
                     )}
                   </div>
 
-                  {/* Progressive Hint Box */}
+                  {/* Progressive Hint */}
                   {showHint && questions[currentIndex]?.star_tips && (
-                    <div className="mt-3 p-3 bg-amber-950/40 border border-amber-800/60 rounded-xl text-xs text-amber-300 space-y-1 animate-fadeIn">
-                      <span className="font-semibold flex items-center gap-1">
-                        <HelpCircle className="w-3.5 h-3.5" />
-                        STAR Framing Strategy:
+                    <div className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-xs text-neutral-300 space-y-1 gsap-fade-in">
+                      <span className="font-semibold text-neutral-200 flex items-center gap-1.5">
+                        <HelpCircle className="w-3.5 h-3.5 text-neutral-400" />
+                        STAR Response Framing Structure:
                       </span>
-                      <p className="text-[11px] text-amber-200/90">{questions[currentIndex]?.star_tips}</p>
+                      <p className="text-neutral-400 leading-relaxed font-mono text-[11px]">
+                        {questions[currentIndex]?.star_tips}
+                      </p>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-800">
+                <div className="flex items-center justify-between pt-3 border-t border-neutral-800 text-xs">
                   <button
                     onClick={() => speakQuestion(questions[currentIndex]?.question)}
-                    className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition"
+                    className="flex items-center gap-1.5 text-neutral-400 hover:text-white transition"
                   >
-                    <Volume2 className="w-4 h-4" />
-                    Repeat Question
+                    <Volume2 className="w-3.5 h-3.5" />
+                    Replay Prompt
                   </button>
 
                   <button
                     onClick={() => setShowHint(!showHint)}
-                    className="flex items-center gap-1.5 text-xs text-amber-400 hover:text-amber-300 transition"
+                    className="flex items-center gap-1.5 text-neutral-400 hover:text-white transition"
                   >
-                    <HelpCircle className="w-4 h-4" />
-                    {showHint ? "Hide Hint" : "Request STAR Hint"}
+                    <HelpCircle className="w-3.5 h-3.5" />
+                    {showHint ? "Hide Strategy Hint" : "Reveal Strategy Hint"}
                   </button>
                 </div>
               </div>
 
-              {/* RIGHT: CANDIDATE VIDEO FEED & SPEECH TRANSCRIPT */}
-              <div className="bg-gray-900/80 border border-gray-800 rounded-3xl p-6 flex flex-col justify-between space-y-4">
-                
-                {/* Webcam & Telemetry Panel */}
-                <div className="relative rounded-2xl overflow-hidden bg-gray-950 border border-gray-800 aspect-video flex items-center justify-center">
+              {/* RIGHT: CANDIDATE VIDEO FEED & TRANSCRIPTION WORKSPACE */}
+              <div className="col-span-12 lg:col-span-6 bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 flex flex-col justify-between space-y-4 gsap-fade-in">
+                {/* Webcam Panel with HUD */}
+                <div className="relative rounded-xl overflow-hidden bg-neutral-950 border border-neutral-800 aspect-video flex items-center justify-center">
                   {cameraActive ? (
                     <video
                       ref={videoRef}
@@ -671,63 +745,66 @@ export default function MockInterview() {
                       className="w-full h-full object-cover transform -scale-x-100"
                     />
                   ) : (
-                    <div className="flex flex-col items-center justify-center text-gray-500 space-y-2">
-                      <User className="w-12 h-12" />
-                      <span className="text-xs">Camera Feed Off</span>
+                    <div className="flex flex-col items-center justify-center text-neutral-600 space-y-2">
+                      <User className="w-10 h-10" />
+                      <span className="text-xs font-mono">Video Stream Standby</span>
                     </div>
                   )}
 
-                  {/* Live HUD Overlay: Posture & Eye Contact */}
+                  {/* Telemetry HUD */}
                   <div className="absolute top-3 left-3 flex items-center gap-2">
-                    <span className="px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[11px] font-medium text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-[11px] font-mono text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       {postureStatus}
                     </span>
-                    <span className="px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[11px] font-medium text-violet-300 border border-violet-500/30">
-                      Eye Contact: {eyeContactScore}%
+                    <span className="px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-[11px] font-mono text-neutral-300 border border-neutral-700">
+                      Gaze Alignment: {eyeContactScore}%
                     </span>
                   </div>
 
-                  {/* Camera Toggle Button */}
                   <div className="absolute bottom-3 right-3">
                     <button
                       onClick={() => setCameraActive(!cameraActive)}
-                      className="p-2 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-xl text-gray-300 hover:text-white transition"
+                      className="p-2 bg-black/70 hover:bg-black/90 backdrop-blur-md rounded-xl text-neutral-300 hover:text-white transition border border-neutral-800"
                     >
-                      {cameraActive ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4 text-red-400" />}
+                      {cameraActive ? (
+                        <Video className="w-3.5 h-3.5" />
+                      ) : (
+                        <VideoOff className="w-3.5 h-3.5 text-red-400" />
+                      )}
                     </button>
                   </div>
                 </div>
 
-                {/* Candidate Answer Workspace */}
+                {/* Candidate Response Workspace */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-gray-400 flex items-center gap-2">
-                      <span>Your Response</span>
+                    <label className="text-xs uppercase tracking-wider font-mono text-neutral-400 flex items-center gap-2">
+                      <span>Candidate Response Terminal</span>
                       {isRecordingAudio && (
-                        <span className="text-[11px] text-red-400 animate-pulse font-medium">
-                          ● Transcribing voice live...
+                        <span className="text-[11px] text-red-400 animate-pulse font-mono">
+                          Transcribing audio stream...
                         </span>
                       )}
                     </label>
 
                     <button
                       onClick={handleToggleAudioRecording}
-                      className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition font-mono ${
                         isRecordingAudio
-                          ? "bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/30"
-                          : "bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700"
+                          ? "bg-red-600 hover:bg-red-500 text-white"
+                          : "bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700"
                       }`}
                     >
                       {isRecordingAudio ? (
                         <>
-                          <Square className="w-3.5 h-3.5 fill-current" />
-                          Stop Recording
+                          <Square className="w-3 h-3 fill-current" />
+                          Halt Recording
                         </>
                       ) : (
                         <>
-                          <Mic className="w-3.5 h-3.5 text-violet-400" />
-                          Record Answer
+                          <Mic className="w-3 h-3 text-neutral-300" />
+                          Record Voice
                         </>
                       )}
                     </button>
@@ -737,198 +814,196 @@ export default function MockInterview() {
                     rows={4}
                     value={currentAnswer}
                     onChange={(e) => setCurrentAnswer(e.target.value)}
-                    placeholder="Speak into microphone or type your STAR response here..."
-                    className="w-full p-3.5 bg-gray-800/90 border border-gray-700 rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition resize-none"
+                    placeholder="Speak into microphone or input your structured STAR answer..."
+                    className="w-full p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-500 transition resize-none leading-relaxed"
                   />
 
-                  {/* Submission Action */}
                   <button
                     onClick={handleSubmitAnswer}
                     disabled={evaluatingAnswer || !currentAnswer.trim()}
-                    className={`w-full py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${
+                    className={`w-full py-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${
                       evaluatingAnswer || !currentAnswer.trim()
-                        ? "bg-violet-950 text-gray-500 cursor-not-allowed"
-                        : "bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-600/30 active:scale-[0.99]"
+                        ? "bg-neutral-900 text-neutral-600 cursor-not-allowed border border-neutral-800"
+                        : "bg-white hover:bg-neutral-200 text-neutral-950 shadow-lg active:scale-[0.99]"
                     }`}
                   >
                     {evaluatingAnswer ? (
                       <>
-                        <Sparkles className="w-4 h-4 animate-spin" />
-                        Evaluating STAR Structure & Communication...
+                        <Sparkles className="w-3.5 h-3.5 animate-spin" />
+                        Evaluating STAR Architecture & Communication...
                       </>
                     ) : (
                       <>
-                        <CheckCircle2 className="w-4 h-4" />
-                        Submit Answer for AI Evaluation
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Submit Answer for Multi-Vector Evaluation
                       </>
                     )}
                   </button>
                 </div>
-
               </div>
             </div>
 
-            {/* LIVE FEEDBACK POPUP MODAL ON SUBMIT */}
+            {/* LIVE EVALUATION POPUP MODAL */}
             {liveFeedback && (
-              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div className="bg-gray-900 border border-gray-800 rounded-3xl max-w-2xl w-full p-6 space-y-5 animate-scaleUp">
-                  
-                  <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+              <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                <div className="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 max-h-[85vh] overflow-y-auto gsap-fade-in">
+                  <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-violet-950 border border-violet-800 flex items-center justify-center text-violet-300 font-bold text-sm">
+                      <div className="w-10 h-10 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-center text-white font-mono font-bold text-sm">
                         {liveFeedback.score}
                       </div>
                       <div>
-                        <h3 className="text-base font-bold text-white">Instant AI Feedback</h3>
-                        <span className="text-xs text-gray-400">Score: {liveFeedback.score}/100</span>
+                        <h3 className="text-sm font-bold text-white">Instant Diagnostics</h3>
+                        <span className="text-xs text-neutral-400 font-mono">
+                          Overall Score: {liveFeedback.score}/100
+                        </span>
                       </div>
                     </div>
-                    
-                    <span className="px-2.5 py-1 text-xs rounded-full bg-violet-950 text-violet-300 border border-violet-800">
-                      STAR Score: {liveFeedback.star_compliance?.score || 70}%
+
+                    <span className="px-2.5 py-1 text-xs rounded-full bg-neutral-950 text-neutral-300 border border-neutral-800 font-mono">
+                      STAR Compliance: {liveFeedback.star_compliance?.score || 70}%
                     </span>
                   </div>
 
-                  {/* Feedback Content */}
-                  <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-                    
-                    {/* Strengths & Improvements */}
+                  <div className="space-y-4">
+                    {/* Strengths & Improvements Bento */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="p-3 bg-emerald-950/30 border border-emerald-800/50 rounded-xl space-y-1">
-                        <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1">
+                      <div className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1.5">
+                        <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          Key Strengths:
+                          Validated Strengths
                         </span>
-                        <ul className="text-[11px] text-gray-300 space-y-0.5">
+                        <ul className="text-xs text-neutral-300 space-y-1">
                           {liveFeedback.strengths?.map((s, i) => (
-                            <li key={i}>• {s}</li>
+                            <li key={i} className="flex items-start gap-1.5">
+                              <span className="text-neutral-500">•</span>
+                              <span>{s}</span>
+                            </li>
                           ))}
                         </ul>
                       </div>
 
-                      <div className="p-3 bg-amber-950/30 border border-amber-800/50 rounded-xl space-y-1">
-                        <span className="text-xs font-semibold text-amber-400 flex items-center gap-1">
+                      <div className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1.5">
+                        <span className="text-xs font-semibold text-amber-400 flex items-center gap-1.5">
                           <AlertTriangle className="w-3.5 h-3.5" />
-                          Improvement Areas:
+                          Targeted Refinements
                         </span>
-                        <ul className="text-[11px] text-gray-300 space-y-0.5">
+                        <ul className="text-xs text-neutral-300 space-y-1">
                           {liveFeedback.areas_for_improvement?.map((a, i) => (
-                            <li key={i}>• {a}</li>
+                            <li key={i} className="flex items-start gap-1.5">
+                              <span className="text-neutral-500">•</span>
+                              <span>{a}</span>
+                            </li>
                           ))}
                         </ul>
                       </div>
                     </div>
 
-                    {/* Follow-up question if generated */}
+                    {/* Follow-up Question Probe */}
                     {liveFeedback.follow_up_question && (
-                      <div className="p-3.5 bg-violet-950/40 border border-violet-800/60 rounded-xl space-y-1">
-                        <span className="text-xs font-bold text-violet-300 flex items-center gap-1.5">
-                          <BrainCog className="w-4 h-4 text-violet-400" />
-                          Interviewer Follow-Up Probe:
+                      <div className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
+                        <span className="text-xs font-bold text-neutral-200 flex items-center gap-1.5">
+                          <BrainCog className="w-3.5 h-3.5 text-neutral-400" />
+                          Adaptive Follow-up Inquiry:
                         </span>
-                        <p className="text-xs text-gray-200 italic">
+                        <p className="text-xs text-neutral-300 italic">
                           "{liveFeedback.follow_up_question}"
                         </p>
                       </div>
                     )}
 
-                    {/* Suggested STAR Polish */}
+                    {/* Exemplary Model Answer */}
                     {liveFeedback.suggested_better_answer && (
-                      <div className="p-3 bg-gray-800/60 border border-gray-700 rounded-xl space-y-1">
-                        <span className="text-xs font-semibold text-gray-300">Exemplary STAR Model Polish:</span>
-                        <p className="text-xs text-gray-300 italic">
+                      <div className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
+                        <span className="text-xs font-semibold text-neutral-300">
+                          Exemplary STAR Formulation:
+                        </span>
+                        <p className="text-xs text-neutral-400 leading-relaxed">
                           {liveFeedback.suggested_better_answer}
                         </p>
                       </div>
                     )}
                   </div>
 
-                  {/* Next Step Button */}
-                  <div className="pt-3 border-t border-gray-800 flex justify-end">
+                  {/* Modal Action */}
+                  <div className="pt-3 border-t border-neutral-800 flex justify-end">
                     <button
                       onClick={handleNextQuestion}
-                      className="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-violet-600/30 flex items-center gap-2 transition"
+                      className="px-5 py-2.5 bg-white hover:bg-neutral-200 text-neutral-950 rounded-xl text-xs font-bold flex items-center gap-2 transition"
                     >
-                      <span>{currentIndex + 1 < questions.length ? "Proceed to Next Question" : "Complete & View Final Report"}</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <span>
+                        {currentIndex + 1 < questions.length
+                          ? "Advance to Next Question"
+                          : "Finalize & Generate Session Report"}
+                      </span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
-
                 </div>
               </div>
             )}
-
           </div>
         )}
 
         {/* PHASE 3: COMPREHENSIVE PERFORMANCE REPORT CARD */}
         {phase === "report" && sessionReport && (
-          <div className="space-y-8 animate-fadeIn max-w-5xl mx-auto">
-            
+          <div className="space-y-8 max-w-5xl mx-auto gsap-fade-in">
             {/* Header Verdict Card */}
-            <div className="bg-gray-900/80 border border-gray-800 rounded-3xl p-6 md:p-8 space-y-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
-
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+            <div className="bg-neutral-900/80 border border-neutral-800 rounded-2xl p-6 md:p-8 space-y-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 <div className="flex items-center gap-6">
-                  <div className="w-24 h-24 rounded-3xl bg-violet-950 border border-violet-800 flex flex-col items-center justify-center shrink-0 shadow-xl">
-                    <span className="text-3xl font-extrabold text-white leading-none">
+                  <div className="w-20 h-20 rounded-2xl bg-neutral-950 border border-neutral-800 flex flex-col items-center justify-center shrink-0">
+                    <span className="text-3xl font-black text-white leading-none font-mono">
                       {sessionReport.overall_score}
                     </span>
-                    <span className="text-[10px] text-gray-400 font-medium mt-1">/ 100</span>
+                    <span className="text-[10px] text-neutral-500 font-mono mt-1">/ 100</span>
                   </div>
 
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-2xl font-bold text-white">Interview Performance Verdict</h2>
-                      <span className={`px-3 py-1 text-xs font-bold rounded-full border ${
-                        sessionReport.recommendation === "Strong Hire"
-                          ? "bg-emerald-950 text-emerald-300 border-emerald-800"
-                          : sessionReport.recommendation === "Hire"
-                          ? "bg-violet-950 text-violet-300 border-violet-800"
-                          : "bg-amber-950 text-amber-300 border-amber-800"
-                      }`}>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2.5">
+                      <h2 className="text-xl md:text-2xl font-bold text-white">
+                        Executive Evaluation Assessment
+                      </h2>
+                      <span className="px-3 py-0.5 text-xs font-bold rounded-full border bg-neutral-950 text-white border-neutral-700">
                         {sessionReport.recommendation}
                       </span>
                     </div>
-                    <p className="text-xs md:text-sm text-gray-300 max-w-xl leading-relaxed">
+                    <p className="text-xs md:text-sm text-neutral-400 max-w-xl leading-relaxed">
                       {sessionReport.hiring_verdict_summary}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2 shrink-0">
+                <div className="flex flex-wrap gap-2.5 shrink-0">
                   <button
                     onClick={handleDownloadReportPDF}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-violet-600/30 transition"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-neutral-200 text-neutral-950 rounded-xl text-xs font-bold transition"
                   >
-                    <Download className="w-4 h-4" />
-                    Download PDF Report
+                    <Download className="w-3.5 h-3.5" />
+                    Export PDF Assessment
                   </button>
                   <button
                     onClick={() => setPhase("lobby")}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-xl text-xs font-medium border border-gray-700 transition"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-neutral-950 hover:bg-neutral-800 text-neutral-300 rounded-xl text-xs font-medium border border-neutral-800 transition"
                   >
-                    <RotateCcw className="w-4 h-4" />
-                    Start New Interview
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    New Assessment
                   </button>
                 </div>
               </div>
 
               {/* Competency Scores Bar Grid */}
               {sessionReport.radar_scores && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pt-6 border-t border-gray-800">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pt-6 border-t border-neutral-800">
                   {Object.entries(sessionReport.radar_scores).map(([comp, score]) => (
-                    <div key={comp} className="bg-gray-800/40 p-3.5 rounded-2xl border border-gray-800">
+                    <div key={comp} className="bg-neutral-950 p-3.5 rounded-xl border border-neutral-800">
                       <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span className="text-gray-400">{comp}</span>
-                        <span className="font-bold text-white">{score}%</span>
+                        <span className="text-neutral-400 font-mono text-[11px]">{comp}</span>
+                        <span className="font-bold text-white font-mono">{score}%</span>
                       </div>
-                      <div className="w-full bg-gray-700/60 rounded-full h-1.5 overflow-hidden">
+                      <div className="w-full bg-neutral-800 rounded-full h-1.5 overflow-hidden">
                         <div
-                          className={`h-full rounded-full ${
-                            score >= 80 ? "bg-emerald-500" : score >= 65 ? "bg-violet-500" : "bg-amber-500"
-                          }`}
+                          className="h-full rounded-full bg-white transition-all duration-700"
                           style={{ width: `${score}%` }}
                         />
                       </div>
@@ -938,16 +1013,16 @@ export default function MockInterview() {
               )}
             </div>
 
-            {/* Strengths & Growth Areas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gray-900/70 border border-gray-800 rounded-2xl p-6 space-y-3">
-                <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" />
-                  Primary Interview Strengths
+            {/* Strengths & Growth Areas Bento */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 grid-flow-dense">
+              <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 space-y-3">
+                <h3 className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  Primary Demonstrated Strengths
                 </h3>
                 <ul className="space-y-2">
                   {sessionReport.strengths?.map((s, idx) => (
-                    <li key={idx} className="text-xs text-gray-300 flex items-start gap-2">
+                    <li key={idx} className="text-xs text-neutral-400 flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
                       <span>{s}</span>
                     </li>
@@ -955,14 +1030,14 @@ export default function MockInterview() {
                 </ul>
               </div>
 
-              <div className="bg-gray-900/70 border border-gray-800 rounded-2xl p-6 space-y-3">
-                <h3 className="text-sm font-bold text-amber-400 flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4" />
-                  Key Growth & Coaching Focus
+              <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 space-y-3">
+                <h3 className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  Growth & Refinement Imperatives
                 </h3>
                 <ul className="space-y-2">
                   {sessionReport.key_growth_areas?.map((g, idx) => (
-                    <li key={idx} className="text-xs text-gray-300 flex items-start gap-2">
+                    <li key={idx} className="text-xs text-neutral-400 flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
                       <span>{g}</span>
                     </li>
@@ -971,36 +1046,43 @@ export default function MockInterview() {
               </div>
             </div>
 
-            {/* Question by Question Transcript Breakdown */}
-            <div className="bg-gray-900/70 border border-gray-800 rounded-2xl p-6 space-y-6">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <BarChart2 className="w-5 h-5 text-violet-400" />
-                Question Transcript & Detailed Diagnostics
+            {/* Question Transcript Breakdown */}
+            <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 space-y-4">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <BarChart2 className="w-4 h-4 text-neutral-400" />
+                Individual Question Audits
               </h3>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {answersHistory.map((ans, idx) => (
-                  <div key={idx} className="bg-gray-800/40 border border-gray-800 p-5 rounded-2xl space-y-3">
+                  <div
+                    key={idx}
+                    className="bg-neutral-950 border border-neutral-800/80 p-5 rounded-xl space-y-3"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 bg-violet-950 text-violet-300 rounded text-xs font-bold">
-                          Q{idx + 1}
+                        <span className="px-2 py-0.5 bg-neutral-800 text-neutral-300 rounded text-xs font-mono">
+                          Item {idx + 1}
                         </span>
                         <h4 className="text-sm font-semibold text-white">{ans.question}</h4>
                       </div>
-                      <span className="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-800/60">
+                      <span className="text-xs font-mono font-bold text-white bg-neutral-900 px-2.5 py-1 rounded-lg border border-neutral-800">
                         Score: {ans.score}/100
                       </span>
                     </div>
 
-                    <div className="text-xs text-gray-300 bg-gray-900/60 p-3 rounded-xl border border-gray-800/80">
-                      <span className="text-[11px] font-semibold text-gray-400 block mb-1">Your Response:</span>
+                    <div className="text-xs text-neutral-300 bg-neutral-900/50 p-3 rounded-lg border border-neutral-800/60 leading-relaxed">
+                      <span className="text-[10px] font-mono uppercase text-neutral-500 block mb-1">
+                        Candidate Answer:
+                      </span>
                       "{ans.answer}"
                     </div>
 
                     {ans.suggested_better_answer && (
-                      <div className="text-xs text-emerald-300/90 bg-emerald-950/20 p-3 rounded-xl border border-emerald-800/40">
-                        <span className="text-[11px] font-semibold text-emerald-400 block mb-1">Polished Model Answer:</span>
+                      <div className="text-xs text-neutral-400 bg-neutral-900/30 p-3 rounded-lg border border-neutral-800/40 leading-relaxed">
+                        <span className="text-[10px] font-mono uppercase text-neutral-400 block mb-1">
+                          Engineered STAR Model:
+                        </span>
                         "{ans.suggested_better_answer}"
                       </div>
                     )}
@@ -1008,11 +1090,9 @@ export default function MockInterview() {
                 ))}
               </div>
             </div>
-
           </div>
         )}
-
       </div>
-    </div>
+    </main>
   );
 }
