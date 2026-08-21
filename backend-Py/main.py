@@ -32,7 +32,10 @@ from services.ai_assistant import get_ai_code_assistance
 from services.resume_service import (
     analyze_resume_comprehensive,
     improve_bullet_point,
-    optimize_resume_section
+    optimize_resume_section,
+    generate_action_previews,
+    apply_resume_actions,
+    recalculate_ats_score
 )
 from services.interview_service import (
     generate_interview_questions,
@@ -238,6 +241,78 @@ def optimize_section_api(req: SectionOptimizeRequest):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Section optimization failed: {str(e)}")
+
+class ActionPreviewRequest(BaseModel):
+    resume_text: str
+    actions: List[Dict[str, Any]]
+    target_role: Optional[str] = "Software Engineer"
+    job_description: Optional[str] = None
+
+class ActionApplyRequest(BaseModel):
+    resume_text: str
+    actions: List[Dict[str, Any]]
+    target_role: Optional[str] = "Software Engineer"
+    job_description: Optional[str] = None
+    previous_score: Optional[int] = None
+    previous_category_scores: Optional[Dict[str, int]] = None
+
+class RecalculateAtsRequest(BaseModel):
+    resume_text: str
+    previous_score: Optional[int] = None
+    previous_category_scores: Optional[Dict[str, int]] = None
+    target_role: Optional[str] = "Software Engineer"
+    job_description: Optional[str] = None
+
+@app.post("/api/resume/actions/preview")
+@app.post("/resume/actions/preview")
+def actions_preview_api(req: ActionPreviewRequest):
+    """Generates structured before/after diff previews for chosen action items."""
+    try:
+        previews = generate_action_previews(
+            resume_text=req.resume_text,
+            actions=req.actions,
+            target_role=req.target_role,
+            job_description=req.job_description
+        )
+        return {"success": True, "previews": previews}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate action previews: {str(e)}")
+
+@app.post("/api/resume/actions/apply")
+@app.post("/resume/actions/apply")
+@app.post("/api/resume/actions/apply-selected")
+@app.post("/resume/actions/apply-selected")
+def actions_apply_api(req: ActionApplyRequest):
+    """Applies confirmed action edits to resume text and recalculates verified ATS score."""
+    try:
+        result = apply_resume_actions(
+            resume_text=req.resume_text,
+            applied_actions=req.actions,
+            target_role=req.target_role,
+            job_description=req.job_description,
+            previous_score=req.previous_score,
+            previous_category_scores=req.previous_category_scores
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to apply actions: {str(e)}")
+
+@app.post("/api/resume/recalculate-ats")
+@app.post("/resume/recalculate-ats")
+def recalculate_ats_api(req: RecalculateAtsRequest):
+    """Recalculates ATS score for updated resume without artificial inflation."""
+    try:
+        result = recalculate_ats_score(
+            resume_text=req.resume_text,
+            previous_score=req.previous_score,
+            previous_category_scores=req.previous_category_scores,
+            target_role=req.target_role,
+            job_description=req.job_description
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to recalculate ATS: {str(e)}")
+
 
 
 # ==========================================
