@@ -86,7 +86,7 @@ const FeaturesGrid = () => {
             </div>
           </motion.div>
 
-          {/* Bento Card 3: DSA Problem Generator (Col 1, Row 1) */}
+          {/* Bento Card 3: DSA LeetCode Arena (Col 1, Row 1) */}
           <motion.div
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
@@ -97,11 +97,15 @@ const FeaturesGrid = () => {
                 <Code2 className="w-5 h-5" />
               </div>
               <h3 className="text-lg font-bold text-white mb-1.5 tracking-tight">
-                Curated DSA Prep
+                2,800+ LeetCode Arena
               </h3>
               <p className="text-slate-400 text-xs leading-relaxed">
-                Structured patterns for LeetCode medium & hard algorithms with step-by-step breakdown.
+                Full-scale coding environment with live Python test sandbox, Monaco IDE, and Gemini AI hints.
               </p>
+            </div>
+            <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-emerald-400">
+              <span className="font-semibold">Explore Arena</span>
+              <Zap className="w-3.5 h-3.5" />
             </div>
           </motion.div>
 
