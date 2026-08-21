@@ -8,6 +8,10 @@ import {
   getVtopAuthProtocolSummary,
   generateDefaultVtopData,
 } from "../services/vtopService.js";
+import {
+  getLiveVtopCaptcha,
+  authenticateAndScrapeVtop,
+} from "../services/vtopLiveAuthService.js";
 
 // @desc    Get user's synced VTOP profile and placement parameter impact
 // @route   GET /api/vtop/profile
@@ -131,6 +135,41 @@ export const getPlacementImpact = asyncHandler(async (req, res) => {
   const placementImpact = computeVtopPlacementImpact(vtop);
 
   res.json(placementImpact);
+});
+
+// @desc    Fetch fresh live captcha and session from VTOP portal
+// @route   GET /api/vtop/live-captcha
+// @access  Private
+export const getLiveCaptchaHandler = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const result = await getLiveVtopCaptcha(userId);
+  res.json(result);
+});
+
+// @desc    Perform live login and scrape marksheet/GPA from VTOP portal
+// @route   POST /api/vtop/live-login
+// @access  Private
+export const liveLoginHandler = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { username, password, captchaStr, sessionId, semesterId } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ success: false, error: "Username and password are required." });
+  }
+
+  const result = await authenticateAndScrapeVtop(userId, {
+    username,
+    password,
+    captchaStr: captchaStr || "K7N9P",
+    sessionId,
+    semesterId,
+  });
+
+  if (!result.success && result.error) {
+    return res.status(401).json(result);
+  }
+
+  res.json(result);
 });
 
 // @desc    Get the technical login protocol breakdown

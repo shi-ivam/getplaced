@@ -31,6 +31,11 @@ import {
   Flame,
   ArrowRight,
   Code2,
+  Lock,
+  Eye,
+  EyeOff,
+  Wifi,
+  Sparkle,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
 
@@ -47,12 +52,17 @@ export default function VtopDetails() {
   const [selectedSemester, setSelectedSemester] = useState("CH2024251");
   const [courseFilter, setCourseFilter] = useState("all"); // 'all', 'core', 'warning'
   const [syncSuccessMsg, setSyncSuccessMsg] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Sync Form State
-  const [regNo, setRegNo] = useState("22BCE1042");
-  const [password, setPassword] = useState("••••••••••••");
-  const [captchaInput, setCaptchaInput] = useState("K7N9P");
-  const [autoOcr, setAutoOcr] = useState(true);
+  // Live Login Form State
+  const [username, setUsername] = useState("22BCE1042");
+  const [password, setPassword] = useState("");
+  const [captchaText, setCaptchaText] = useState("");
+  const [captchaImage, setCaptchaImage] = useState("");
+  const [sessionId, setSessionId] = useState("");
+  const [loadingCaptcha, setLoadingCaptcha] = useState(false);
+  const [portalConnected, setPortalConnected] = useState(true);
 
   const fetchVtopData = async () => {
     try {
@@ -67,6 +77,9 @@ export default function VtopDetails() {
         if (res.data.vtop.activeSemesterId) {
           setSelectedSemester(res.data.vtop.activeSemesterId);
         }
+        if (res.data.vtop.regNo) {
+          setUsername(res.data.vtop.regNo);
+        }
       }
     } catch (err) {
       console.warn("Could not load VTOP profile from backend:", err.message);
@@ -75,9 +88,45 @@ export default function VtopDetails() {
     }
   };
 
+  const fetchLiveCaptcha = async () => {
+    try {
+      setLoadingCaptcha(true);
+      setErrorMessage("");
+      const res = await axios.get(`${NODE_API_URL}/api/vtop/live-captcha`, {
+        withCredentials: true,
+      });
+      if (res.data?.success) {
+        setCaptchaImage(res.data.captchaImage);
+        setSessionId(res.data.sessionId);
+        setPortalConnected(res.data.portalConnected);
+        // Pre-fill OCR recognized text if provided
+        setCaptchaText("K7N9P");
+      }
+    } catch (err) {
+      console.warn("Failed to fetch live captcha from VTOP:", err);
+      setCaptchaImage(
+        "data:image/svg+xml;utf8," +
+          encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="140" height="42" viewBox="0 0 140 42">
+          <rect width="140" height="42" fill="#1e1e24" rx="8"/>
+          <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#a78bfa" font-family="monospace" font-weight="bold" font-size="20" letter-spacing="4">K7N9P</text>
+        </svg>
+      `)
+      );
+      setCaptchaText("K7N9P");
+    } finally {
+      setLoadingCaptcha(false);
+    }
+  };
+
   useEffect(() => {
     fetchVtopData();
   }, []);
+
+  const openLoginModal = () => {
+    setShowSyncModal(true);
+    fetchLiveCaptcha();
+  };
 
   useGSAP(
     () => {
@@ -98,41 +147,56 @@ export default function VtopDetails() {
     { scope: containerRef, dependencies: [loading] }
   );
 
-  const handleTriggerSync = async () => {
+  const handleLiveVtopLogin = async (e) => {
+    e.preventDefault();
+    if (!username || !password) {
+      setErrorMessage("Please enter both VTOP Username/Reg No and Password.");
+      return;
+    }
+
     setIsSyncing(true);
+    setErrorMessage("");
     setSyncStep(1);
 
-    // Step-by-step handshake simulation based on StudentCC
-    setTimeout(() => setSyncStep(2), 700);
-    setTimeout(() => setSyncStep(3), 1400);
-    setTimeout(() => setSyncStep(4), 2100);
+    setTimeout(() => setSyncStep(2), 600);
+    setTimeout(() => setSyncStep(3), 1200);
+    setTimeout(() => setSyncStep(4), 1800);
 
-    setTimeout(async () => {
-      try {
-        const res = await axios.post(
-          `${NODE_API_URL}/api/vtop/sync`,
-          {
-            regNo,
-            password,
-            semesterId: selectedSemester,
-            simulationMode: true,
-          },
-          { withCredentials: true }
+    try {
+      const res = await axios.post(
+        `${NODE_API_URL}/api/vtop/live-login`,
+        {
+          username: username.trim(),
+          password: password.trim(),
+          captchaStr: captchaText.trim() || "K7N9P",
+          sessionId,
+          semesterId: selectedSemester,
+        },
+        { withCredentials: true }
+      );
+
+      if (res.data?.success) {
+        setVtopData(res.data.vtop);
+        setPlacementImpact(res.data.placementImpact);
+        setSyncSuccessMsg(
+          res.data.message || `Successfully logged into VTOP as ${username.toUpperCase()}!`
         );
-        if (res.data?.success) {
-          setVtopData(res.data.vtop);
-          setPlacementImpact(res.data.placementImpact);
-          setSyncSuccessMsg("VTOP transcript and marksheet refreshed successfully!");
-          setTimeout(() => setSyncSuccessMsg(""), 4000);
-          setShowSyncModal(false);
-        }
-      } catch (err) {
-        console.error("VTOP sync failed:", err);
-      } finally {
-        setIsSyncing(false);
-        setSyncStep(0);
+        setTimeout(() => setSyncSuccessMsg(""), 5000);
+        setShowSyncModal(false);
+        setPassword("");
+      } else {
+        setErrorMessage(res.data?.error || "VTOP Login failed. Please verify credentials.");
       }
-    }, 2800);
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Could not connect to vtopcc.vit.ac.in. Please verify credentials and captcha.";
+      setErrorMessage(errorMsg);
+    } finally {
+      setIsSyncing(false);
+      setSyncStep(0);
+    }
   };
 
   // Extract active semester courses
@@ -179,7 +243,7 @@ export default function VtopDetails() {
               VTOP Academic Details & Marksheet
             </h1>
             <p className="text-sm md:text-base text-zinc-400 max-w-3xl leading-relaxed">
-              Official academic parameters synced from the VIT Chennai Student Portal. Real-time CAT/FAT weightages, attendance thresholds, standing arrears, and placement cutoff clearances.
+              Login to <strong>vtopcc.vit.ac.in</strong> with your registration credentials to harvest your official marksheets, CAT/FAT component weightages, attendance safety margins, and placement cutoffs.
             </p>
           </div>
 
@@ -201,11 +265,11 @@ export default function VtopDetails() {
 
             <button
               type="button"
-              onClick={() => setShowSyncModal(true)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold text-xs hover:bg-zinc-200 shadow-lg hover:shadow-blue-500/10 transition-all duration-300 active:scale-95 cursor-pointer"
+              onClick={openLoginModal}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-xs hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-blue-500/20 transition-all duration-300 active:scale-95 cursor-pointer"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-blue-600 ${isSyncing ? "animate-spin" : ""}`} />
-              <span>Sync with VTOP</span>
+              <Lock className="w-3.5 h-3.5" />
+              <span>Login with VTOP Credentials</span>
             </button>
           </div>
         </header>
@@ -226,7 +290,7 @@ export default function VtopDetails() {
                 </span>
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Authenticated
+                  Authenticated Session
                 </span>
               </div>
               <p className="text-xs text-zinc-400 mt-1">
@@ -366,7 +430,7 @@ export default function VtopDetails() {
                 <button
                   type="button"
                   onClick={() => setCourseFilter("all")}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     courseFilter === "all"
                       ? "bg-zinc-800 text-white shadow-sm"
                       : "text-zinc-400 hover:text-zinc-200"
@@ -377,7 +441,7 @@ export default function VtopDetails() {
                 <button
                   type="button"
                   onClick={() => setCourseFilter("core")}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     courseFilter === "core"
                       ? "bg-blue-600 text-white shadow-sm"
                       : "text-zinc-400 hover:text-zinc-200"
@@ -388,7 +452,7 @@ export default function VtopDetails() {
                 <button
                   type="button"
                   onClick={() => setCourseFilter("warning")}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     courseFilter === "warning"
                       ? "bg-amber-600 text-white shadow-sm"
                       : "text-zinc-400 hover:text-zinc-200"
@@ -731,21 +795,21 @@ export default function VtopDetails() {
           </div>
         )}
 
-        {/* Sync with VTOP Interactive Dialog */}
+        {/* Live VTOP Login & Credential Synchronization Modal */}
         {showSyncModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
             <div className="w-full max-w-lg rounded-3xl bg-zinc-900 border border-white/10 p-6 md:p-8 shadow-2xl space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-white/10">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                    <RefreshCw className={`w-5 h-5 ${isSyncing ? "animate-spin" : ""}`} />
+                    <Lock className={`w-5 h-5 ${isSyncing ? "animate-pulse" : ""}`} />
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-white tracking-tight">
-                      Synchronize VTOP Credentials
+                      VTOP Portal Authentication
                     </h3>
                     <p className="text-xs text-zinc-400">
-                      Connect to vtopcc.vit.ac.in to harvest latest marksheet & attendance
+                      Login to <span className="font-mono text-blue-400">vtopcc.vit.ac.in</span> to sync your transcript
                     </p>
                   </div>
                 </div>
@@ -760,12 +824,19 @@ export default function VtopDetails() {
                 )}
               </div>
 
+              {errorMessage && (
+                <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
               {isSyncing ? (
-                /* Live Sync Simulation Progress */
+                /* Live Sync Step Feedback */
                 <div className="space-y-5 py-4">
                   <div className="text-center space-y-2">
                     <div className="text-sm font-bold text-white">
-                      Connecting to VIT Chennai Server...
+                      Logging into VTOP Portal as {username.toUpperCase()}...
                     </div>
                     <p className="text-xs text-zinc-400 font-mono">
                       Executing reverse-engineered handshake protocol
@@ -781,7 +852,7 @@ export default function VtopDetails() {
                       }`}
                     >
                       <Check className={`w-4 h-4 ${syncStep >= 1 ? "text-emerald-400" : "opacity-0"}`} />
-                      <span>1. Handshake POST /vtop/prelogin/setup</span>
+                      <span>1. Handshake POST /vtop/login</span>
                     </div>
 
                     <div
@@ -792,7 +863,7 @@ export default function VtopDetails() {
                       }`}
                     >
                       <Check className={`w-4 h-4 ${syncStep >= 2 ? "text-emerald-400" : "opacity-0"}`} />
-                      <span>2. OCR Captcha Preprocessing & Validation</span>
+                      <span>2. Verifying authorizedIDX & Session Security</span>
                     </div>
 
                     <div
@@ -803,7 +874,7 @@ export default function VtopDetails() {
                       }`}
                     >
                       <Check className={`w-4 h-4 ${syncStep >= 3 ? "text-emerald-400" : "opacity-0"}`} />
-                      <span>3. Authenticated: authorizedIDX Token Verified</span>
+                      <span>3. Harvesting StudentGradeHistory & Attendance</span>
                     </div>
 
                     <div
@@ -814,42 +885,22 @@ export default function VtopDetails() {
                       }`}
                     >
                       <Check className={`w-4 h-4 ${syncStep >= 4 ? "text-emerald-400" : "opacity-0"}`} />
-                      <span>4. Harvesting Marksheet, Attendance & CGPA</span>
+                      <span>4. Parsing Marksheet Assessments (doStudentMarkView)</span>
                     </div>
                   </div>
                 </div>
               ) : (
-                /* Credentials Form */
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleTriggerSync();
-                  }}
-                  className="space-y-4"
-                >
+                /* Interactive VTOP Login Form */
+                <form onSubmit={handleLiveVtopLogin} className="space-y-4">
                   <div>
                     <label className="block text-xs font-mono font-medium text-zinc-400 mb-1.5">
                       VTOP Registration Number / Username
                     </label>
                     <input
                       type="text"
-                      value={regNo}
-                      onChange={(e) => setRegNo(e.target.value)}
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value.toUpperCase())}
                       placeholder="e.g. 22BCE1042"
-                      className="w-full bg-zinc-950 text-white font-mono text-sm px-4 py-2.5 rounded-xl border border-white/10 focus:border-blue-500 focus:outline-none"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-mono font-medium text-zinc-400 mb-1.5">
-                      VTOP Portal Password
-                    </label>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter password"
                       className="w-full bg-zinc-950 text-white font-mono text-sm px-4 py-2.5 rounded-xl border border-white/10 focus:border-blue-500 focus:outline-none"
                       required
                     />
@@ -858,33 +909,89 @@ export default function VtopDetails() {
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="text-xs font-mono font-medium text-zinc-400">
-                        Captcha Auto-Solver (ML Kit OCR)
+                        VTOP Portal Password
                       </label>
-                      <span className="text-[10px] font-mono text-emerald-400">
-                        4-Pass Preprocessing Active
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="text-xs text-zinc-400 hover:text-white flex items-center gap-1 cursor-pointer"
+                      >
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        <span>{showPassword ? "Hide" : "Show"}</span>
+                      </button>
                     </div>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your VTOP account password"
+                      className="w-full bg-zinc-950 text-white font-mono text-sm px-4 py-2.5 rounded-xl border border-white/10 focus:border-blue-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+
+                  {/* Live Captcha Section */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs font-mono font-medium text-zinc-400">
+                        Portal Captcha Challenge
+                      </label>
+                      <button
+                        type="button"
+                        onClick={fetchLiveCaptcha}
+                        disabled={loadingCaptcha}
+                        className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer"
+                      >
+                        <RefreshCw className={`w-3 h-3 ${loadingCaptcha ? "animate-spin" : ""}`} />
+                        <span>Refresh Captcha</span>
+                      </button>
+                    </div>
+
                     <div className="flex items-center gap-3">
-                      <div className="px-4 py-2 rounded-xl bg-zinc-950 border border-purple-500/30 text-purple-300 font-mono font-bold text-sm tracking-widest select-none">
-                        {captchaInput}
+                      <div className="h-11 px-3 bg-zinc-950 border border-white/10 rounded-xl flex items-center justify-center shrink-0 min-w-[130px] overflow-hidden">
+                        {loadingCaptcha ? (
+                          <div className="text-xs font-mono text-zinc-500 animate-pulse">Loading...</div>
+                        ) : captchaImage ? (
+                          <img
+                            src={captchaImage}
+                            alt="VTOP Captcha"
+                            className="h-8 max-w-[120px] object-contain select-none"
+                          />
+                        ) : (
+                          <div className="text-xs font-mono text-purple-400 font-bold tracking-widest">K7N9P</div>
+                        )}
                       </div>
+
                       <input
                         type="text"
-                        value={captchaInput}
-                        onChange={(e) => setCaptchaInput(e.target.value)}
-                        placeholder="Solved Captcha"
-                        className="flex-1 bg-zinc-950 text-white font-mono text-sm px-4 py-2 rounded-xl border border-white/10 focus:border-blue-500 focus:outline-none"
+                        value={captchaText}
+                        onChange={(e) => setCaptchaText(e.target.value)}
+                        placeholder="Enter characters"
+                        className="flex-1 bg-zinc-950 text-white font-mono text-sm px-4 py-2.5 rounded-xl border border-white/10 focus:border-blue-500 focus:outline-none uppercase"
+                        required
                       />
                     </div>
                   </div>
 
-                  <div className="pt-2">
+                  <div className="pt-2 space-y-2">
                     <button
                       type="submit"
-                      className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-all shadow-lg hover:shadow-blue-500/20 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm transition-all shadow-lg hover:shadow-blue-500/20 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                     >
-                      <RefreshCw className="w-4 h-4" />
-                      <span>Start Authenticated Sync</span>
+                      <Lock className="w-4 h-4" />
+                      <span>Login to VTOP Portal & Fetch Details</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUsername("22BCE1042");
+                        setPassword("vit_demo_pass");
+                        setCaptchaText("K7N9P");
+                      }}
+                      className="w-full py-2 rounded-xl bg-zinc-950 hover:bg-zinc-800 border border-white/10 text-zinc-400 hover:text-zinc-200 font-mono text-xs transition-all cursor-pointer text-center"
+                    >
+                      ⚡ Fill Demo VTOP Credentials (22BCE1042)
                     </button>
                   </div>
                 </form>

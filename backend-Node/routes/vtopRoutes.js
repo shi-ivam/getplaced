@@ -6,12 +6,16 @@ import {
   updateCourseMarks,
   getPlacementImpact,
   getAuthProtocol,
+  getLiveCaptchaHandler,
+  liveLoginHandler,
 } from "../controllers/vtopController.js";
 
 const router = express.Router();
 
 router.get("/profile", protect, getVtopProfile);
 router.post("/sync", protect, syncVtopProfile);
+router.get("/live-captcha", protect, getLiveCaptchaHandler);
+router.post("/live-login", protect, liveLoginHandler);
 router.put("/course-update", protect, updateCourseMarks);
 router.get("/placement-impact", protect, getPlacementImpact);
 router.get("/auth-protocol", getAuthProtocol);
