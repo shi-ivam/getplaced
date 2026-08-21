@@ -9,12 +9,18 @@ import { normalizeIdentifier } from "../models/companyRequirementModel.js"
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body
 
-  const user = await User.findOne({ email })
+  if (!email || !password) {
+    res.status(400)
+    throw new Error("Please provide email and password")
+  }
+
+  const normalizedEmail = email.trim().toLowerCase()
+  const user = await User.findOne({ email: normalizedEmail })
 
   if (user && (await user.matchPassword(password))) {
     generateToken(res, user._id)
 
-    res.status(201).json({
+    res.status(200).json({
       _id: user._id,
       name: user.name,
       email: user.email,
@@ -31,7 +37,13 @@ const authUser = asyncHandler(async (req, res) => {
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body
 
-  const userExists = await User.findOne({ email })
+  if (!name || !email || !password) {
+    res.status(400)
+    throw new Error("Please provide name, email, and password")
+  }
+
+  const normalizedEmail = email.trim().toLowerCase()
+  const userExists = await User.findOne({ email: normalizedEmail })
 
   if (userExists) {
     res.status(400)
@@ -39,8 +51,8 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const user = await User.create({
-    name,
-    email,
+    name: name.trim(),
+    email: normalizedEmail,
     password,
   })
 
@@ -62,8 +74,11 @@ const registerUser = asyncHandler(async (req, res) => {
 // route /api/users/logout
 // @method post
 const logoutUser = asyncHandler(async (req, res) => {
+  const isProduction = process.env.NODE_ENV === "production"
   res.cookie("jwt", "", {
     httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     expires: new Date(0),
   })
   res.status(200).json({ message: "User logged out" })
