@@ -9,6 +9,7 @@ import RegisterPage from '@/pages/Register'
 import Dashboard from '@/pages/Dashboard'
 import JobRecommendations from '@/pages/JobRecommendations'
 import Profile from '@/pages/Profile'
+import DSAContent from '@/pages/DSAcontent'
 
 function Routings() {
   return (
@@ -21,6 +22,7 @@ function Routings() {
             <Route path="/register" element={<RegisterPage/>} />
             <Route path="/app" element={<Layout />} >
                 <Route index element={<Dashboard />} />
+                <Route path="dsa" element={<DSAContent />} />
                 <Route path="resume" element={<AnalyzeResume />} />
                 <Route path="job" element={<JobRecommendations />} />
                 <Route path="profile" element={<Profile />} />

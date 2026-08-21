@@ -19,12 +19,22 @@ import {
   TrendingUp,
   Activity,
   Award,
+  Crown,
+  Star,
+  CheckCircle,
+  XCircle,
+  Calendar,
+  Zap,
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NODE_API_URL } from "@/config/api";
+import LeetCodeSubmissionAnalysis from "./LeetCodeSubmissionAnalysis";
 
 export default function LeetCodeConnectCard({ onProfileUpdate }) {
   const [profile, setProfile] = useState(null);
@@ -34,6 +44,8 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
   const [syncing, setSyncing] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [showConfirmDisconnect, setShowConfirmDisconnect] = useState(false);
+  const [showAllTopics, setShowAllTopics] = useState(false);
+  const [activeView, setActiveView] = useState("overview"); // 'overview' | 'submissions'
 
   const [inputUsername, setInputUsername] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -129,6 +141,8 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
         err.response?.data?.message ||
           "Failed to refresh LeetCode data. Please verify your connection."
       );
+      // Re-fetch profile to capture syncStatus='failed' state
+      fetchProfile();
     } finally {
       setSyncing(false);
     }
@@ -159,21 +173,40 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
     }
   };
 
-  const formatTimestamp = (dateStr) => {
+  const formatFullDateTime = (dateStr) => {
+    if (!dateStr) return "Not synced";
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return "Not synced";
+      return date.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "Not synced";
+    }
+  };
+
+  const formatRelativeTime = (dateStr) => {
     if (!dateStr) return "";
     try {
       const date = new Date(dateStr);
       if (isNaN(date.getTime())) return "";
       const now = new Date();
       const diffMs = now - date;
+      const diffSecs = Math.floor(diffMs / 1000);
       const diffMins = Math.floor(diffMs / (1000 * 60));
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-      if (diffMins < 1) return "just now";
+      if (diffSecs < 45) return "just now";
       if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
       if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
       if (diffDays === 1) return "yesterday";
+      if (diffDays < 30) return `${diffDays} days ago`;
       return date.toLocaleDateString(undefined, {
         month: "short",
         day: "numeric",
@@ -190,10 +223,9 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
       const num = Number(ts);
       if (!isNaN(num) && num > 0) {
         // Unix timestamp in seconds
-        const date = new Date(num * 1000);
-        return formatTimestamp(date);
+        return formatRelativeTime(new Date(num * 1000));
       }
-      return formatTimestamp(ts);
+      return formatRelativeTime(ts);
     } catch {
       return "";
     }
@@ -210,16 +242,99 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
           <Skeleton className="h-4 w-72 bg-gray-800/60 mt-1" />
         </CardHeader>
         <CardContent className="pt-6 space-y-4">
-          <Skeleton className="h-24 w-full bg-gray-800/40 rounded-xl" />
+          <Skeleton className="h-28 w-full bg-gray-800/40 rounded-xl" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Skeleton className="h-20 bg-gray-800/30 rounded-lg" />
-            <Skeleton className="h-20 bg-gray-800/30 rounded-lg" />
-            <Skeleton className="h-20 bg-gray-800/30 rounded-lg" />
+            <Skeleton className="h-24 bg-gray-800/30 rounded-lg" />
+            <Skeleton className="h-24 bg-gray-800/30 rounded-lg" />
+            <Skeleton className="h-24 bg-gray-800/30 rounded-lg" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Skeleton className="h-48 bg-gray-800/30 rounded-lg" />
+            <Skeleton className="h-48 bg-gray-800/30 rounded-lg" />
           </div>
         </CardContent>
       </Card>
     );
   }
+
+  // Extract structured and normalized fields safely
+  const problemsSolved = profile?.problemsSolved || {
+    total: profile?.totalSolved ?? 0,
+    easy: profile?.easySolved ?? 0,
+    medium: profile?.mediumSolved ?? 0,
+    hard: profile?.hardSolved ?? 0,
+  };
+
+  const totalSolved = problemsSolved.total ?? profile?.totalSolved ?? 0;
+  const easySolved = problemsSolved.easy ?? profile?.easySolved ?? 0;
+  const mediumSolved = problemsSolved.medium ?? profile?.mediumSolved ?? 0;
+  const hardSolved = problemsSolved.hard ?? profile?.hardSolved ?? 0;
+
+  const totalQuestions = profile?.totalQuestions ?? 0;
+
+  const submissions = profile?.submissions || {};
+  const totalSubmissions =
+    submissions.total !== undefined && submissions.total !== null
+      ? submissions.total
+      : null;
+  const acceptedSubmissions =
+    submissions.accepted !== undefined && submissions.accepted !== null
+      ? submissions.accepted
+      : null;
+  const rejectedSubmissions =
+    submissions.rejected !== undefined && submissions.rejected !== null
+      ? submissions.rejected
+      : null;
+  const acceptanceRate =
+    submissions.acceptanceRate !== undefined && submissions.acceptanceRate !== null
+      ? submissions.acceptanceRate
+      : (profile?.acceptanceRate !== undefined && profile?.acceptanceRate !== null
+          ? profile.acceptanceRate
+          : null);
+
+  const contest = profile?.contest || {};
+  const contestRating =
+    contest.rating !== undefined && contest.rating !== null ? contest.rating : null;
+  const contestGlobalRank =
+    contest.globalRank !== undefined && contest.globalRank !== null
+      ? contest.globalRank
+      : null;
+  const contestsAttended =
+    contest.contestsAttended !== undefined && contest.contestsAttended !== null
+      ? contest.contestsAttended
+      : null;
+  const contestTopPercentage =
+    contest.topPercentage !== undefined && contest.topPercentage !== null
+      ? contest.topPercentage
+      : null;
+  const contestBadge = contest.badge || null;
+
+  const languages = Array.isArray(profile?.languages) ? profile.languages : [];
+  const primaryLanguage =
+    profile?.primaryLanguage?.name
+      ? profile.primaryLanguage
+      : languages.length > 0 && languages[0].problemsSolved > 0
+      ? { name: languages[0].languageName, solved: languages[0].problemsSolved }
+      : null;
+
+  const recentSubmissions = Array.isArray(profile?.recentSubmissions)
+    ? profile.recentSubmissions
+    : [];
+
+  const topicTags = Array.isArray(profile?.topicTags) ? profile.topicTags : [];
+
+  // Difficulty percentages based on total solved
+  const easyPct = totalSolved > 0 ? Math.round((easySolved / totalSolved) * 100) : 0;
+  const mediumPct = totalSolved > 0 ? Math.round((mediumSolved / totalSolved) * 100) : 0;
+  const hardPct =
+    totalSolved > 0
+      ? Math.max(0, 100 - easyPct - mediumPct)
+      : 0;
+
+  const maxLangCount =
+    languages.length > 0
+      ? Math.max(...languages.map((l) => Number(l.problemsSolved) || 0), 1)
+      : 1;
 
   return (
     <Card className="bg-[#141414] border-gray-800/80 shadow-md">
@@ -231,7 +346,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <CardTitle className="text-lg text-white">LeetCode Integration</CardTitle>
+                <CardTitle className="text-lg text-white">LeetCode Problem Analysis</CardTitle>
                 {connected && (
                   <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">
                     <CheckCircle2 className="w-3 h-3" />
@@ -241,8 +356,8 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
               </div>
               <CardDescription className="text-gray-400 text-xs">
                 {connected
-                  ? "Public statistics synced and integrated into your algorithmic placement readiness score."
-                  : "Connect your public LeetCode profile to import solved problems, topic mastery, and benchmark placement readiness."}
+                  ? "Real-time algorithmic analytics, difficulty breakdown, submission accuracy, contest standing, and topic strengths."
+                  : "Connect your public LeetCode profile to import solved problems, topic mastery, contest rating, and benchmark placement readiness."}
               </CardDescription>
             </div>
           </div>
@@ -316,19 +431,34 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
           </div>
         )}
 
+        {/* Graceful sync failure banner */}
         {profile?.syncStatus === "failed" && (
-          <div className="flex items-center justify-between gap-3 bg-amber-950/50 border border-amber-600/50 text-amber-200 p-3 rounded-lg text-xs">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>Last background sync failed: {profile.syncError || "Could not reach LeetCode"}.</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-950/40 border border-amber-600/50 text-amber-200 p-3.5 rounded-xl text-xs">
+            <div className="flex items-start sm:items-center gap-2.5">
+              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
+              <div>
+                <span className="font-semibold text-amber-300">
+                  Unable to fetch latest LeetCode data.
+                </span>{" "}
+                <span>Showing your last successfully synced data.</span>
+                {profile.syncError && (
+                  <div className="text-[11px] text-amber-400/80 font-mono mt-0.5">
+                    Reason: {profile.syncError}
+                  </div>
+                )}
+              </div>
             </div>
-            <button
+            <Button
               type="button"
+              size="sm"
+              variant="outline"
               onClick={handleSync}
-              className="underline hover:text-white font-medium shrink-0 cursor-pointer"
+              disabled={syncing}
+              className="bg-amber-900/40 hover:bg-amber-900/70 border-amber-600 text-amber-100 text-xs h-7 px-3 shrink-0 self-start sm:self-auto cursor-pointer"
             >
-              Retry Sync
-            </button>
+              <RefreshCw className={`w-3 h-3 mr-1 ${syncing ? "animate-spin" : ""}`} />
+              {syncing ? "Retrying..." : "Retry Sync"}
+            </Button>
           </div>
         )}
 
@@ -337,10 +467,10 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
         {/* ------------------------------------------------------------- */}
         {connected && profile ? (
           <div className="space-y-6">
-            {/* Top Identity Banner */}
-            <div className="bg-gradient-to-r from-amber-950/20 via-[#18181b] to-purple-950/20 border border-amber-900/30 rounded-xl p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* 1. LeetCode Profile Summary Banner */}
+            <div className="bg-gradient-to-r from-amber-950/25 via-[#18181b] to-purple-950/25 border border-amber-900/30 rounded-xl p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-xl font-mono shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-purple-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-xl font-mono shrink-0 shadow-inner">
                   {profile.username?.charAt(0)?.toUpperCase() || "L"}
                 </div>
                 <div>
@@ -352,24 +482,44 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                       href={profile.profileUrl || `https://leetcode.com/u/${profile.username}/`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-mono bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/60 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-mono bg-amber-950/60 px-2.5 py-0.5 rounded border border-amber-800/60 transition-colors cursor-pointer"
+                      title="Open LeetCode profile in new tab"
                     >
                       <span>@{profile.username}</span>
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 mt-1 font-mono">
-                    {profile.ranking && (
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 mt-1.5 font-mono">
+                    {profile.ranking ? (
                       <span className="flex items-center gap-1 text-amber-300">
                         <Trophy className="w-3.5 h-3.5 text-amber-400" />
                         Rank #{profile.ranking.toLocaleString()}
                       </span>
-                    )}
-                    {profile.lastSyncedAt && (
+                    ) : (
                       <span className="flex items-center gap-1 text-zinc-500">
+                        <Trophy className="w-3.5 h-3.5 text-zinc-600" />
+                        Unranked
+                      </span>
+                    )}
+
+                    {contestRating !== null && (
+                      <span className="flex items-center gap-1 text-purple-300">
+                        <Award className="w-3.5 h-3.5 text-purple-400" />
+                        Rating: {contestRating.toLocaleString()}
+                      </span>
+                    )}
+
+                    {profile.lastSyncedAt && (
+                      <span
+                        className="flex items-center gap-1 text-zinc-500"
+                        title={formatFullDateTime(profile.lastSyncedAt)}
+                      >
                         <Clock className="w-3 h-3 text-zinc-500" />
-                        Synced {formatTimestamp(profile.lastSyncedAt)}
+                        Last synced: {formatFullDateTime(profile.lastSyncedAt)}
+                        <span className="text-zinc-600">
+                          ({formatRelativeTime(profile.lastSyncedAt)})
+                        </span>
                       </span>
                     )}
                   </div>
@@ -384,127 +534,414 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                   </div>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-2xl font-bold font-mono text-white">
-                      {profile.totalSolved}
+                      {totalSolved}
                     </span>
-                    {profile.totalQuestions > 0 && (
+                    {totalQuestions > 0 && (
                       <span className="text-xs font-mono text-zinc-500">
-                        / {profile.totalQuestions}
+                        / {totalQuestions}
                       </span>
                     )}
                   </div>
                 </div>
-                {profile.acceptanceRate > 0 && (
+                {acceptanceRate !== null && (
                   <div className="pl-3 border-l border-zinc-800 space-y-0.5">
                     <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-400">
                       Accuracy
                     </div>
                     <div className="text-sm font-bold font-mono text-emerald-400">
-                      {profile.acceptanceRate}%
+                      {acceptanceRate}%
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Difficulty Breakdown Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Easy Card */}
-              <div className="bg-[#18181b]/80 border border-emerald-900/30 rounded-xl p-4 space-y-2.5 relative overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold font-mono uppercase tracking-wider text-emerald-400">
-                    Easy
-                  </span>
-                  <span className="text-sm font-bold font-mono text-white">
-                    {profile.easySolved}
-                  </span>
+            {/* Sub-view switcher tabs */}
+            <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
+              <button
+                type="button"
+                onClick={() => setActiveView("overview")}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
+                  activeView === "overview"
+                    ? "bg-amber-600/20 text-amber-300 border border-amber-500/40 font-semibold shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>Overview & Topic Strengths</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveView("submissions")}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
+                  activeView === "submissions"
+                    ? "bg-sky-600/20 text-sky-300 border border-sky-500/40 font-semibold shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
+                }`}
+              >
+                <Activity className="w-3.5 h-3.5" />
+                <span>Submission Activity & Consistency</span>
+              </button>
+            </div>
+
+            {activeView === "submissions" ? (
+              <LeetCodeSubmissionAnalysis showHeader={false} />
+            ) : (
+              <>
+                {/* 2. Difficulty Distribution Section */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-emerald-400" />
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
+                    Difficulty Distribution
+                  </h4>
                 </div>
-                <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
-                  <div
-                    className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${Math.min(
-                        100,
-                        Math.max(5, (profile.easySolved / Math.max(1, profile.totalSolved || 1)) * 100)
-                      )}%`,
-                    }}
-                  />
-                </div>
-                <div className="flex justify-between text-[11px] text-zinc-500 font-mono">
-                  <span>Foundation</span>
-                  <span>{profile.totalSolved > 0 ? Math.round((profile.easySolved / profile.totalSolved) * 100) : 0}% of solved</span>
-                </div>
+                <span className="text-[11px] text-zinc-500 font-mono">
+                  {totalSolved} problem{totalSolved === 1 ? "" : "s"} resolved
+                </span>
               </div>
 
-              {/* Medium Card */}
-              <div className="bg-[#18181b]/80 border border-amber-900/30 rounded-xl p-4 space-y-2.5 relative overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold font-mono uppercase tracking-wider text-amber-400">
-                    Medium
-                  </span>
-                  <span className="text-sm font-bold font-mono text-white">
-                    {profile.mediumSolved}
-                  </span>
-                </div>
-                <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
+              {/* Combined Multi-segment Bar */}
+              {totalSolved > 0 && (
+                <div className="w-full h-3 bg-zinc-900 rounded-full overflow-hidden flex shadow-inner">
                   <div
-                    className="bg-amber-500 h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${Math.min(
-                        100,
-                        Math.max(5, (profile.mediumSolved / Math.max(1, profile.totalSolved || 1)) * 100)
-                      )}%`,
-                    }}
+                    style={{ width: `${easyPct}%` }}
+                    className="bg-emerald-500 transition-all duration-500"
+                    title={`Easy: ${easySolved} (${easyPct}%)`}
+                  />
+                  <div
+                    style={{ width: `${mediumPct}%` }}
+                    className="bg-amber-500 transition-all duration-500"
+                    title={`Medium: ${mediumSolved} (${mediumPct}%)`}
+                  />
+                  <div
+                    style={{ width: `${hardPct}%` }}
+                    className="bg-rose-500 transition-all duration-500"
+                    title={`Hard: ${hardSolved} (${hardPct}%)`}
                   />
                 </div>
-                <div className="flex justify-between text-[11px] text-zinc-500 font-mono">
-                  <span>Core Placement Bar</span>
-                  <span>{profile.totalSolved > 0 ? Math.round((profile.mediumSolved / profile.totalSolved) * 100) : 0}% of solved</span>
-                </div>
-              </div>
+              )}
 
-              {/* Hard Card */}
-              <div className="bg-[#18181b]/80 border border-rose-900/30 rounded-xl p-4 space-y-2.5 relative overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold font-mono uppercase tracking-wider text-rose-400">
-                    Hard
-                  </span>
-                  <span className="text-sm font-bold font-mono text-white">
-                    {profile.hardSolved}
-                  </span>
+              {/* Individual Difficulty Breakdown Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Easy Card */}
+                <div className="bg-[#18181b]/80 border border-emerald-900/30 rounded-xl p-4 space-y-2.5 relative overflow-hidden">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                      Easy
+                    </span>
+                    <span className="text-sm font-bold font-mono text-white">
+                      {easySolved}
+                    </span>
+                  </div>
+                  <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          totalSolved > 0 ? (easySolved / totalSolved) * 100 : 0
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[11px] text-zinc-500 font-mono">
+                    <span>Foundation</span>
+                    <span className="text-emerald-400/90 font-semibold">{easyPct}% of solved</span>
+                  </div>
                 </div>
-                <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
-                  <div
-                    className="bg-rose-500 h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${Math.min(
-                        100,
-                        Math.max(5, (profile.hardSolved / Math.max(1, profile.totalSolved || 1)) * 100)
-                      )}%`,
-                    }}
-                  />
+
+                {/* Medium Card */}
+                <div className="bg-[#18181b]/80 border border-amber-900/30 rounded-xl p-4 space-y-2.5 relative overflow-hidden">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold font-mono uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-amber-400" />
+                      Medium
+                    </span>
+                    <span className="text-sm font-bold font-mono text-white">
+                      {mediumSolved}
+                    </span>
+                  </div>
+                  <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-amber-500 h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          totalSolved > 0 ? (mediumSolved / totalSolved) * 100 : 0
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[11px] text-zinc-500 font-mono">
+                    <span>Core Placement Bar</span>
+                    <span className="text-amber-400/90 font-semibold">{mediumPct}% of solved</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-[11px] text-zinc-500 font-mono">
-                  <span>Advanced Mastery</span>
-                  <span>{profile.totalSolved > 0 ? Math.round((profile.hardSolved / profile.totalSolved) * 100) : 0}% of solved</span>
+
+                {/* Hard Card */}
+                <div className="bg-[#18181b]/80 border border-rose-900/30 rounded-xl p-4 space-y-2.5 relative overflow-hidden">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold font-mono uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-rose-400" />
+                      Hard
+                    </span>
+                    <span className="text-sm font-bold font-mono text-white">
+                      {hardSolved}
+                    </span>
+                  </div>
+                  <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-rose-500 h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          totalSolved > 0 ? (hardSolved / totalSolved) * 100 : 0
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[11px] text-zinc-500 font-mono">
+                    <span>Advanced Mastery</span>
+                    <span className="text-rose-400/90 font-semibold">{hardPct}% of solved</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Topic Strengths Section */}
-            {profile.topicTags && profile.topicTags.length > 0 && (
-              <div className="space-y-3 pt-2">
+            {/* 3. Middle Section: Submission Activity & Contest & Rating */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Submission Activity Card */}
+              <div className="bg-[#18181b]/70 border border-zinc-800/80 rounded-xl p-4 space-y-3.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-sky-400" />
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
+                      Submission Activity
+                    </h4>
+                  </div>
+                  {acceptanceRate !== null && (
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-sky-950/60 text-sky-300 border border-sky-800/60">
+                      {acceptanceRate}% Success Rate
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  <div className="bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg space-y-0.5">
+                    <div className="text-[10px] text-zinc-400 font-mono uppercase">Total Submissions</div>
+                    <div className="text-sm font-bold font-mono text-white">
+                      {totalSubmissions !== null
+                        ? totalSubmissions.toLocaleString()
+                        : "Not available"}
+                    </div>
+                  </div>
+
+                  <div className="bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg space-y-0.5">
+                    <div className="text-[10px] text-emerald-400/90 font-mono uppercase">Accepted</div>
+                    <div className="text-sm font-bold font-mono text-emerald-400">
+                      {acceptedSubmissions !== null
+                        ? acceptedSubmissions.toLocaleString()
+                        : "Not available"}
+                    </div>
+                  </div>
+
+                  <div className="bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg space-y-0.5 col-span-2 sm:col-span-1">
+                    <div className="text-[10px] text-rose-400/90 font-mono uppercase">Rejected / Other</div>
+                    <div className="text-sm font-bold font-mono text-rose-400">
+                      {rejectedSubmissions !== null
+                        ? rejectedSubmissions.toLocaleString()
+                        : "Not available"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Accuracy meter */}
+                {acceptanceRate !== null && (
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex justify-between text-[11px] text-zinc-400 font-mono">
+                      <span>Acceptance Precision</span>
+                      <span className="text-white font-semibold">{acceptanceRate}%</span>
+                    </div>
+                    <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-sky-500 to-emerald-500 h-full rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(100, Math.max(0, acceptanceRate))}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="text-[11px] text-zinc-500 font-mono flex items-center gap-1.5 pt-1">
+                  <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>
+                    {acceptanceRate !== null && acceptanceRate >= 60
+                      ? "High submission accuracy indicates solid test-case reasoning and first-try correctness."
+                      : "Refining edge-case testing before submitting improves acceptance efficiency."}
+                  </span>
+                </div>
+              </div>
+
+              {/* Contest & Rating Card */}
+              <div className="bg-[#18181b]/70 border border-zinc-800/80 rounded-xl p-4 space-y-3.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-purple-400" />
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
+                      Contest & Rating
+                    </h4>
+                  </div>
+                  {contestBadge ? (
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-purple-950/70 text-purple-300 border border-purple-800/60 flex items-center gap-1">
+                      <Crown className="w-3 h-3 text-amber-400" />
+                      {contestBadge}
+                    </span>
+                  ) : contestRating !== null ? (
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-purple-950/70 text-purple-300 border border-purple-800/60">
+                      Active Competitor
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {/* Contest Rating */}
+                  <div className="bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg space-y-0.5">
+                    <div className="text-[10px] text-zinc-400 font-mono uppercase">Contest Rating</div>
+                    <div className="text-sm font-bold font-mono text-purple-300">
+                      {contestRating !== null ? contestRating.toLocaleString() : "Not available"}
+                    </div>
+                  </div>
+
+                  {/* Global Contest Rank */}
+                  <div className="bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg space-y-0.5">
+                    <div className="text-[10px] text-zinc-400 font-mono uppercase">Global Rank</div>
+                    <div className="text-sm font-bold font-mono text-amber-300">
+                      {contestGlobalRank !== null
+                        ? `#${contestGlobalRank.toLocaleString()}`
+                        : "Not available"}
+                    </div>
+                  </div>
+
+                  {/* Contests Attended (distinguish 0 from null!) */}
+                  <div className="bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg space-y-0.5 col-span-2 sm:col-span-1">
+                    <div className="text-[10px] text-zinc-400 font-mono uppercase">Attended</div>
+                    <div className="text-sm font-bold font-mono text-white">
+                      {contestsAttended !== null
+                        ? `${contestsAttended} contest${contestsAttended === 1 ? "" : "s"}`
+                        : "Not available"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top Percentage / Performance Note */}
+                {contestTopPercentage !== null && (
+                  <div className="flex items-center justify-between text-[11px] font-mono bg-purple-950/30 border border-purple-900/40 p-2 rounded-lg">
+                    <span className="text-purple-300">Competitive Standing</span>
+                    <span className="text-amber-300 font-semibold">
+                      Top {contestTopPercentage}% of all contestants
+                    </span>
+                  </div>
+                )}
+
+                <div className="text-[11px] text-zinc-500 font-mono flex items-center gap-1.5 pt-1">
+                  <Award className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                  <span>
+                    {contestRating !== null
+                      ? "Weekly & Biweekly contest performance showcases speed and real-time algorithmic agility."
+                      : "Participate in LeetCode contests to unlock global competitive ratings and percentile benchmarks."}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Programming Languages Card */}
+            <div className="bg-[#18181b]/70 border border-zinc-800/80 rounded-xl p-4 space-y-3.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Code2 className="w-4 h-4 text-amber-400" />
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
+                    Programming Languages
+                  </h4>
+                </div>
+                {primaryLanguage && (
+                  <div className="flex items-center gap-1.5 bg-amber-950/70 border border-amber-700/60 px-2.5 py-0.5 rounded-md text-[11px] font-mono text-amber-300">
+                    <Crown className="w-3 h-3 text-amber-400" />
+                    <span>Primary: <strong>{primaryLanguage.name}</strong> ({primaryLanguage.solved} solved)</span>
+                  </div>
+                )}
+              </div>
+
+              {languages.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {languages.map((lang, idx) => {
+                    const isPrimary = primaryLanguage && lang.languageName === primaryLanguage.name;
+                    const pct = totalSolved > 0
+                      ? Math.round((lang.problemsSolved / totalSolved) * 100)
+                      : Math.round((lang.problemsSolved / maxLangCount) * 100);
+
+                    return (
+                      <div
+                        key={lang.languageName || idx}
+                        className={`p-3 rounded-lg border transition-all ${
+                          isPrimary
+                            ? "bg-amber-950/20 border-amber-700/50 shadow-sm"
+                            : "bg-zinc-900/60 border-zinc-800/70"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between text-xs mb-1.5">
+                          <span className="font-semibold text-zinc-200 flex items-center gap-1.5">
+                            {isPrimary && <Star className="w-3 h-3 text-amber-400 fill-amber-400" />}
+                            {lang.languageName}
+                          </span>
+                          <span className="font-mono text-zinc-400">
+                            {lang.problemsSolved} solved
+                          </span>
+                        </div>
+                        <div className="w-full bg-zinc-950 rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              isPrimary ? "bg-amber-400" : "bg-zinc-600"
+                            }`}
+                            style={{
+                              width: `${Math.min(
+                                100,
+                                Math.max(8, (lang.problemsSolved / maxLangCount) * 100)
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="flex justify-end text-[10px] text-zinc-500 font-mono mt-1">
+                          <span>{pct}% of profile</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-xs text-zinc-500 font-mono py-4 text-center bg-zinc-900/40 rounded-lg">
+                  No language data available.
+                </div>
+              )}
+            </div>
+
+            {/* 5. Topic Strengths Section */}
+            {topicTags.length > 0 && (
+              <div className="bg-[#18181b]/70 border border-zinc-800/80 rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Layers className="w-4 h-4 text-purple-400" />
                     <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
-                      Topic Strengths ({profile.topicTags.length})
+                      Topic Strengths ({topicTags.length})
                     </h4>
                   </div>
-                  <span className="text-[11px] text-zinc-500 font-mono">Problems Solved</span>
+                  <span className="text-[11px] text-zinc-500 font-mono">Problems Solved by Topic</span>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {profile.topicTags.slice(0, 16).map((tag, idx) => (
+                  {(showAllTopics ? topicTags : topicTags.slice(0, 16)).map((tag, idx) => (
                     <div
                       key={tag.tagSlug || idx}
                       className="inline-flex items-center gap-1.5 bg-[#1a1a1e] hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 px-2.5 py-1 rounded-md text-xs transition-colors"
@@ -515,82 +952,120 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                       </span>
                     </div>
                   ))}
-                  {profile.topicTags.length > 16 && (
-                    <span className="text-xs text-zinc-500 self-center px-1 font-mono">
-                      +{profile.topicTags.length - 16} more topics
-                    </span>
-                  )}
                 </div>
+
+                {topicTags.length > 16 && (
+                  <div className="pt-1 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowAllTopics((prev) => !prev)}
+                      className="text-xs text-purple-400 hover:text-purple-300 font-mono flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      {showAllTopics ? (
+                        <>
+                          <ChevronUp className="w-3.5 h-3.5" />
+                          <span>Show Less Topics</span>
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="w-3.5 h-3.5" />
+                          <span>Show All {topicTags.length} Topics</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Bottom Row: Languages & Recent Activity */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              {/* Languages */}
-              {profile.languages && profile.languages.length > 0 && (
-                <div className="bg-[#18181b]/60 border border-zinc-800/80 rounded-xl p-4 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Code2 className="w-4 h-4 text-amber-400" />
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
-                      Languages Used
-                    </h4>
-                  </div>
-                  <div className="space-y-2">
-                    {profile.languages.slice(0, 5).map((lang, idx) => (
-                      <div
-                        key={lang.languageName || idx}
-                        className="flex items-center justify-between text-xs py-1 px-2 rounded bg-zinc-900/60 border border-zinc-800/60"
-                      >
-                        <span className="text-zinc-300 font-medium">{lang.languageName}</span>
-                        <span className="text-zinc-400 font-mono">{lang.problemsSolved} solved</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Recent Activity / Submissions */}
-              <div className="bg-[#18181b]/60 border border-zinc-800/80 rounded-xl p-4 space-y-3">
+            {/* 6. Recent Submissions Section */}
+            <div className="bg-[#18181b]/70 border border-zinc-800/80 rounded-xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-sky-400" />
+                  <Clock className="w-4 h-4 text-sky-400" />
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
                     Recent Submissions
                   </h4>
                 </div>
+                <span className="text-[11px] text-zinc-500 font-mono">
+                  {recentSubmissions.length} recent activity logs
+                </span>
+              </div>
 
-                {profile.recentSubmissions && profile.recentSubmissions.length > 0 ? (
-                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                    {profile.recentSubmissions.slice(0, 5).map((sub, idx) => (
+              {recentSubmissions.length > 0 ? (
+                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                  {recentSubmissions.map((sub, idx) => {
+                    const isAccepted = sub.statusDisplay === "Accepted";
+                    const isWrong = sub.statusDisplay === "Wrong Answer";
+                    const isTLE = sub.statusDisplay === "Time Limit Exceeded";
+
+                    return (
                       <div
                         key={idx}
-                        className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded bg-zinc-900/60 border border-zinc-800/60 gap-2"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between text-xs py-2 px-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 gap-2 hover:border-zinc-700 transition-colors"
                       >
-                        <div className="truncate pr-2">
-                          <div className="text-zinc-200 font-medium truncate">{sub.title}</div>
-                          <div className="text-[10px] text-zinc-500 font-mono flex items-center gap-2 mt-0.5">
-                            {sub.lang && <span>{sub.lang}</span>}
-                            {sub.timestamp && <span>· {formatSubmissionTime(sub.timestamp)}</span>}
+                        <div className="flex items-center gap-2 min-w-0">
+                          {isAccepted ? (
+                            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                          ) : (
+                            <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                          )}
+                          <div className="min-w-0">
+                            {sub.titleSlug ? (
+                              <a
+                                href={`https://leetcode.com/problems/${sub.titleSlug}/`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-zinc-200 hover:text-amber-400 font-medium truncate inline-flex items-center gap-1 cursor-pointer transition-colors"
+                              >
+                                <span>{sub.title || sub.titleSlug}</span>
+                                <ExternalLink className="w-2.5 h-2.5 text-zinc-500 shrink-0" />
+                              </a>
+                            ) : (
+                              <div className="text-zinc-200 font-medium truncate">
+                                {sub.title || "Submission"}
+                              </div>
+                            )}
+                            <div className="text-[10px] text-zinc-500 font-mono flex items-center gap-2 mt-0.5">
+                              {sub.lang && (
+                                <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300">
+                                  {sub.lang}
+                                </span>
+                              )}
+                              {sub.timestamp && (
+                                <span>· {formatSubmissionTime(sub.timestamp)}</span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                        <span
-                          className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold shrink-0 ${
-                            sub.statusDisplay === "Accepted"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-zinc-800 text-zinc-400 border border-zinc-700"
-                          }`}
-                        >
-                          {sub.statusDisplay || "Submitted"}
-                        </span>
+
+                        <div className="self-end sm:self-auto shrink-0">
+                          <span
+                            className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold ${
+                              isAccepted
+                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                : isWrong
+                                ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                                : isTLE
+                                ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                : "bg-zinc-800 text-zinc-400 border border-zinc-700"
+                            }`}
+                          >
+                            {sub.statusDisplay || "Submitted"}
+                          </span>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-xs text-zinc-500 font-mono py-4 text-center">
-                    No recent submissions recorded on public endpoint.
-                  </div>
-                )}
-              </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-xs text-zinc-500 font-mono py-6 text-center bg-zinc-900/40 rounded-lg">
+                  No recent submissions recorded on public endpoint.
+                </div>
+              )}
             </div>
+              </>
+            )}
           </div>
         ) : (
           /* ------------------------------------------------------------- */
@@ -603,7 +1078,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                   Connect your LeetCode profile
                 </div>
                 <p className="text-xs text-zinc-400 leading-relaxed max-w-2xl">
-                  Enter your public LeetCode username or profile link below. We query LeetCode’s public GraphQL endpoints to import your verified problem counts, topic distribution, and global ranking.
+                  Enter your public LeetCode username or profile link below. We query LeetCode’s public GraphQL endpoints to import your verified problem counts, difficulty breakdown, submission activity, contest ranking, and programming languages.
                 </p>
               </div>
 

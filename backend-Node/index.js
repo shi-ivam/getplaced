@@ -4,6 +4,8 @@ import userRoutes from "./routes/userRoutes.js"
 import readinessRoutes from "./routes/readinessRoutes.js"
 import levelGapRoutes from "./routes/levelGapRoutes.js"
 import leetcodeRoutes from "./routes/leetcodeRoutes.js"
+import githubRoutes from "./routes/githubRoutes.js"
+import dsaRoutes from "./routes/dsaRoutes.js"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 dotenv.config()
@@ -46,6 +48,8 @@ app.use("/api/users", userRoutes)
 app.use("/api/readiness", readinessRoutes)
 app.use("/api/gap-analysis", levelGapRoutes)
 app.use("/api/leetcode", leetcodeRoutes)
+app.use("/api/github", githubRoutes)
+app.use("/api/dsa", dsaRoutes)
 
 app.get("/job-recommendations", async (req, res) => {
   const url = "https://jsearch.p.rapidapi.com/search";

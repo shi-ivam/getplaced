@@ -6,6 +6,7 @@ import {
   Briefcase,
   FileText,
   BrainCog,
+  Code2,
   Settings,
   HelpCircle,
   LogOut,
@@ -29,6 +30,11 @@ const mainItems = [
     icon: Home,
   },
   {
+    title: "DSA Analysis",
+    url: "/app/dsa",
+    icon: Code2,
+  },
+  {
     title: "Interview",
     url: "/app/interview",
     icon: BrainCog,
@@ -40,7 +46,7 @@ const mainItems = [
     icon: FileText,
   },
   {
-    title: "Job Recommentation",
+    title: "Job Recommendation",
     url: "/app/job",
     icon: Briefcase,
   },

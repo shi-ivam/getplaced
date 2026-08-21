@@ -28,9 +28,14 @@ import {
   CheckSquare,
   Circle,
   Cpu,
+  Star,
+  GitFork,
+  Globe,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
 import LevelComparisonTable from "@/components/ui/LevelComparisonTable";
+import DsaTopicAnalysis from "@/components/dsa/DsaTopicAnalysis";
+import DsaRequirementComparison from "@/components/dsa/DsaRequirementComparison";
 
 const DIMENSION_ICONS = {
   dsa: Code2,
@@ -46,6 +51,7 @@ export default function Dashboard() {
   const [userProfile, setUserProfile] = useState(null);
   const [readiness, setReadiness] = useState(null);
   const [gapData, setGapData] = useState(null);
+  const [githubProfile, setGithubProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showExplainModal, setShowExplainModal] = useState(false);
 
@@ -53,10 +59,11 @@ export default function Dashboard() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [profileRes, readinessRes, gapRes] = await Promise.allSettled([
+        const [profileRes, readinessRes, gapRes, githubRes] = await Promise.allSettled([
           axios.get(`${NODE_API_URL}/api/users/profile`, { withCredentials: true }),
           axios.get(`${NODE_API_URL}/api/readiness`, { withCredentials: true }),
           axios.get(`${NODE_API_URL}/api/gap-analysis`, { withCredentials: true }),
+          axios.get(`${NODE_API_URL}/api/github/profile`, { withCredentials: true }),
         ]);
 
         if (profileRes.status === "fulfilled" && profileRes.value?.data) {
@@ -69,6 +76,10 @@ export default function Dashboard() {
 
         if (gapRes.status === "fulfilled" && gapRes.value?.data) {
           setGapData(gapRes.value.data);
+        }
+
+        if (githubRes.status === "fulfilled" && githubRes.value?.data?.connected && githubRes.value.data.profile) {
+          setGithubProfile(githubRes.value.data.profile);
         }
       } catch (err) {
         console.error("Could not fetch dashboard data:", err);
@@ -639,6 +650,208 @@ export default function Dashboard() {
         targetJobRole={userProfile?.targetJobRole}
       />
 
+      {/* DSA Readiness vs Target Company Benchmark */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Target className="w-5 h-5 text-purple-400" />
+            <h2 className="text-base md:text-lg font-semibold text-zinc-100 tracking-tight">
+              DSA Readiness vs Target Company Benchmark
+            </h2>
+          </div>
+          <Link
+            to="/app/dsa"
+            className="text-xs text-purple-400 hover:text-purple-300 font-mono inline-flex items-center gap-1 hover:underline"
+          >
+            <span>Open DSA Hub</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        <DsaRequirementComparison
+          targetCompany={userProfile?.targetCompany}
+          targetJobRole={userProfile?.targetJobRole}
+        />
+      </section>
+
+      {/* DSA Topic-Level Proficiency Analysis Engine */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Code2 className="w-5 h-5 text-purple-400" />
+            <h2 className="text-base md:text-lg font-semibold text-zinc-100 tracking-tight">
+              DSA Topic Proficiency & Gap Analysis
+            </h2>
+          </div>
+          <Link
+            to="/app/dsa"
+            className="text-xs text-purple-400 hover:text-purple-300 font-mono inline-flex items-center gap-1 hover:underline"
+          >
+            <span>Full Hub</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        <DsaTopicAnalysis
+          targetCompany={userProfile?.targetCompany}
+          targetJobRole={userProfile?.targetJobRole}
+        />
+      </section>
+
+      {/* GitHub Projects & Portfolio Analysis Engine */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FolderGit2 className="w-5 h-5 text-purple-400" />
+            <h2 className="text-base md:text-lg font-semibold text-zinc-100 tracking-tight">
+              GitHub Projects & Engineering Portfolio
+            </h2>
+          </div>
+          <Link
+            to="/app/profile"
+            className="text-xs text-purple-400 hover:text-purple-300 font-mono inline-flex items-center gap-1 hover:underline"
+          >
+            <span>{githubProfile ? "Manage GitHub" : "Connect GitHub"}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {githubProfile ? (
+          <div className="bg-[#121215] border border-zinc-800/90 rounded-xl p-5 space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-zinc-800/80">
+              <div className="flex items-center gap-3">
+                {githubProfile.avatarUrl ? (
+                  <img
+                    src={githubProfile.avatarUrl}
+                    alt={githubProfile.username}
+                    className="w-10 h-10 rounded-lg border border-purple-500/30 object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold font-mono">
+                    {githubProfile.username?.charAt(0)?.toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-white text-sm">
+                      {githubProfile.name || githubProfile.username}
+                    </span>
+                    <a
+                      href={githubProfile.profileUrl || `https://github.com/${githubProfile.username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-purple-400 hover:underline font-mono"
+                    >
+                      @{githubProfile.username}
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-zinc-400 font-mono mt-0.5">
+                    <span>{githubProfile.originalReposCount || 0} Original Projects</span>
+                    <span>·</span>
+                    <span className="text-amber-400 flex items-center gap-1">
+                      <Star className="w-3 h-3 fill-amber-400/30" />
+                      {githubProfile.totalStars || 0} Stars
+                    </span>
+                    <span>·</span>
+                    <span className="text-sky-400 flex items-center gap-1">
+                      <GitFork className="w-3 h-3" />
+                      {githubProfile.totalForks || 0} Forks
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono text-zinc-400">Projects Dimension:</span>
+                <span className="text-xs px-2.5 py-1 rounded-full font-mono font-bold bg-purple-950/80 text-purple-300 border border-purple-800">
+                  {githubProfile.projectScore || readiness?.dimensions?.projects?.score || 0} / 100 ({githubProfile.scoreTier || "Active"})
+                </span>
+              </div>
+            </div>
+
+            {/* Top 3 Featured Projects */}
+            {githubProfile.topRepositories && githubProfile.topRepositories.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {githubProfile.topRepositories.slice(0, 3).map((repo, idx) => (
+                  <div
+                    key={repo.githubId || idx}
+                    className="bg-zinc-900/70 border border-zinc-800/80 rounded-lg p-3 space-y-2 flex flex-col justify-between"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <a
+                          href={repo.htmlUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-xs text-zinc-200 hover:text-purple-300 truncate font-mono"
+                        >
+                          {repo.name}
+                        </a>
+                        <span className="text-amber-400 font-mono text-[11px] flex items-center gap-0.5 shrink-0">
+                          <Star className="w-3 h-3 fill-amber-400/20" />
+                          {repo.stars || 0}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed">
+                        {repo.description || "No description provided."}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] font-mono pt-1 text-zinc-500 border-t border-zinc-800/60">
+                      <span>{repo.language || "Project"}</span>
+                      {repo.hasLiveDemo && repo.liveDemoUrl ? (
+                        <a
+                          href={repo.liveDemoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-emerald-400 hover:underline flex items-center gap-1"
+                        >
+                          <Globe className="w-2.5 h-2.5" />
+                          <span>Demo</span>
+                        </a>
+                      ) : (
+                        <a
+                          href={repo.htmlUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-400 hover:underline"
+                        >
+                          Code ↗
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="bg-[#121215] border border-dashed border-zinc-800 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-purple-400 font-mono">
+                  Projects Dimension (15% Weight)
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-400 border border-zinc-800 font-mono">
+                  Pending Connection
+                </span>
+              </div>
+              <p className="text-xs text-zinc-400">
+                Connect your GitHub profile to showcase real-world repositories, star recognition, and boost your Projects readiness score.
+              </p>
+            </div>
+
+            <Link
+              to="/app/profile"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-md bg-purple-600 hover:bg-purple-700 text-white transition-colors shrink-0"
+            >
+              <span>Connect GitHub</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        )}
+      </section>
+
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         <StatCard
           title="Resume ATS Score"
@@ -650,7 +863,21 @@ export default function Dashboard() {
           }
           subtitle="ATS Benchmark"
         />
-        <StatCard title="Interviews Completed" value="5" subtitle="AI Mock Sessions" />
+        <StatCard
+          title="Projects Portfolio"
+          value={
+            githubProfile
+              ? `${githubProfile.originalReposCount || 0} Repos`
+              : readiness?.dimensions?.projects?.score !== null && readiness?.dimensions?.projects?.score !== undefined
+              ? `${readiness.dimensions.projects.score}%`
+              : "Pending"
+          }
+          subtitle={
+            githubProfile
+              ? `${githubProfile.totalStars || 0} Stars ⭐`
+              : "15% Dimension Wt"
+          }
+        />
         <StatCard
           title="Past Interview Score"
           value={

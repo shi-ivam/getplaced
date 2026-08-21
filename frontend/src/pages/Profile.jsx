@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import SearchableCombobox from "@/components/ui/SearchableCombobox";
 import LeetCodeConnectCard from "@/components/leetcode/LeetCodeConnectCard";
+import GitHubConnectCard from "@/components/github/GitHubConnectCard";
 import { NODE_API_URL } from "@/config/api";
 
 const DEGREE_OPTIONS = [
@@ -130,7 +131,7 @@ const LOCATION_SUGGESTIONS = [
 const CURRENT_YEAR = new Date().getFullYear();
 const GRADUATION_YEARS = Array.from({ length: 15 }, (_, i) => CURRENT_YEAR - 5 + i);
 
-export const normalizeIdentifier = (str) => {
+const normalizeIdentifier = (str) => {
   if (!str || typeof str !== "string") return "";
   return str
     .toLowerCase()
@@ -813,8 +814,11 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-        {/* 4. Coding & Platforms Section */}
-        <LeetCodeConnectCard />
+        {/* 4. Coding & Project Platforms Section */}
+        <div className="space-y-6">
+          <LeetCodeConnectCard />
+          <GitHubConnectCard />
+        </div>
 
         {/* Action Button */}
         <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-800/80">

@@ -91,8 +91,8 @@ export const DIMENSION_METADATA = {
     weight: 0.15,
     weightPercent: 15,
     description: "Practical engineering experience, full-stack complexity, clean code on GitHub",
-    actionLink: "/app/resume",
-    actionLabel: "Showcase Projects",
+    actionLink: "/app/profile",
+    actionLabel: "Connect GitHub",
     defaultRequiredScore: 75,
   },
   resume: {

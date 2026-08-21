@@ -4,15 +4,15 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Blackhole from "../assets/blackhole.webm";
 
+const telemetryStates = [
+  { speech: "Clear & Articulate (98% Clarity)", eye: "Optimal Focus (100% Direct)", posture: "Upright & Poised", confidence: "High (Top 2% Candidate)" },
+  { speech: "Pacing Balanced (140 wpm)", eye: "Natural Gaze (95% Active)", posture: "Relaxed Engagement", confidence: "Elevated (Senior Tier)" },
+  { speech: "Technical Terms Precise", eye: "Steady Eye Contact", posture: "Professional Alignment", confidence: "Interview Ready" }
+];
+
 const Hero = () => {
   const navigate = useNavigate();
   const [telemetryIndex, setTelemetryIndex] = useState(0);
-
-  const telemetryStates = [
-    { speech: "Clear & Articulate (98% Clarity)", eye: "Optimal Focus (100% Direct)", posture: "Upright & Poised", confidence: "High (Top 2% Candidate)" },
-    { speech: "Pacing Balanced (140 wpm)", eye: "Natural Gaze (95% Active)", posture: "Relaxed Engagement", confidence: "Elevated (Senior Tier)" },
-    { speech: "Technical Terms Precise", eye: "Steady Eye Contact", posture: "Professional Alignment", confidence: "Interview Ready" }
-  ];
 
   useEffect(() => {
     const interval = setInterval(() => {

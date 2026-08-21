@@ -3,6 +3,8 @@ import LeetCodeProfile from "../models/leetcodeProfileModel.js";
 import {
   fetchLeetCodeStats,
   extractLeetCodeUsername,
+  formatLeetCodeProfileResponse,
+  getSubmissionAnalysis,
 } from "../services/leetcodeService.js";
 
 /**
@@ -27,7 +29,7 @@ export const getLeetCodeProfile = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     connected: true,
-    profile,
+    profile: formatLeetCodeProfileResponse(profile),
   });
 });
 
@@ -71,7 +73,7 @@ export const connectLeetCodeProfile = asyncHandler(async (req, res) => {
       success: true,
       message: `LeetCode profile @${profile.username} connected successfully!`,
       connected: true,
-      profile,
+      profile: formatLeetCodeProfileResponse(profile),
     });
   } catch (err) {
     console.error("Error connecting LeetCode profile:", err.message);
@@ -111,7 +113,16 @@ export const syncLeetCodeProfile = asyncHandler(async (req, res) => {
     existingProfile.hardSolved = stats.hardSolved;
     existingProfile.totalQuestions = stats.totalQuestions;
     existingProfile.acceptanceRate = stats.acceptanceRate;
+    existingProfile.problemsSolved = stats.problemsSolved;
+    existingProfile.submissions = stats.submissions;
+    existingProfile.submissionStats = stats.submissionStats;
+    existingProfile.activeDays = stats.activeDays;
+    existingProfile.streak = stats.streak;
+    existingProfile.submissionCalendar = stats.submissionCalendar;
+    existingProfile.efficiencyRatio = stats.efficiencyRatio;
+    existingProfile.contest = stats.contest;
     existingProfile.languages = stats.languages;
+    existingProfile.primaryLanguage = stats.primaryLanguage;
     existingProfile.topicTags = stats.topicTags;
     existingProfile.recentSubmissions = stats.recentSubmissions;
     existingProfile.lastSyncedAt = new Date();
@@ -124,7 +135,7 @@ export const syncLeetCodeProfile = asyncHandler(async (req, res) => {
       success: true,
       message: `LeetCode stats for @${existingProfile.username} refreshed successfully!`,
       connected: true,
-      profile: existingProfile,
+      profile: formatLeetCodeProfileResponse(existingProfile),
     });
   } catch (err) {
     console.error("Error syncing LeetCode stats:", err.message);
@@ -136,6 +147,22 @@ export const syncLeetCodeProfile = asyncHandler(async (req, res) => {
     res.status(statusCode >= 400 && statusCode < 600 ? statusCode : 502);
     throw new Error(err.message || "Failed to refresh LeetCode statistics");
   }
+});
+
+/**
+ * @desc    Get detailed submission and consistency analysis for authenticated user
+ * @route   GET /api/leetcode/submissions-analysis
+ * @access  Private
+ */
+export const getLeetCodeSubmissionAnalysis = asyncHandler(async (req, res) => {
+  if (!req.user || !req.user._id) {
+    res.status(401);
+    throw new Error("Not authorized, user missing");
+  }
+
+  const analysis = await getSubmissionAnalysis(req.user._id);
+
+  res.status(200).json(analysis);
 });
 
 /**

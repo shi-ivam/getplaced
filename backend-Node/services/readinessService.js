@@ -1,7 +1,10 @@
 import mongoose from "mongoose";
 import CompanyRequirement, { normalizeIdentifier } from "../models/companyRequirementModel.js";
 import LeetCodeProfile from "../models/leetcodeProfileModel.js";
+import GitHubProfile from "../models/githubProfileModel.js";
 import { calculateLeetCodeDsaScore } from "./leetcodeService.js";
+import { calculateGitHubProjectScore } from "./githubService.js";
+import { analyzeDsaProficiency } from "./dsaAnalysisService.js";
 import {
   READINESS_WEIGHTS,
   STATUS_LEVELS,
@@ -53,14 +56,18 @@ export const calculatePlacementReadiness = async (user) => {
     }
   }
 
-  // Attempt to load LeetCode profile if connected
+  // Attempt to load LeetCode & GitHub profiles if connected
   let leetcodeProfile = null;
+  let githubProfile = null;
   const userId = user._id || user.id;
   if (userId && mongoose.connection?.readyState === 1) {
     try {
-      leetcodeProfile = await LeetCodeProfile.findOne({ userId }).lean();
+      [leetcodeProfile, githubProfile] = await Promise.all([
+        LeetCodeProfile.findOne({ userId }).lean(),
+        GitHubProfile.findOne({ userId }).lean(),
+      ]);
     } catch (err) {
-      console.warn("Could not query LeetCodeProfile in readinessService:", err.message);
+      console.warn("Could not query connected profiles in readinessService:", err.message);
     }
   }
 
@@ -83,7 +90,7 @@ export const calculatePlacementReadiness = async (user) => {
   dimensions.dsa = evaluateDsaDimension(user, companyRequirement, leetcodeProfile);
 
   // 5. Projects Dimension (Weight: 15%)
-  dimensions.projects = evaluateProjectsDimension(user);
+  dimensions.projects = evaluateProjectsDimension(user, githubProfile);
 
   // 6. Communication Dimension (Weight: 7.5%)
   dimensions.communication = evaluateCommunicationDimension(user);
@@ -167,6 +174,23 @@ export const calculatePlacementReadiness = async (user) => {
           hardSolved: leetcodeProfile.hardSolved,
           ranking: leetcodeProfile.ranking,
           acceptanceRate: leetcodeProfile.acceptanceRate,
+        }
+      : null,
+    githubProfile: githubProfile
+      ? {
+          username: githubProfile.username,
+          name: githubProfile.name || "",
+          avatarUrl: githubProfile.avatarUrl || "",
+          profileUrl: githubProfile.profileUrl || `https://github.com/${githubProfile.username}`,
+          publicReposCount: githubProfile.publicReposCount || (githubProfile.repositories?.length ?? 0),
+          originalReposCount: githubProfile.originalReposCount || 0,
+          totalStars: githubProfile.totalStars || 0,
+          totalForks: githubProfile.totalForks || 0,
+          projectScore:
+            githubProfile.projectScore !== undefined && githubProfile.projectScore !== null
+              ? githubProfile.projectScore
+              : calculateGitHubProjectScore(githubProfile),
+          topLanguage: githubProfile.languages?.[0]?.languageName || null,
         }
       : null,
     dimensions,
@@ -343,18 +367,36 @@ const evaluateDsaDimension = (user, companyRequirement, leetcodeProfile = null) 
     leetcodeProfile.syncStatus === "synced" &&
     (leetcodeProfile.totalSolved > 0 || leetcodeProfile.username)
   ) {
-    const rawScore = calculateLeetCodeDsaScore(leetcodeProfile);
-    const score = Math.min(100, Math.max(0, rawScore));
-    const statusObj = getStatusFromScore(score);
+    const dsaAnalysis = analyzeDsaProficiency(user, leetcodeProfile, companyRequirement);
+    const score = dsaAnalysis.summary.overallDsaScore ?? calculateLeetCodeDsaScore(leetcodeProfile);
+    const finalScore = Math.min(100, Math.max(0, score));
+    const statusObj = getStatusFromScore(finalScore);
+
+    const strongestNames = dsaAnalysis.summary.strongestTopics.map((t) => t.name).join(", ");
+    const weakestNames = dsaAnalysis.summary.weakestTopics.map((t) => t.name).join(", ");
+
+    let noteText = `Synced from LeetCode (@${leetcodeProfile.username}): ${leetcodeProfile.totalSolved} solved (${leetcodeProfile.easySolved}E / ${leetcodeProfile.mediumSolved}M / ${leetcodeProfile.hardSolved}H)${leetcodeProfile.ranking ? ` · Global #${leetcodeProfile.ranking.toLocaleString()}` : ""}.`;
+    if (strongestNames) {
+      noteText += ` Strongest topics: ${strongestNames}.`;
+    }
+    if (weakestNames) {
+      noteText += ` Focus areas: ${weakestNames}.`;
+    }
+
     return {
-      score,
+      score: finalScore,
       status: statusObj.key,
       statusLabel: statusObj.label,
       dataAvailability: "available",
       requiredScore: reqScore,
-      gap: Math.max(0, reqScore - score),
-      notes: `Synced from LeetCode (@${leetcodeProfile.username}): ${leetcodeProfile.totalSolved} solved (${leetcodeProfile.easySolved}E / ${leetcodeProfile.mediumSolved}M / ${leetcodeProfile.hardSolved}H)${leetcodeProfile.ranking ? ` · Global #${leetcodeProfile.ranking.toLocaleString()}` : ""}.`,
+      gap: Math.max(0, reqScore - finalScore),
+      notes: noteText,
       source: "leetcode",
+      overallDsaLevel: dsaAnalysis.summary.overallDsaLevel,
+      topicsAnalyzedCount: dsaAnalysis.summary.topicsAnalyzedCount,
+      strongestTopics: dsaAnalysis.summary.strongestTopics,
+      weakestTopics: dsaAnalysis.summary.weakestTopics,
+      largestGapTopic: dsaAnalysis.summary.largestGapTopic,
       leetcodeSummary: {
         username: leetcodeProfile.username,
         totalSolved: leetcodeProfile.totalSolved,
@@ -398,9 +440,60 @@ const evaluateDsaDimension = (user, companyRequirement, leetcodeProfile = null) 
 /**
  * 5. Projects Dimension (Weight: 15%)
  */
-const evaluateProjectsDimension = (user) => {
+const evaluateProjectsDimension = (user, githubProfile = null) => {
   const reqScore = 75;
 
+  // Priority 1: Connected & Synced GitHub Profile
+  if (
+    githubProfile &&
+    githubProfile.syncStatus === "synced" &&
+    (githubProfile.originalReposCount > 0 || githubProfile.publicReposCount > 0 || githubProfile.username)
+  ) {
+    const rawScore =
+      githubProfile.projectScore !== undefined && githubProfile.projectScore !== null
+        ? Number(githubProfile.projectScore)
+        : calculateGitHubProjectScore(githubProfile);
+
+    const score = Math.min(100, Math.max(0, rawScore));
+    const statusObj = getStatusFromScore(score);
+    const topLanguage = githubProfile.languages?.[0]?.languageName || "Full-stack";
+
+    let noteText = `Synced from GitHub (@${githubProfile.username}): ${githubProfile.originalReposCount || 0} original repos, ${githubProfile.totalStars || 0} stars ⭐, ${githubProfile.totalForks || 0} forks 🍴 across ${githubProfile.publicReposCount || 0} public projects. Primary stack: ${topLanguage}.`;
+
+    return {
+      score,
+      status: statusObj.key,
+      statusLabel: statusObj.label,
+      dataAvailability: "available",
+      requiredScore: reqScore,
+      gap: Math.max(0, reqScore - score),
+      notes: noteText,
+      source: "github",
+      githubSummary: {
+        username: githubProfile.username,
+        name: githubProfile.name || "",
+        avatarUrl: githubProfile.avatarUrl || "",
+        profileUrl: githubProfile.profileUrl || `https://github.com/${githubProfile.username}`,
+        publicReposCount: githubProfile.publicReposCount || (githubProfile.repositories?.length ?? 0),
+        originalReposCount: githubProfile.originalReposCount || 0,
+        forkedReposCount: githubProfile.forkedReposCount || 0,
+        totalStars: githubProfile.totalStars || 0,
+        totalForks: githubProfile.totalForks || 0,
+        projectScore: score,
+        topLanguages: (githubProfile.languages || []).slice(0, 4),
+        featuredProjects: (githubProfile.topRepositories || []).slice(0, 3).map((r) => ({
+          name: r.name,
+          htmlUrl: r.htmlUrl,
+          stars: r.stars,
+          language: r.language,
+          hasLiveDemo: r.hasLiveDemo,
+          liveDemoUrl: r.liveDemoUrl,
+        })),
+      },
+    };
+  }
+
+  // Priority 2: Stored manual projectsScore
   if (user.projectsScore !== undefined && user.projectsScore !== null && !isNaN(Number(user.projectsScore))) {
     const score = Math.min(100, Math.max(0, Math.round(Number(user.projectsScore))));
     const statusObj = getStatusFromScore(score);
@@ -411,7 +504,8 @@ const evaluateProjectsDimension = (user) => {
       dataAvailability: "available",
       requiredScore: reqScore,
       gap: Math.max(0, reqScore - score),
-      notes: "Evaluated from practical project portfolio and GitHub repository metrics.",
+      notes: "Evaluated from practical project portfolio and manual assessment.",
+      source: "manual",
     };
   }
 
@@ -422,7 +516,8 @@ const evaluateProjectsDimension = (user) => {
     dataAvailability: "not_started",
     requiredScore: reqScore,
     gap: null,
-    notes: "Connect your GitHub or project portfolio to evaluate engineering depth.",
+    notes: "Connect your GitHub account in your Profile to evaluate real-world engineering portfolio and project depth.",
+    source: null,
   };
 };
 

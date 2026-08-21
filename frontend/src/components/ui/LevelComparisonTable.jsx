@@ -146,7 +146,7 @@ export default function LevelComparisonTable({
           dotClass: "bg-emerald-400",
           icon: Check,
         };
-      case "needs_improvement":
+      case "needs_improvement": {
         const isMajor = gap !== null && gap <= -2.5;
         return {
           label: "Needs Improvement",
@@ -156,6 +156,7 @@ export default function LevelComparisonTable({
           dotClass: isMajor ? "bg-rose-400" : "bg-amber-400",
           icon: AlertCircle,
         };
+      }
       case "not_analyzed":
       default:
         return {
@@ -421,7 +422,6 @@ export default function LevelComparisonTable({
                 filteredItems.map((item) => {
                   const Icon = CATEGORY_ICONS[item.category] || Layers;
                   const statusInfo = getStatusBadge(item.statusKey, item.gap);
-                  const isAvailable = item.dataAvailability === "available";
 
                   return (
                     <tr

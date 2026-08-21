@@ -52,12 +52,68 @@ const leetcodeProfileSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    problemsSolved: {
+      total: { type: Number, default: 0 },
+      easy: { type: Number, default: 0 },
+      medium: { type: Number, default: 0 },
+      hard: { type: Number, default: 0 },
+    },
+    submissions: {
+      total: { type: Number, default: 0 },
+      accepted: { type: Number, default: 0 },
+      rejected: { type: Number, default: 0 },
+      acceptanceRate: { type: Number, default: 0 },
+    },
+    submissionStats: {
+      acSubmissionNum: [
+        {
+          difficulty: { type: String, default: "" },
+          count: { type: Number, default: 0 },
+          submissions: { type: Number, default: 0 },
+        },
+      ],
+      totalSubmissionNum: [
+        {
+          difficulty: { type: String, default: "" },
+          count: { type: Number, default: 0 },
+          submissions: { type: Number, default: 0 },
+        },
+      ],
+    },
+    activeDays: {
+      type: Number,
+      default: 0,
+    },
+    streak: {
+      type: Number,
+      default: 0,
+    },
+    submissionCalendar: {
+      type: String,
+      default: "{}",
+    },
+    efficiencyRatio: {
+      type: Number,
+      default: null,
+    },
+    contest: {
+      rating: { type: Number, default: null },
+      globalRank: { type: Number, default: null },
+      contestsAttended: { type: Number, default: null },
+      totalParticipants: { type: Number, default: null },
+      topPercentage: { type: Number, default: null },
+      badge: { type: String, default: null },
+    },
     languages: [
       {
         languageName: { type: String, default: "" },
         problemsSolved: { type: Number, default: 0 },
       },
     ],
+    primaryLanguage: {
+      name: { type: String, default: null },
+      solved: { type: Number, default: null },
+    },
     topicTags: [
       {
         tagName: { type: String, default: "" },
