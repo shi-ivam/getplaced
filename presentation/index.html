@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08080c" />
+    <link rel="icon" href="data:," />
+    <title>getPlaced - Hackathon Presentation</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #f6f4f8;
+        --muted: #b9b3c2;
+        --quiet: #837b8f;
+        --accent: #a855f7;
+        --accent-soft: #c084fc;
+        --green: #34d399;
+        --amber: #fbbf24;
+        --surface: rgba(12, 11, 17, 0.9);
+        --line: rgba(255, 255, 255, 0.14);
+        --radius: 18px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #08080c;
+        color: var(--ink);
+        font-family: "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+        font-synthesis: none;
+      }
+
+      button,
+      a {
+        font: inherit;
+      }
+
+      .deck {
+        position: relative;
+        width: 100vw;
+        height: 100dvh;
+        display: grid;
+        place-items: center;
+        background: #08080c;
+      }
+
+      .slide {
+        position: absolute;
+        display: none;
+        width: min(100vw, 177.7777778dvh);
+        height: min(100dvh, 56.25vw);
+        overflow: hidden;
+        isolation: isolate;
+        background: #08080c;
+      }
+
+      .slide.is-active {
+        display: block;
+      }
+
+      .screen {
+        position: absolute;
+        inset: 0;
+        z-index: -4;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        filter: saturate(0.82) contrast(1.05) brightness(0.82);
+      }
+
+      .screen.focus-right {
+        object-position: 64% center;
+      }
+
+      .screen.focus-left {
+        object-position: 36% center;
+      }
+
+      .scrim {
+        position: absolute;
+        inset: 0;
+        z-index: -3;
+        pointer-events: none;
+      }
+
+      .scrim-left {
+        background:
+          linear-gradient(90deg, rgba(6, 6, 10, 0.99) 0%, rgba(6, 6, 10, 0.96) 31%, rgba(6, 6, 10, 0.58) 58%, rgba(6, 6, 10, 0.12) 100%),
+          linear-gradient(0deg, rgba(6, 6, 10, 0.48), transparent 55%);
+      }
+
+      .scrim-right {
+        background:
+          linear-gradient(270deg, rgba(6, 6, 10, 0.99) 0%, rgba(6, 6, 10, 0.96) 31%, rgba(6, 6, 10, 0.56) 58%, rgba(6, 6, 10, 0.12) 100%),
+          linear-gradient(0deg, rgba(6, 6, 10, 0.42), transparent 55%);
+      }
+
+      .scrim-center {
+        background:
+          linear-gradient(90deg, rgba(6, 6, 10, 0.88), rgba(6, 6, 10, 0.4) 50%, rgba(6, 6, 10, 0.88)),
+          linear-gradient(0deg, rgba(6, 6, 10, 0.95), rgba(6, 6, 10, 0.12) 50%, rgba(6, 6, 10, 0.7));
+      }
+
+      .scrim-heavy {
+        background: rgba(6, 6, 10, 0.78);
+      }
+
+      .grain {
+        position: absolute;
+        inset: 0;
+        z-index: 9;
+        pointer-events: none;
+        opacity: 0.09;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.24'/%3E%3C/svg%3E");
+        mix-blend-mode: soft-light;
+      }
+
+      .content {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        height: 100%;
+        padding: 5.1% 5.7%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .content.centered {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .content.right-copy {
+        align-items: flex-end;
+        text-align: left;
+      }
+
+      .content.engagement {
+        justify-content: flex-start;
+        padding-top: 5.8%;
+      }
+
+      .content.engagement h2 {
+        max-width: 15ch;
+        margin-bottom: 0.8rem;
+        font-size: clamp(42px, 3.65vw, 94px);
+      }
+
+      .content.engagement .lede {
+        max-width: 46ch;
+        font-size: clamp(17px, 1.05vw, 27px);
+      }
+
+      .content.engagement .feature-band {
+        top: 37%;
+      }
+
+      .brand {
+        position: absolute;
+        top: 5.1%;
+        right: 5.7%;
+        font-size: clamp(15px, 0.95vw, 25px);
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .brand span {
+        color: var(--accent-soft);
+      }
+
+      .kicker {
+        margin: 0 0 1.25rem;
+        color: var(--accent-soft);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: clamp(11px, 0.74vw, 19px);
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 12.5ch;
+        margin-bottom: 1.5rem;
+        font-size: clamp(56px, 5.2vw, 134px);
+        line-height: 0.92;
+        letter-spacing: -0.067em;
+        font-weight: 860;
+      }
+
+      h2 {
+        max-width: 14ch;
+        margin-bottom: 1.35rem;
+        font-size: clamp(46px, 4.15vw, 106px);
+        line-height: 0.96;
+        letter-spacing: -0.06em;
+        font-weight: 850;
+      }
+
+      h3 {
+        margin-bottom: 0.5rem;
+        font-size: clamp(18px, 1.15vw, 30px);
+        line-height: 1.08;
+        letter-spacing: -0.035em;
+      }
+
+      .lede {
+        max-width: 34ch;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: clamp(19px, 1.35vw, 35px);
+        line-height: 1.35;
+        letter-spacing: -0.025em;
+      }
+
+      .lede strong {
+        color: var(--ink);
+      }
+
+      .accent {
+        color: var(--accent-soft);
+      }
+
+      .green {
+        color: var(--green);
+      }
+
+      .amber {
+        color: var(--amber);
+      }
+
+      .bottom-line {
+        margin-top: auto;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 2rem;
+        color: rgba(255, 255, 255, 0.56);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: clamp(10px, 0.67vw, 17px);
+        letter-spacing: 0.04em;
+      }
+
+      .bottom-line strong {
+        color: rgba(255, 255, 255, 0.88);
+      }
+
+      .proof-chip {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        margin-top: 2rem;
+        padding: 0.72rem 1rem;
+        border: 1px solid rgba(192, 132, 252, 0.42);
+        border-radius: 999px;
+        background: rgba(88, 28, 135, 0.28);
+        color: #e9d5ff;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: clamp(11px, 0.72vw, 18px);
+        font-weight: 800;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+
+      .proof-chip::before {
+        content: "";
+        width: 0.5rem;
+        height: 0.5rem;
+        margin-right: 0.68rem;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12);
+      }
+
+      .split-copy {
+        width: 47%;
+        margin-top: auto;
+        margin-bottom: auto;
+      }
+
+      .right-copy .split-copy {
+        width: 44%;
+        margin-right: 0;
+      }
+
+      .statement {
+        max-width: 12ch;
+        margin-top: auto;
+        margin-bottom: auto;
+        font-size: clamp(50px, 4.7vw, 120px);
+        line-height: 0.95;
+        letter-spacing: -0.067em;
+        font-weight: 850;
+      }
+
+      .statement small {
+        display: block;
+        max-width: 26ch;
+        margin-top: 1.6rem;
+        color: var(--muted);
+        font-size: clamp(17px, 1.17vw, 30px);
+        line-height: 1.42;
+        letter-spacing: -0.02em;
+        font-weight: 450;
+      }
+
+      .metric {
+        font-size: clamp(86px, 9vw, 230px);
+        line-height: 0.82;
+        letter-spacing: -0.09em;
+        font-weight: 900;
+      }
+
+      .metric-label {
+        max-width: 22ch;
+        margin-top: 1.4rem;
+        color: var(--muted);
+        font-size: clamp(17px, 1.15vw, 30px);
+        line-height: 1.4;
+      }
+
+      .mini-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.8rem 2.6rem;
+        max-width: 39rem;
+        margin-top: 2.1rem;
+      }
+
+      .mini-grid div {
+        padding-top: 0.85rem;
+        border-top: 1px solid var(--line);
+        color: rgba(255, 255, 255, 0.76);
+        font-size: clamp(14px, 0.9vw, 23px);
+        line-height: 1.3;
+      }
+
+      .mini-grid strong {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--ink);
+      }
+
+      .pipeline {
+        width: 100%;
+        margin-top: auto;
+        margin-bottom: auto;
+      }
+
+      .pipeline h2 {
+        max-width: 17ch;
+      }
+
+      .pipeline-track {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        margin-top: 3.4rem;
+        border-top: 2px solid rgba(192, 132, 252, 0.5);
+      }
+
+      .pipeline-step {
+        position: relative;
+        padding: 1.6rem 1.15rem 0 0;
+      }
+
+      .pipeline-step::before {
+        content: "";
+        position: absolute;
+        top: -0.48rem;
+        left: 0;
+        width: 0.82rem;
+        height: 0.82rem;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        box-shadow: 0 0 0 6px rgba(168, 85, 247, 0.13);
+      }
+
+      .pipeline-step span {
+        display: block;
+        margin-bottom: 0.42rem;
+        color: var(--accent-soft);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: clamp(10px, 0.66vw, 17px);
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .pipeline-step strong {
+        display: block;
+        max-width: 12ch;
+        font-size: clamp(15px, 1.04vw, 27px);
+        line-height: 1.12;
+      }
+
+      .callouts {
+        display: grid;
+        gap: 0.75rem;
+        width: min(36rem, 100%);
+        margin-top: 2.2rem;
+      }
+
+      .callout {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.9rem;
+        align-items: center;
+        padding: 0.88rem 1rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(12, 11, 17, 0.84);
+        backdrop-filter: blur(12px);
+      }
+
+      .callout b {
+        display: grid;
+        place-items: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 10px;
+        background: rgba(168, 85, 247, 0.17);
+        color: var(--accent-soft);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.82rem;
+      }
+
+      .callout p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: clamp(13px, 0.84vw, 21px);
+        line-height: 1.3;
+      }
+
+      .callout strong {
+        color: white;
+      }
+
+      .inset-screen {
+        position: absolute;
+        z-index: 3;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: var(--radius);
+        background: #08080c;
+        box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.42);
+      }
+
+      .inset-screen img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .inset-screen.communication {
+        left: 4.6%;
+        bottom: 6.2%;
+        width: 46%;
+        height: 50%;
+      }
+
+      .inset-screen.jobs {
+        left: 4.6%;
+        bottom: 6.2%;
+        width: 43%;
+        height: 47%;
+      }
+
+      .inset-screen.progress {
+        left: 4.5%;
+        bottom: 6%;
+        width: 47%;
+        height: 52%;
+      }
+
+      .inset-screen.library {
+        left: 5.7%;
+        bottom: 4.5%;
+        width: 42%;
+        height: 30%;
+      }
+
+      .inset-screen.arena {
+        right: 5.7%;
+        bottom: 4.5%;
+        width: 42%;
+        height: 30%;
+      }
+
+      .inset-screen.communication img,
+      .inset-screen.jobs img,
+      .inset-screen.progress img,
+      .inset-screen.library img,
+      .inset-screen.arena img {
+        object-position: center top;
+      }
+
+      .comparison {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: stretch;
+        width: min(84rem, 88%);
+        margin-top: 3.2rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: rgba(8, 8, 12, 0.82);
+        backdrop-filter: blur(14px);
+      }
+
+      .comparison-panel {
+        padding: 2rem 2.2rem;
+        text-align: left;
+      }
+
+      .comparison-panel p {
+        max-width: 32ch;
+        margin: 0;
+        color: var(--muted);
+        font-size: clamp(14px, 0.9vw, 23px);
+        line-height: 1.4;
+      }
+
+      .comparison-arrow {
+        display: grid;
+        place-items: center;
+        padding: 0 1.2rem;
+        color: var(--accent-soft);
+        font-size: clamp(24px, 2vw, 50px);
+      }
+
+      .feature-band {
+        position: absolute;
+        top: 49%;
+        left: 5.7%;
+        right: 5.7%;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        width: auto;
+        margin: 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .feature-band article {
+        min-height: 8rem;
+        padding: 1.35rem 1.5rem 0 0;
+      }
+
+      .feature-band article + article {
+        padding-left: 1.5rem;
+        border-left: 1px solid var(--line);
+      }
+
+      .feature-band p {
+        margin: 0;
+        color: var(--quiet);
+        font-size: clamp(12px, 0.76vw, 19px);
+        line-height: 1.35;
+      }
+
+      .big-close {
+        max-width: 12ch;
+        margin: auto;
+        font-size: clamp(58px, 5.75vw, 148px);
+        line-height: 0.9;
+        letter-spacing: -0.075em;
+        font-weight: 900;
+        text-align: center;
+      }
+
+      .big-close span {
+        color: var(--accent-soft);
+      }
+
+      .close-proof {
+        display: grid;
+        grid-template-columns: repeat(3, auto);
+        justify-content: center;
+        gap: 1px;
+        margin-top: 2.8rem;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--line);
+      }
+
+      .close-proof div {
+        padding: 1rem 1.7rem;
+        background: rgba(8, 8, 12, 0.86);
+        color: var(--muted);
+        font-size: clamp(13px, 0.86vw, 22px);
+      }
+
+      .close-proof strong {
+        color: var(--ink);
+      }
+
+      .tap-zone {
+        position: fixed;
+        z-index: 20;
+        top: 0;
+        bottom: 0;
+        width: 8vw;
+        border: 0;
+        outline: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .tap-zone.prev {
+        left: 0;
+      }
+
+      .tap-zone.next {
+        right: 0;
+      }
+
+      @media (max-aspect-ratio: 4 / 3) {
+        .slide {
+          font-size: 85%;
+        }
+
+        .content {
+          padding: 4.5%;
+        }
+
+        .inset-screen {
+          display: none;
+        }
+
+        .split-copy,
+        .right-copy .split-copy {
+          width: 70%;
+        }
+      }
+
+      @media print {
+        @page {
+          size: 16in 9in;
+          margin: 0;
+        }
+
+        html,
+        body,
+        .deck {
+          width: auto;
+          height: auto;
+          overflow: visible;
+          background: #08080c;
+        }
+
+        .slide,
+        .slide.is-active {
+          position: relative;
+          display: block;
+          width: 16in;
+          height: 9in;
+          break-after: page;
+          page-break-after: always;
+        }
+
+        .tap-zone {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="deck" aria-label="getPlaced hackathon presentation">
+      <section class="slide is-active" data-slide="1" aria-labelledby="s1-title">
+        <img class="screen focus-right" src="assets/coach.png" alt="getPlaced AI career coach interface" />
+        <div class="scrim scrim-left"></div>
+        <div class="grain"></div>
+        <div class="content">
+          <div class="brand">get<span>Placed</span></div>
+          <div class="split-copy">
+            <p class="kicker">Hackathon product demo</p>
+            <h1 id="s1-title">A placement operating system for every student.</h1>
+            <p class="lede">Verified evidence becomes a <strong>company-specific plan</strong>, focused practice, and job discovery.</p>
+            <div class="proof-chip">One connected placement loop</div>
+          </div>
+          <div class="bottom-line">
+            <span>React 19 / Node / FastAPI / MongoDB / Gemini</span>
+            <strong>Team TheMentalists</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="2" aria-labelledby="s2-title">
+        <img class="screen focus-right" src="assets/profile.png" alt="Candidate profile and target configuration screen" />
+        <div class="scrim scrim-left"></div>
+        <div class="grain"></div>
+        <div class="content">
+          <div class="brand">get<span>Placed</span></div>
+          <div class="split-copy">
+            <p class="kicker">The problem</p>
+            <h2 id="s2-title">Placement prep is a pile of disconnected guesses.</h2>
+            <div class="mini-grid">
+              <div><strong>Generic learning</strong>No target-specific priority.</div>
+              <div><strong>Static scores</strong>No explanation or next action.</div>
+              <div><strong>Interview anxiety</strong>No realistic practice loop.</div>
+              <div><strong>Scattered evidence</strong>Projects, DSA, resume, and academics live apart.</div>
+            </div>
+          </div>
+          <div class="bottom-line">
+            <span>The student asks: <strong>Am I ready for this exact role?</strong></span>
+            <span>getPlaced answers with evidence.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="3" aria-labelledby="s3-title">
+        <img class="screen" src="assets/coach.png" alt="AI career coach and calibrated candidate profile" />
+        <div class="scrim scrim-heavy"></div>
+        <div class="grain"></div>
+        <div class="content">
+          <div class="brand">get<span>Placed</span></div>
+          <div class="pipeline">
+            <p class="kicker">The product loop</p>
+            <h2 id="s3-title">One target. One source of truth. One path forward.</h2>
+            <p class="lede">Every module reads the same candidate profile and target role.</p>
+            <div class="pipeline-track" aria-label="getPlaced product workflow">
+              <div class="pipeline-step"><span>Profile</span><strong>Set the goal</strong></div>
+              <div class="pipeline-step"><span>Evidence</span><strong>Verify the candidate</strong></div>
+              <div class="pipeline-step"><span>Gap</span><strong>Compare to the role</strong></div>
+              <div class="pipeline-step"><span>Plan</span><strong>Prioritize the work</strong></div>
+              <div class="pipeline-step"><span>Practice</span><strong>Build real readiness</strong></div>
+              <div class="pipeline-step"><span>Placement</span><strong>Find the right opening</strong></div>
+            </div>
+          </div>
+          <div class="bottom-line">
+            <span>No duplicate scoring engine. No fake history.</span>
+            <strong>Connected by design</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="4" aria-labelledby="s4-title">
+        <img class="screen focus-right" src="assets/academics.png" alt="Academic performance and placement eligibility screen" />
+        <div class="scrim scrim-left"></div>
+        <div class="grain"></div>
+        <div class="content">
+          <div class="brand">get<span>Placed</span></div>
+          <div class="split-copy">
+            <p class="kicker">Evidence engine</p>
+            <div class="metric accent">7</div>
+            <p class="metric-label">readiness dimensions, reconciled into one explainable view.</p>
+            <div class="callouts">
+              <div class="callout"><b>01</b><p><strong>Verified signals:</strong> academics, coding profiles, project repositories, resume, communication, interviews.</p></div>
+              <div class="callout"><b>02</b><p><strong>Target benchmark:</strong> current level, required level, gap, and confidence.</p></div>
+              <div class="callout"><b>03</b><p><strong>Honest output:</strong> missing data stays missing. Evidence is never invented.</p></div>
+            </div>
+          </div>
+          <div class="bottom-line">
+            <span>Academics / coding signals / project proof / resume / interviews</span>
+            <strong>Explainable readiness</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="5" aria-labelledby="s5-title">
+        <img class="screen focus-right" src="assets/coding.png" alt="Data structures and algorithms coding arena" />
+        <div class="scrim scrim-left"></div>
+        <div class="grain"></div>
+        <div class="content">
+          <div class="brand">get<span>Placed</span></div>
+          <div class="split-copy">
+            <p class="kicker">DSA and coding</p>
+            <h2 id="s5-title">Practice what the target actually demands.</h2>
+            <p class="lede"><strong>2,800+ official problems</strong> meet LeetCode sync, topic diagnostics, submission consistency, and an in-browser coding sandbox.</p>
+            <div class="mini-grid">
+              <div><strong>Topic-level gaps</strong>Arrays to dynamic programming.</div>
+              <div><strong>Difficulty benchmark</strong>Easy, medium, and hard coverage.</div>
+              <div><strong>Live execution</strong>Test cases and complexity guidance.</div>
+              <div><strong>Target context</strong>Practice ordered by company need.</div>
+            </div>
+          </div>
+          <div class="bottom-line">
+            <span>LeetCode integration / submission analysis / DSA requirement comparison</span>
+            <strong>Target-aware practice</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="6" aria-labelledby="s6-title">
+        <img class="screen focus-right" src="assets/resume.png" alt="Resume action center and ATS intelligence screen" />
+        <div class="scrim scrim-left"></div>
+        <div class="grain"></div>
+        <div class="content">
+          <div class="brand">get<span>Placed</span></div>
+          <div class="split-copy">
+            <p class="kicker">Resume intelligence</p>
+            <h2 id="s6-title">From an ATS score to exact, evidence-backed fixes.</h2>
+            <p class="lede">Upload a resume, match it to the target job, preview improvements, and track versions over time.</p>
+            <div class="callouts">
+              <div class="callout"><b>A</b><p><strong>Action center:</strong> keywords, measurable impact, projects, links, formatting.</p></div>
+              <div class="callout"><b>B</b><p><strong>Impact preview:</strong> estimated gain before the candidate commits a change.</p></div>
+              <div class="callout"><b>C</b><p><strong>Builder and history:</strong> one-page output with version-to-version progress.</p></div>
+            </div>
+          </div>
+          <div class="bottom-line">
+            <span>ATS score / improvement plan / builder / version tracking</span>
+            <strong>Resume changes you can act on</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="7" aria-labelledby="s7-title">
+        <img class="screen focus-left" src="assets/interview.png" alt="AI mock interview configuration screen" />
+        <div class="scrim scrim-right"></div>
+        <div class="grain"></div>
+        <div class="content right-copy">
+          <div class="brand">get<span>Placed</span></div>
+          <div class="split-copy">
+            <p class="kicker">Interview readiness</p>
+            <h2 id="s7-title">Practice the interview before it counts.</h2>
+            <p class="lede">Company and role calibrated sessions cover technical depth, behavior, culture, voice, and communication.</p>
+            <div class="callouts">
+              <div class="callout"><b>AI</b><p><strong>Adaptive questions</strong> from the candidate's real profile and projects.</p></div>
+              <div class="callout"><b>STAR</b><p><strong>Answer diagnostics</strong> for clarity, structure, confidence, and conciseness.</p></div>
+            </div>
+          </div>
+          <div class="bottom-line">
+            <span>HR prep / communication lab / mock interview</span>
+            <strong>Role-calibrated practice</strong>
+          </div>
+        </div>
+        <figure class="inset-screen communication" aria-label="Communication diagnostics screenshot">
+          <img src="assets/communication.png" alt="Voice and communication diagnostics interface" />
+        </figure>
+      </section>
+
+      <section class="slide" data-slide="8" aria-labelledby="s8-title">
+        <img class="screen focus-left" src="assets/company.png" alt="Company hiring intelligence dossier" />
+        <div class="scrim scrim-right"></div>
+        <div class="grain"></div>
+        <div class="content right-copy">
+          <div class="brand">get<span>Placed</span></div>
+          <div class="split-copy">
+            <p class="kicker">Company and opportunity intelligence</p>
+            <h2 id="s8-title">Know the company. Know every round.</h2>
+            <p class="lede">Hiring philosophy, interview architecture, DSA patterns, production stack, culture, and matched openings in one dossier.</p>
+            <div class="mini-grid">
+              <div><strong>Company research</strong>Products, strategy, and recent context.</div>
+              <div><strong>Round calibration</strong>Format, focus areas, and passing bar.</div>
+              <div><strong>Role fit</strong>Skills and readiness against each opening.</div>
+              <div><strong>Action bridge</strong>Launch practice from the dossier.</div>
+            </div>
+          </div>
+          <div class="bottom-line">
+            <span>Company research / interview intelligence / jobs marketplace</span>
+            <strong>From research to opportunity</strong>
+          </div>
+        </div>
+        <figure class="inset-screen jobs" aria-label="Jobs marketplace screenshot">
+          <img src="assets/jobs.png" alt="Jobs marketplace and career matching interface" />
+        </figure>
+      </section>
+
+      <section class="slide" data-slide="9" aria-labelledby="s9-title">
+        <img class="screen focus-right" src="assets/academics.png" alt="Academic transcript and placement cutoff calculator" />
+        <div class="scrim scrim-left"></div>
+        <div class="grain"></div>
+        <div class="content">
+          <div class="brand">get<span>Placed</span></div>
+          <div class="split-copy">
+            <p class="kicker">Academic eligibility</p>
+            <h2 id="s9-title">Turn college scores into placement decisions.</h2>
+            <p class="lede">Track CGPA, calculate realistic semester targets, and screen eligibility across recruiter cutoffs.</p>
+            <div class="comparison">
+              <div class="comparison-panel">
+                <h3>Not generic advice</h3>
+                <p>“Increase your CGPA” is not a plan.</p>
+              </div>
+              <div class="comparison-arrow">→</div>
+              <div class="comparison-panel">
+                <h3>Exact feasibility</h3>
+                <p>Required SGPA, remaining semesters, reachable range, and company threshold.</p>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-line">
+            <span>Semester improvement / cutoff calculator / eligibility screening</span>
+            <strong>Eligibility, made actionable</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-slide="10" aria-labelledby="s10-title">
+        <img class="screen focus-left" src="assets/roadmap.png" alt="Personalized placement preparation roadmap" />
+        <div class="scrim scrim-right"></div>
+        <div class="grain"></div>
+        <div class="content right-copy">
+          <div class="brand">get<span>Placed</span></div>
+          <div class="split-copy">
+            <p class="kicker">Roadmap and momentum</p>
+            <h2 id="s10-title">Every gap becomes the next best action.</h2>
+            <p class="lede">An explainable priority engine turns readiness gaps into a measurable 7-day plan and an 8-week trajectory.</p>
+            <div class="callouts">
+              <div class="callout"><b>NOW</b><p><strong>Next actions</strong> ranked by impact, urgency, and prerequisite.</p></div>
+              <div class="callout"><b>THEN</b><p><strong>Snapshots</strong> explain what changed and why the score moved.</p></div>
+              <div class="callout"><b>GOAL</b><p><strong>Milestones</strong> keep progress visible without hiding remaining gaps.</p></div>
+            </div>
+          </div>
+          <div class="bottom-line">
+            <span>Recommendation engine / progress history / milestones / roadmap</span>
+            <strong>Progress that explains itself</strong>
+          </div>
+        </div>
+        <figure class="inset-screen progress" aria-label="Readiness progress screenshot">
+          <img src="assets/progress.png" alt="Placement readiness velocity and growth interface" />
+        </figure>
+      </section>
+
+      <section class="slide" data-slide="11" aria-labelledby="s11-title">
+        <img class="screen" src="assets/coach.png" alt="AI career coach interface" />
+        <div class="scrim scrim-heavy"></div>
+        <div class="grain"></div>
+        <div class="content centered engagement">
+          <div class="brand">get<span>Placed</span></div>
+          <p class="kicker">The engagement layer</p>
+          <h2 id="s11-title">A system that keeps students moving.</h2>
+          <p class="lede">The AI coach turns the entire product into a conversation, then connects learning and friendly competition to the same plan.</p>
+          <div class="feature-band">
+            <article><h3>AI Career Coach</h3><p>Conversational onboarding and profile-aware guidance.</p></article>
+            <article><h3>Study Library</h3><p>Resources selected for the candidate's actual gaps.</p></article>
+            <article><h3>Placement Arena</h3><p>Progress-based squads and readiness competition.</p></article>
+            <article><h3>Milestones</h3><p>Visible wins across a long preparation journey.</p></article>
+          </div>
+        </div>
+        <figure class="inset-screen library" aria-label="Study library screenshot">
+          <img src="assets/library.png" alt="Personalized study library interface" />
+        </figure>
+        <figure class="inset-screen arena" aria-label="Placement arena screenshot">
+          <img src="assets/arena.png" alt="Placement arena and squad battles interface" />
+        </figure>
+      </section>
+
+      <section class="slide" data-slide="12" aria-labelledby="s12-title">
+        <img class="screen" src="assets/company.png" alt="getPlaced company intelligence interface" />
+        <div class="scrim scrim-center"></div>
+        <div class="grain"></div>
+        <div class="content centered">
+          <div class="brand">get<span>Placed</span></div>
+          <p class="kicker">The outcome</p>
+          <h2 class="big-close" id="s12-title">From “I want this role” to <span>“I am ready.”</span></h2>
+          <div class="close-proof">
+            <div><strong>1</strong> connected placement journey</div>
+            <div><strong>7</strong> readiness dimensions</div>
+            <div><strong>0</strong> fake readiness data</div>
+          </div>
+          <p class="lede" style="margin-top: 2rem; max-width: 36ch;">getPlaced does not add another preparation tool. It connects the entire path to placement.</p>
+          <div class="proof-chip">Ready for the live product demo</div>
+        </div>
+      </section>
+    </main>
+
+    <button class="tap-zone prev" type="button" aria-label="Previous slide"></button>
+    <button class="tap-zone next" type="button" aria-label="Next slide"></button>
+
+    <script>
+      (() => {
+        const slides = [...document.querySelectorAll(".slide")];
+        const total = slides.length;
+        let current = 1;
+
+        const requested = Number(new URLSearchParams(window.location.search).get("slide"));
+        if (Number.isFinite(requested) && requested >= 1 && requested <= total) current = requested;
+
+        function show(index, updateUrl = true) {
+          current = Math.min(total, Math.max(1, index));
+          slides.forEach((slide, position) => {
+            const active = position === current - 1;
+            slide.classList.toggle("is-active", active);
+            slide.setAttribute("aria-hidden", String(!active));
+          });
+
+          document.title = `getPlaced - Slide ${current} of ${total}`;
+          if (updateUrl) {
+            const url = new URL(window.location.href);
+            url.searchParams.set("slide", String(current));
+            window.history.replaceState({}, "", url);
+          }
+        }
+
+        function next() { show(current + 1); }
+        function previous() { show(current - 1); }
+
+        document.querySelector(".tap-zone.next").addEventListener("click", next);
+        document.querySelector(".tap-zone.prev").addEventListener("click", previous);
+
+        window.addEventListener("keydown", (event) => {
+          if (["ArrowRight", "PageDown", " "].includes(event.key)) {
+            event.preventDefault();
+            next();
+          }
+          if (["ArrowLeft", "PageUp"].includes(event.key)) {
+            event.preventDefault();
+            previous();
+          }
+          if (event.key === "Home") show(1);
+          if (event.key === "End") show(total);
+          if (event.key.toLowerCase() === "f" && document.fullscreenEnabled) {
+            if (document.fullscreenElement) document.exitFullscreen();
+            else document.documentElement.requestFullscreen();
+          }
+        });
+
+        show(current, false);
+      })();
+    </script>
+  </body>
+</html>

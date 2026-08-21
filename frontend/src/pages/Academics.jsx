@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -18,6 +19,8 @@ import {
   BookOpen,
   Layers,
   Sparkles,
+  Database,
+  ExternalLink,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
 import TargetCutoffCalculator from "@/components/academics/TargetCutoffCalculator";
@@ -28,11 +31,20 @@ export default function Academics() {
   const [academicData, setAcademicData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditingSemesters, setIsEditingSemesters] = useState(false);
-  const [semesters, setSemesters] = useState([]);
+  const [semesters, setSemesters] = useState([
+    { semesterNumber: 1, sgpa: 8.85, credits: 20.5, isCompleted: true },
+    { semesterNumber: 2, sgpa: 8.73, credits: 24.5, isCompleted: true },
+    { semesterNumber: 3, sgpa: 9.09, credits: 30.5, isCompleted: true },
+    { semesterNumber: 4, sgpa: 9.06, credits: 29.5, isCompleted: true },
+    { semesterNumber: 5, sgpa: null, credits: 24.0, isCompleted: false },
+    { semesterNumber: 6, sgpa: null, credits: 24.0, isCompleted: false },
+    { semesterNumber: 7, sgpa: null, credits: 20.0, isCompleted: false },
+    { semesterNumber: 8, sgpa: null, credits: 16.0, isCompleted: false },
+  ]);
   const [tenthPct, setTenthPct] = useState(88.5);
   const [twelfthPct, setTwelfthPct] = useState(86.0);
   const [activeBacklogs, setActiveBacklogs] = useState(0);
-  const [branch, setBranch] = useState("Computer Science & Engineering");
+  const [branch, setBranch] = useState("Electronics and Computer Engineering");
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
@@ -137,12 +149,21 @@ export default function Academics() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
             {saveSuccess && (
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/30">
                 <CheckCircle2 className="w-4 h-4" /> Changes Saved
               </span>
             )}
+
+            <Link
+              to="/app/vtop"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600/15 border border-blue-500/30 text-blue-300 hover:text-white hover:bg-blue-600/25 text-xs font-semibold transition-all duration-200"
+            >
+              <Database className="w-3.5 h-3.5 text-blue-400" />
+              <span>VTOP Live Sync & Marksheets</span>
+              <ExternalLink className="w-3 h-3 text-blue-400" />
+            </Link>
 
             <button
               type="button"
@@ -252,11 +273,20 @@ export default function Academics() {
                 Semester SGPA Distribution
               </h3>
               <p className="text-xs text-zinc-400 mt-1">
-                Progression metrics and credit allocations across all 8 academic semesters
+                Progression metrics and credit allocations computed via <strong>StudentCC</strong> formula across all semesters
               </p>
             </div>
-            <div className="text-xs font-mono font-semibold px-3.5 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 self-start sm:self-auto">
-              Weighted Average: {currentCgpa} CGPA
+            <div className="flex items-center gap-3">
+              <Link
+                to="/app/vtop"
+                className="text-xs font-mono text-blue-400 hover:text-blue-300 flex items-center gap-1.5 bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20 transition-colors"
+              >
+                <span>Inspect All 47 Subject Grades</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <div className="text-xs font-mono font-semibold px-3.5 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 self-start sm:self-auto">
+                Cumulative CGPA: {currentCgpa}
+              </div>
             </div>
           </div>
 

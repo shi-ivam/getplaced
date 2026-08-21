@@ -56,13 +56,20 @@ export default function VtopDetails() {
   const [showPassword, setShowPassword] = useState(false);
 
   // Live Login Form State
-  const [username, setUsername] = useState("22BCE1042");
+  const [username, setUsername] = useState("24BLC1103");
   const [password, setPassword] = useState("");
   const [captchaText, setCaptchaText] = useState("");
   const [captchaImage, setCaptchaImage] = useState("");
   const [sessionId, setSessionId] = useState("");
   const [loadingCaptcha, setLoadingCaptcha] = useState(false);
   const [portalConnected, setPortalConnected] = useState(true);
+
+  // StudentCC GPA Engine State
+  const [selectedSemModal, setSelectedSemModal] = useState(null);
+  const [calcTargetCgpa, setCalcTargetCgpa] = useState("9.00");
+  const [calcNextSemCredits, setCalcNextSemCredits] = useState("24");
+  const [predictorExpectedSgpa, setPredictorExpectedSgpa] = useState("9.20");
+  const [predictorCredits, setPredictorCredits] = useState("24");
 
   const fetchVtopData = async () => {
     try {
@@ -260,6 +267,113 @@ export default function VtopDetails() {
     acc[curr.grade] = (acc[curr.grade] || 0) + 1;
     return acc;
   }, {});
+
+  // Semester-wise GPA Calculation Engine (StudentCC Algorithm)
+  const semesterWiseGPAs = React.useMemo(() => {
+    const gradePointMap = { S: 10, A: 9, B: 8, C: 7, D: 6, E: 5, F: 0, N: 0 };
+    const semMap = new Map();
+
+    const records = vtopData?.gradeHistory || [];
+    if (records.length === 0) {
+      return [
+        {
+          semesterName: "Dec-2024 (Sem 1)",
+          sgpa: 8.85,
+          runningCgpa: 8.85,
+          creditsRegistered: 20.5,
+          gradedCredits: 19.5,
+          creditsEarned: 20.5,
+          gradeCounts: { S: 3, A: 4, B: 3, P: 1 },
+          coursesCount: 11,
+          courses: [],
+        },
+        {
+          semesterName: "Apr-2025 (Sem 2)",
+          sgpa: 8.73,
+          runningCgpa: 8.79,
+          creditsRegistered: 24.5,
+          gradedCredits: 22.5,
+          creditsEarned: 24.5,
+          gradeCounts: { S: 2, A: 5, B: 3, P: 1 },
+          coursesCount: 11,
+          courses: [],
+        },
+        {
+          semesterName: "Nov-2025 (Sem 3)",
+          sgpa: 9.09,
+          runningCgpa: 8.91,
+          creditsRegistered: 30.5,
+          gradedCredits: 28.5,
+          creditsEarned: 30.5,
+          gradeCounts: { S: 4, A: 5, B: 2, P: 1 },
+          coursesCount: 12,
+          courses: [],
+        },
+        {
+          semesterName: "Apr-2026 (Sem 4)",
+          sgpa: 9.06,
+          runningCgpa: 8.95,
+          creditsRegistered: 29.5,
+          gradedCredits: 25.5,
+          creditsEarned: 29.5,
+          gradeCounts: { S: 4, A: 5, B: 2, P: 2 },
+          coursesCount: 13,
+          courses: [],
+        },
+      ];
+    }
+
+    records.forEach((c) => {
+      const sem = c.semester || "Past Semester";
+      if (!semMap.has(sem)) semMap.set(sem, []);
+      semMap.get(sem).push(c);
+    });
+
+    let cumGradedCredits = 0;
+    let cumGradePoints = 0;
+    const list = [];
+
+    for (const [semName, courses] of semMap.entries()) {
+      let semTotalCredits = 0;
+      let semGradedCredits = 0;
+      let semGradePoints = 0;
+      let semEarnedCredits = 0;
+      const counts = {};
+
+      courses.forEach((c) => {
+        const cr = Number(c.credits) || 0;
+        semTotalCredits += cr;
+        counts[c.grade] = (counts[c.grade] || 0) + 1;
+        if (c.grade !== "F" && c.grade !== "N") {
+          semEarnedCredits += cr;
+        }
+        const pts = gradePointMap[c.grade];
+        if (pts !== undefined) {
+          semGradedCredits += cr;
+          semGradePoints += pts * cr;
+        }
+      });
+
+      const sgpa = semGradedCredits > 0 ? Number((semGradePoints / semGradedCredits).toFixed(2)) : 0;
+      cumGradedCredits += semGradedCredits;
+      cumGradePoints += semGradePoints;
+      const runningCgpa = cumGradedCredits > 0 ? Number((cumGradePoints / cumGradedCredits).toFixed(2)) : 0;
+
+      list.push({
+        semesterName: semName,
+        sgpa,
+        runningCgpa,
+        creditsRegistered: semTotalCredits,
+        gradedCredits: semGradedCredits,
+        creditsEarned: semEarnedCredits,
+        gradeCounts: counts,
+        coursesCount: courses.length,
+        courses,
+      });
+    }
+
+    return list;
+  }, [vtopData]);
 
   return (
     <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-white">
@@ -614,6 +728,235 @@ export default function VtopDetails() {
                 </div>
               );
             })}
+          </div>
+        </section>
+
+        {/* Semester-Wise SGPA Progression & StudentCC Marksheet Matrix */}
+        <section className="gsap-vtop-item rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-white/10">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <GraduationCap className="w-5 h-5 text-purple-400" />
+                <h3 className="text-xl font-bold text-white tracking-tight">
+                  Semester-Wise GPA (SGPA) & Marksheet Matrix
+                </h3>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed max-w-3xl">
+                Calculated strictly following the official <strong>Salmanmalvasi/StudentCC</strong> GPA engine (S = 10, A = 9, B = 8, C = 7, D = 6, E = 5, F/N = 0, P = Pass / Non-graded). Click any semester card to inspect all individual course marks and weighted grade contributions.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="px-3.5 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold">
+                Overall CGPA: {vtopData?.currentCgpa || 8.95}
+              </div>
+              <div className="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
+                Total Earned: {vtopData?.totalCreditsEarned || 96} Credits
+              </div>
+            </div>
+          </div>
+
+          {/* Semester Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {semesterWiseGPAs.map((sem, idx) => (
+              <div
+                key={idx}
+                onClick={() => sem.courses && sem.courses.length > 0 && setSelectedSemModal(sem)}
+                className="group relative overflow-hidden rounded-2xl bg-zinc-950/80 border border-white/10 hover:border-purple-500/50 p-5 transition-all duration-300 flex flex-col justify-between cursor-pointer hover:shadow-xl hover:shadow-purple-500/5 hover:-translate-y-0.5"
+              >
+                {/* Header Tag */}
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-white/10 text-zinc-300 text-xs font-mono font-bold">
+                    {sem.semesterName}
+                  </span>
+                  <span className="text-[10px] font-mono text-zinc-500">
+                    {sem.coursesCount} Courses
+                  </span>
+                </div>
+
+                {/* Main SGPA Score */}
+                <div className="my-4">
+                  <div className="text-xs text-zinc-400 font-medium">Semester SGPA</div>
+                  <div className="text-3xl font-extrabold text-white font-mono tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 group-hover:scale-105 transition-transform duration-300 origin-left">
+                    {Number(sem.sgpa).toFixed(2)}
+                  </div>
+                  <div className="text-xs text-zinc-400 font-mono mt-1">
+                    Running CGPA: <span className="text-emerald-400 font-bold">{Number(sem.runningCgpa).toFixed(2)}</span>
+                  </div>
+                </div>
+
+                {/* Credit Breakdown & Grade Badges */}
+                <div className="space-y-3 pt-3 border-t border-white/5 text-xs font-mono">
+                  <div className="flex items-center justify-between text-zinc-400">
+                    <span>Graded Credits:</span>
+                    <span className="text-white font-bold">{sem.gradedCredits} / {sem.creditsRegistered}</span>
+                  </div>
+
+                  {/* Mini Grade Badges */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {Object.entries(sem.gradeCounts || {}).map(([grade, count]) => (
+                      <span
+                        key={grade}
+                        className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                          grade === "S"
+                            ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                            : grade === "A"
+                            ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                            : grade === "B"
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            : "bg-zinc-800 text-zinc-400"
+                        }`}
+                      >
+                        {count}×'{grade}'
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="text-[11px] text-purple-400 font-sans font-medium flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                    <span>Inspect Course List</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* StudentCC Interactive Target Estimator & SGPA Simulator */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
+            {/* 1. Target CGPA Estimator */}
+            <div className="p-6 rounded-2xl bg-zinc-950/70 border border-white/10 space-y-4">
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-purple-400" />
+                <h4 className="text-sm font-bold text-white tracking-tight">
+                  StudentCC Target CGPA Estimator
+                </h4>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Formula: Required SGPA = [Target CGPA × (Current Credits + Next Credits) − Current CGPA × Current Credits] ÷ Next Credits
+              </p>
+
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <label className="text-zinc-400 font-mono block mb-1">Target CGPA Goal</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="10"
+                    value={calcTargetCgpa}
+                    onChange={(e) => setCalcTargetCgpa(e.target.value)}
+                    className="w-full bg-zinc-900 text-white font-mono px-3 py-2 rounded-xl border border-white/10 focus:border-purple-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-zinc-400 font-mono block mb-1">Next Sem Credits</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="1"
+                    max="35"
+                    value={calcNextSemCredits}
+                    onChange={(e) => setCalcNextSemCredits(e.target.value)}
+                    className="w-full bg-zinc-900 text-white font-mono px-3 py-2 rounded-xl border border-white/10 focus:border-purple-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Result computation */}
+              {(() => {
+                const target = parseFloat(calcTargetCgpa) || 9.0;
+                const nextCr = parseFloat(calcNextSemCredits) || 24.0;
+                const curCgpa = vtopData?.currentCgpa || 8.95;
+                const curCr = vtopData?.totalCreditsEarned || 96.0;
+                const reqSgpa = ((target * (curCr + nextCr)) - (curCgpa * curCr)) / nextCr;
+
+                const isAchievable = reqSgpa <= 10.0 && reqSgpa >= 0;
+                return (
+                  <div className={`p-3.5 rounded-xl border text-xs font-mono flex items-center justify-between ${
+                    isAchievable
+                      ? "bg-purple-500/10 border-purple-500/30 text-purple-200"
+                      : "bg-rose-500/10 border-rose-500/30 text-rose-300"
+                  }`}>
+                    <div>
+                      <span className="text-zinc-400 block text-[11px]">Required Next Sem SGPA:</span>
+                      <span className="text-lg font-bold font-mono">
+                        {isAchievable ? reqSgpa.toFixed(2) : reqSgpa > 10 ? "> 10.00 (Exceeds Max)" : "Already Cleared"}
+                      </span>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${
+                      isAchievable ? "bg-purple-500/20 text-purple-300" : "bg-rose-500/20 text-rose-300"
+                    }`}>
+                      {isAchievable ? "Achievable" : "Adjustment Needed"}
+                    </span>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* 2. CGPA Predictor */}
+            <div className="p-6 rounded-2xl bg-zinc-950/70 border border-white/10 space-y-4">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-blue-400" />
+                <h4 className="text-sm font-bold text-white tracking-tight">
+                  StudentCC New CGPA Predictor
+                </h4>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Formula: New CGPA = [Current CGPA × Current Credits + Expected SGPA × Next Credits] ÷ [Current Credits + Next Credits]
+              </p>
+
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <label className="text-zinc-400 font-mono block mb-1">Expected Sem SGPA</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="10"
+                    value={predictorExpectedSgpa}
+                    onChange={(e) => setPredictorExpectedSgpa(e.target.value)}
+                    className="w-full bg-zinc-900 text-white font-mono px-3 py-2 rounded-xl border border-white/10 focus:border-blue-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-zinc-400 font-mono block mb-1">Semester Credits</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="1"
+                    max="35"
+                    value={predictorCredits}
+                    onChange={(e) => setPredictorCredits(e.target.value)}
+                    className="w-full bg-zinc-900 text-white font-mono px-3 py-2 rounded-xl border border-white/10 focus:border-blue-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Result computation */}
+              {(() => {
+                const expSgpa = parseFloat(predictorExpectedSgpa) || 9.2;
+                const nextCr = parseFloat(predictorCredits) || 24.0;
+                const curCgpa = vtopData?.currentCgpa || 8.95;
+                const curCr = vtopData?.totalCreditsEarned || 96.0;
+                const newCgpa = ((curCgpa * curCr) + (expSgpa * nextCr)) / (curCr + nextCr);
+                const delta = newCgpa - curCgpa;
+
+                return (
+                  <div className="p-3.5 rounded-xl border bg-blue-500/10 border-blue-500/30 text-blue-200 text-xs font-mono flex items-center justify-between">
+                    <div>
+                      <span className="text-zinc-400 block text-[11px]">Predicted New CGPA:</span>
+                      <span className="text-lg font-bold font-mono text-white">
+                        {newCgpa.toFixed(2)}
+                      </span>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${
+                      delta >= 0 ? "bg-emerald-500/20 text-emerald-300" : "bg-rose-500/20 text-rose-300"
+                    }`}>
+                      {delta >= 0 ? `+${delta.toFixed(2)} Gain` : `${delta.toFixed(2)} Drop`}
+                    </span>
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         </section>
 
@@ -1034,6 +1377,93 @@ export default function VtopDetails() {
                   </div>
                 </form>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Semester Course Breakdown Modal */}
+        {selectedSemModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+            <div className="w-full max-w-4xl rounded-3xl bg-zinc-900 border border-white/10 p-6 md:p-8 shadow-2xl space-y-6 max-h-[85vh] overflow-y-auto">
+              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                    <BookOpen className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white tracking-tight">
+                      {selectedSemModal.semesterName} • Subject Marksheet
+                    </h3>
+                    <p className="text-xs text-zinc-400 font-mono">
+                      SGPA: <span className="text-purple-300 font-bold">{selectedSemModal.sgpa}</span> • Earned Credits: <span className="text-emerald-300 font-bold">{selectedSemModal.creditsEarned}</span> • Running CGPA: <span className="text-blue-300 font-bold">{selectedSemModal.runningCgpa}</span>
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSemModal(null)}
+                  className="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-mono text-zinc-300 cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="overflow-x-auto rounded-xl border border-white/5 bg-zinc-950/60">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-white/10 bg-zinc-950 text-zinc-400 font-mono">
+                      <th className="py-3 px-4 font-semibold">Course Code</th>
+                      <th className="py-3 px-4 font-semibold">Course Title</th>
+                      <th className="py-3 px-3 font-semibold text-center">Type</th>
+                      <th className="py-3 px-3 font-semibold text-right">Credits</th>
+                      <th className="py-3 px-3 font-semibold text-center">Grade</th>
+                      <th className="py-3 px-3 font-semibold text-right">Grade Pts</th>
+                      <th className="py-3 px-4 font-semibold text-right">Weighted Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 font-mono">
+                    {selectedSemModal.courses?.map((c, idx) => {
+                      const pts = { S: 10, A: 9, B: 8, C: 7, D: 6, E: 5, F: 0, N: 0 }[c.grade] ?? null;
+                      const weighted = pts !== null ? (pts * (Number(c.credits) || 0)).toFixed(1) : "— (Non-graded Pass)";
+
+                      return (
+                        <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
+                          <td className="py-2.5 px-4 text-purple-400 font-bold">{c.code || c.courseCode}</td>
+                          <td className="py-2.5 px-4 text-zinc-200 font-sans font-medium">{c.title || c.courseTitle}</td>
+                          <td className="py-2.5 px-3 text-center text-zinc-400">{c.type || c.courseType || "Theory"}</td>
+                          <td className="py-2.5 px-3 text-right text-white font-bold">{c.credits}</td>
+                          <td className="py-2.5 px-3 text-center">
+                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                              c.grade === "S"
+                                ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                                : c.grade === "A"
+                                ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                                : c.grade === "B"
+                                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                : c.grade === "P"
+                                ? "bg-zinc-800 text-zinc-300 border border-zinc-700"
+                                : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                            }`}>
+                              {c.grade}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-right text-zinc-300">{pts !== null ? pts.toFixed(1) : "—"}</td>
+                          <td className="py-2.5 px-4 text-right text-emerald-400 font-bold">{weighted}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="p-4 rounded-xl bg-zinc-950/80 border border-white/5 flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+                <div className="text-zinc-400">
+                  Total Graded Credits: <span className="text-white font-bold">{selectedSemModal.gradedCredits}</span> / Registered: <span className="text-white font-bold">{selectedSemModal.creditsRegistered}</span>
+                </div>
+                <div className="text-purple-300 font-bold text-sm">
+                  Semester SGPA: {selectedSemModal.sgpa}
+                </div>
+              </div>
             </div>
           </div>
         )}
