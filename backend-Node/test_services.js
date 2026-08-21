@@ -207,11 +207,15 @@ async function runAllTests() {
   // 3. LeetCode Service Tests
   console.log("\n[3] LeetCode Service Tests");
 
-  await test("extractLeetCodeUsername extracts username cleanly", () => {
+  await test("extractLeetCodeUsername extracts username cleanly from URLs, @ handles, and parameters", () => {
     assert.equal(extractLeetCodeUsername("john_doe"), "john_doe");
     assert.equal(extractLeetCodeUsername("@john_doe"), "john_doe");
     assert.equal(extractLeetCodeUsername("https://leetcode.com/u/john_doe"), "john_doe");
     assert.equal(extractLeetCodeUsername("https://leetcode.com/john_doe/"), "john_doe");
+    assert.equal(extractLeetCodeUsername("http://leetcode.cn/u/john_doe/"), "john_doe");
+    assert.equal(extractLeetCodeUsername("https://leetcode.com/u/john_doe?tab=overview#solutions"), "john_doe");
+    assert.equal(extractLeetCodeUsername("   tourist   "), "tourist");
+    assert.equal(extractLeetCodeUsername(""), "");
   });
 
   await test("calculateLeetCodeDsaScore computes balanced placement score", () => {
@@ -243,9 +247,25 @@ async function runAllTests() {
   });
 
   await test("classifyConsistencyArchetype returns valid archetype", () => {
-    const archetype = classifyConsistencyArchetype(15, 45, 120, 2);
+    const archetype = classifyConsistencyArchetype(15, 45, 120, {});
     assert.ok(archetype.name);
     assert.ok(archetype.badge);
+  });
+
+  await test("formatLeetCodeProfileResponse formats profile doc and preserves null contest fields", () => {
+    const formatted = formatLeetCodeProfileResponse({
+      username: "test_user",
+      totalSolved: 150,
+      easySolved: 60,
+      mediumSolved: 70,
+      hardSolved: 20,
+      contest: { rating: null, globalRank: null },
+      syncStatus: "synced",
+    });
+    assert.equal(formatted.username, "test_user");
+    assert.equal(formatted.totalSolved, 150);
+    assert.equal(formatted.contest.rating, null);
+    assert.equal(formatted.contest.globalRank, null);
   });
 
   // 4. Level Gap & Readiness Engine Tests
