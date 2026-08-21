@@ -75,7 +75,44 @@ function createVtopClient(initialCookies = "") {
 /**
  * Step 1: Initialize VTOP pre-login session and extract fresh captcha image + tokens
  */
-export async function getLiveVtopCaptcha(userId) {
+export async function getLiveVtopCaptcha(userId, existingSessionId = null) {
+  // If an existing valid session is passed, attempt to refresh captcha using /get/new/captcha
+  if (existingSessionId && activeSessions.has(existingSessionId)) {
+    const session = activeSessions.get(existingSessionId);
+    try {
+      const sessionWrapper = createVtopClient(session.cookies);
+      const client = sessionWrapper.client;
+
+      const refreshRes = await client.get("/get/new/captcha", {
+        headers: {
+          Referer: `${VTOP_BASE_URL}/prelogin/setup`,
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      });
+
+      const doc = cheerio.load(refreshRes.data || "");
+      const captchaSrc = doc("#captchaBlock img").attr("src") || doc("img").attr("src") || "";
+
+      if (captchaSrc && captchaSrc.startsWith("data:image")) {
+        // Update session cookies and return refreshed captcha
+        session.cookies = sessionWrapper.getCookies();
+        activeSessions.set(existingSessionId, session);
+
+        return {
+          success: true,
+          sessionId: existingSessionId,
+          captchaImage: captchaSrc,
+          csrfToken: session.csrfToken,
+          portalConnected: true,
+          portalUrl: `${VTOP_BASE_URL}/login`,
+        };
+      }
+    } catch (err) {
+      console.warn("Session-based captcha refresh failed, falling back to full handshake:", err.message);
+    }
+  }
+
+  // Full handshake: GET /login -> POST /prelogin/setup
   const sessionWrapper = createVtopClient();
   const client = sessionWrapper.client;
   const sessionId = `vtop_sess_${userId}_${Date.now()}`;
@@ -100,7 +137,7 @@ export async function getLiveVtopCaptcha(userId) {
     });
 
     const doc2 = cheerio.load(preloginRes.data || "");
-    let captchaSrc = doc2("#captchaBlock img").attr("src") || "";
+    let captchaSrc = doc2("#captchaBlock img").attr("src") || doc2("img.img-fluid").attr("src") || "";
     let loginCsrf = doc2('#vtopLoginForm input[name="_csrf"]').val() || doc2('input[name="_csrf"]').val() || stdCsrf;
 
     // If prelogin redirected or captcha in GET /login
@@ -109,18 +146,12 @@ export async function getLiveVtopCaptcha(userId) {
         headers: { Referer: `${VTOP_BASE_URL}/login` },
       });
       const doc3 = cheerio.load(loginPageRes.data || "");
-      captchaSrc = doc3("#captchaBlock img").attr("src") || "";
+      captchaSrc = doc3("#captchaBlock img").attr("src") || doc3("img.img-fluid").attr("src") || "";
       loginCsrf = doc3('#vtopLoginForm input[name="_csrf"]').val() || doc3('input[name="_csrf"]').val() || loginCsrf;
     }
 
-    // If server rendered dummy or empty, provide a clean fallback
-    if (!captchaSrc) {
-      captchaSrc = "data:image/svg+xml;utf8," + encodeURIComponent(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="140" height="42" viewBox="0 0 140 42">
-          <rect width="140" height="42" fill="#18181b" rx="8"/>
-          <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#c084fc" font-family="monospace" font-weight="bold" font-size="20" letter-spacing="5">VTOP7</text>
-        </svg>
-      `);
+    if (!captchaSrc || !captchaSrc.startsWith("data:image")) {
+      throw new Error("Could not extract dynamic captcha from VTOP portal");
     }
 
     // Save session in memory for Step 2
@@ -142,38 +173,33 @@ export async function getLiveVtopCaptcha(userId) {
   } catch (error) {
     console.warn("VTOP Live Captcha Handshake warning:", error.message);
 
-    const fallbackCaptcha = "data:image/svg+xml;utf8," + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="140" height="42" viewBox="0 0 140 42">
-        <rect width="140" height="42" fill="#18181b" rx="8"/>
-        <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#c084fc" font-family="monospace" font-weight="bold" font-size="20" letter-spacing="5">K7N9P</text>
-      </svg>
-    `);
-
-    activeSessions.set(sessionId, {
-      cookies: "JSESSIONID=demo; SERVERID=vt1",
-      csrfToken: "vtop_csrf_token_local",
-      userId,
-      isSimulated: true,
-      createdAt: Date.now(),
-    });
-
     return {
-      success: true,
+      success: false,
       sessionId,
-      captchaImage: fallbackCaptcha,
-      csrfToken: "vtop_csrf_token_local",
+      captchaImage: "",
       portalConnected: false,
-      message: "Connected via VTOP Secure Gateway (Local/Proxy Sandbox Mode)",
+      error: "Could not establish connection to VTOP portal. Please verify network access.",
     };
   }
 }
 
 /**
- * Step 2: Authenticate using credentials + captcha and harvest transcript, marksheet, and attendance
+ * Step 2: Authenticate using credentials + dynamic captcha and harvest transcript, marksheet, and attendance
  */
 export async function authenticateAndScrapeVtop(userId, credentials) {
   const { username, password, captchaStr, sessionId, semesterId } = credentials;
+
+  if (!captchaStr || !captchaStr.trim()) {
+    return { success: false, error: "Please enter the captcha characters shown in the image." };
+  }
+
   const session = activeSessions.get(sessionId);
+  if (!session) {
+    return {
+      success: false,
+      error: "VTOP session expired. Please refresh the captcha and try again.",
+    };
+  }
 
   const user = await User.findById(userId);
   let vtop = await VtopProfile.findOne({ userId });
@@ -181,99 +207,146 @@ export async function authenticateAndScrapeVtop(userId, credentials) {
     vtop = new VtopProfile(generateDefaultVtopData(userId, user));
   }
 
-  // Attempt live connection if session exists
-  if (session && !session.isSimulated) {
-    try {
-      const sessionWrapper = createVtopClient(session.cookies);
-      const client = sessionWrapper.client;
-      const csrf = session.csrfToken;
+  try {
+    const sessionWrapper = createVtopClient(session.cookies);
+    const client = sessionWrapper.client;
+    const csrf = session.csrfToken;
 
-      const loginPayload = new URLSearchParams({
-        username: username.trim(),
-        password: password.trim(),
-        captchaStr: captchaStr.trim(),
-        _csrf: csrf,
-      }).toString();
+    const loginPayload = new URLSearchParams({
+      username: username.trim(),
+      password: password.trim(),
+      captchaStr: captchaStr.trim(),
+      _csrf: csrf,
+    }).toString();
 
-      const loginRes = await client.post("/login", loginPayload, {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Referer: `${VTOP_BASE_URL}/login`,
-          "X-Requested-With": "XMLHttpRequest",
-        },
-      });
+    const loginRes = await client.post("/login", loginPayload, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Referer: `${VTOP_BASE_URL}/login`,
+        "X-Requested-With": "XMLHttpRequest",
+      },
+    });
 
-      const responseText = typeof loginRes.data === "string" ? loginRes.data : JSON.stringify(loginRes.data);
-      const pageLower = responseText.toLowerCase();
+    const responseText = typeof loginRes.data === "string" ? loginRes.data : JSON.stringify(loginRes.data);
+    const pageLower = responseText.toLowerCase();
+    const doc = cheerio.load(responseText);
 
-      // Check VTOP specific error messages
+    // Check if authenticated
+    const authorizedId = doc("#authorizedIDX").val() || doc('input[name="authorizedID"]').val();
+    const isAuthorized =
+      Boolean(authorizedId) ||
+      responseText.includes("authorizedIDX") ||
+      responseText.includes("doStudentMarkView") ||
+      responseText.includes("logout");
+
+    if (!isAuthorized) {
+      // Determine exact error reason
+      let errorMsg = "VTOP Login failed. Please verify credentials and captcha.";
+      const alertText = doc(".alert, .text-danger, #errorMsg, span.text-danger").text().trim();
+
       if (pageLower.includes("invalid captcha")) {
-        return { success: false, error: "Invalid Captcha entered. Please refresh captcha and try again." };
-      }
-      if (
+        errorMsg = "Invalid Captcha entered. Please try again with the new captcha.";
+      } else if (
         pageLower.includes("invalid user name") ||
         pageLower.includes("invalid login id") ||
         pageLower.includes("invalid password") ||
-        pageLower.includes("user does not exist")
+        pageLower.includes("user does not exist") ||
+        pageLower.includes("invalid user") ||
+        pageLower.includes("invalid credentials")
       ) {
-        return { success: false, error: "Invalid VTOP Registration Number or Password." };
-      }
-      if (pageLower.includes("account is locked")) {
-        return { success: false, error: "Your VTOP account is locked. Please reset password on VTOP." };
+        errorMsg = "Invalid VTOP Registration Number or Password.";
+      } else if (pageLower.includes("account is locked") || pageLower.includes("locked")) {
+        errorMsg = "Your VTOP account is locked. Please reset your password on the VTOP portal.";
+      } else if (alertText) {
+        errorMsg = alertText;
       }
 
-      // Check if authorizedIDX exists
-      const doc = cheerio.load(responseText);
-      const authorizedId = doc("#authorizedIDX").val() || doc('input[name="authorizedID"]').val();
-      const updatedCsrf = doc('input[name="_csrf"]').val() || csrf;
+      // Extract new dynamic captcha generated by VTOP after failed attempt
+      let newCaptchaSrc = doc("#captchaBlock img").attr("src") || doc("img.img-fluid").attr("src") || "";
+      const newCsrf = doc('#vtopLoginForm input[name="_csrf"]').val() || doc('input[name="_csrf"]').val() || csrf;
 
-      if (authorizedId || responseText.includes("authorizedIDX")) {
-        // Scrape Live VTOP Endpoints
-        await harvestVtopLiveDetails(client, authorizedId || "AUTH_OK", updatedCsrf, vtop, semesterId);
+      // If response didn't include image directly, fetch new captcha on existing session
+      if (!newCaptchaSrc || !newCaptchaSrc.startsWith("data:image")) {
+        try {
+          const refreshRes = await client.get("/get/new/captcha", {
+            headers: {
+              Referer: `${VTOP_BASE_URL}/prelogin/setup`,
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          });
+          const rDoc = cheerio.load(refreshRes.data || "");
+          newCaptchaSrc = rDoc("#captchaBlock img").attr("src") || rDoc("img").attr("src") || "";
+        } catch (e) {
+          console.warn("Could not fetch new captcha after failed login:", e.message);
+        }
       }
-    } catch (err) {
-      console.warn("Live scraping completed with synchronization fallback:", err.message);
+
+      // Update session for retry
+      activeSessions.set(sessionId, {
+        cookies: sessionWrapper.getCookies(),
+        csrfToken: newCsrf,
+        userId,
+        createdAt: Date.now(),
+      });
+
+      return {
+        success: false,
+        error: errorMsg,
+        newCaptchaImage: newCaptchaSrc,
+        sessionId,
+      };
     }
+
+    // Successfully Authenticated!
+    const updatedCsrf = doc('input[name="_csrf"]').val() || csrf;
+    await harvestVtopLiveDetails(client, authorizedId || "AUTH_OK", updatedCsrf, vtop, semesterId);
+
+    // Update profile with user-provided credentials
+    vtop.regNo = username.toUpperCase();
+    vtop.lastSyncedAt = new Date();
+    vtop.syncStatus = "synced";
+    if (semesterId) vtop.activeSemesterId = semesterId;
+
+    await vtop.save();
+
+    // Synchronize AcademicProfile and User
+    await AcademicProfile.findOneAndUpdate(
+      { userId },
+      {
+        currentCgpa: vtop.currentCgpa,
+        activeBacklogs: vtop.activeBacklogs,
+        historyOfBacklogs: vtop.historyOfBacklogs,
+        college: "VIT Chennai",
+        degree: "B.Tech",
+        branch: "Computer Science & Engineering",
+      },
+      { upsert: true }
+    );
+
+    await User.findByIdAndUpdate(userId, {
+      regNo: vtop.regNo,
+      cgpa: vtop.currentCgpa,
+    });
+
+    // Clean up session
+    activeSessions.delete(sessionId);
+
+    const placementImpact = computeVtopPlacementImpact(vtop);
+
+    return {
+      success: true,
+      message: `Successfully logged in to VTOP as ${username.toUpperCase()} and extracted live marksheet & GPA.`,
+      vtop,
+      placementImpact,
+    };
+  } catch (err) {
+    console.error("VTOP Live login error:", err.message);
+    return {
+      success: false,
+      error: err.message || "An unexpected error occurred during VTOP authentication.",
+      sessionId,
+    };
   }
-
-  // Update profile with user-provided credentials
-  vtop.regNo = username.toUpperCase();
-  vtop.lastSyncedAt = new Date();
-  vtop.syncStatus = "synced";
-  if (semesterId) vtop.activeSemesterId = semesterId;
-
-  await vtop.save();
-
-  // Synchronize AcademicProfile and User
-  await AcademicProfile.findOneAndUpdate(
-    { userId },
-    {
-      currentCgpa: vtop.currentCgpa,
-      activeBacklogs: vtop.activeBacklogs,
-      historyOfBacklogs: vtop.historyOfBacklogs,
-      college: "VIT Chennai",
-      degree: "B.Tech",
-      branch: "Computer Science & Engineering",
-    },
-    { upsert: true }
-  );
-
-  await User.findByIdAndUpdate(userId, {
-    regNo: vtop.regNo,
-    cgpa: vtop.currentCgpa,
-  });
-
-  // Clean up session
-  if (sessionId) activeSessions.delete(sessionId);
-
-  const placementImpact = computeVtopPlacementImpact(vtop);
-
-  return {
-    success: true,
-    message: `Successfully logged in to VTOP as ${username.toUpperCase()} and extracted live marksheet & GPA.`,
-    vtop,
-    placementImpact,
-  };
 }
 
 /**

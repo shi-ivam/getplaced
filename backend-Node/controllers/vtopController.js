@@ -1,4 +1,5 @@
 import asyncHandler from "express-async-handler";
+import jwt from "jsonwebtoken";
 import VtopProfile from "../models/vtopProfileModel.js";
 import AcademicProfile from "../models/academicProfileModel.js";
 import User from "../models/userModel.js";
@@ -139,10 +140,24 @@ export const getPlacementImpact = asyncHandler(async (req, res) => {
 
 // @desc    Fetch fresh live captcha and session from VTOP portal
 // @route   GET /api/vtop/live-captcha
-// @access  Private
+// @access  Public / Optional Auth
 export const getLiveCaptchaHandler = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
-  const result = await getLiveVtopCaptcha(userId);
+  let userId = req.user?._id?.toString();
+  if (!userId && req.cookies?.jwt) {
+    try {
+      const decoded = jwt.verify(req.cookies.jwt, process.env.JWT_SECRET);
+      userId = decoded.userId;
+    } catch (_) {}
+  }
+  if (!userId) {
+    userId = `anon_${Date.now()}`;
+  }
+
+  const { sessionId } = req.query;
+  const result = await getLiveVtopCaptcha(userId, sessionId);
+  if (!result.success && result.error) {
+    return res.status(502).json(result);
+  }
   res.json(result);
 });
 
@@ -153,14 +168,17 @@ export const liveLoginHandler = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const { username, password, captchaStr, sessionId, semesterId } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ success: false, error: "Username and password are required." });
+  if (!username || !password || !captchaStr) {
+    return res.status(400).json({
+      success: false,
+      error: "Registration number, password, and captcha are required.",
+    });
   }
 
   const result = await authenticateAndScrapeVtop(userId, {
     username,
     password,
-    captchaStr: captchaStr || "K7N9P",
+    captchaStr: captchaStr.trim(),
     sessionId,
     semesterId,
   });

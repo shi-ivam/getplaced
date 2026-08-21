@@ -88,32 +88,38 @@ export default function VtopDetails() {
     }
   };
 
-  const fetchLiveCaptcha = async () => {
+  const fetchLiveCaptcha = async (currentSessionId = null) => {
     try {
       setLoadingCaptcha(true);
       setErrorMessage("");
-      const res = await axios.get(`${NODE_API_URL}/api/vtop/live-captcha`, {
+      setCaptchaText("");
+      const activeSess = currentSessionId || sessionId;
+      const url = activeSess
+        ? `${NODE_API_URL}/api/vtop/live-captcha?sessionId=${encodeURIComponent(activeSess)}`
+        : `${NODE_API_URL}/api/vtop/live-captcha`;
+
+      const res = await axios.get(url, {
         withCredentials: true,
       });
-      if (res.data?.success) {
+
+      if (res.data?.success && res.data.captchaImage) {
         setCaptchaImage(res.data.captchaImage);
         setSessionId(res.data.sessionId);
-        setPortalConnected(res.data.portalConnected);
-        // Pre-fill OCR recognized text if provided
-        setCaptchaText("K7N9P");
+        setPortalConnected(res.data.portalConnected ?? true);
+        setCaptchaText("");
+      } else {
+        setErrorMessage(res.data?.error || "Could not fetch dynamic captcha from VTOP.");
+        setCaptchaImage("");
       }
     } catch (err) {
       console.warn("Failed to fetch live captcha from VTOP:", err);
-      setCaptchaImage(
-        "data:image/svg+xml;utf8," +
-          encodeURIComponent(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="140" height="42" viewBox="0 0 140 42">
-          <rect width="140" height="42" fill="#1e1e24" rx="8"/>
-          <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#a78bfa" font-family="monospace" font-weight="bold" font-size="20" letter-spacing="4">K7N9P</text>
-        </svg>
-      `)
-      );
-      setCaptchaText("K7N9P");
+      const errMsg =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Could not load live captcha from VTOP portal. Please check connection.";
+      setErrorMessage(errMsg);
+      setCaptchaImage("");
+      setCaptchaText("");
     } finally {
       setLoadingCaptcha(false);
     }
@@ -125,6 +131,8 @@ export default function VtopDetails() {
 
   const openLoginModal = () => {
     setShowSyncModal(true);
+    setCaptchaText("");
+    setErrorMessage("");
     fetchLiveCaptcha();
   };
 
@@ -149,8 +157,12 @@ export default function VtopDetails() {
 
   const handleLiveVtopLogin = async (e) => {
     e.preventDefault();
-    if (!username || !password) {
-      setErrorMessage("Please enter both VTOP Username/Reg No and Password.");
+    if (!username.trim() || !password.trim()) {
+      setErrorMessage("Please enter both VTOP Registration Number and Password.");
+      return;
+    }
+    if (!captchaText.trim()) {
+      setErrorMessage("Please enter the captcha characters shown in the dynamic image.");
       return;
     }
 
@@ -158,9 +170,9 @@ export default function VtopDetails() {
     setErrorMessage("");
     setSyncStep(1);
 
-    setTimeout(() => setSyncStep(2), 600);
-    setTimeout(() => setSyncStep(3), 1200);
-    setTimeout(() => setSyncStep(4), 1800);
+    const t1 = setTimeout(() => setSyncStep(2), 600);
+    const t2 = setTimeout(() => setSyncStep(3), 1200);
+    const t3 = setTimeout(() => setSyncStep(4), 1800);
 
     try {
       const res = await axios.post(
@@ -168,7 +180,7 @@ export default function VtopDetails() {
         {
           username: username.trim(),
           password: password.trim(),
-          captchaStr: captchaText.trim() || "K7N9P",
+          captchaStr: captchaText.trim(),
           sessionId,
           semesterId: selectedSemester,
         },
@@ -184,15 +196,35 @@ export default function VtopDetails() {
         setTimeout(() => setSyncSuccessMsg(""), 5000);
         setShowSyncModal(false);
         setPassword("");
+        setCaptchaText("");
       } else {
-        setErrorMessage(res.data?.error || "VTOP Login failed. Please verify credentials.");
+        const errorMsg = res.data?.error || "VTOP Login failed. Please verify credentials.";
+        setErrorMessage(errorMsg);
+        if (res.data?.newCaptchaImage) {
+          setCaptchaImage(res.data.newCaptchaImage);
+          if (res.data.sessionId) setSessionId(res.data.sessionId);
+        } else {
+          fetchLiveCaptcha(sessionId);
+        }
+        setCaptchaText("");
       }
     } catch (err) {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
       const errorMsg =
         err.response?.data?.error ||
         err.response?.data?.message ||
         "Could not connect to vtopcc.vit.ac.in. Please verify credentials and captcha.";
       setErrorMessage(errorMsg);
+
+      if (err.response?.data?.newCaptchaImage) {
+        setCaptchaImage(err.response.data.newCaptchaImage);
+        if (err.response.data.sessionId) setSessionId(err.response.data.sessionId);
+      } else {
+        fetchLiveCaptcha(sessionId);
+      }
+      setCaptchaText("");
     } finally {
       setIsSyncing(false);
       setSyncStep(0);
@@ -933,14 +965,15 @@ export default function VtopDetails() {
                   {/* Live Captcha Section */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-mono font-medium text-zinc-400">
-                        Portal Captcha Challenge
+                      <label className="text-xs font-mono font-medium text-zinc-400 flex items-center gap-1.5">
+                        <span>Portal Captcha Challenge</span>
+                        <span className="text-[10px] text-zinc-500">(Type the characters shown)</span>
                       </label>
                       <button
                         type="button"
-                        onClick={fetchLiveCaptcha}
+                        onClick={() => fetchLiveCaptcha(sessionId)}
                         disabled={loadingCaptcha}
-                        className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer"
+                        className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer transition-colors"
                       >
                         <RefreshCw className={`w-3 h-3 ${loadingCaptcha ? "animate-spin" : ""}`} />
                         <span>Refresh Captcha</span>
@@ -950,7 +983,10 @@ export default function VtopDetails() {
                     <div className="flex items-center gap-3">
                       <div className="h-11 px-3 bg-zinc-950 border border-white/10 rounded-xl flex items-center justify-center shrink-0 min-w-[130px] overflow-hidden">
                         {loadingCaptcha ? (
-                          <div className="text-xs font-mono text-zinc-500 animate-pulse">Loading...</div>
+                          <div className="flex items-center gap-2 text-xs font-mono text-zinc-400 animate-pulse">
+                            <RefreshCw className="w-3 h-3 animate-spin text-blue-400" />
+                            <span>Loading...</span>
+                          </div>
                         ) : captchaImage ? (
                           <img
                             src={captchaImage}
@@ -958,7 +994,7 @@ export default function VtopDetails() {
                             className="h-8 max-w-[120px] object-contain select-none"
                           />
                         ) : (
-                          <div className="text-xs font-mono text-purple-400 font-bold tracking-widest">K7N9P</div>
+                          <div className="text-xs font-mono text-zinc-500">No Captcha</div>
                         )}
                       </div>
 
@@ -966,9 +1002,10 @@ export default function VtopDetails() {
                         type="text"
                         value={captchaText}
                         onChange={(e) => setCaptchaText(e.target.value)}
-                        placeholder="Enter characters"
-                        className="flex-1 bg-zinc-950 text-white font-mono text-sm px-4 py-2.5 rounded-xl border border-white/10 focus:border-blue-500 focus:outline-none uppercase"
+                        placeholder="Enter captcha text"
+                        className="flex-1 bg-zinc-950 text-white font-mono text-sm px-4 py-2.5 rounded-xl border border-white/10 focus:border-blue-500 focus:outline-none uppercase tracking-wider"
                         required
+                        autoComplete="off"
                       />
                     </div>
                   </div>
@@ -976,7 +1013,8 @@ export default function VtopDetails() {
                   <div className="pt-2 space-y-2">
                     <button
                       type="submit"
-                      className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm transition-all shadow-lg hover:shadow-blue-500/20 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                      disabled={loadingCaptcha || isSyncing}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm transition-all shadow-lg hover:shadow-blue-500/20 active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Lock className="w-4 h-4" />
                       <span>Login to VTOP Portal & Fetch Details</span>
@@ -987,11 +1025,11 @@ export default function VtopDetails() {
                       onClick={() => {
                         setUsername("22BCE1042");
                         setPassword("vit_demo_pass");
-                        setCaptchaText("K7N9P");
+                        // User solves the live dynamic captcha from VTOP
                       }}
                       className="w-full py-2 rounded-xl bg-zinc-950 hover:bg-zinc-800 border border-white/10 text-zinc-400 hover:text-zinc-200 font-mono text-xs transition-all cursor-pointer text-center"
                     >
-                      ⚡ Fill Demo VTOP Credentials (22BCE1042)
+                      ⚡ Autofill Sample Reg No & Password
                     </button>
                   </div>
                 </form>

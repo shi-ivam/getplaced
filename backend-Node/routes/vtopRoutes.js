@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.get("/profile", protect, getVtopProfile);
 router.post("/sync", protect, syncVtopProfile);
-router.get("/live-captcha", protect, getLiveCaptchaHandler);
+router.get("/live-captcha", getLiveCaptchaHandler);
 router.post("/live-login", protect, liveLoginHandler);
 router.put("/course-update", protect, updateCourseMarks);
 router.get("/placement-impact", protect, getPlacementImpact);
