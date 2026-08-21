@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import {
   TrendingUp,
   Flame,
@@ -12,6 +14,11 @@ import {
   Zap,
   ArrowUpRight,
   Shield,
+  Plus,
+  Activity,
+  Award,
+  Target,
+  X,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -27,237 +34,444 @@ import {
 } from "recharts";
 import { NODE_API_URL } from "@/config/api";
 
+const DIMENSIONS = [
+  { key: "overallScore", label: "Overall Readiness", color: "#a855f7" },
+  { key: "dsaScore", label: "DSA Proficiency", color: "#3b82f6" },
+  { key: "projectScore", label: "Projects & GitHub", color: "#10b981" },
+  { key: "resumeScore", label: "ATS Resume", color: "#f59e0b" },
+  { key: "interviewScore", label: "Mock Interviews", color: "#ec4899" },
+];
+
 export default function ProgressTracker() {
+  const containerRef = useRef(null);
   const [progressData, setProgressData] = useState(null);
   const [timeRange, setTimeRange] = useState("30d");
   const [activeDimension, setActiveDimension] = useState("overallScore");
   const [loading, setLoading] = useState(true);
+  const [showLogModal, setShowLogModal] = useState(false);
+  const [activityTitle, setActivityTitle] = useState("");
+  const [activityType, setActivityType] = useState("dsa_solved");
+  const [activityMinutes, setActivityMinutes] = useState(45);
+  const [activityXp, setActivityXp] = useState(25);
+  const [loggingInProgress, setLoggingInProgress] = useState(false);
+
+  const fetchProgress = async () => {
+    try {
+      const res = await axios.get(`${NODE_API_URL}/api/progress/analytics`, {
+        withCredentials: true,
+      });
+      if (res.data) {
+        setProgressData(res.data);
+      }
+    } catch (err) {
+      console.warn("Could not load progress data from backend, using defaults:", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProgress = async () => {
-      try {
-        const res = await axios.get(`${NODE_API_URL}/api/progress/analytics`, {
-          withCredentials: true,
-        });
-        if (res.data) {
-          setProgressData(res.data);
-        }
-      } catch (err) {
-        console.warn("Could not load progress data from backend, using defaults:", err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProgress();
   }, []);
 
+  useGSAP(
+    () => {
+      if (!loading) {
+        gsap.fromTo(
+          ".gsap-fade-item",
+          { opacity: 0, y: 24 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.08,
+            ease: "power3.out",
+          }
+        );
+      }
+    },
+    { scope: containerRef, dependencies: [loading] }
+  );
+
+  const handleLogActivitySubmit = async (e) => {
+    e.preventDefault();
+    if (!activityTitle.trim()) return;
+
+    setLoggingInProgress(true);
+    try {
+      const res = await axios.post(
+        `${NODE_API_URL}/api/progress/log-activity`,
+        {
+          type: activityType,
+          title: activityTitle,
+          xp: Number(activityXp) || 20,
+          studyMinutes: Number(activityMinutes) || 30,
+        },
+        { withCredentials: true }
+      );
+
+      if (res.data?.success) {
+        setShowLogModal(false);
+        setActivityTitle("");
+        fetchProgress();
+      }
+    } catch (err) {
+      console.error("Could not log activity:", err);
+    } finally {
+      setLoggingInProgress(false);
+    }
+  };
+
   const snapshots = progressData?.snapshots || [];
+  const selectedDim = DIMENSIONS.find((d) => d.key === activeDimension) || DIMENSIONS[0];
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
-      {/* Title Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
-              <TrendingUp className="w-7 h-7" />
+    <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-white">
+      <div ref={containerRef} className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">
+        {/* Editorial Wide Header */}
+        <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
+          <div className="space-y-3 max-w-4xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono uppercase tracking-widest">
+              <Activity className="w-3.5 h-3.5" />
+              Velocity & Trajectory Analytics
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">Progress Tracking & Velocity</h1>
-              <p className="text-sm text-gray-400 mt-0.5">
-                Placement readiness velocity, multi-dimensional skill trend graphs, and habit analytics
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Readiness Pace Badge */}
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-950/40 to-indigo-950/40 border border-purple-500/30 text-xs">
-          <Zap className="w-4 h-4 text-purple-400" />
-          <span className="text-purple-300 font-semibold">
-            Placement Readiness Velocity: +{progressData?.weeklyVelocityPct || 4.8}% / week
-          </span>
-        </div>
-      </div>
-
-      {/* Velocity & Aggregate KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Weekly Velocity */}
-        <div className="bg-[#18181b] border border-gray-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
-          <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
-            <span>Readiness Velocity</span>
-            <span className="text-emerald-400 font-semibold">+4.8% 7d</span>
-          </div>
-          <div className="text-3xl font-extrabold text-emerald-400 font-mono">
-            +{progressData?.weeklyVelocityPct || 4.8}%
-          </div>
-          <div className="text-xs text-gray-400 mt-1">
-            Projected ready in ~{progressData?.projectedWeeksToPlacementReady || 3} weeks
-          </div>
-        </div>
-
-        {/* Practice Streak */}
-        <div className="bg-[#18181b] border border-gray-800 rounded-2xl p-5 shadow-lg">
-          <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
-            <span>Current Streak</span>
-            <span className="text-amber-400 font-semibold">Longest: {progressData?.longestStreak || 12}d</span>
-          </div>
-          <div className="text-3xl font-extrabold text-amber-400 font-mono flex items-center gap-1">
-            <Flame className="w-7 h-7 fill-amber-400/20" />
-            {progressData?.dailyStreak || 5} Days
-          </div>
-          <div className="text-xs text-gray-400 mt-1">Daily consistency multiplier active</div>
-        </div>
-
-        {/* Problems Solved */}
-        <div className="bg-[#18181b] border border-gray-800 rounded-2xl p-5 shadow-lg">
-          <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
-            <span>Problems Solved</span>
-            <span className="text-purple-400 font-semibold">DSA Mastery</span>
-          </div>
-          <div className="text-3xl font-extrabold text-purple-400 font-mono flex items-center gap-1">
-            <Code2 className="w-7 h-7" />
-            {progressData?.totalProblemsSolved || 98}
-          </div>
-          <div className="text-xs text-gray-400 mt-1">Synced across LeetCode & Arena</div>
-        </div>
-
-        {/* Total Study Hours */}
-        <div className="bg-[#18181b] border border-gray-800 rounded-2xl p-5 shadow-lg">
-          <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
-            <span>Study Hours Logged</span>
-            <span className="text-blue-400 font-semibold">Video & Sprints</span>
-          </div>
-          <div className="text-3xl font-extrabold text-blue-400 font-mono flex items-center gap-1">
-            <Clock className="w-7 h-7" />
-            {progressData?.totalStudyHours || 7.5}h
-          </div>
-          <div className="text-xs text-gray-400 mt-1">
-            {progressData?.totalTasksCompleted || 22} roadmap tasks completed
-          </div>
-        </div>
-      </div>
-
-      {/* Historical Trend Graphs */}
-      <div className="bg-[#18181b] border border-gray-800 rounded-2xl p-6 shadow-xl space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h3 className="text-lg font-bold text-white">Skill Progress & Readiness Timeline</h3>
-            <p className="text-xs text-gray-400">
-              Track multi-dimensional growth across DSA, Projects, ATS Resume, and Academics over time
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+              Placement Readiness Velocity & Growth
+            </h1>
+            <p className="text-sm md:text-base text-zinc-400 max-w-3xl leading-relaxed">
+              Multi-dimensional skill acceleration models, continuous practice telemetry, and milestone readiness forecasting.
             </p>
           </div>
 
-          {/* Time Range Tabs */}
-          <div className="flex items-center gap-1 bg-[#121214] p-1 rounded-xl border border-gray-800">
-            {["7d", "30d", "90d", "all"].map((t) => (
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowLogModal(true)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold text-xs hover:bg-zinc-200 shadow-lg hover:shadow-purple-500/10 transition-all duration-300 active:scale-95 cursor-pointer"
+            >
+              <Plus className="w-4 h-4 text-zinc-900" /> Log Practice Sprint
+            </button>
+          </div>
+        </header>
+
+        {/* Gapless Bento Metrics Grid */}
+        <section className="gsap-fade-item grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 grid-flow-dense gap-4">
+          {/* Weekly Velocity Bento Card */}
+          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-emerald-500/40 transition-all duration-500">
+            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
+              <span>Readiness Velocity</span>
+              <span className="text-emerald-400 font-mono">7-Day Trajectory</span>
+            </div>
+            <div className="text-4xl font-extrabold text-emerald-400 font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left">
+              +{progressData?.weeklyVelocityPct || 4.8}%
+            </div>
+            <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-purple-400" />
+              <span>
+                Target reached in ~{progressData?.projectedWeeksToPlacementReady || 3} weeks
+              </span>
+            </div>
+          </div>
+
+          {/* Daily Streak Bento Card */}
+          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-amber-500/40 transition-all duration-500">
+            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
+              <span>Practice Consistency</span>
+              <span className="text-amber-400 font-mono">
+                Best: {progressData?.longestStreak || 12}d
+              </span>
+            </div>
+            <div className="text-4xl font-extrabold text-amber-400 font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left flex items-center gap-2">
+              <Flame className="w-7 h-7 text-amber-400 shrink-0" />
+              <span>{progressData?.dailyStreak || 5} Days</span>
+            </div>
+            <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Consistency multiplier active</span>
+            </div>
+          </div>
+
+          {/* Solved Problems Bento Card */}
+          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-purple-500/40 transition-all duration-500">
+            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
+              <span>Solved Problem Volume</span>
+              <span className="text-purple-400 font-mono">LeetCode & Arena</span>
+            </div>
+            <div className="text-4xl font-extrabold text-purple-300 font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left flex items-center gap-2">
+              <Code2 className="w-7 h-7 text-purple-400 shrink-0" />
+              <span>{progressData?.totalProblemsSolved || 98}</span>
+            </div>
+            <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
+              <Target className="w-3.5 h-3.5 text-purple-400" />
+              <span>Balanced across Arrays, Trees, DP</span>
+            </div>
+          </div>
+
+          {/* Study Hours Bento Card */}
+          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-blue-500/40 transition-all duration-500">
+            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
+              <span>Dedicated Study Time</span>
+              <span className="text-blue-400 font-mono">Sessions & Labs</span>
+            </div>
+            <div className="text-4xl font-extrabold text-blue-400 font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left flex items-center gap-2">
+              <Clock className="w-7 h-7 text-blue-400 shrink-0" />
+              <span>{progressData?.totalStudyHours || 7.5}h</span>
+            </div>
+            <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
+              <Award className="w-3.5 h-3.5 text-blue-400" />
+              <span>{progressData?.totalTasksCompleted || 22} tasks mastered</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Historical Multi-Dimensional Trend Graphs */}
+        <section className="gsap-fade-item rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-xl font-bold text-white tracking-tight">
+                Readiness Trajectory Timeline
+              </h3>
+              <p className="text-xs text-zinc-400 mt-1">
+                Progression metrics over time across Algorithmic DSA, Projects, ATS Resume, and Interviews
+              </p>
+            </div>
+
+            {/* Time Range Tabs */}
+            <div className="flex items-center gap-1 bg-zinc-950/80 p-1.5 rounded-xl border border-white/10 self-start sm:self-auto">
+              {["7d", "30d", "90d", "all"].map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTimeRange(t)}
+                  className={`px-3 py-1 text-xs font-mono font-semibold rounded-lg uppercase transition-all duration-200 cursor-pointer ${
+                    timeRange === t
+                      ? "bg-white text-zinc-950 shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Dimension Toggles */}
+          <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+            {DIMENSIONS.map((dim) => (
               <button
-                key={t}
+                key={dim.key}
                 type="button"
-                onClick={() => setTimeRange(t)}
-                className={`px-3 py-1 text-xs font-semibold rounded-lg uppercase transition-all ${
-                  timeRange === t
-                    ? "bg-purple-600 text-white"
-                    : "text-gray-400 hover:text-white"
+                onClick={() => setActiveDimension(dim.key)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-medium border transition-all duration-200 cursor-pointer ${
+                  activeDimension === dim.key
+                    ? "bg-white text-zinc-950 font-semibold border-white shadow-md"
+                    : "bg-zinc-950/80 text-zinc-400 border-white/10 hover:text-white hover:border-white/20"
                 }`}
               >
-                {t}
+                <span
+                  className="inline-block w-2 h-2 rounded-full mr-2"
+                  style={{
+                    backgroundColor: activeDimension === dim.key ? "#09090b" : dim.color,
+                  }}
+                />
+                {dim.label}
               </button>
             ))}
           </div>
-        </div>
 
-        {/* Dimension Toggles */}
-        <div className="flex flex-wrap gap-2">
-          {[
-            { key: "overallScore", label: "Overall Readiness", color: "#a855f7" },
-            { key: "dsaScore", label: "DSA Proficiency", color: "#3b82f6" },
-            { key: "projectScore", label: "Projects & GitHub", color: "#10b981" },
-            { key: "resumeScore", label: "ATS Resume", color: "#f59e0b" },
-            { key: "interviewScore", label: "Mock Interviews", color: "#ec4899" },
-          ].map((dim) => (
-            <button
-              key={dim.key}
-              type="button"
-              onClick={() => setActiveDimension(dim.key)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                activeDimension === dim.key
-                  ? "bg-purple-500/20 text-white border-purple-500"
-                  : "bg-[#121214] text-gray-400 border-gray-800 hover:text-white"
-              }`}
-            >
-              <span
-                className="inline-block w-2 h-2 rounded-full mr-1.5"
-                style={{ backgroundColor: dim.color }}
-              />
-              {dim.label}
-            </button>
-          ))}
-        </div>
+          {/* Recharts Area Chart */}
+          <div className="h-80 w-full pt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={snapshots} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorActiveDim" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={selectedDim.color} stopOpacity={0.35} />
+                    <stop offset="95%" stopColor={selectedDim.color} stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" opacity={0.6} />
+                <XAxis
+                  dataKey="date"
+                  stroke="#71717a"
+                  fontSize={11}
+                  tickLine={false}
+                  fontFamily="monospace"
+                />
+                <YAxis
+                  stroke="#71717a"
+                  fontSize={11}
+                  domain={[30, 100]}
+                  tickLine={false}
+                  fontFamily="monospace"
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#121215",
+                    borderColor: "rgba(255,255,255,0.15)",
+                    borderRadius: "1rem",
+                    fontSize: "12px",
+                    color: "#fff",
+                    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)",
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey={activeDimension}
+                  stroke={selectedDim.color}
+                  strokeWidth={2.5}
+                  fillOpacity={1}
+                  fill="url(#colorActiveDim)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
 
-        {/* Recharts Area Chart */}
-        <div className="h-72 w-full pt-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={snapshots}>
-              <defs>
-                <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#a855f7" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#a855f7" stopOpacity={0.0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-              <XAxis dataKey="date" stroke="#71717a" fontSize={12} />
-              <YAxis stroke="#71717a" fontSize={12} domain={[30, 100]} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#18181b",
-                  borderColor: "#3f3f46",
-                  borderRadius: "0.75rem",
-                  fontSize: "12px",
-                }}
-              />
-              <Area
-                type="monotone"
-                dataKey={activeDimension}
-                stroke="#a855f7"
-                strokeWidth={3}
-                fillOpacity={1}
-                fill="url(#colorScore)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+        {/* Activity Telemetry Feed */}
+        <section className="gsap-fade-item rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-white tracking-tight">
+                Practice Session Telemetry
+              </h3>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Verified training log and XP attribution history
+              </p>
+            </div>
+          </div>
 
-      {/* Recent Activity Log */}
-      <div className="bg-[#18181b] border border-gray-800 rounded-2xl p-6 shadow-xl">
-        <h3 className="text-lg font-bold text-white mb-4">Recent Placement Activities</h3>
-        <div className="space-y-3">
-          {(progressData?.activityLog || []).map((act, idx) => (
-            <div
-              key={idx}
-              className="flex items-center justify-between p-3.5 rounded-xl bg-[#121214] border border-gray-800/80 hover:border-gray-700 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-white">{act.title}</div>
-                  <div className="text-[11px] text-gray-500 mt-0.5">
-                    {new Date(act.timestamp).toLocaleString()}
+          <div className="space-y-2.5 pt-2">
+            {(progressData?.activityLog || []).map((act, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between p-4 rounded-2xl bg-zinc-950/80 border border-white/5 hover:border-white/15 transition-all duration-200"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 shrink-0">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-white tracking-tight">
+                      {act.title}
+                    </div>
+                    <div className="text-[11px] text-zinc-500 font-mono mt-0.5">
+                      {new Date(act.timestamp).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
                   </div>
                 </div>
+
+                <span className="text-xs font-bold font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                  +{act.xp} XP
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Log Activity Modal */}
+        {showLogModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+            <div className="bg-zinc-900 border border-white/15 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <h3 className="text-lg font-bold text-white tracking-tight">
+                  Log Learning Practice Sprint
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowLogModal(false)}
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              <span className="text-xs font-bold font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                +{act.xp} XP
-              </span>
+              <form onSubmit={handleLogActivitySubmit} className="space-y-4">
+                <div>
+                  <label className="text-xs text-zinc-400 font-mono block mb-1.5">
+                    Activity Type
+                  </label>
+                  <select
+                    value={activityType}
+                    onChange={(e) => setActivityType(e.target.value)}
+                    className="w-full bg-zinc-950 text-white text-xs rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-purple-400"
+                  >
+                    <option value="dsa_solved">DSA Coding Problem</option>
+                    <option value="study_session">Video Lecture / Core CS Review</option>
+                    <option value="resume_analyzed">Resume ATS Optimization</option>
+                    <option value="interview_sprint">Mock Interview Drill</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs text-zinc-400 font-mono block mb-1.5">
+                    Activity Title / Description
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Solved Hard: Word Break II on LeetCode"
+                    value={activityTitle}
+                    onChange={(e) => setActivityTitle(e.target.value)}
+                    required
+                    className="w-full bg-zinc-950 text-white text-xs rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-purple-400"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-zinc-400 font-mono block mb-1.5">
+                      Minutes Studied
+                    </label>
+                    <input
+                      type="number"
+                      min="5"
+                      max="300"
+                      value={activityMinutes}
+                      onChange={(e) => setActivityMinutes(e.target.value)}
+                      className="w-full bg-zinc-950 text-white text-xs rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-purple-400 font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-zinc-400 font-mono block mb-1.5">
+                      XP Reward
+                    </label>
+                    <input
+                      type="number"
+                      min="5"
+                      max="100"
+                      value={activityXp}
+                      onChange={(e) => setActivityXp(e.target.value)}
+                      className="w-full bg-zinc-950 text-white text-xs rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-purple-400 font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setShowLogModal(false)}
+                    className="px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loggingInProgress}
+                    className="px-5 py-2.5 rounded-xl bg-white text-zinc-950 text-xs font-semibold hover:bg-zinc-200 transition-all cursor-pointer"
+                  >
+                    {loggingInProgress ? "Logging..." : "Record Activity"}
+                  </button>
+                </div>
+              </form>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
-    </div>
+    </main>
   );
 }

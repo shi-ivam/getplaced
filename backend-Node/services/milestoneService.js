@@ -182,6 +182,8 @@ export async function getUserMilestones(userId, user = null) {
   const inProgress = [];
   let totalXp = 0;
 
+  const claimedIds = milestoneDoc?.claimedMilestoneIds || [];
+
   for (const m of MASTER_MILESTONES) {
     let isComplete = false;
     let progressPct = 0;
@@ -209,9 +211,12 @@ export async function getUserMilestones(userId, user = null) {
       progressPct = 100;
     }
 
+    const isClaimed = claimedIds.includes(m.id);
+
     const item = {
       ...m,
       isUnlocked: isComplete,
+      isClaimed,
       progressPct,
       unlockedAt: isComplete ? new Date(Date.now() - 3 * 86400000) : null,
     };
@@ -235,9 +240,47 @@ export async function getUserMilestones(userId, user = null) {
     totalXp: Math.max(totalXp, 750),
     currentTier,
     unlockedCount: unlocked.length,
+    claimedCount: unlocked.filter((u) => u.isClaimed).length,
     totalMilestonesCount: MASTER_MILESTONES.length,
     completionRatePct: Math.round((unlocked.length / MASTER_MILESTONES.length) * 100),
     unlockedMilestones: unlocked,
     inProgressMilestones: inProgress,
+  };
+}
+
+/**
+ * Claim an unlocked milestone reward
+ */
+export async function claimMilestoneReward(userId, milestoneId) {
+  let milestoneDoc = await Milestone.findOne({ userId });
+  if (!milestoneDoc) {
+    milestoneDoc = await Milestone.create({ userId, claimedMilestoneIds: [], totalXp: 750 });
+  }
+
+  const milestone = MASTER_MILESTONES.find((m) => m.id === milestoneId);
+  if (!milestone) {
+    throw new Error("Milestone not found");
+  }
+
+  if (milestoneDoc.claimedMilestoneIds.includes(milestoneId)) {
+    return {
+      success: true,
+      alreadyClaimed: true,
+      milestoneId,
+      xpGained: 0,
+      totalXp: milestoneDoc.totalXp,
+    };
+  }
+
+  milestoneDoc.claimedMilestoneIds.push(milestoneId);
+  milestoneDoc.totalXp = (milestoneDoc.totalXp || 750) + milestone.xp;
+  await milestoneDoc.save();
+
+  return {
+    success: true,
+    alreadyClaimed: false,
+    milestoneId,
+    xpGained: milestone.xp,
+    totalXp: milestoneDoc.totalXp,
   };
 }

@@ -10,6 +10,9 @@ import {
   Briefcase,
   GraduationCap,
   Info,
+  ShieldCheck,
+  ShieldAlert,
+  Sparkles,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
 
@@ -17,7 +20,7 @@ const STATUS_CONFIG = {
   Eligible: {
     bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
     icon: CheckCircle2,
-    badgeText: "100% Eligible",
+    badgeText: "Eligible",
   },
   Borderline: {
     bg: "bg-amber-500/10 text-amber-400 border-amber-500/30",
@@ -67,48 +70,44 @@ export default function CompanyEligibilityFilter({ academicData }) {
   });
 
   return (
-    <div className="bg-[#18181b] border border-gray-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+    <div className="rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl relative overflow-hidden space-y-6">
       {/* Header & Stats */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400">
-              <Building2 className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-white">
-                Company Academic Eligibility Checker
-              </h3>
-              <p className="text-xs text-gray-400">
-                Live screening against cutoffs for 35+ top recruiters & product companies
-              </p>
-            </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+            <Building2 className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-white tracking-tight">
+              Company Eligibility Screening
+            </h3>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Live matching against academic cutoff criteria for 35+ top recruiters
+            </p>
           </div>
         </div>
 
-        {/* Aggregate Rate */}
         {companiesData && (
-          <div className="flex items-center gap-2">
-            <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
-              <span className="text-emerald-400 font-bold">
-                {companiesData.eligibleCount} / {companiesData.totalEvaluated} Companies Eligible ({companiesData.eligibilityRatePct}%)
-              </span>
-            </div>
+          <div className="self-start sm:self-auto">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-mono font-semibold text-emerald-400">
+              <ShieldCheck className="w-4 h-4" />
+              {companiesData.eligibleCount} / {companiesData.totalEvaluated} Companies Cleared ({companiesData.eligibilityRatePct}%)
+            </span>
           </div>
         )}
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3">
         {/* Search */}
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search company (e.g. Google, Microsoft, TCS, Amazon)..."
+            placeholder="Filter company name or tier (Google, Microsoft, FinTech, TCS)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#121214] border border-gray-800 rounded-xl pl-9 pr-4 py-2 text-xs text-gray-200 focus:outline-none focus:border-blue-500 transition-colors"
+            className="w-full bg-zinc-950/80 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-blue-400 transition-colors"
           />
         </div>
 
@@ -119,10 +118,10 @@ export default function CompanyEligibilityFilter({ academicData }) {
               key={tier}
               type="button"
               onClick={() => setFilterTier(tier)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 cursor-pointer ${
                 filterTier === tier
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-[#121214] text-gray-400 hover:text-white border border-gray-800"
+                  ? "bg-white text-zinc-950 font-semibold shadow-md"
+                  : "bg-zinc-950/80 text-zinc-400 hover:text-white border border-white/10"
               }`}
             >
               {tier}
@@ -140,32 +139,34 @@ export default function CompanyEligibilityFilter({ academicData }) {
           return (
             <div
               key={item.company}
-              className="bg-[#121214] border border-gray-800/80 hover:border-gray-700 rounded-xl p-4 transition-all flex flex-col justify-between"
+              className="group bg-zinc-950/80 border border-white/10 hover:border-white/20 rounded-2xl p-5 transition-all duration-300 flex flex-col justify-between"
             >
               <div>
                 {/* Top: Name & Status */}
-                <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="flex items-start justify-between gap-2 mb-3">
                   <div>
-                    <h4 className="text-base font-bold text-white">{item.company}</h4>
-                    <span className="text-[11px] text-gray-400 font-medium">
-                      {item.tier} · {item.avgPackageLpa} LPA Avg
+                    <h4 className="text-base font-bold text-white tracking-tight group-hover:text-purple-300 transition-colors">
+                      {item.company}
+                    </h4>
+                    <span className="text-xs text-zinc-400 font-mono">
+                      {item.tier} · {item.avgPackageLpa} LPA CTC
                     </span>
                   </div>
 
                   <span
-                    className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border shrink-0 ${cfg.bg}`}
+                    className={`inline-flex items-center gap-1.5 text-[11px] font-mono font-bold px-2.5 py-1 rounded-full border shrink-0 ${cfg.bg}`}
                   >
-                    <IconComp className="w-3 h-3" />
+                    <IconComp className="w-3.5 h-3.5" />
                     {cfg.badgeText}
                   </span>
                 </div>
 
                 {/* Criteria Grid */}
-                <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-800/60 text-xs">
-                  <div className="p-2 rounded-lg bg-[#18181b]">
-                    <span className="text-[10px] text-gray-400 block">Min CGPA</span>
+                <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/5 text-xs font-mono">
+                  <div className="p-2.5 rounded-xl bg-zinc-900/90 border border-white/5">
+                    <span className="text-[10px] text-zinc-500 uppercase block mb-0.5">Min CGPA</span>
                     <span
-                      className={`font-semibold font-mono ${
+                      className={`font-semibold ${
                         item.passFlags.cgpa ? "text-emerald-400" : "text-rose-400"
                       }`}
                     >
@@ -173,11 +174,13 @@ export default function CompanyEligibilityFilter({ academicData }) {
                     </span>
                   </div>
 
-                  <div className="p-2 rounded-lg bg-[#18181b]">
-                    <span className="text-[10px] text-gray-400 block">10th / 12th Cutoff</span>
+                  <div className="p-2.5 rounded-xl bg-zinc-900/90 border border-white/5">
+                    <span className="text-[10px] text-zinc-500 uppercase block mb-0.5">10th / 12th Cutoff</span>
                     <span
-                      className={`font-semibold font-mono ${
-                        item.passFlags.tenth && item.passFlags.twelfth ? "text-emerald-400" : "text-rose-400"
+                      className={`font-semibold ${
+                        item.passFlags.tenth && item.passFlags.twelfth
+                          ? "text-emerald-400"
+                          : "text-rose-400"
                       }`}
                     >
                       {item.criteria.minTenthPct}% / {item.criteria.minTwelfthPct}%
@@ -187,23 +190,24 @@ export default function CompanyEligibilityFilter({ academicData }) {
 
                 {/* Gaps or Notes */}
                 {item.gaps.length > 0 ? (
-                  <div className="mt-3 p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-300">
-                    <span className="font-semibold block mb-0.5">Eligibility Blockers:</span>
-                    <ul className="list-disc list-inside space-y-0.5 text-rose-200">
+                  <div className="mt-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300">
+                    <span className="font-semibold block mb-1">Eligibility Criteria Deficit:</span>
+                    <ul className="list-disc list-inside space-y-1 text-[11px] text-rose-200">
                       {item.gaps.map((g, idx) => (
                         <li key={idx}>{g}</li>
                       ))}
                     </ul>
                   </div>
                 ) : (
-                  <div className="mt-3 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-300">
-                    <span className="font-semibold">✓ Meets all academic thresholds</span>
+                  <div className="mt-3 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Meets all academic criteria</span>
                   </div>
                 )}
               </div>
 
               {/* Footer Note */}
-              <p className="text-[11px] text-gray-500 mt-3 pt-2 border-t border-gray-800/40 line-clamp-2">
+              <p className="text-[11px] text-zinc-500 mt-4 pt-3 border-t border-white/5 line-clamp-2 leading-relaxed">
                 {item.notes}
               </p>
             </div>
