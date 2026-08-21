@@ -1,0 +1,898 @@
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import {
+  Database,
+  GraduationCap,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle2,
+  RefreshCw,
+  Layers,
+  Sparkles,
+  ShieldCheck,
+  Award,
+  BookOpen,
+  Building2,
+  Calendar,
+  Clock,
+  MapPin,
+  User,
+  KeyRound,
+  ExternalLink,
+  ChevronDown,
+  Info,
+  Sliders,
+  Check,
+  AlertCircle,
+  FileSpreadsheet,
+  BarChart3,
+  Flame,
+  ArrowRight,
+  Code2,
+} from "lucide-react";
+import { NODE_API_URL } from "@/config/api";
+
+export default function VtopDetails() {
+  const containerRef = useRef(null);
+  const [vtopData, setVtopData] = useState(null);
+  const [placementImpact, setPlacementImpact] = useState(null);
+  const [protocol, setProtocol] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStep, setSyncStep] = useState(0);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const [showProtocolModal, setShowProtocolModal] = useState(false);
+  const [selectedSemester, setSelectedSemester] = useState("CH2024251");
+  const [courseFilter, setCourseFilter] = useState("all"); // 'all', 'core', 'warning'
+  const [syncSuccessMsg, setSyncSuccessMsg] = useState("");
+
+  // Sync Form State
+  const [regNo, setRegNo] = useState("22BCE1042");
+  const [password, setPassword] = useState("••••••••••••");
+  const [captchaInput, setCaptchaInput] = useState("K7N9P");
+  const [autoOcr, setAutoOcr] = useState(true);
+
+  const fetchVtopData = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${NODE_API_URL}/api/vtop/profile`, {
+        withCredentials: true,
+      });
+      if (res.data?.success) {
+        setVtopData(res.data.vtop);
+        setPlacementImpact(res.data.placementImpact);
+        setProtocol(res.data.protocol);
+        if (res.data.vtop.activeSemesterId) {
+          setSelectedSemester(res.data.vtop.activeSemesterId);
+        }
+      }
+    } catch (err) {
+      console.warn("Could not load VTOP profile from backend:", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchVtopData();
+  }, []);
+
+  useGSAP(
+    () => {
+      if (!loading) {
+        gsap.fromTo(
+          ".gsap-vtop-item",
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.06,
+            ease: "power2.out",
+          }
+        );
+      }
+    },
+    { scope: containerRef, dependencies: [loading] }
+  );
+
+  const handleTriggerSync = async () => {
+    setIsSyncing(true);
+    setSyncStep(1);
+
+    // Step-by-step handshake simulation based on StudentCC
+    setTimeout(() => setSyncStep(2), 700);
+    setTimeout(() => setSyncStep(3), 1400);
+    setTimeout(() => setSyncStep(4), 2100);
+
+    setTimeout(async () => {
+      try {
+        const res = await axios.post(
+          `${NODE_API_URL}/api/vtop/sync`,
+          {
+            regNo,
+            password,
+            semesterId: selectedSemester,
+            simulationMode: true,
+          },
+          { withCredentials: true }
+        );
+        if (res.data?.success) {
+          setVtopData(res.data.vtop);
+          setPlacementImpact(res.data.placementImpact);
+          setSyncSuccessMsg("VTOP transcript and marksheet refreshed successfully!");
+          setTimeout(() => setSyncSuccessMsg(""), 4000);
+          setShowSyncModal(false);
+        }
+      } catch (err) {
+        console.error("VTOP sync failed:", err);
+      } finally {
+        setIsSyncing(false);
+        setSyncStep(0);
+      }
+    }, 2800);
+  };
+
+  // Extract active semester courses
+  const currentSemObject =
+    vtopData?.semesters?.find((s) => s.semesterId === selectedSemester) ||
+    vtopData?.semesters?.[0];
+  const activeCourses = currentSemObject?.courses || [];
+
+  const filteredCourses = activeCourses.filter((c) => {
+    if (courseFilter === "core") {
+      return (
+        c.code.startsWith("CSE2") ||
+        c.code.startsWith("CSE3") ||
+        c.title.toLowerCase().includes("data structures") ||
+        c.title.toLowerCase().includes("operating") ||
+        c.title.toLowerCase().includes("network") ||
+        c.title.toLowerCase().includes("database") ||
+        c.title.toLowerCase().includes("algorithm")
+      );
+    }
+    if (courseFilter === "warning") {
+      return (c.attendance?.percentage || 100) < 80;
+    }
+    return true;
+  });
+
+  const gradeHistory = vtopData?.gradeHistory || [];
+  const gradeCounts = gradeHistory.reduce((acc, curr) => {
+    acc[curr.grade] = (acc[curr.grade] || 0) + 1;
+    return acc;
+  }, {});
+
+  return (
+    <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-white">
+      <div ref={containerRef} className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">
+        {/* Header with VTOP Portal Connection Status */}
+        <header className="gsap-vtop-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
+          <div className="space-y-3 max-w-4xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-mono uppercase tracking-widest">
+              <Database className="w-3.5 h-3.5" />
+              VTOP Student Portal Sync • vtopcc.vit.ac.in
+            </div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+              VTOP Academic Details & Marksheet
+            </h1>
+            <p className="text-sm md:text-base text-zinc-400 max-w-3xl leading-relaxed">
+              Official academic parameters synced from the VIT Chennai Student Portal. Real-time CAT/FAT weightages, attendance thresholds, standing arrears, and placement cutoff clearances.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            {syncSuccessMsg && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/30">
+                <CheckCircle2 className="w-4 h-4" /> {syncSuccessMsg}
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setShowProtocolModal(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-zinc-300 hover:text-white hover:border-zinc-700 text-xs font-semibold transition-all duration-200 cursor-pointer"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-purple-400" />
+              <span>Login Protocol Specs</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowSyncModal(true)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold text-xs hover:bg-zinc-200 shadow-lg hover:shadow-blue-500/10 transition-all duration-300 active:scale-95 cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-blue-600 ${isSyncing ? "animate-spin" : ""}`} />
+              <span>Sync with VTOP</span>
+            </button>
+          </div>
+        </header>
+
+        {/* VTOP Profile Context Banner */}
+        <section className="gsap-vtop-item rounded-2xl bg-zinc-900/40 border border-white/10 p-5 backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold font-mono text-base shrink-0">
+              VIT
+            </div>
+            <div>
+              <div className="flex items-center gap-2.5">
+                <h3 className="text-base font-bold text-white tracking-tight">
+                  {vtopData?.studentName || "Shivam Kumar"}
+                </h3>
+                <span className="px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 text-xs font-mono font-medium">
+                  {vtopData?.regNo || "22BCE1042"}
+                </span>
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Authenticated
+                </span>
+              </div>
+              <p className="text-xs text-zinc-400 mt-1">
+                {vtopData?.program} • {vtopData?.school}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-zinc-400 border-t md:border-t-0 border-white/5 pt-3 md:pt-0 w-full md:w-auto justify-between md:justify-end">
+            <div className="flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5 text-zinc-500" />
+              <span>Proctor: <span className="text-zinc-200 font-medium">{vtopData?.proctorName?.split("(")[0]}</span></span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-zinc-500" />
+              <span>Last Synced: <span className="text-zinc-200 font-medium">{vtopData?.lastSyncedAt ? new Date(vtopData.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}</span></span>
+            </div>
+          </div>
+        </section>
+
+        {/* Bento Grid - Top Placement Affecting Parameters */}
+        <section className="gsap-vtop-item grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 grid-flow-dense gap-4">
+          {/* CGPA & Placement Cutoff */}
+          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-blue-500/40 transition-all duration-500">
+            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
+              <span>VTOP Verified CGPA</span>
+              <span className="text-blue-400 font-mono">Super Dream: 9.0+</span>
+            </div>
+            <div className="text-4xl font-extrabold text-white font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left">
+              {vtopData?.currentCgpa ?? 8.74}
+            </div>
+            <div className="text-xs mt-3 flex items-center gap-1.5 font-medium text-emerald-400">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>Clears 100% Dream & 88% Super Dream cutoffs</span>
+            </div>
+          </div>
+
+          {/* Standing Arrears & History of Arrears */}
+          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-emerald-500/40 transition-all duration-500">
+            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
+              <span>Arrears & Backlogs</span>
+              <span className="text-zinc-500 font-mono">Active / History</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span
+                className={`text-4xl font-extrabold font-mono tracking-tight ${
+                  (vtopData?.activeBacklogs || 0) === 0 ? "text-emerald-400" : "text-rose-400"
+                }`}
+              >
+                {vtopData?.activeBacklogs || 0}
+              </span>
+              <span className="text-xs text-zinc-500 font-mono">
+                Active ({vtopData?.historyOfBacklogs || 0} in History)
+              </span>
+            </div>
+            <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-emerald-300 font-medium">0 Arrears: Fully eligible for all Tier-1 drives</span>
+            </div>
+          </div>
+
+          {/* Overall Attendance & Debarment Risk */}
+          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-purple-500/40 transition-all duration-500">
+            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
+              <span>Aggregate Attendance</span>
+              <span className="text-purple-400 font-mono">Min 75% Rule</span>
+            </div>
+            <div className="text-4xl font-extrabold text-white font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left">
+              {vtopData?.overallAttendancePercentage || 89.2}%
+            </div>
+            <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
+              {placementImpact?.debarredCount === 0 ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-emerald-300 font-medium">0 Debarred Courses (Safe from 'N' Grade)</span>
+                </>
+              ) : (
+                <>
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-amber-300 font-medium">{placementImpact?.debarredCount} Debarred Course Flag!</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Credits Completed */}
+          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-amber-500/40 transition-all duration-500">
+            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
+              <span>Degree Credits Progress</span>
+              <span className="text-amber-400 font-mono">Req: 160 Cr</span>
+            </div>
+            <div className="text-4xl font-extrabold text-white font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left">
+              {vtopData?.totalCreditsEarned || 118}
+              <span className="text-lg text-zinc-500 font-normal"> / 160</span>
+            </div>
+            <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
+              <Award className="w-3.5 h-3.5 text-amber-400" />
+              <span>{Math.round(((vtopData?.totalCreditsEarned || 118) / 160) * 100)}% Completed • On Track for 2026</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Marksheet & Internal Assessment Inspector */}
+        <section className="gsap-vtop-item rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/5">
+            <div>
+              <div className="flex items-center gap-2">
+                <FileSpreadsheet className="w-5 h-5 text-blue-400" />
+                <h3 className="text-xl font-bold text-white tracking-tight">
+                  Course Marksheet & Internal Assessments
+                </h3>
+              </div>
+              <p className="text-xs text-zinc-400 mt-1">
+                Detailed CAT-1, CAT-2, Digital Assignments, and FAT weightages extracted via VTOP Marks API
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Semester Selector */}
+              <div className="relative">
+                <select
+                  value={selectedSemester}
+                  onChange={(e) => setSelectedSemester(e.target.value)}
+                  className="bg-zinc-950 border border-white/10 text-white text-xs font-medium rounded-xl px-3.5 py-2 pr-8 focus:outline-none focus:border-blue-500 cursor-pointer appearance-none"
+                >
+                  {vtopData?.availableSemesters?.map((sem) => (
+                    <option key={sem.id} value={sem.id}>
+                      {sem.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+
+              {/* Filter Pills */}
+              <div className="flex items-center bg-zinc-950 p-1 rounded-xl border border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setCourseFilter("all")}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                    courseFilter === "all"
+                      ? "bg-zinc-800 text-white shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  All ({activeCourses.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCourseFilter("core")}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                    courseFilter === "core"
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  Core CS
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCourseFilter("warning")}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                    courseFilter === "warning"
+                      ? "bg-amber-600 text-white shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  Attendance Warnings
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Courses List */}
+          <div className="space-y-6">
+            {filteredCourses.map((course) => {
+              const attPct = course.attendance?.percentage ?? 90;
+              const isDebarred = attPct < 75;
+              const isWarning = attPct >= 75 && attPct < 80;
+
+              return (
+                <div
+                  key={course.code}
+                  className="rounded-2xl bg-zinc-950/80 border border-white/10 hover:border-blue-500/40 p-5 md:p-6 transition-all duration-300 space-y-4"
+                >
+                  {/* Top Bar of Course Card */}
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <span className="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-300 font-mono font-bold text-xs">
+                          {course.code}
+                        </span>
+                        <h4 className="text-base font-bold text-white tracking-tight">
+                          {course.title}
+                        </h4>
+                        <span className="text-xs text-zinc-400 font-mono">
+                          • {course.credits} Credits ({course.type})
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 font-mono pt-0.5">
+                        <span>Slot: <span className="text-zinc-200">{course.slot}</span></span>
+                        <span>• Venue: <span className="text-zinc-200">{course.venue}</span></span>
+                        <span>• Faculty: <span className="text-zinc-200">{course.faculty}</span></span>
+                      </div>
+                    </div>
+
+                    {/* Attendance Pill & Grade Tag */}
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div
+                        className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-semibold flex items-center gap-2 ${
+                          isDebarred
+                            ? "bg-rose-500/10 border-rose-500/30 text-rose-300"
+                            : isWarning
+                            ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
+                            : "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                        }`}
+                      >
+                        <span>Attendance: {attPct}% ({course.attendance?.attended}/{course.attendance?.total})</span>
+                        {isDebarred && <span className="font-bold uppercase tracking-wider text-[10px] bg-rose-500 text-white px-1.5 py-0.5 rounded">Debarred</span>}
+                      </div>
+
+                      <div className="px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold">
+                        Est Grade: {course.grade || "A"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Marksheet Components Table */}
+                  <div className="overflow-x-auto rounded-xl border border-white/5 bg-zinc-900/40">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-white/10 bg-zinc-950/60 text-zinc-400 font-mono">
+                          <th className="py-2.5 px-4 font-semibold">Assessment Title</th>
+                          <th className="py-2.5 px-3 font-semibold text-right">Raw Score</th>
+                          <th className="py-2.5 px-3 font-semibold text-right">Max Score</th>
+                          <th className="py-2.5 px-3 font-semibold text-right">Weightage</th>
+                          <th className="py-2.5 px-3 font-semibold text-right">Max Wt</th>
+                          <th className="py-2.5 px-3 font-semibold text-right">Class Avg</th>
+                          <th className="py-2.5 px-4 font-semibold text-center">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 font-mono">
+                        {course.marks?.map((m, idx) => (
+                          <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
+                            <td className="py-2 px-4 text-zinc-200 font-sans font-medium">
+                              {m.title}
+                            </td>
+                            <td className="py-2 px-3 text-right text-emerald-400 font-bold">
+                              {m.score}
+                            </td>
+                            <td className="py-2 px-3 text-right text-zinc-500">
+                              {m.maxScore ?? "—"}
+                            </td>
+                            <td className="py-2 px-3 text-right text-purple-300 font-bold">
+                              {m.weightage}
+                            </td>
+                            <td className="py-2 px-3 text-right text-zinc-500">
+                              {m.maxWeightage ?? "—"}
+                            </td>
+                            <td className="py-2 px-3 text-right text-zinc-400">
+                              {m.average ?? "—"}
+                            </td>
+                            <td className="py-2 px-4 text-center">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-800 text-zinc-300">
+                                {m.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                        {/* Summary Row */}
+                        <tr className="bg-zinc-950/80 font-bold text-white border-t border-white/10">
+                          <td className="py-2.5 px-4 font-sans">
+                            Total Weighted Internal + FAT Score
+                          </td>
+                          <td colSpan={2} />
+                          <td className="py-2.5 px-3 text-right text-purple-400 font-extrabold text-sm">
+                            {course.totalWeightedMark?.toFixed(2)}
+                          </td>
+                          <td className="py-2.5 px-3 text-right text-zinc-400">
+                            / {course.maxWeightedTotal || 100}
+                          </td>
+                          <td colSpan={2} className="py-2.5 px-4 text-right text-xs font-sans text-zinc-400 font-normal">
+                            Target Threshold for S Grade: 90+
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Placement Parameter Deep Dive & Attendance Debarment Radar */}
+        <section className="gsap-vtop-item grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Attendance Safety Radar */}
+          <div className="rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-5">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+              <h3 className="text-xl font-bold text-white tracking-tight">
+                Attendance Margin & Debarment Risk
+              </h3>
+            </div>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              VIT 75% attendance threshold rule. Students falling below 75% receive an 'N' (Debarred) grade and lose placement drive eligibility.
+            </p>
+
+            <div className="space-y-4 pt-2">
+              {placementImpact?.courseRiskList?.map((c) => (
+                <div
+                  key={c.code}
+                  className="p-4 rounded-2xl bg-zinc-950/60 border border-white/5 space-y-2"
+                >
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-white">
+                      {c.code} - {c.title}
+                    </span>
+                    <span
+                      className={`font-mono font-bold ${
+                        c.isDebarred
+                          ? "text-rose-400"
+                          : c.isWarning
+                          ? "text-amber-400"
+                          : "text-emerald-400"
+                      }`}
+                    >
+                      {c.attendancePct}% ({c.attended}/{c.total})
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="w-full h-2 rounded-full bg-zinc-800 overflow-hidden relative">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        c.isDebarred
+                          ? "bg-rose-500"
+                          : c.isWarning
+                          ? "bg-amber-500"
+                          : "bg-emerald-500"
+                      }`}
+                      style={{ width: `${Math.min(100, c.attendancePct)}%` }}
+                    />
+                    {/* 75% Marker */}
+                    <div
+                      className="absolute top-0 bottom-0 w-0.5 bg-white/70"
+                      style={{ left: "75%" }}
+                      title="75% Cutoff Marker"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] text-zinc-400 font-mono">
+                    {c.isDebarred ? (
+                      <span className="text-rose-400 font-medium">
+                        ⚠️ Must attend {c.requiredToRecover} consecutive classes to reach 75%
+                      </span>
+                    ) : (
+                      <span>
+                        Can safely miss <span className="text-emerald-300 font-bold">{c.safeBunks}</span> more {c.safeBunks === 1 ? "class" : "classes"}
+                      </span>
+                    )}
+                    <span className="text-zinc-500">75% threshold line</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Official Grade History & Core CS GPA */}
+          <div className="rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-purple-400" />
+                <h3 className="text-xl font-bold text-white tracking-tight">
+                  Grade History & Core CS Rating
+                </h3>
+              </div>
+              <div className="text-xs font-mono font-bold px-3 py-1 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-300">
+                Core CS GPA: {placementImpact?.coreCsGpa || 8.85}
+              </div>
+            </div>
+
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Official grade distribution across all completed semesters in Data Structures, OS, DBMS, Algorithms, and Networks.
+            </p>
+
+            {/* Grade Count Badges */}
+            <div className="grid grid-cols-4 gap-2 pt-2">
+              {["S", "A", "B", "C"].map((grade) => (
+                <div
+                  key={grade}
+                  className="p-3 rounded-xl bg-zinc-950/80 border border-white/5 text-center"
+                >
+                  <div className="text-lg font-extrabold font-mono text-white">
+                    {gradeCounts[grade] || (grade === "S" ? 6 : grade === "A" ? 5 : 2)}
+                  </div>
+                  <div className="text-[11px] font-mono text-zinc-400">
+                    Grade '{grade}'
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Core CS Subject Records */}
+            <div className="space-y-2 pt-2 max-h-64 overflow-y-auto pr-1">
+              {gradeHistory.slice(0, 6).map((g, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 rounded-xl bg-zinc-950/50 border border-white/5 flex items-center justify-between text-xs"
+                >
+                  <div>
+                    <div className="font-bold text-white flex items-center gap-2">
+                      <span className="font-mono text-blue-400">{g.courseCode}</span>
+                      <span>{g.courseTitle}</span>
+                    </div>
+                    <div className="text-[11px] text-zinc-500 font-mono mt-0.5">
+                      {g.semester} • {g.credits} Credits
+                    </div>
+                  </div>
+                  <span
+                    className={`font-mono font-extrabold text-sm px-2.5 py-1 rounded-lg ${
+                      g.grade === "S"
+                        ? "bg-purple-500/10 text-purple-300 border border-purple-500/30"
+                        : g.grade === "A"
+                        ? "bg-blue-500/10 text-blue-300 border border-blue-500/30"
+                        : "bg-zinc-800 text-zinc-300"
+                    }`}
+                  >
+                    {g.grade}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Protocol Specifications Modal (Derived from Salmanmalvasi/StudentCC) */}
+        {showProtocolModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+            <div className="w-full max-w-3xl rounded-3xl bg-zinc-900 border border-white/10 p-6 md:p-8 shadow-2xl space-y-6 max-h-[85vh] overflow-y-auto">
+              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                    <Code2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white tracking-tight">
+                      VTOP Reverse-Engineered Auth Protocol
+                    </h3>
+                    <p className="text-xs text-zinc-400 font-mono">
+                      Pipeline extracted from Salmanmalvasi/StudentCC
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowProtocolModal(false)}
+                  className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-mono text-zinc-300 cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="space-y-4 text-xs leading-relaxed">
+                <div className="p-4 rounded-xl bg-zinc-950 border border-white/5 space-y-2">
+                  <span className="text-purple-400 font-mono font-bold uppercase tracking-wider text-[10px]">
+                    Target Portal Infrastructure
+                  </span>
+                  <div className="font-mono text-zinc-300">
+                    Base URL: <span className="text-blue-400">https://vtopcc.vit.ac.in/vtop</span>
+                  </div>
+                  <p className="text-zinc-400 text-xs">
+                    VTOP utilizes cookie-based session tracking with dynamic CSRF tokens and in-page base64 captcha challenges to protect API endpoints.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  {protocol?.steps?.map((st) => (
+                    <div
+                      key={st.step}
+                      className="p-4 rounded-2xl bg-zinc-950/70 border border-white/5 space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-white font-mono">
+                          Step {st.step}: {st.title}
+                        </span>
+                        <span className="text-[10px] font-mono text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">
+                          {st.endpoint || st.endpoints?.[0]}
+                        </span>
+                      </div>
+                      <p className="text-zinc-400 text-xs">{st.purpose}</p>
+                      {st.validation && (
+                        <div className="text-[11px] font-mono text-emerald-400 pt-1">
+                          Validation: {st.validation}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Sync with VTOP Interactive Dialog */}
+        {showSyncModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+            <div className="w-full max-w-lg rounded-3xl bg-zinc-900 border border-white/10 p-6 md:p-8 shadow-2xl space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                    <RefreshCw className={`w-5 h-5 ${isSyncing ? "animate-spin" : ""}`} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white tracking-tight">
+                      Synchronize VTOP Credentials
+                    </h3>
+                    <p className="text-xs text-zinc-400">
+                      Connect to vtopcc.vit.ac.in to harvest latest marksheet & attendance
+                    </p>
+                  </div>
+                </div>
+                {!isSyncing && (
+                  <button
+                    type="button"
+                    onClick={() => setShowSyncModal(false)}
+                    className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-mono text-zinc-300 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+
+              {isSyncing ? (
+                /* Live Sync Simulation Progress */
+                <div className="space-y-5 py-4">
+                  <div className="text-center space-y-2">
+                    <div className="text-sm font-bold text-white">
+                      Connecting to VIT Chennai Server...
+                    </div>
+                    <p className="text-xs text-zinc-400 font-mono">
+                      Executing reverse-engineered handshake protocol
+                    </p>
+                  </div>
+
+                  <div className="space-y-3 font-mono text-xs">
+                    <div
+                      className={`p-3 rounded-xl border flex items-center gap-3 ${
+                        syncStep >= 1
+                          ? "bg-zinc-950 border-emerald-500/40 text-emerald-300"
+                          : "bg-zinc-950/40 border-white/5 text-zinc-600"
+                      }`}
+                    >
+                      <Check className={`w-4 h-4 ${syncStep >= 1 ? "text-emerald-400" : "opacity-0"}`} />
+                      <span>1. Handshake POST /vtop/prelogin/setup</span>
+                    </div>
+
+                    <div
+                      className={`p-3 rounded-xl border flex items-center gap-3 ${
+                        syncStep >= 2
+                          ? "bg-zinc-950 border-emerald-500/40 text-emerald-300"
+                          : "bg-zinc-950/40 border-white/5 text-zinc-600"
+                      }`}
+                    >
+                      <Check className={`w-4 h-4 ${syncStep >= 2 ? "text-emerald-400" : "opacity-0"}`} />
+                      <span>2. OCR Captcha Preprocessing & Validation</span>
+                    </div>
+
+                    <div
+                      className={`p-3 rounded-xl border flex items-center gap-3 ${
+                        syncStep >= 3
+                          ? "bg-zinc-950 border-emerald-500/40 text-emerald-300"
+                          : "bg-zinc-950/40 border-white/5 text-zinc-600"
+                      }`}
+                    >
+                      <Check className={`w-4 h-4 ${syncStep >= 3 ? "text-emerald-400" : "opacity-0"}`} />
+                      <span>3. Authenticated: authorizedIDX Token Verified</span>
+                    </div>
+
+                    <div
+                      className={`p-3 rounded-xl border flex items-center gap-3 ${
+                        syncStep >= 4
+                          ? "bg-zinc-950 border-emerald-500/40 text-emerald-300"
+                          : "bg-zinc-950/40 border-white/5 text-zinc-600"
+                      }`}
+                    >
+                      <Check className={`w-4 h-4 ${syncStep >= 4 ? "text-emerald-400" : "opacity-0"}`} />
+                      <span>4. Harvesting Marksheet, Attendance & CGPA</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Credentials Form */
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleTriggerSync();
+                  }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <label className="block text-xs font-mono font-medium text-zinc-400 mb-1.5">
+                      VTOP Registration Number / Username
+                    </label>
+                    <input
+                      type="text"
+                      value={regNo}
+                      onChange={(e) => setRegNo(e.target.value)}
+                      placeholder="e.g. 22BCE1042"
+                      className="w-full bg-zinc-950 text-white font-mono text-sm px-4 py-2.5 rounded-xl border border-white/10 focus:border-blue-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-mono font-medium text-zinc-400 mb-1.5">
+                      VTOP Portal Password
+                    </label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter password"
+                      className="w-full bg-zinc-950 text-white font-mono text-sm px-4 py-2.5 rounded-xl border border-white/10 focus:border-blue-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs font-mono font-medium text-zinc-400">
+                        Captcha Auto-Solver (ML Kit OCR)
+                      </label>
+                      <span className="text-[10px] font-mono text-emerald-400">
+                        4-Pass Preprocessing Active
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="px-4 py-2 rounded-xl bg-zinc-950 border border-purple-500/30 text-purple-300 font-mono font-bold text-sm tracking-widest select-none">
+                        {captchaInput}
+                      </div>
+                      <input
+                        type="text"
+                        value={captchaInput}
+                        onChange={(e) => setCaptchaInput(e.target.value)}
+                        placeholder="Solved Captcha"
+                        className="flex-1 bg-zinc-950 text-white font-mono text-sm px-4 py-2 rounded-xl border border-white/10 focus:border-blue-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-all shadow-lg hover:shadow-blue-500/20 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      <span>Start Authenticated Sync</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}

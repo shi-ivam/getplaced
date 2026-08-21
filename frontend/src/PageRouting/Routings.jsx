@@ -25,6 +25,7 @@ import PlacementRoadmap from '@/pages/PlacementRoadmap'
 import StudyLibrary from '@/pages/StudyLibrary'
 import PlacementArena from '@/pages/PlacementArena'
 import CareerCoach from '@/pages/CareerCoach'
+import VtopDetails from '@/pages/VtopDetails'
 
 function Routings() {
   return (
@@ -60,6 +61,7 @@ function Routings() {
 
             {/* New Group C Surfaces */}
             <Route path="academics" element={<Academics />} />
+            <Route path="vtop" element={<VtopDetails />} />
             <Route path="progress" element={<ProgressTracker />} />
             <Route path="milestones" element={<Milestones />} />
             <Route path="roadmap" element={<PlacementRoadmap />} />

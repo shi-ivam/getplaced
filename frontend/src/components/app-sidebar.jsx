@@ -19,6 +19,7 @@ import {
   PlayCircle,
   Swords,
   Sparkles,
+  Database,
 } from "lucide-react";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -64,6 +65,11 @@ const mainItems = [
     title: "Academics & Eligibility",
     url: "/app/academics",
     icon: GraduationCap,
+  },
+  {
+    title: "VTOP Details",
+    url: "/app/vtop",
+    icon: Database,
   },
   {
     title: "Progress & Velocity",

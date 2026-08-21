@@ -14,6 +14,7 @@ import roadmapRoutes from "./routes/roadmapRoutes.js"
 import studyLibraryRoutes from "./routes/studyLibraryRoutes.js"
 import arenaRoutes from "./routes/arenaRoutes.js"
 import coachRoutes from "./routes/coachRoutes.js"
+import vtopRoutes from "./routes/vtopRoutes.js"
 
 import cookieParser from "cookie-parser"
 import cors from "cors"
@@ -70,6 +71,7 @@ app.use("/api/roadmap", roadmapRoutes)
 app.use("/api/study-library", studyLibraryRoutes)
 app.use("/api/arena", arenaRoutes)
 app.use("/api/coach", coachRoutes)
+app.use("/api/vtop", vtopRoutes)
 
 const CURATED_TECH_JOBS = [
   {
