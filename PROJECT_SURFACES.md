@@ -91,7 +91,7 @@ The **getPlaced** platform is a polyglot microservice/monorepo application organ
 | **User Login** | `/login` | `Login.jsx`<br>`components/login-form.jsx` | `backend-Node`<br>`POST /api/users/auth` | **Fully Functional** (JWT cookie set, redirects to `/app`) |
 | **User Registration** | `/register` | `Register.jsx`<br>`components/register-form.jsx` | `backend-Node`<br>`POST /api/users/` | **Fully Functional** (Creates Mongo user, redirects to `/app`) |
 | **App Shell & Nav** | `/app/*` | `PageRouting/Layout.jsx`<br>`components/app-sidebar.jsx` | None | **Active** (Collapsible sidebar with dynamic routing) |
-| **Candidate Dashboard**| `/app` | `pages/Dashboard.jsx` | None (Hardcoded stats & UI mockups) | **Visual Mockup / Prototype UI** |
+| **Candidate Dashboard**| `/app` | `pages/Dashboard.jsx` | `backend-Node`<br>`GET /api/readiness`<br>`GET /api/users/profile` | **Fully Functional** (Dynamic 7-dimension readiness engine, target gap analysis, re-normalized weighting) |
 | **Resume Analyzer** | `/resume`<br>`/app/resume` | `pages/AnalyzeResume.jsx` | `backend-Py`<br>`POST /analyze-resume/`<br>Google Gemini 1.5 Flash + OCR | **Fully Functional** (PDF upload, OCR fallback, AI prompt, PDF export) |
 | **Job Recommendations**| `/app/job` | `pages/JobRecommendations.jsx` | `backend-Node`<br>`GET /job-recommendations`<br>RapidAPI JSearch | **Fully Functional** (Real-time RapidAPI fetch + client-side search) |
 | **DSA Learning Hub** | *Dormant (Not in Router)* | `pages/DSAcontent.jsx`<br>`components/dsa_content/*`<br>`data/dsaContent.js` | None (Comprehensive client-side dataset) | **Fully Implemented UI & Data, Disconnected Route** |
@@ -262,6 +262,7 @@ Base URL: `http://localhost:3000` (or `process.env.VITE_NODE_API_URL`)
 | `GET` | `/api/users/profile` | `protect` | None | `{ _id, name, email }` | Returns authenticated user info extracted from cookie. |
 | `PUT` | `/api/users/profile` | `protect` | `{ name?, email?, password? }` | `{ _id, name, email }` | Updates authenticated user profile and password. |
 | `GET` | `/api/users/get` | None | None | `"backend working"` | Health check endpoint. |
+| `GET` | `/api/readiness` | `protect` | None | `{ hasSufficientData, overallScore, overallStatus, targetScore, overallGap, dimensions, topGaps, explainability }` | Computes dynamic 7-dimension placement readiness score, re-normalized weighting, and gap breakdown. |
 | `GET` | `/job-recommendations` | None | Query params optional | `{ jobs: [...] }` | Proxies RapidAPI JSearch query for developer jobs in India. |
 
 #### Auth Middleware & Token Specification

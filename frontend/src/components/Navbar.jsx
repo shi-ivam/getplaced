@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FiMenu, FiX, FiArrowUpRight, FiZap } from "react-icons/fi";
+import { FiMenu, FiX, FiArrowUpRight } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
@@ -12,11 +12,8 @@ const Navbar = () => {
         {/* Brand Logo */}
         <div 
           onClick={() => navigate("/")} 
-          className="flex items-center gap-2.5 cursor-pointer group"
+          className="flex items-center cursor-pointer group"
         >
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
-            <FiZap className="w-4 h-4 text-white" />
-          </div>
           <span className="text-xl font-black tracking-tight text-white font-sans">
             get<span className="text-purple-400">Placed</span>
           </span>

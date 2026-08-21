@@ -1,6 +1,7 @@
 import express from "express"
 import dotenv from "dotenv"
 import userRoutes from "./routes/userRoutes.js"
+import readinessRoutes from "./routes/readinessRoutes.js"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 dotenv.config()
@@ -40,6 +41,7 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use("/api/users", userRoutes)
+app.use("/api/readiness", readinessRoutes)
 
 app.get("/job-recommendations", async (req, res) => {
   const url = "https://jsearch.p.rapidapi.com/search";

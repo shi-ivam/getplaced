@@ -38,10 +38,7 @@ export default function Footer() {
           
           {/* Brand */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-purple-600 flex items-center justify-center text-white">
-                <Zap className="w-3.5 h-3.5" />
-              </div>
+            <div className="flex items-center">
               <span className="text-xl font-black text-white tracking-tight">get<span className="text-purple-400">Placed</span></span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
