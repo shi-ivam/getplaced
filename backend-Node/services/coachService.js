@@ -32,7 +32,7 @@ export async function getOrCreateCoachSession(userId, user = null) {
       messages: [
         {
           sender: "coach",
-          text: `👋 Hello ${userName}! I am your AI Career Coach & Placement Strategist. Let us construct your dream career profile and custom placement roadmap.\n\nFirst, what is your **primary dream company** and **target role**?`,
+          text: `Hello ${userName}. I am your AI Career Coach and Placement Strategist. Let us construct your target career profile and custom placement roadmap.\n\nFirst, what is your primary target company and dream role?`,
           chips: [
             "Target: Microsoft · SDE-1",
             "Target: Google · Software Engineer",
@@ -83,7 +83,7 @@ export async function processCoachMessage(userId, userMessage, user = null) {
     session.extractedProfile.targetJobRole = "Software Development Engineer";
     nextStep = 2;
 
-    replyText = `🎯 Excellent target! **${session.extractedProfile.targetCompany}** values solid algorithmic problem-solving and clean system fundamentals.\n\nNext, let us verify your **academic baseline**. What is your current college, degree, and current CGPA?`;
+    replyText = `Target set: ${session.extractedProfile.targetCompany}. This tier evaluates algorithmic problem solving and system fundamentals.\n\nNext, let us verify your academic baseline. What is your current college, degree, and current CGPA?`;
     nextChips = [
       "CGPA: 8.8 · B.Tech CSE (2026 Batch)",
       "CGPA: 8.2 · B.Tech IT (2026 Batch)",
@@ -97,22 +97,22 @@ export async function processCoachMessage(userId, userMessage, user = null) {
     }
     nextStep = 3;
 
-    replyText = `📚 Great! Academic score recorded: **${session.extractedProfile.cgpa || 8.5} CGPA**. This satisfies the academic cutoff for ${session.extractedProfile.targetCompany}!\n\nNow, let us sync your **coding profiles and tech skills**. Do you have LeetCode or GitHub handles, or key languages like C++, Java, Python, JavaScript?`;
+    replyText = `Academic record updated: ${session.extractedProfile.cgpa || 8.5} CGPA. This meets the academic qualification threshold for ${session.extractedProfile.targetCompany}.\n\nNow, let us sync your technical skills and profiles. Mention your core languages (C++, Java, Python, JavaScript) or frameworks.`;
     nextChips = [
       "LeetCode: tourist · C++, Python, DSA",
       "GitHub: octocat · React, Node.js, TypeScript",
       "Full Stack: React, Express, MongoDB, Java",
-      "Primary: C++, DSA, OOPs, SQL",
+      "Core: C++, DSA, OOP, SQL, System Design",
     ];
   } else if (step === 3) {
     session.extractedProfile.primarySkills = ["Data Structures", "Algorithms", "C++", "JavaScript", "System Design"];
     nextStep = 4;
 
-    replyText = `⚡ Awesome tech stack captured! You are building solid leverage for technical interview rounds.\n\nLastly, how many weeks do you have before your campus placement drive starts?`;
+    replyText = `Technical competencies registered. Building structured milestones for upcoming technical evaluations.\n\nWhat is your preparation horizon before recruitment drives begin?`;
     nextChips = [
-      "4 Weeks (Intensive Fast-Track Sprint)",
-      "8 Weeks (Recommended Placement Master Plan)",
-      "12 Weeks (Comprehensive Foundational Track)",
+      "4 Weeks (Accelerated Sprint)",
+      "8 Weeks (Comprehensive Master Plan)",
+      "12 Weeks (Foundational Track)",
     ];
   } else if (step >= 4) {
     let weeks = 8;
@@ -123,11 +123,11 @@ export async function processCoachMessage(userId, userMessage, user = null) {
     session.isCompleted = true;
     nextStep = 5;
 
-    replyText = `🎉 Congratulations! Your personalized profile and **${weeks}-week Placement Strategy** for **${session.extractedProfile.targetCompany}** have been synthesized!\n\nClick **"Launch My Placement Roadmap"** below to enter your customized dashboard.`;
+    replyText = `Profile calibration complete. A custom ${weeks}-week Placement Strategy for ${session.extractedProfile.targetCompany} has been synthesized.\n\nSelect an action below to access your calibrated dashboard and personalized roadmap.`;
     nextChips = [
-      "🚀 Launch My Placement Roadmap",
-      "📊 View Academic Eligibility Check",
-      "⚡ Start 'What Should I Do Next?' Task",
+      "Launch Placement Roadmap",
+      "View Academic Eligibility Matrix",
+      "Execute Next High-Impact Task",
     ];
 
     try {
