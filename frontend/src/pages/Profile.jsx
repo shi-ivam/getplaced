@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
+import gsap from "gsap";
 import {
   User,
   GraduationCap,
@@ -218,6 +219,16 @@ export default function Profile() {
     fetchProfile();
   }, []);
 
+  useEffect(() => {
+    if (!loading && containerRef.current) {
+      gsap.fromTo(
+        containerRef.current.querySelectorAll(".gsap-reveal"),
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.6, stagger: 0.08, ease: "power2.out" }
+      );
+    }
+  }, [loading]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -378,98 +389,99 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0d0d0d] text-gray-200 p-6 md:p-10 space-y-6 max-w-5xl mx-auto">
+      <div className="min-h-screen bg-[#09090b] text-zinc-300 p-6 md:p-10 space-y-6 max-w-5xl mx-auto font-sans">
         <div className="space-y-2">
-          <Skeleton className="h-8 w-48 bg-gray-800" />
-          <Skeleton className="h-4 w-96 bg-gray-800/60" />
+          <Skeleton className="h-8 w-48 bg-zinc-800" />
+          <Skeleton className="h-4 w-96 bg-zinc-800/60" />
         </div>
-        <Skeleton className="h-28 w-full bg-gray-800/40 rounded-xl" />
+        <Skeleton className="h-28 w-full bg-zinc-800/40 rounded-xl" />
         <div className="grid gap-6">
-          <Skeleton className="h-44 w-full bg-gray-800/30 rounded-xl" />
-          <Skeleton className="h-64 w-full bg-gray-800/30 rounded-xl" />
-          <Skeleton className="h-56 w-full bg-gray-800/30 rounded-xl" />
+          <Skeleton className="h-44 w-full bg-zinc-800/30 rounded-xl" />
+          <Skeleton className="h-64 w-full bg-zinc-800/30 rounded-xl" />
+          <Skeleton className="h-56 w-full bg-zinc-800/30 rounded-xl" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d] text-gray-200 p-4 md:p-8 lg:p-10 space-y-8 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800/80 pb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
-            <User className="w-8 h-8 text-purple-500" />
-            My Profile
-          </h1>
-          <p className="text-gray-400 text-sm mt-1">
-            Build your baseline placement profile for personalized skill-gap & readiness analysis.
-          </p>
+    <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-zinc-100 p-4 md:p-8 lg:p-10 font-sans selection:bg-zinc-800 selection:text-zinc-100">
+      <div ref={containerRef} className="max-w-5xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="gsap-reveal flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
+          <div className="max-w-3xl">
+            <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight flex items-center gap-3">
+              <User className="w-7 h-7 text-purple-400" />
+              Candidate Profile Configuration
+            </h1>
+            <p className="text-zinc-400 text-xs mt-1">
+              Configure baseline academic parameters, target company alignment, and verified coding profiles.
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Notifications */}
-      {successMessage && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-3 bg-emerald-950/70 border border-emerald-600/60 text-emerald-200 px-4 py-3 rounded-xl shadow-lg">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-            <div className="text-sm font-medium">
-              <div>{successMessage}</div>
-              {targetConfirmation && (
-                <div className="text-xs text-emerald-300/90 font-semibold mt-0.5 flex items-center gap-1.5">
-                  <Target className="w-3.5 h-3.5 text-emerald-400" />
-                  {targetConfirmation}
+        {/* Notifications */}
+        {successMessage && (
+          <div className="gsap-reveal space-y-2">
+            <div className="flex items-center gap-3 bg-emerald-950/70 border border-emerald-600/60 text-emerald-200 px-4 py-3 rounded-xl shadow-lg">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+              <div className="text-sm font-medium">
+                <div>{successMessage}</div>
+                {targetConfirmation && (
+                  <div className="text-xs text-emerald-300/90 font-semibold mt-0.5 flex items-center gap-1.5 font-mono">
+                    <Target className="w-3.5 h-3.5 text-emerald-400" />
+                    {targetConfirmation}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {errorMessage && (
+          <div className="gsap-reveal flex items-center gap-3 bg-rose-950/60 border border-rose-600/50 text-rose-300 px-4 py-3 rounded-xl shadow-lg">
+            <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
+            <span className="text-sm font-medium">{errorMessage}</span>
+          </div>
+        )}
+
+        {/* Profile Completion Indicator Card */}
+        <Card className="gsap-reveal bg-[#121215] border-zinc-800/80 shadow-md">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-purple-400" />
+                  <h3 className="font-semibold text-zinc-100 text-sm">Profile Completeness Benchmark</h3>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-bold font-mono bg-purple-950 text-purple-300 border border-purple-800">
+                    {completion}%
+                  </span>
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {errorMessage && (
-        <div className="flex items-center gap-3 bg-rose-950/60 border border-rose-600/50 text-rose-300 px-4 py-3 rounded-xl shadow-lg">
-          <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
-          <span className="text-sm font-medium">{errorMessage}</span>
-        </div>
-      )}
-
-      {/* Profile Completion Indicator Card */}
-      <Card className="bg-[#141414] border-gray-800/80 shadow-md">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-purple-400" />
-                <h3 className="font-semibold text-white text-base">Profile Completion</h3>
-                <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-purple-950 text-purple-300 border border-purple-800">
-                  {completion}%
-                </span>
+                <p className="text-xs text-zinc-400">
+                  {completion === 100
+                    ? "Your candidate profile is complete and fully configured for dynamic placement-readiness analysis."
+                    : "Complete remaining parameters to maximize readiness scoring accuracy and tailored recommendations."}
+                </p>
               </div>
-              <p className="text-xs text-gray-400">
-                {completion === 100
-                  ? "🎉 Your profile is complete and ready for placement-readiness analysis!"
-                  : "Complete your profile to get more accurate placement-readiness analysis and customized recommendations."}
-              </p>
-            </div>
 
-            {/* Progress Bar */}
-            <div className="w-full md:w-64 space-y-1.5">
-              <div className="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-purple-600 to-indigo-500 h-full transition-all duration-500 rounded-full"
-                  style={{ width: `${completion}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[11px] text-gray-500">
-                <span>Baseline</span>
-                <span>{completion}%</span>
+              {/* Progress Bar */}
+              <div className="w-full md:w-64 space-y-1.5">
+                <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-purple-600 to-indigo-500 h-full transition-all duration-500 rounded-full"
+                    style={{ width: `${completion}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-[11px] font-mono text-zinc-500">
+                  <span>Baseline</span>
+                  <span>{completion}%</span>
+                </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-8">
         {/* 1. Personal Information */}
         <Card className="bg-[#141414] border-gray-800/80">
           <CardHeader className="pb-4 border-b border-gray-800/60">
@@ -815,32 +827,33 @@ export default function Profile() {
         </Card>
 
         {/* 4. Coding & Project Platforms Section */}
-        <div className="space-y-6">
+        <div className="gsap-reveal space-y-6">
           <LeetCodeConnectCard />
           <GitHubConnectCard />
         </div>
 
         {/* Action Button */}
-        <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-800/80">
+        <div className="gsap-reveal flex items-center justify-end gap-4 pt-4 border-t border-zinc-800/80">
           <Button
             type="submit"
             disabled={saving}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-8 py-2.5 rounded-lg shadow-lg shadow-purple-950/50 flex items-center gap-2 transition-all cursor-pointer"
+            className="bg-zinc-100 hover:bg-white text-zinc-950 font-semibold px-8 py-2.5 rounded-lg shadow-lg shadow-zinc-950/50 flex items-center gap-2 transition-all cursor-pointer text-xs uppercase tracking-wider"
           >
             {saving ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Saving Profile...
+                <Loader2 className="w-4 h-4 animate-spin text-zinc-950" />
+                <span>Saving Profile...</span>
               </>
             ) : (
               <>
-                <CheckCircle2 className="w-4 h-4" />
-                Save Profile
+                <CheckCircle2 className="w-4 h-4 text-zinc-950" />
+                <span>Save Profile</span>
               </>
             )}
           </Button>
         </div>
       </form>
-    </div>
+      </div>
+    </main>
   );
 }

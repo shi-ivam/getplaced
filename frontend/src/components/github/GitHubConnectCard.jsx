@@ -696,7 +696,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                 <div className="text-2xl font-bold font-mono text-sky-400">
                   {profile.totalForks || 0}
                 </div>
-                <p className="text-[11px] text-zinc-500 font-mono">Downstream forks 🍴</p>
+                <p className="text-[11px] text-zinc-500 font-mono">Downstream forks</p>
               </div>
             </div>
 

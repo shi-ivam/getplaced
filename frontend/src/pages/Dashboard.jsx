@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import gsap from "gsap";
 import {
   Target,
   Building2,
@@ -55,6 +56,7 @@ export default function Dashboard() {
   const [githubProfile, setGithubProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showExplainModal, setShowExplainModal] = useState(false);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -92,6 +94,16 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (!loading && containerRef.current) {
+      gsap.fromTo(
+        containerRef.current.querySelectorAll(".gsap-reveal"),
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.6, stagger: 0.08, ease: "power2.out" }
+      );
+    }
+  }, [loading]);
+
   const hasTarget = Boolean(userProfile?.targetCompany || userProfile?.targetJobRole);
   const isFullTarget = Boolean(userProfile?.targetCompany && userProfile?.targetJobRole);
 
@@ -105,7 +117,6 @@ export default function Dashboard() {
         return "bg-amber-500/10 text-amber-400 border-amber-500/20";
       case "needs_major_improvement":
       case "needs_improvement":
-        return "bg-rose-500/10 text-rose-400 border-rose-500/20";
       case "not_ready":
         return "bg-rose-500/10 text-rose-400 border-rose-500/20";
       default:
@@ -118,7 +129,6 @@ export default function Dashboard() {
     if (score >= 90) return "text-emerald-400";
     if (score >= 75) return "text-sky-400";
     if (score >= 60) return "text-amber-400";
-    if (score >= 40) return "text-rose-400";
     return "text-rose-400";
   };
 
@@ -133,27 +143,28 @@ export default function Dashboard() {
   const dimensionsList = readiness?.dimensions ? Object.values(readiness.dimensions) : [];
 
   return (
-    <div className="min-h-screen bg-[#0c0c0e] text-zinc-200 p-4 md:p-8 lg:p-10 space-y-8 max-w-6xl mx-auto font-sans selection:bg-zinc-800 selection:text-zinc-100">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-zinc-100 tracking-tight">
-            {userProfile?.name ? userProfile.name : "Candidate Overview"}
-          </h1>
-          <p className="text-xs text-zinc-400 mt-1">
-            Placement milestones, active target alignment, and readiness evaluation.
-          </p>
-        </div>
-
-        {hasTarget && (
-          <div className="inline-flex items-center gap-2 self-start sm:self-auto bg-zinc-900/90 border border-zinc-800 px-3 py-1.5 rounded-md text-xs">
-            <Target className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="text-zinc-500 font-mono">TARGET:</span>
-            <span className="font-medium text-zinc-200 font-mono">
-              {userProfile.targetCompany || "Any"} · {userProfile.targetJobRole || "Developer"}
-            </span>
+    <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-zinc-100 p-4 md:p-8 lg:p-10 font-sans selection:bg-zinc-800 selection:text-zinc-100">
+      <div ref={containerRef} className="max-w-6xl mx-auto space-y-8">
+        <header className="gsap-reveal flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
+          <div className="max-w-4xl">
+            <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight leading-snug">
+              {userProfile?.name ? `${userProfile.name} • Candidate Performance Overview` : "Candidate Performance Overview"}
+            </h1>
+            <p className="text-xs text-zinc-400 mt-1">
+              Real-time multi-dimensional placement evaluation, target alignment, and milestone progression.
+            </p>
           </div>
-        )}
-      </header>
+
+          {hasTarget && (
+            <div className="inline-flex items-center gap-2 self-start sm:self-auto bg-zinc-900 border border-zinc-800 px-3.5 py-1.5 rounded-lg text-xs">
+              <Target className="w-3.5 h-3.5 text-zinc-400" />
+              <span className="text-zinc-500 font-mono">TARGET:</span>
+              <span className="font-semibold text-zinc-200 font-mono">
+                {userProfile.targetCompany || "Any"} / {userProfile.targetJobRole || "Developer"}
+              </span>
+            </div>
+          )}
+        </header>
 
       {hasTarget ? (
         <section className="rounded-xl bg-[#121215] border border-zinc-800/90 p-5 md:p-6 transition-colors hover:border-zinc-700/80">
@@ -856,7 +867,7 @@ export default function Dashboard() {
         )}
       </section>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <section className="gsap-reveal grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         <StatCard
           title="Resume ATS Score"
           value={
@@ -878,7 +889,7 @@ export default function Dashboard() {
           }
           subtitle={
             githubProfile
-              ? `${githubProfile.totalStars || 0} Stars ⭐`
+              ? `${githubProfile.totalStars || 0} Stars`
               : "15% Dimension Wt"
           }
         />
@@ -899,7 +910,7 @@ export default function Dashboard() {
         />
       </section>
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <section className="gsap-reveal grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-[#121215] border border-zinc-800/90 p-5 rounded-xl col-span-1 md:col-span-2 space-y-3.5 flex flex-col justify-between">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -921,7 +932,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-3 pt-2">
             <Link
               to="/app/interview"
-              className="bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-medium px-3.5 py-1.5 rounded-md transition-colors inline-flex items-center gap-1.5"
+              className="bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold px-4 py-2 rounded-md transition-colors inline-flex items-center gap-1.5"
             >
               <span>Start Mock Interview</span>
               <ArrowRight className="w-3 h-3" />
@@ -950,7 +961,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <section className="gsap-reveal grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-[#121215] border border-zinc-800/90 p-5 rounded-xl col-span-1 md:col-span-2 space-y-3">
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-zinc-400" />
@@ -975,7 +986,7 @@ export default function Dashboard() {
                     {course.tag}
                   </span>
                 </div>
-                <button className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-2.5 py-1 rounded-md transition-colors cursor-pointer shrink-0 font-medium">
+                <button className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-1 rounded-md transition-colors cursor-pointer shrink-0 font-medium">
                   Enroll
                 </button>
               </li>
@@ -1010,7 +1021,8 @@ export default function Dashboard() {
           </ul>
         </div>
       </section>
-    </div>
+      </div>
+    </main>
   );
 }
 

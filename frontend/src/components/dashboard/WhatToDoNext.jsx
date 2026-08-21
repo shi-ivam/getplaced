@@ -162,7 +162,7 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
         {/* Daily Streak & Velocity */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#222] border border-gray-800 text-xs text-gray-300">
-            <span className="text-amber-400 font-bold">🔥 {streakDays} Day Streak</span>
+            <span className="text-amber-400 font-bold font-mono">{streakDays} Day Streak</span>
           </div>
           <Link
             to="/app/roadmap"

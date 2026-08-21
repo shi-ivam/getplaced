@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Calendar,
   Home,
   User,
   Briefcase,
@@ -9,7 +8,6 @@ import {
   Code2,
   Terminal,
   Settings,
-  HelpCircle,
   LogOut,
   Building,
   Mic,
@@ -22,7 +20,9 @@ import {
   Swords,
   Sparkles,
 } from "lucide-react";
-
+import axios from "axios";
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { NODE_API_URL } from "@/config/api";
 import {
   Sidebar,
   SidebarContent,
@@ -33,7 +33,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Link, useLocation } from 'react-router-dom';
 
 const mainItems = [
   {
@@ -112,7 +111,7 @@ const mainItems = [
     icon: Sparkles,
   },
   {
-    title: "Job Recommendation",
+    title: "Job Recommendations",
     url: "/app/job",
     icon: Briefcase,
   },
@@ -125,112 +124,121 @@ const generalItems = [
     icon: User,
   },
   {
-    title: "Setting",
-    url: "#",
+    title: "Settings",
+    url: "/app/profile",
     icon: Settings,
   },
 ];
 
 export default function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${NODE_API_URL}/api/users/logout`, {}, { withCredentials: true });
+    } catch (err) {
+      console.warn("Logout request failed:", err);
+    } finally {
+      navigate("/login");
+    }
+  };
+
   return (
-    <div className="relative h-full">
-      <Sidebar className="bg-[#121212] text-gray-300 border-r border-gray-800 h-full flex flex-col">
+    <div className="relative h-full select-none">
+      <Sidebar className="bg-[#09090b] text-zinc-300 border-r border-zinc-800/80 h-full flex flex-col">
         <SidebarContent className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center gap-2 px-4 py-4 mb-2">
-            <span className="font-bold text-white text-lg tracking-tight bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
-              getPlaced
-            </span>
+          <div className="flex items-center gap-2 px-5 py-5 mb-1 border-b border-zinc-800/60">
+            <Link to="/app" className="flex items-center gap-2">
+              <span className="font-bold text-white text-lg tracking-tight font-sans">
+                get<span className="text-purple-400">Placed</span>
+              </span>
+            </Link>
           </div>
-          
+
           {/* Main menu */}
-          <SidebarGroup>
-            <SidebarGroupLabel className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-              Navigation
+          <SidebarGroup className="py-2">
+            <SidebarGroupLabel className="px-5 py-2 text-[10px] font-semibold text-zinc-500 uppercase tracking-widest font-mono">
+              Platform Navigation
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
-                {mainItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                    <Link
-                         to={item.url}
-                         className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
-                           location.pathname === item.url || (item.url !== "/app" && location.pathname.startsWith(item.url))
-                             ? "bg-purple-600 text-white font-medium shadow-sm" 
-                             : "hover:bg-gray-800 hover:text-white text-gray-300"
-                         } transition-all`}
-                       >
-                        <item.icon className="w-4 h-4" />
-                        <span className="text-xs font-medium">{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-          
-          {/* General menu */}
-          <SidebarGroup className="mt-2">
-            <SidebarGroupLabel className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-              Account
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {generalItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      {item.url.startsWith("/") ? (
+              <SidebarMenu className="space-y-0.5 px-2">
+                {mainItems.map((item) => {
+                  const isActive =
+                    item.url === "/app"
+                      ? location.pathname === "/app"
+                      : location.pathname === item.url || location.pathname.startsWith(item.url + "/");
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
                         <Link
                           to={item.url}
-                          className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
-                            location.pathname === item.url
-                              ? "bg-purple-600 text-white"
-                              : "hover:bg-gray-800 hover:text-white"
-                          } transition-all`}
+                          className={`flex items-center gap-3 px-3.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                            isActive
+                              ? "bg-zinc-100 text-zinc-950 font-semibold shadow-sm"
+                              : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
+                          }`}
                         >
-                          <item.icon className="w-4 h-4 text-gray-400" />
-                          <span className="text-xs">{item.title}</span>
+                          <item.icon className={`w-4 h-4 shrink-0 ${isActive ? "text-zinc-950" : "text-zinc-400"}`} />
+                          <span className="truncate">{item.title}</span>
                         </Link>
-                      ) : (
-                        <a
-                          href={item.url}
-                          className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-800 hover:text-white transition-all"
-                        >
-                          <item.icon className="w-4 h-4 text-gray-400" />
-                          <span className="text-xs">{item.title}</span>
-                        </a>
-                      )}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-          
-          {/* Dotted pattern background */}
-          <div className="relative flex-grow overflow-hidden">
-            <div className="absolute inset-0 opacity-40" 
-                 style={{
-                   backgroundImage: 'radial-gradient(circle, #444 1px, transparent 1px)',
-                   backgroundSize: '12px 12px'
-                 }} />
-          </div>
-          
+
+          {/* General menu */}
+          <SidebarGroup className="mt-2 border-t border-zinc-800/60 pt-2">
+            <SidebarGroupLabel className="px-5 py-2 text-[10px] font-semibold text-zinc-500 uppercase tracking-widest font-mono">
+              Account Management
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="space-y-0.5 px-2">
+                {generalItems.map((item) => {
+                  const isActive = location.pathname === item.url;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <Link
+                          to={item.url}
+                          className={`flex items-center gap-3 px-3.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                            isActive
+                              ? "bg-zinc-100 text-zinc-950 font-semibold shadow-sm"
+                              : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
+                          }`}
+                        >
+                          <item.icon className={`w-4 h-4 shrink-0 ${isActive ? "text-zinc-950" : "text-zinc-400"}`} />
+                          <span className="truncate">{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* Spacer */}
+          <div className="flex-grow" />
+
           {/* Logout button */}
-          <div className="mt-auto mb-4 px-4">
-            <a
-              href="#"
-              className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-all"
+          <div className="p-3 border-t border-zinc-800/80 bg-zinc-950/40">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all cursor-pointer font-mono"
             >
               <LogOut className="w-4 h-4" />
-              <span className="text-xs">Log Out</span>
-            </a>
+              <span>Log Out</span>
+            </button>
           </div>
         </SidebarContent>
       </Sidebar>
     </div>
   );
 }
+
