@@ -142,6 +142,7 @@ const normalizeIdentifier = (str) => {
 };
 
 export default function Profile() {
+  const containerRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
