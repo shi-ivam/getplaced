@@ -8,6 +8,7 @@ import LoginPage from '@/pages/Login'
 import RegisterPage from '@/pages/Register'
 import Dashboard from '@/pages/Dashboard'
 import JobRecommendations from '@/pages/JobRecommendations'
+import Profile from '@/pages/Profile'
 
 function Routings() {
   return (
@@ -22,6 +23,7 @@ function Routings() {
                 <Route index element={<Dashboard />} />
                 <Route path="resume" element={<AnalyzeResume />} />
                 <Route path="job" element={<JobRecommendations />} />
+                <Route path="profile" element={<Profile />} />
             </Route>
             </Routes>
         </Router>

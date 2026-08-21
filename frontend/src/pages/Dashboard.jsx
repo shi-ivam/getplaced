@@ -1,11 +1,32 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { NODE_API_URL } from "@/config/api";
 
 export default function Dashboard() {
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(`${NODE_API_URL}/api/users/profile`, {
+          withCredentials: true,
+        });
+        if (res.data && res.data.name) {
+          setUserName(res.data.name);
+        }
+      } catch (err) {
+        console.error("Could not fetch user profile for dashboard greeting:", err);
+      }
+    };
+    fetchUser();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f9fafb] p-6 space-y-6">
       {/* Header */}
-      <h1 className="text-2xl font-bold text-gray-800">👋 Welcome, Pravin!</h1>
+      <h1 className="text-2xl font-bold text-gray-800">
+        👋 Welcome{userName ? `, ${userName}` : ""}!
+      </h1>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

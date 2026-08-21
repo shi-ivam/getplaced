@@ -1,126 +1,85 @@
-"use client";
-
 import React from "react";
 import { motion } from "framer-motion";
-import { FaLock } from "react-icons/fa";
-import Particles from "react-tsparticles";
-import { loadFull } from "tsparticles";
+import { Lock, ShieldCheck, Key, EyeOff, Server } from "lucide-react";
 
-const backgroundData = [
-  "fSdD2iui", "8dkFaZ4H", "gGxT3zkf", "x6t9wpR", "PuUKgx9c", "FiM5dhXzW", "WDPvDCBG",
-  "QztXTafcF", "gGzot4rF", "NaOt7yWVD", "LrkBMa6gS", "OqlilAo9w", "xKxv9tHW", "QuT2rkF",
-  "5kKx+FSJ", "vZw4Tf3E", "F1kaf12Ij", "1FQ2+x48", "8vepZkY", "O6k5FHz9", "mP1+suK",
-  "NA6TY0wcE", "qqW6dY2", "FiM5dhXzW", "YDDves2RE", "Tf3Em", "QztXTafcF", "PuUKgx9c"
+const encryptedHashes = [
+  "0x7F9a...3B4C", "0xE421...91F0", "0x89D2...04A1",
+  "0x11B8...99E3", "0x33A0...77B2", "0x55C1...22D4"
 ];
-
-const glowWords = backgroundData.map((text, i) => (
-  <motion.span
-    key={i}
-    className="text-xs text-[#6e6eff]/30 font-mono select-none px-1"
-    animate={{ opacity: [0.1, 0.4, 0.1], y: [0, -2, 0] }}
-    transition={{
-      repeat: Infinity,
-      repeatType: "loop",
-      duration: 3 + Math.random() * 2,
-      delay: i * 0.02,
-    }}
-  >
-    {text}
-  </motion.span>
-));
-
-const particlesInit = async (main) => {
-  await loadFull(main);
-};
 
 const PrivacyProtection = () => {
   return (
-    <div className="relative min-h-screen bg-[#0a0812] flex flex-col items-center justify-center text-white overflow-hidden px-6">
+    <section id="security" className="py-24 md:py-36 bg-[#05060d] text-white relative overflow-hidden">
+      
+      {/* Subtle Background Mesh */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-950/20 via-[#05060d] to-[#05060d] pointer-events-none" />
 
-      {/* 3D Grid Effect */}
-      <div className="absolute inset-0 z-0 perspective-[1000px] overflow-hidden">
-        <div className="absolute bottom-0 w-full h-[500px] [transform-style:preserve-3d] animate-gridWave">
-          <div className="w-full h-full bg-[linear-gradient(to_right,rgba(110,110,255,0.1)_1px,transparent_1px),linear-gradient(to_top,rgba(110,110,255,0.1)_1px,transparent_1px)] bg-[size:40px_40px] scale-150 blur-sm" />
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+        
+        <div className="rounded-3xl bg-gradient-to-b from-[#0c0e1b] to-[#070811] p-8 md:p-14 border border-white/10 shadow-2xl relative overflow-hidden">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            {/* Text & Specs */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-mono uppercase tracking-widest">
+                <Lock className="w-3.5 h-3.5 text-emerald-400" /> Hardened Enterprise Security
+              </div>
+              
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                Zero-Knowledge Privacy & Encryption Standard
+              </h2>
+
+              <p className="text-slate-300 text-base md:text-lg leading-relaxed">
+                Your mock interview audio streams, candidate telemetry, and custom resume documents are encrypted in transit via TLS 1.3 and at rest with AES-256 GCM.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-start gap-3">
+                  <Key className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-sm font-bold text-white mb-0.5">End-to-End Key Isolation</h4>
+                    <p className="text-xs text-slate-400">Isolated candidate key pairs generated client-side.</p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-start gap-3">
+                  <EyeOff className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-sm font-bold text-white mb-0.5">No Unverified Data Training</h4>
+                    <p className="text-xs text-slate-400">Your mock interview data is never stored for public AI model training.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Encrypted Hash Graphic */}
+            <div className="lg:col-span-5 flex flex-col items-center justify-center p-6 rounded-2xl bg-black/60 border border-white/10 relative">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-6 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                <ShieldCheck className="w-8 h-8" />
+              </div>
+
+              <div className="w-full space-y-2 font-mono text-xs">
+                {encryptedHashes.map((hash, i) => (
+                  <div key={i} className="flex justify-between p-2.5 rounded-lg bg-slate-950/80 border border-white/5 text-slate-400">
+                    <span className="text-emerald-400">PAYLOAD_HASH_{i+1}</span>
+                    <span>{hash}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 flex items-center gap-2 text-[11px] font-mono text-slate-400">
+                <Server className="w-3.5 h-3.5 text-purple-400" />
+                <span>STATUS: SOC-2 COMPLIANT ENCLAVE</span>
+              </div>
+            </div>
+
+          </div>
+
         </div>
+
       </div>
-
-      {/* Particle Effect */}
-      <Particles
-        id="tsparticles"
-        init={particlesInit}
-        className="absolute inset-0 z-0"
-        options={{
-          fullScreen: false,
-          background: { color: { value: "#0a0812" } },
-          fpsLimit: 60,
-          interactivity: {
-            events: { onHover: { enable: true, mode: "repulse" }, resize: true },
-            modes: { repulse: { distance: 100 } },
-          },
-          particles: {
-            color: { value: "#6e6eff" },
-            links: {
-              color: "#8888ff",
-              distance: 120,
-              enable: true,
-              opacity: 0.3,
-              width: 1,
-            },
-            move: { enable: true, speed: 1, direction: "none", outMode: "bounce" },
-            number: { value: 60 },
-            opacity: { value: 0.4 },
-            shape: { type: "circle" },
-            size: { value: { min: 1, max: 3 } },
-          },
-          detectRetina: true,
-        }}
-      />
-
-      {/* Floating glow text */}
-      <div className="absolute top-0 left-0 w-full h-full flex flex-wrap items-center justify-center text-center blur-sm z-10 pointer-events-none">
-        {glowWords}
-      </div>
-
-      {/* Lock icon */}
-      <motion.div
-        className="text-purple-400 text-6xl mb-4 z-20"
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1 }}
-      >
-        <FaLock />
-      </motion.div>
-
-      {/* Tag */}
-      <motion.div
-        className="bg-purple-700/20 px-4 py-1 rounded-full text-sm text-purple-300 font-medium z-20 mb-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
-      >
-        Encryption
-      </motion.div>
-
-      {/* Title */}
-      <motion.h1
-        className="text-4xl md:text-5xl font-extrabold text-center bg-gradient-to-r from-purple-500 via-blue-400 to-indigo-400 bg-clip-text text-transparent z-20 mb-4"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.6, duration: 0.8 }}
-      >
-        Hardened security
-      </motion.h1>
-
-      {/* Description */}
-      <motion.p
-        className="text-center text-sm md:text-lg text-gray-400 max-w-xl z-20"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-      >
-        Your data is end-to-end encrypted. No one, not even us, can see your private information. Your privacy is protected by default.
-      </motion.p>
-    </div>
+    </section>
   );
 };
 

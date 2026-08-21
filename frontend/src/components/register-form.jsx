@@ -31,11 +31,15 @@ export function RegisterForm(props) {
     e.preventDefault()
     try {
       await axios
-        .post(`${NODE_API_URL}/api/users/`, {
-          name,
-          email,
-          password,
-        })
+        .post(
+          `${NODE_API_URL}/api/users/`,
+          {
+            name,
+            email,
+            password,
+          },
+          { withCredentials: true }
+        )
         .then(() => {
           navigate('/app')
           console.log("User created")

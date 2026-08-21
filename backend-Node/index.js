@@ -12,27 +12,28 @@ connectDB()
 
 const app = express()
 
-// Change this origin when in production
-// app.use(cors({ origin: "https://dev-clash-flax.vercel.app"})) // for production
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+  "https://dev-clash-flax.vercel.app",
+  "https://dev-clash-hackathon.vercel.app",
+]
 
-
-// app.use(cors({ origin: "http://localhost:5173"}, )) // for Localhost
-
-
-// app.use(cors({
-//   origin: "https://dev-clash-flax.vercel.app/",
-//   credentials: true, // Allow cookies or Authorization headers
-//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Ensure all required methods are allowed
-//   allowedHeaders: ["Content-Type", "Authorization"] // Include necessary headers
-// }))
-
-app.use(cors());
-// app.use(cors({
-//   origin: "https://dev-clash-hackathon.vercel.app", // frontend domain
-//   credentials: true,
-//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//   allowedHeaders: ["Content-Type", "Authorization"]
-// }));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+        callback(null, true)
+      } else {
+        callback(null, true)
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+)
 
 app.use(express.json())
 

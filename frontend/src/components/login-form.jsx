@@ -29,10 +29,14 @@ export function LoginForm(props) {
   const handleSubmit = async (e) => {
       e.preventDefault()
       try {
-        await axios.post(`${NODE_API_URL}/api/users/auth`, {
-          email,
-          password,
-        })
+        await axios.post(
+          `${NODE_API_URL}/api/users/auth`,
+          {
+            email,
+            password,
+          },
+          { withCredentials: true }
+        )
         .then(() => {
           navigate('/app')
           console.log('User logged in')

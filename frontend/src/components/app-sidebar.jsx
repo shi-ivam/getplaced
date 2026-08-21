@@ -46,10 +46,12 @@ const mainItems = [
   },
 ];
 
+import { Link, useLocation } from 'react-router-dom';
+
 const generalItems = [
   {
     title: "Profile",
-    url: "#",
+    url: "/app/profile",
     icon: User,
   },
   {
@@ -58,8 +60,6 @@ const generalItems = [
     icon: Settings,
   },
 ];
-
-import {Link , useLocation} from 'react-router-dom';
 
 export default function AppSidebar() {
   const location = useLocation();
@@ -111,13 +111,27 @@ export default function AppSidebar() {
                 {generalItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <a
-                        href={item.url}
-                        className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-800 hover:text-white transition-all"
-                      >
-                        <item.icon className="w-5 h-5 text-gray-400" />
-                        <span className="text-sm">{item.title}</span>
-                      </a>
+                      {item.url.startsWith("/") ? (
+                        <Link
+                          to={item.url}
+                          className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
+                            location.pathname === item.url
+                              ? "bg-purple-600 text-white"
+                              : "hover:bg-gray-800 hover:text-white"
+                          } transition-all`}
+                        >
+                          <item.icon className="w-5 h-5 text-gray-400" />
+                          <span className="text-sm">{item.title}</span>
+                        </Link>
+                      ) : (
+                        <a
+                          href={item.url}
+                          className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-800 hover:text-white transition-all"
+                        >
+                          <item.icon className="w-5 h-5 text-gray-400" />
+                          <span className="text-sm">{item.title}</span>
+                        </a>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

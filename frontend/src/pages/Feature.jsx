@@ -1,81 +1,132 @@
 import React from "react";
 import { motion } from "framer-motion";
-
-const features = [
-  {
-    icon: "☁️",
-    title: "Built for speed",
-    description: "Instantly sync your notes across devices",
-  },
-  {
-    icon: "🕸️",
-    title: "Networked notes",
-    description: "Form a graph of ideas with backlinked notes",
-  },
-  {
-    icon: "📱",
-    title: "iOS app",
-    description: "Capture ideas on the go, online or offline",
-  },
-  {
-    icon: "🔒",
-    title: "End-to-end encryption",
-    description: "Only you can access your notes",
-  },
-  {
-    icon: "📅",
-    title: "Calendar integration",
-    description: "Keep track of meetings and agendas",
-  },
-  {
-    icon: "🚀",
-    title: "Publishing",
-    description: "Share anything you write with one click",
-  },
-  {
-    icon: "📥",
-    title: "Instant capture",
-    description: "Save snippets from your browser and Kindle",
-  },
-  {
-    icon: "🔍",
-    title: "Frictionless search",
-    description: "Easily recall and index past notes and ideas",
-  },
-];
+import { Cpu, FileSearch, Code2, Sparkles, Target, BarChart3, Bot, Zap } from "lucide-react";
 
 const FeaturesGrid = () => {
   return (
-    <div className="min-h-screen bg-[#0a0812] text-white p-10">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {features.map((feature, index) => (
+    <section id="features" className="py-24 md:py-36 bg-[#05060d] text-white relative overflow-hidden">
+      
+      {/* Background Glow */}
+      <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[160px] pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+        
+        {/* Section Header */}
+        <div className="flex flex-col items-center text-center mb-16 md:mb-24">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono uppercase tracking-widest mb-4">
+            <Zap className="w-3.5 h-3.5 text-purple-400" /> Platform Architecture
+          </div>
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight max-w-4xl text-white">
+            Engineering Precision for Placement Excellence
+          </h2>
+        </div>
+
+        {/* Gapless Bento Grid with grid-flow-dense */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 grid-flow-dense">
+          
+          {/* Bento Card 1: AI Interview Mesh (Col 2, Row 2) */}
           <motion.div
-            key={index}
-            className="bg-[#14101d] p-6 rounded-2xl shadow-lg cursor-pointer transition-all duration-300"
-            whileHover={{
-              scale: 1.07,
-              rotateX: 5,
-              rotateY: -5,
-              boxShadow: "0px 20px 50px rgba(255,255,255,0.15)",
-            }}
-            whileTap={{ scale: 0.97 }}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: index * 0.05,
-              duration: 0.6,
-              ease: "easeOut",
-            }}
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="col-span-1 md:col-span-2 lg:col-span-2 row-span-2 group relative rounded-3xl bg-gradient-to-b from-[#131728] to-[#0a0c16] p-8 border border-white/10 overflow-hidden flex flex-col justify-between shadow-2xl hover:border-purple-500/50 transition-colors"
           >
-            <div className="text-4xl mb-4 transition-transform duration-300 hover:scale-125">
-              {feature.icon}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600/20 rounded-full blur-[90px] group-hover:bg-purple-600/30 transition-all pointer-events-none" />
+            
+            <div>
+              <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-6 group-hover:scale-110 transition-transform">
+                <Bot className="w-6 h-6" />
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight">
+                Neural AI Interview Simulation
+              </h3>
+              <p className="text-slate-400 text-sm md:text-base leading-relaxed mb-6">
+                Engineered with real-time biometric feedback analyzing voice pitch, eye tracking, posture, and technical clarity during live mock sessions.
+              </p>
             </div>
-            <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-            <p className="text-gray-400">{feature.description}</p>
+
+            {/* Micro Graphic Component */}
+            <div className="rounded-2xl bg-slate-950/80 border border-white/10 p-5 backdrop-blur-md">
+              <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3">
+                <span>SPEECH_ANALYSIS_ENGINE</span>
+                <span className="text-emerald-400 font-semibold">99.4% ACCURACY</span>
+              </div>
+              <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-purple-500 via-indigo-500 to-emerald-400 w-[92%] rounded-full animate-pulse" />
+              </div>
+              <div className="mt-3 flex justify-between text-[11px] text-slate-400 font-mono">
+                <span>Pacing: 142 wpm</span>
+                <span>Tone: Confident</span>
+                <span>Filler Words: 0%</span>
+              </div>
+            </div>
           </motion.div>
-        ))}
+
+          {/* Bento Card 2: ATS Resume Radar (Col 2, Row 1) */}
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="col-span-1 md:col-span-2 lg:col-span-2 row-span-1 group relative rounded-3xl bg-[#0c0e1a] p-8 border border-white/10 overflow-hidden flex flex-col justify-between shadow-xl hover:border-cyan-500/40 transition-colors"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-4 group-hover:scale-110 transition-transform">
+                  <FileSearch className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-2 tracking-tight">
+                  ATS Resume Optimization Radar
+                </h3>
+                <p className="text-slate-400 text-sm leading-relaxed max-w-md">
+                  Parse, score, and reconstruct your resume against top tech company job descriptions to pass enterprise ATS screeners.
+                </p>
+              </div>
+              <div className="hidden sm:flex flex-col items-end justify-center">
+                <div className="text-3xl font-mono font-black text-cyan-400">86%</div>
+                <div className="text-[10px] text-slate-400 font-mono">MATCH SCORE</div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Bento Card 3: DSA Problem Generator (Col 1, Row 1) */}
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 group relative rounded-3xl bg-[#0c0e1a] p-6 border border-white/10 overflow-hidden flex flex-col justify-between shadow-xl hover:border-emerald-500/40 transition-colors"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4 group-hover:scale-110 transition-transform">
+                <Code2 className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-1.5 tracking-tight">
+                Curated DSA Prep
+              </h3>
+              <p className="text-slate-400 text-xs leading-relaxed">
+                Structured patterns for LeetCode medium & hard algorithms with step-by-step breakdown.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Bento Card 4: Analytics Dashboard (Col 1, Row 1) */}
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 group relative rounded-3xl bg-[#0c0e1a] p-6 border border-white/10 overflow-hidden flex flex-col justify-between shadow-xl hover:border-purple-500/40 transition-colors"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition-transform">
+                <BarChart3 className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-1.5 tracking-tight">
+                Readiness Analytics
+              </h3>
+              <p className="text-slate-400 text-xs leading-relaxed">
+                Track behavioral, technical, and communication scores across your preparation lifecycle.
+              </p>
+            </div>
+          </motion.div>
+
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 
