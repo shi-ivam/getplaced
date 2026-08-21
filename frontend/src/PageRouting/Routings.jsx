@@ -1,5 +1,5 @@
 import React from 'react'
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import LandingPage from '../pages/LandingPage'
 import Layout from './Layout'
 import AnalyzeResume from '@/pages/AnalyzeResume'
@@ -13,30 +13,50 @@ import DSAContent from '@/pages/DSAcontent'
 import CodingArena from '@/pages/CodingArena'
 import CodingWorkspace from '@/pages/CodingWorkspace'
 
+// Group C Pages (#28 - #44)
+import Academics from '@/pages/Academics'
+import ProgressTracker from '@/pages/ProgressTracker'
+import Milestones from '@/pages/Milestones'
+import PlacementRoadmap from '@/pages/PlacementRoadmap'
+import StudyLibrary from '@/pages/StudyLibrary'
+import PlacementArena from '@/pages/PlacementArena'
+import CareerCoach from '@/pages/CareerCoach'
+
 function Routings() {
   return (
     <div>
-        <Router>
-            <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/resume" element={<AnalyzeResume />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage/>} />
-            <Route path="/coding" element={<CodingArena />} />
-            <Route path="/coding/:slug" element={<CodingWorkspace />} />
-            <Route path="/app" element={<Layout />} >
-                <Route index element={<Dashboard />} />
-                <Route path="dsa" element={<DSAContent />} />
-                <Route path="coding" element={<CodingArena />} />
-                <Route path="coding/:slug" element={<CodingWorkspace />} />
-                <Route path="problems" element={<CodingArena />} />
-                <Route path="problems/:slug" element={<CodingWorkspace />} />
-                <Route path="resume" element={<AnalyzeResume />} />
-                <Route path="job" element={<JobRecommendations />} />
-                <Route path="profile" element={<Profile />} />
-            </Route>
-            </Routes>
-        </Router>
+      <Router>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/resume" element={<AnalyzeResume />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/coding" element={<CodingArena />} />
+          <Route path="/coding/:slug" element={<CodingWorkspace />} />
+
+          {/* Authenticated Dashboard App Shell */}
+          <Route path="/app" element={<Layout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="dsa" element={<DSAContent />} />
+            <Route path="coding" element={<CodingArena />} />
+            <Route path="coding/:slug" element={<CodingWorkspace />} />
+            <Route path="problems" element={<CodingArena />} />
+            <Route path="problems/:slug" element={<CodingWorkspace />} />
+            <Route path="resume" element={<AnalyzeResume />} />
+            <Route path="job" element={<JobRecommendations />} />
+            <Route path="profile" element={<Profile />} />
+
+            {/* New Group C Surfaces */}
+            <Route path="academics" element={<Academics />} />
+            <Route path="progress" element={<ProgressTracker />} />
+            <Route path="milestones" element={<Milestones />} />
+            <Route path="roadmap" element={<PlacementRoadmap />} />
+            <Route path="library" element={<StudyLibrary />} />
+            <Route path="arena" element={<PlacementArena />} />
+            <Route path="coach" element={<CareerCoach />} />
+          </Route>
+        </Routes>
+      </Router>
     </div>
   )
 }
