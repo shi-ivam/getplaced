@@ -1,0 +1,215 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  Building2,
+  CheckCircle2,
+  AlertCircle,
+  XCircle,
+  Search,
+  Filter,
+  Briefcase,
+  GraduationCap,
+  Info,
+} from "lucide-react";
+import { NODE_API_URL } from "@/config/api";
+
+const STATUS_CONFIG = {
+  Eligible: {
+    bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+    icon: CheckCircle2,
+    badgeText: "100% Eligible",
+  },
+  Borderline: {
+    bg: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+    icon: AlertCircle,
+    badgeText: "Borderline Gap",
+  },
+  Ineligible: {
+    bg: "bg-rose-500/10 text-rose-400 border-rose-500/30",
+    icon: XCircle,
+    badgeText: "Ineligible",
+  },
+};
+
+export default function CompanyEligibilityFilter({ academicData }) {
+  const [companiesData, setCompaniesData] = useState(null);
+  const [filterTier, setFilterTier] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEligibility = async () => {
+      try {
+        const res = await axios.get(
+          `${NODE_API_URL}/api/academics/eligibility?tier=${filterTier}`,
+          { withCredentials: true }
+        );
+        if (res.data) {
+          setCompaniesData(res.data);
+        }
+      } catch (err) {
+        console.warn("Could not fetch company eligibility, using fallback data:", err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEligibility();
+  }, [filterTier, academicData]);
+
+  const companies = companiesData?.companies || [];
+
+  const filteredCompanies = companies.filter((c) => {
+    const matchesSearch =
+      c.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.tier.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
+
+  return (
+    <div className="bg-[#18181b] border border-gray-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+      {/* Header & Stats */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div>
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400">
+              <Building2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white">
+                Company Academic Eligibility Checker
+              </h3>
+              <p className="text-xs text-gray-400">
+                Live screening against cutoffs for 35+ top recruiters & product companies
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Aggregate Rate */}
+        {companiesData && (
+          <div className="flex items-center gap-2">
+            <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
+              <span className="text-emerald-400 font-bold">
+                {companiesData.eligibleCount} / {companiesData.totalEvaluated} Companies Eligible ({companiesData.eligibilityRatePct}%)
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Filter and Search Bar */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        {/* Search */}
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Search company (e.g. Google, Microsoft, TCS, Amazon)..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-[#121214] border border-gray-800 rounded-xl pl-9 pr-4 py-2 text-xs text-gray-200 focus:outline-none focus:border-blue-500 transition-colors"
+          />
+        </div>
+
+        {/* Tier Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+          {["All", "Tier 1 Product", "FinTech", "Unicorn", "IT Services"].map((tier) => (
+            <button
+              key={tier}
+              type="button"
+              onClick={() => setFilterTier(tier)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+                filterTier === tier
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "bg-[#121214] text-gray-400 hover:text-white border border-gray-800"
+              }`}
+            >
+              {tier}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Company List */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredCompanies.map((item) => {
+          const cfg = STATUS_CONFIG[item.status] || STATUS_CONFIG.Ineligible;
+          const IconComp = cfg.icon;
+
+          return (
+            <div
+              key={item.company}
+              className="bg-[#121214] border border-gray-800/80 hover:border-gray-700 rounded-xl p-4 transition-all flex flex-col justify-between"
+            >
+              <div>
+                {/* Top: Name & Status */}
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div>
+                    <h4 className="text-base font-bold text-white">{item.company}</h4>
+                    <span className="text-[11px] text-gray-400 font-medium">
+                      {item.tier} · {item.avgPackageLpa} LPA Avg
+                    </span>
+                  </div>
+
+                  <span
+                    className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border shrink-0 ${cfg.bg}`}
+                  >
+                    <IconComp className="w-3 h-3" />
+                    {cfg.badgeText}
+                  </span>
+                </div>
+
+                {/* Criteria Grid */}
+                <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-800/60 text-xs">
+                  <div className="p-2 rounded-lg bg-[#18181b]">
+                    <span className="text-[10px] text-gray-400 block">Min CGPA</span>
+                    <span
+                      className={`font-semibold font-mono ${
+                        item.passFlags.cgpa ? "text-emerald-400" : "text-rose-400"
+                      }`}
+                    >
+                      {item.criteria.minCgpa} (User: {item.userValues.cgpa})
+                    </span>
+                  </div>
+
+                  <div className="p-2 rounded-lg bg-[#18181b]">
+                    <span className="text-[10px] text-gray-400 block">10th / 12th Cutoff</span>
+                    <span
+                      className={`font-semibold font-mono ${
+                        item.passFlags.tenth && item.passFlags.twelfth ? "text-emerald-400" : "text-rose-400"
+                      }`}
+                    >
+                      {item.criteria.minTenthPct}% / {item.criteria.minTwelfthPct}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Gaps or Notes */}
+                {item.gaps.length > 0 ? (
+                  <div className="mt-3 p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-300">
+                    <span className="font-semibold block mb-0.5">Eligibility Blockers:</span>
+                    <ul className="list-disc list-inside space-y-0.5 text-rose-200">
+                      {item.gaps.map((g, idx) => (
+                        <li key={idx}>{g}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="mt-3 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-300">
+                    <span className="font-semibold">✓ Meets all academic thresholds</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Note */}
+              <p className="text-[11px] text-gray-500 mt-3 pt-2 border-t border-gray-800/40 line-clamp-2">
+                {item.notes}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

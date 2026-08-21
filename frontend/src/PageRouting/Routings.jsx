@@ -17,6 +17,15 @@ import DSAContent from '@/pages/DSAcontent'
 import CodingArena from '@/pages/CodingArena'
 import CodingWorkspace from '@/pages/CodingWorkspace'
 
+// Group C Pages (#28 - #44)
+import Academics from '@/pages/Academics'
+import ProgressTracker from '@/pages/ProgressTracker'
+import Milestones from '@/pages/Milestones'
+import PlacementRoadmap from '@/pages/PlacementRoadmap'
+import StudyLibrary from '@/pages/StudyLibrary'
+import PlacementArena from '@/pages/PlacementArena'
+import CareerCoach from '@/pages/CareerCoach'
+
 function Routings() {
   return (
     <div>
@@ -33,7 +42,7 @@ function Routings() {
           <Route path="/coding" element={<CodingArena />} />
           <Route path="/coding/:slug" element={<CodingWorkspace />} />
 
-          {/* Authenticated / App Shell Routes */}
+          {/* Authenticated Dashboard App Shell */}
           <Route path="/app" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="dsa" element={<DSAContent />} />
@@ -48,6 +57,15 @@ function Routings() {
             <Route path="company-intel" element={<CompanyIntelligence />} />
             <Route path="job" element={<JobRecommendations />} />
             <Route path="profile" element={<Profile />} />
+
+            {/* Group C Surfaces */}
+            <Route path="academics" element={<Academics />} />
+            <Route path="progress" element={<ProgressTracker />} />
+            <Route path="milestones" element={<Milestones />} />
+            <Route path="roadmap" element={<PlacementRoadmap />} />
+            <Route path="library" element={<StudyLibrary />} />
+            <Route path="arena" element={<PlacementArena />} />
+            <Route path="coach" element={<CareerCoach />} />
           </Route>
         </Routes>
       </Router>

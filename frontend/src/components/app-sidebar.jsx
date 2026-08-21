@@ -13,7 +13,14 @@ import {
   LogOut,
   Building,
   Mic,
-  BookOpen
+  BookOpen,
+  GraduationCap,
+  TrendingUp,
+  Award,
+  Target,
+  PlayCircle,
+  Swords,
+  Sparkles,
 } from "lucide-react";
 
 import {
@@ -26,12 +33,23 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Link, useLocation } from 'react-router-dom';
 
 const mainItems = [
   {
     title: "Dashboard",
     url: "/app",
     icon: Home,
+  },
+  {
+    title: "AI Career Coach",
+    url: "/app/coach",
+    icon: Sparkles,
+  },
+  {
+    title: "Placement Roadmap",
+    url: "/app/roadmap",
+    icon: Target,
   },
   {
     title: "Coding Arena",
@@ -49,11 +67,6 @@ const mainItems = [
     icon: BrainCog,
   },
   {
-    title: "Resume Intelligence",
-    url: "/app/resume",
-    icon: FileText,
-  },
-  {
     title: "HR Prep Hub",
     url: "/app/hr-prep",
     icon: BookOpen,
@@ -69,13 +82,41 @@ const mainItems = [
     icon: Building,
   },
   {
-    title: "Job Recommendation",
+    title: "Resume Intelligence",
+    url: "/app/resume",
+    icon: FileText,
+  },
+  {
+    title: "Academics & Eligibility",
+    url: "/app/academics",
+    icon: GraduationCap,
+  },
+  {
+    title: "Progress & Velocity",
+    url: "/app/progress",
+    icon: TrendingUp,
+  },
+  {
+    title: "Milestones & Badges",
+    url: "/app/milestones",
+    icon: Award,
+  },
+  {
+    title: "Study Library",
+    url: "/app/library",
+    icon: PlayCircle,
+  },
+  {
+    title: "Placement Arena",
+    url: "/app/arena",
+    icon: Swords,
+  },
+  {
+    title: "Job Recommendations",
     url: "/app/job",
     icon: Briefcase,
   },
 ];
-
-import { Link, useLocation } from 'react-router-dom';
 
 const generalItems = [
   {
@@ -97,15 +138,16 @@ export default function AppSidebar() {
       <Sidebar className="bg-[#121212] text-gray-300 border-r border-gray-800 h-full flex flex-col">
         <SidebarContent className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center gap-2 px-4 py-4 mb-4">
-            
-            <span className="font-semibold text-white">getPlaced</span>
+          <div className="flex items-center gap-2 px-4 py-4 mb-2">
+            <span className="font-bold text-white text-lg tracking-tight bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              getPlaced
+            </span>
           </div>
           
           {/* Main menu */}
           <SidebarGroup>
-            <SidebarGroupLabel className="px-4 py-2 text-sm text-gray-400">
-              Main Menu
+            <SidebarGroupLabel className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Navigation
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -120,8 +162,8 @@ export default function AppSidebar() {
                              : "hover:bg-gray-800 hover:text-white text-gray-300"
                          } transition-all`}
                        >
-                        <item.icon className="w-5 h-5" />
-                        <span className="text-sm">{item.title}</span>
+                        <item.icon className="w-4 h-4" />
+                        <span className="text-xs font-medium">{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -131,9 +173,9 @@ export default function AppSidebar() {
           </SidebarGroup>
           
           {/* General menu */}
-          <SidebarGroup className="mt-4">
-            <SidebarGroupLabel className="px-4 py-2 text-sm text-gray-400">
-              General
+          <SidebarGroup className="mt-2">
+            <SidebarGroupLabel className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Account
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -149,16 +191,16 @@ export default function AppSidebar() {
                               : "hover:bg-gray-800 hover:text-white"
                           } transition-all`}
                         >
-                          <item.icon className="w-5 h-5 text-gray-400" />
-                          <span className="text-sm">{item.title}</span>
+                          <item.icon className="w-4 h-4 text-gray-400" />
+                          <span className="text-xs">{item.title}</span>
                         </Link>
                       ) : (
                         <a
                           href={item.url}
                           className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-800 hover:text-white transition-all"
                         >
-                          <item.icon className="w-5 h-5 text-gray-400" />
-                          <span className="text-sm">{item.title}</span>
+                          <item.icon className="w-4 h-4 text-gray-400" />
+                          <span className="text-xs">{item.title}</span>
                         </a>
                       )}
                     </SidebarMenuButton>
@@ -170,7 +212,7 @@ export default function AppSidebar() {
           
           {/* Dotted pattern background */}
           <div className="relative flex-grow overflow-hidden">
-            <div className="absolute inset-0 opacity-50" 
+            <div className="absolute inset-0 opacity-40" 
                  style={{
                    backgroundImage: 'radial-gradient(circle, #444 1px, transparent 1px)',
                    backgroundSize: '12px 12px'
@@ -183,8 +225,8 @@ export default function AppSidebar() {
               href="#"
               className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-all"
             >
-              <LogOut className="w-5 h-5" />
-              <span className="text-sm">Log Out</span>
+              <LogOut className="w-4 h-4" />
+              <span className="text-xs">Log Out</span>
             </a>
           </div>
         </SidebarContent>

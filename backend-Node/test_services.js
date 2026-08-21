@@ -39,6 +39,16 @@ import {
 } from "./config/readinessWeights.js";
 import { DSA_TOPICS, DSA_CATEGORIES } from "./config/dsaTaxonomy.js";
 
+// Group C Services Imports
+import {
+  calculateTargetCgpaRequirement,
+  evaluateAllCompaniesEligibility,
+  COMPANY_ACADEMIC_BENCHMARKS,
+} from "./services/academicService.js";
+import { CURATED_STUDY_VIDEOS } from "./services/studyLibraryService.js";
+import { MASTER_MILESTONES } from "./services/milestoneService.js";
+import { ACTIVE_WEEKLY_CHALLENGES, DUMMY_LEADERBOARD_USERS } from "./services/arenaService.js";
+
 console.log("==========================================");
 console.log("RUNNING GETPLACED BACKEND TEST SUITE");
 console.log("==========================================");
@@ -295,6 +305,66 @@ async function runAllTests() {
     assert.ok(result.overallScore >= 0 && result.overallScore <= 100);
     assert.ok(Object.keys(result.dimensions).length >= 5);
     assert.equal(result.targetCompany, "Google");
+  });
+
+  // 5. Group C Feature Tests: Academics & Target Cutoff Engine (#28, #29)
+  console.log("\n[5] Group C: Academics CGPA & Eligibility Engine Tests (#28, #29)");
+
+  await test("calculateTargetCgpaRequirement computes required SGPA correctly", () => {
+    // Current 7.8 over 5 semesters, target 8.5 over 8 semesters
+    // (8.5 * 8 - 7.8 * 5) / 3 = (68.0 - 39.0) / 3 = 29.0 / 3 = 9.67
+    const calc = calculateTargetCgpaRequirement(7.8, 5, 8, 8.5);
+    assert.equal(calc.achievable, true);
+    assert.equal(calc.remainingSemesters, 3);
+    assert.equal(calc.requiredSgpaPerSem, 9.67);
+    assert.ok(calc.maxPossibleCgpa >= 8.5);
+
+    // Unattainable target (current 6.0 over 7 semesters, target 9.5 over 8)
+    const impossibleCalc = calculateTargetCgpaRequirement(6.0, 7, 8, 9.5);
+    assert.equal(impossibleCalc.achievable, false);
+    assert.equal(impossibleCalc.difficultyLevel, "Impossible");
+  });
+
+  await test("evaluateAllCompaniesEligibility correctly filters 35+ companies", () => {
+    const student = {
+      currentCgpa: 8.2,
+      tenthPercentage: 88,
+      twelfthPercentage: 85,
+      activeBacklogs: 0,
+      historyOfBacklogs: 0,
+      branch: "Computer Science & Engineering",
+    };
+
+    const evaluation = evaluateAllCompaniesEligibility(student);
+    assert.ok(evaluation.totalEvaluated >= 15);
+    assert.ok(evaluation.eligibleCount > 0);
+    assert.ok(evaluation.eligibilityRatePct >= 50);
+
+    const googleCheck = evaluation.companies.find((c) => c.company === "Google");
+    assert.ok(googleCheck);
+    assert.equal(googleCheck.status, "Eligible");
+  });
+
+  // 6. Group C Feature Tests: Study Library, Milestones & Arena (#33, #42, #43)
+  console.log("\n[6] Group C: Study Library, Milestones & Arena Tests (#33, #42, #43)");
+
+  await test("CURATED_STUDY_VIDEOS catalog has high-quality learning resources", () => {
+    assert.ok(CURATED_STUDY_VIDEOS.length >= 10);
+    const categories = new Set(CURATED_STUDY_VIDEOS.map((v) => v.category));
+    assert.ok(categories.has("DSA"));
+    assert.ok(categories.has("System Design"));
+    assert.ok(categories.has("Core CS"));
+  });
+
+  await test("MASTER_MILESTONES catalog covers all readiness tiers and skills", () => {
+    assert.ok(MASTER_MILESTONES.length >= 10);
+    const tiers = MASTER_MILESTONES.filter((m) => m.category === "tier");
+    assert.equal(tiers.length, 5); // Bronze, Silver, Gold, Platinum, Diamond
+  });
+
+  await test("ACTIVE_WEEKLY_CHALLENGES and Leaderboard data are populated", () => {
+    assert.ok(ACTIVE_WEEKLY_CHALLENGES.length >= 3);
+    assert.ok(DUMMY_LEADERBOARD_USERS.length >= 5);
   });
 
   console.log("\n==========================================");

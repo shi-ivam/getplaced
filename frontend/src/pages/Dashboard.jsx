@@ -36,6 +36,7 @@ import { NODE_API_URL } from "@/config/api";
 import LevelComparisonTable from "@/components/ui/LevelComparisonTable";
 import DsaTopicAnalysis from "@/components/dsa/DsaTopicAnalysis";
 import DsaRequirementComparison from "@/components/dsa/DsaRequirementComparison";
+import WhatToDoNext from "@/components/dashboard/WhatToDoNext";
 
 const DIMENSION_ICONS = {
   dsa: Code2,
@@ -249,6 +250,9 @@ export default function Dashboard() {
           </div>
         </section>
       )}
+
+      {/* Group C High-Impact Recommendation Engine: What Should I Do Next? */}
+      <WhatToDoNext userProfile={userProfile} readinessScore={readiness?.overallScore} />
 
       {!readiness || !readiness.hasSufficientData ? (
         <section className="rounded-xl bg-[#121215] border border-zinc-800/90 p-6 md:p-8 space-y-4">
