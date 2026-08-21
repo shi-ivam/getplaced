@@ -1,9 +1,57 @@
 import axios from "axios";
-import { PY_API_URL } from "@/config/api";
+import { PY_API_URL, NODE_API_URL } from "@/config/api";
 
 const API_BASE = `${PY_API_URL}/api/problems`;
+const PROFILE_API_BASE = `${NODE_API_URL}/api/leetcode`;
 
 export const leetcodeService = {
+  // --- LeetCode Connected Profile & Analytics (Node Backend) ---
+  
+  // Get connected profile and public statistics for authenticated user
+  async getProfile() {
+    const response = await axios.get(`${PROFILE_API_BASE}/profile`, {
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
+  // Connect LeetCode profile using username or profile URL
+  async connectProfile(username) {
+    const response = await axios.post(
+      `${PROFILE_API_BASE}/connect`,
+      { username },
+      { withCredentials: true }
+    );
+    return response.data;
+  },
+
+  // Refresh latest statistics from LeetCode public GraphQL
+  async syncProfile() {
+    const response = await axios.post(
+      `${PROFILE_API_BASE}/sync`,
+      {},
+      { withCredentials: true }
+    );
+    return response.data;
+  },
+
+  // Disconnect LeetCode profile from user account
+  async disconnectProfile() {
+    const response = await axios.delete(`${PROFILE_API_BASE}/disconnect`, {
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
+  // Get in-depth submission and consistency analysis
+  async getSubmissionAnalysis() {
+    const response = await axios.get(`${PROFILE_API_BASE}/submissions-analysis`, {
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
+  // --- Python Problem Dataset & IDE Sandbox Catalog ---
   // Fetch paginated problem catalog
   async getProblems({ page = 1, pageSize = 20, search = "", difficulty = "", tag = "", sortBy = "question_id", sortOrder = "asc" } = {}) {
     const params = {

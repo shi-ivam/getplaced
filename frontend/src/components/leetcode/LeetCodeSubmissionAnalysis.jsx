@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import axios from "axios";
 import {
   Activity,
   CheckCircle2,
@@ -30,7 +29,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { NODE_API_URL } from "@/config/api";
+import { leetcodeService } from "@/services/leetcodeService";
 
 export default function LeetCodeSubmissionAnalysis({
   initialData = null,
@@ -51,14 +50,12 @@ export default function LeetCodeSubmissionAnalysis({
     setError("");
 
     try {
-      const response = await axios.get(`${NODE_API_URL}/api/leetcode/submissions-analysis`, {
-        withCredentials: true,
-      });
+      const resData = await leetcodeService.getSubmissionAnalysis();
 
-      if (response.data) {
-        setData(response.data);
-        if (onRefresh && response.data.analysis) {
-          onRefresh(response.data);
+      if (resData) {
+        setData(resData);
+        if (onRefresh && resData.analysis) {
+          onRefresh(resData);
         }
       }
     } catch (err) {
@@ -87,7 +84,7 @@ export default function LeetCodeSubmissionAnalysis({
     setError("");
     try {
       // First trigger sync to pull newest data from LeetCode
-      await axios.post(`${NODE_API_URL}/api/leetcode/sync`, {}, { withCredentials: true });
+      await leetcodeService.syncProfile();
       // Then re-fetch analysis
       await fetchAnalysis(true);
     } catch (err) {

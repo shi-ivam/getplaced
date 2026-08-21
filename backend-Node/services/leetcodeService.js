@@ -19,18 +19,18 @@ export const extractLeetCodeUsername = (input) => {
 
   let trimmed = input.trim();
 
-  // Strip query parameters and trailing slashes
+  // Strip query parameters and trailing slashes/hashes
   trimmed = trimmed.replace(/[?#].*$/, "").replace(/\/+$/, "");
 
-  // If input contains leetcode.com URL pattern
-  const urlMatch = trimmed.match(/leetcode\.com\/(?:u\/)?([a-zA-Z0-9_\-]+)/i);
+  // If input contains leetcode.com or leetcode.cn URL pattern
+  const urlMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?leetcode\.(?:com|cn)\/(?:u\/)?([a-zA-Z0-9_\-]+)/i);
   if (urlMatch && urlMatch[1]) {
     return urlMatch[1].trim();
   }
 
   // Strip leading @
   if (trimmed.startsWith("@")) {
-    trimmed = trimmed.slice(1);
+    trimmed = trimmed.slice(1).trim();
   }
 
   // Handle generic URL format if passed without leetcode domain
@@ -136,6 +136,49 @@ const LEETCODE_GRAPHQL_QUERY = `
 `;
 
 /**
+ * Fallback simplified GraphQL query in case contest or tag resolvers fail or time out
+ */
+const LEETCODE_CORE_GRAPHQL_QUERY = `
+  query getUserProfileCore($username: String!) {
+    allQuestionsCount {
+      difficulty
+      count
+    }
+    matchedUser(username: $username) {
+      username
+      profile {
+        realName
+        ranking
+        userAvatar
+        reputation
+      }
+      userCalendar {
+        activeYears
+        streak
+        totalActiveDays
+        submissionCalendar
+      }
+      submitStats {
+        acSubmissionNum {
+          difficulty
+          count
+          submissions
+        }
+        totalSubmissionNum {
+          difficulty
+          count
+          submissions
+        }
+      }
+      languageProblemCount {
+        languageName
+        problemsSolved
+      }
+    }
+  }
+`;
+
+/**
  * Fetches public statistics from LeetCode GraphQL API for a given username.
  * Sanitizes and normalizes the payload into a structured snapshot.
  *
@@ -146,10 +189,19 @@ export const fetchLeetCodeStats = async (rawUsername) => {
   const cleanUsername = extractLeetCodeUsername(rawUsername);
 
   if (!cleanUsername) {
-    const error = new Error("Invalid LeetCode username or URL format");
+    const error = new Error("Please enter a valid LeetCode username or profile URL");
     error.statusCode = 400;
     throw error;
   }
+
+  const requestHeaders = {
+    "Content-Type": "application/json",
+    "User-Agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    Referer: "https://leetcode.com",
+    Origin: "https://leetcode.com",
+    Accept: "*/*",
+  };
 
   let response;
   try {
@@ -160,22 +212,47 @@ export const fetchLeetCodeStats = async (rawUsername) => {
         variables: { username: cleanUsername },
       },
       {
-        headers: {
-          "Content-Type": "application/json",
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          Referer: "https://leetcode.com",
-        },
+        headers: requestHeaders,
         timeout: 12000,
       }
     );
   } catch (err) {
-    console.error("LeetCode GraphQL request failed:", err.message);
-    const networkError = new Error(
-      `Failed to connect to LeetCode API: ${err.message || "Network timeout"}`
-    );
-    networkError.statusCode = 502;
-    throw networkError;
+    if (err.response?.status === 429) {
+      const rateLimitError = new Error(
+        "LeetCode is temporarily limiting requests. We'll keep your last synced data and try again later."
+      );
+      rateLimitError.statusCode = 429;
+      throw rateLimitError;
+    }
+
+    // Try fallback core query
+    try {
+      response = await axios.post(
+        "https://leetcode.com/graphql",
+        {
+          query: LEETCODE_CORE_GRAPHQL_QUERY,
+          variables: { username: cleanUsername },
+        },
+        {
+          headers: requestHeaders,
+          timeout: 10000,
+        }
+      );
+    } catch (coreErr) {
+      console.error("LeetCode GraphQL request failed:", coreErr.message || err.message);
+      if (coreErr.response?.status === 429) {
+        const rateLimitError = new Error(
+          "LeetCode is temporarily limiting requests. We'll keep your last synced data and try again later."
+        );
+        rateLimitError.statusCode = 429;
+        throw rateLimitError;
+      }
+      const networkError = new Error(
+        `LeetCode is temporarily unavailable (${coreErr.message || err.message || "Network timeout"}). Your previously synced data is still available.`
+      );
+      networkError.statusCode = 502;
+      throw networkError;
+    }
   }
 
   const data = response?.data?.data;
@@ -183,7 +260,7 @@ export const fetchLeetCodeStats = async (rawUsername) => {
   // If user is not found on LeetCode
   if (!data || !data.matchedUser) {
     const notFoundError = new Error(
-      `LeetCode user "${cleanUsername}" was not found. Please verify your username or public profile link.`
+      `Couldn't find a LeetCode profile with username "${cleanUsername}". Please verify your username or public profile link.`
     );
     notFoundError.statusCode = 404;
     throw notFoundError;
