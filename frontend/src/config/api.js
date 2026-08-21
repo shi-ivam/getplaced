@@ -1,0 +1,2 @@
+export const NODE_API_URL = import.meta.env.VITE_NODE_API_URL || "http://localhost:3000";
+export const PY_API_URL = import.meta.env.VITE_PY_API_URL || "http://localhost:8000";

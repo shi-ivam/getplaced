@@ -1,0 +1,83 @@
+services:
+  # MongoDB Database Service
+  mongodb:
+    image: mongo:7.0
+    container_name: getplaced-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=getplaced
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - getplaced-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Node.js Backend API
+  backend-node:
+    build:
+      context: ./backend-Node
+      dockerfile: Dockerfile
+    container_name: getplaced-backend-node
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - MONGO_URI=mongodb://mongodb:27017/getplaced
+      - JWT_SECRET=${JWT_SECRET:-secretkey123}
+      - RAPIDAPI_KEY=${RAPIDAPI_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - getplaced-network
+
+  # Python / FastAPI Backend API (Resume Analyzer & OCR)
+  backend-py:
+    build:
+      context: ./backend-Py
+      dockerfile: Dockerfile
+    container_name: getplaced-backend-py
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - RAPIDAPI_KEY=${RAPIDAPI_KEY:-}
+      - ADZUNA_API_ID=${ADZUNA_API_ID:-}
+      - ADZUNA_API_KEY=${ADZUNA_API_KEY:-}
+    networks:
+      - getplaced-network
+
+  # React Frontend (Vite + Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_NODE_API_URL=${VITE_NODE_API_URL:-http://localhost:3000}
+        - VITE_PY_API_URL=${VITE_PY_API_URL:-http://localhost:8000}
+    container_name: getplaced-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend-node
+      - backend-py
+    networks:
+      - getplaced-network
+
+networks:
+  getplaced-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    driver: local
