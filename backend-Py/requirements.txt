@@ -7,3 +7,6 @@ pytesseract
 pdf2image
 google-generativeai
 requests
+pandas
+pyarrow
+sortedcontainers

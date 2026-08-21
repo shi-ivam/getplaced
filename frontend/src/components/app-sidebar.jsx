@@ -7,6 +7,7 @@ import {
   FileText,
   BrainCog,
   Code2,
+  Terminal,
   Settings,
   HelpCircle,
   LogOut,
@@ -28,6 +29,11 @@ const mainItems = [
     title: "Dashboard",
     url: "/app",
     icon: Home,
+  },
+  {
+    title: "Coding Arena",
+    url: "/app/coding",
+    icon: Terminal,
   },
   {
     title: "DSA Analysis",
@@ -92,12 +98,12 @@ export default function AppSidebar() {
                     <Link
                          to={item.url}
                          className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
-                           location.pathname === item.url
-                             ? "bg-purple-600 text-white" 
-                             : "hover:bg-gray-800 hover:text-white"
+                           location.pathname === item.url || (item.url !== "/app" && location.pathname.startsWith(item.url))
+                             ? "bg-purple-600 text-white font-medium shadow-sm" 
+                             : "hover:bg-gray-800 hover:text-white text-gray-300"
                          } transition-all`}
                        >
-                        <item.icon className={`w-5 h-5 ${item.active ? "text-white" : "text-gray-400"}`} />
+                        <item.icon className="w-5 h-5" />
                         <span className="text-sm">{item.title}</span>
                       </Link>
                     </SidebarMenuButton>

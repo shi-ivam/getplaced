@@ -10,6 +10,8 @@ import Dashboard from '@/pages/Dashboard'
 import JobRecommendations from '@/pages/JobRecommendations'
 import Profile from '@/pages/Profile'
 import DSAContent from '@/pages/DSAcontent'
+import CodingArena from '@/pages/CodingArena'
+import CodingWorkspace from '@/pages/CodingWorkspace'
 
 function Routings() {
   return (
@@ -20,9 +22,15 @@ function Routings() {
             <Route path="/resume" element={<AnalyzeResume />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage/>} />
+            <Route path="/coding" element={<CodingArena />} />
+            <Route path="/coding/:slug" element={<CodingWorkspace />} />
             <Route path="/app" element={<Layout />} >
                 <Route index element={<Dashboard />} />
                 <Route path="dsa" element={<DSAContent />} />
+                <Route path="coding" element={<CodingArena />} />
+                <Route path="coding/:slug" element={<CodingWorkspace />} />
+                <Route path="problems" element={<CodingArena />} />
+                <Route path="problems/:slug" element={<CodingWorkspace />} />
                 <Route path="resume" element={<AnalyzeResume />} />
                 <Route path="job" element={<JobRecommendations />} />
                 <Route path="profile" element={<Profile />} />
