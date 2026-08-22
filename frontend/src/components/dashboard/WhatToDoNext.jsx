@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import {
@@ -18,6 +18,7 @@ import {
   Zap,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
+import { getWhatToDoNextCopy } from "@/utils/dynamicCopy";
 
 const CATEGORY_ICONS = {
   dsa: Code2,
@@ -41,7 +42,7 @@ const CATEGORY_COLORS = {
 
 export default function WhatToDoNext({ userProfile, readinessScore }) {
   const [recommendations, setRecommendations] = useState([]);
-  const [streakDays, setStreakDays] = useState(5);
+  const [streakDays, setStreakDays] = useState(0);
   const [completedTaskIds, setCompletedTaskIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
 
@@ -53,55 +54,12 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
         });
         if (res.data) {
           setRecommendations(res.data.recommendations || []);
-          setStreakDays(res.data.streakDays || 5);
+          setStreakDays(res.data.streakDays || 0);
         }
       } catch (err) {
-        console.warn("Could not fetch recommendations, fallback to defaults:", err.message);
-        // Fallback default recommendations
-        setRecommendations([
-          {
-            id: "rec-dsa-dp",
-            category: "dsa",
-            categoryLabel: "DSA & Problem Solving",
-            priority: "CRITICAL",
-            title: "Solve 2 Medium Dynamic Programming Problems",
-            description: "Close your largest readiness gap by mastering 0/1 Knapsack & LCS patterns.",
-            estimatedMinutes: 45,
-            impactReadinessBoost: "+3.5%",
-            actionUrl: "/app/coding",
-            actionLabel: "Launch Coding Arena",
-            badgeColor: "purple",
-            dueToday: true,
-          },
-          {
-            id: "rec-resume-ats",
-            category: "resume",
-            categoryLabel: "Resume & ATS",
-            priority: "HIGH",
-            title: "Optimize Resume Keywords for " + (userProfile?.targetJobRole || "SDE-1"),
-            description: "Add quantifiable impact metrics to exceed 85% ATS score threshold.",
-            estimatedMinutes: 20,
-            impactReadinessBoost: "+4.0%",
-            actionUrl: "/app/resume",
-            actionLabel: "Analyze Resume",
-            badgeColor: "blue",
-            dueToday: false,
-          },
-          {
-            id: "rec-academics-cutoff",
-            category: "academics",
-            categoryLabel: "Academic Cutoff",
-            priority: "MEDIUM",
-            title: "Check " + (userProfile?.targetCompany || "Target") + " Academic Eligibility Cutoff",
-            description: "Calculate required SGPA in remaining semesters to stay 100% eligible.",
-            estimatedMinutes: 15,
-            impactReadinessBoost: "+2.0%",
-            actionUrl: "/app/academics",
-            actionLabel: "Open Calculator",
-            badgeColor: "amber",
-            dueToday: false,
-          },
-        ]);
+        console.warn("Could not fetch recommendations:", err.message);
+        setRecommendations([]);
+        setStreakDays(0);
       } finally {
         setLoading(false);
       }
@@ -133,6 +91,16 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
   const totalCount = recommendations.length || 3;
   const progressPct = Math.round((completedCount / totalCount) * 100);
 
+  const dynamicCopy = useMemo(() => {
+    return getWhatToDoNextCopy({
+      readinessScore,
+      streakDays,
+      tasksCompleted: completedCount,
+      totalTasks: totalCount,
+      targetCompany: userProfile?.targetCompany,
+    });
+  }, [readinessScore, streakDays, completedCount, totalCount, userProfile]);
+
   return (
     <div className="bg-[#18181b] border border-gray-800/80 rounded-2xl p-6 shadow-xl relative overflow-hidden">
       {/* Decorative gradient blur */}
@@ -147,13 +115,13 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
             </div>
             <div>
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                What Should I Do Next?
+                {dynamicCopy.title}
                 <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-normal border border-purple-500/30">
-                  AI Prioritized
+                  {dynamicCopy.badgeText}
                 </span>
               </h2>
               <p className="text-xs text-gray-400 mt-0.5">
-                High-impact daily actions tuned to your target company gaps
+                {dynamicCopy.subtitle}
               </p>
             </div>
           </div>
@@ -162,7 +130,7 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
         {/* Daily Streak & Velocity */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#222] border border-gray-800 text-xs text-gray-300">
-            <span className="text-amber-400 font-bold font-mono">{streakDays} Day Streak</span>
+            <span className="text-amber-400 font-bold font-mono">{dynamicCopy.streakNote}</span>
           </div>
           <Link
             to="/app/roadmap"
@@ -178,7 +146,7 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
         <div>
           <div className="text-xs text-gray-400 font-medium">Daily Goal Progress</div>
           <div className="text-sm font-semibold text-white mt-0.5">
-            {completedCount} of {totalCount} tasks completed today
+            {dynamicCopy.progressSummary}
           </div>
         </div>
         <div className="flex items-center gap-3 min-w-[180px]">

@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
 import GitHubConnectCard from "@/components/github/GitHubConnectCard";
+import { getDevMentorCopy } from "@/utils/dynamicCopy";
 
 const DEV_LEARNING_TRACKS = [
   {
@@ -215,11 +216,21 @@ export default function Development() {
   }, [gapData]);
 
   const projectScore =
-    githubProfile?.projectScore ||
-    readiness?.dimensions?.projects?.score ||
-    (projectsCategory?.currentLevel ? Math.round(projectsCategory.currentLevel * 10) : 75);
+    githubProfile?.projectScore ??
+    readiness?.dimensions?.projects?.score ??
+    (projectsCategory?.currentLevel ? Math.round(projectsCategory.currentLevel * 10) : null);
 
-  const targetScore = readiness?.dimensions?.projects?.requiredScore || 85;
+  const targetScore = readiness?.dimensions?.projects?.requiredScore ?? null;
+
+  const devMentor = useMemo(() => {
+    return getDevMentorCopy({
+      projectScore,
+      targetScore: targetScore || 70,
+      repoCount: githubProfile?.publicReposCount || (githubProfile?.repositories ? githubProfile.repositories.length : 0),
+      targetCompany: userProfile?.targetCompany,
+      topFramework: githubProfile?.languages?.[0]?.languageName,
+    });
+  }, [projectScore, targetScore, githubProfile, userProfile]);
 
   return (
     <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-zinc-100 p-4 md:p-8 lg:p-10 font-sans selection:bg-emerald-950 selection:text-emerald-200">
@@ -233,10 +244,10 @@ export default function Development() {
               <span>Development & Engineering Pillar • Portfolio, Tech Stack & Deployments</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight">
-              Development Workspace
+              {devMentor.heading}
             </h1>
             <p className="text-zinc-400 text-xs leading-relaxed max-w-2xl">
-              Track GitHub codebases, benchmark your role-specific technology stack against target company bars, verify live deployments, and master engineering architectures.
+              {devMentor.subtitle}
             </p>
           </div>
 
@@ -322,37 +333,40 @@ export default function Development() {
 
                   <div className="flex items-baseline gap-3">
                     <span className="text-4xl md:text-5xl font-bold font-mono text-zinc-100 tracking-tight">
-                      {projectScore}
+                      {projectScore !== null ? projectScore : "Unassessed"}
                     </span>
-                    <span className="text-lg font-mono text-zinc-500">/ 100</span>
+                    {projectScore !== null && <span className="text-lg font-mono text-zinc-500">/ 100</span>}
 
                     <div className="hidden sm:flex flex-col text-xs text-zinc-400 pl-4 border-l border-zinc-800 space-y-0.5 font-mono">
                       <div>
-                        Target Bar: <span className="text-zinc-200">{targetScore} / 100</span>
+                        Target Bar: <span className="text-zinc-200">{targetScore !== null ? `${targetScore} / 100` : "N/A"}</span>
                       </div>
                       <div>
                         Status:{" "}
-                        <span className={projectScore >= targetScore ? "text-emerald-400" : "text-amber-400"}>
-                          {projectScore >= targetScore ? "Target Met (+0)" : `Gap: -${targetScore - projectScore} pts`}
+                        <span className={projectScore !== null && targetScore !== null && projectScore >= targetScore ? "text-emerald-400" : "text-amber-400"}>
+                          {projectScore !== null && targetScore !== null
+                            ? projectScore >= targetScore ? "Target Met (+0)" : `Gap: -${targetScore - projectScore} pts`
+                            : "Unassessed"}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <p className="text-xs text-zinc-400 max-w-xl leading-relaxed">
-                    Evaluated across codebase architecture, multi-framework versatility, GitHub star reception, and verified live production deployments for {userProfile?.targetCompany || "Tier-1"} {userProfile?.targetJobRole || "Engineering"}.
-                  </p>
+                  <div className="flex items-start gap-2.5 bg-zinc-900/80 border border-zinc-800/80 rounded-xl p-3 max-w-xl text-xs text-zinc-300">
+                    <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <p className="leading-relaxed font-sans">{devMentor.mentorTip}</p>
+                  </div>
                 </div>
 
                 {/* Score vs Target Box */}
                 <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-1 gap-3 bg-zinc-900/90 border border-zinc-800 p-4 rounded-xl shrink-0 text-xs font-mono">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6">
                     <span className="text-zinc-500 text-[11px]">Portfolio Score</span>
-                    <span className="font-semibold text-emerald-400">{projectScore}%</span>
+                    <span className="font-semibold text-emerald-400">{projectScore !== null ? `${projectScore}%` : "Unassessed"}</span>
                   </div>
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6 border-l lg:border-l-0 lg:border-t border-zinc-800 pl-3 lg:pl-0 lg:pt-2">
                     <span className="text-zinc-500 text-[11px]">Benchmark</span>
-                    <span className="font-semibold text-zinc-300">{targetScore}%</span>
+                    <span className="font-semibold text-zinc-300">{targetScore !== null ? `${targetScore}%` : "N/A"}</span>
                   </div>
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6 border-l lg:border-l-0 lg:border-t border-zinc-800 pl-3 lg:pl-0 lg:pt-2">
                     <span className="text-zinc-500 text-[11px]">Status</span>
@@ -366,18 +380,20 @@ export default function Development() {
               {/* Progress Bar */}
               <div className="space-y-1.5 pt-2 border-t border-zinc-800/80">
                 <div className="flex justify-between text-[11px] font-mono text-zinc-500">
-                  <span>Current: {projectScore}%</span>
-                  <span>Target Benchmark: {targetScore}%</span>
+                  <span>Current: {projectScore !== null ? `${projectScore}%` : "Unassessed"}</span>
+                  <span>Target Benchmark: {targetScore !== null ? `${targetScore}%` : "N/A"}</span>
                 </div>
                 <div className="relative w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
-                  <div
-                    className="absolute top-0 bottom-0 w-0.5 bg-zinc-300 z-10"
-                    style={{ left: `${targetScore}%` }}
-                    title={`Target Benchmark: ${targetScore}%`}
-                  />
+                  {targetScore !== null && (
+                    <div
+                      className="absolute top-0 bottom-0 w-0.5 bg-zinc-300 z-10"
+                      style={{ left: `${targetScore}%` }}
+                      title={`Target Benchmark: ${targetScore}%`}
+                    />
+                  )}
                   <div
                     className="h-full rounded-full bg-emerald-400 transition-all duration-500"
-                    style={{ width: `${Math.min(100, Math.max(0, projectScore))}%` }}
+                    style={{ width: `${Math.min(100, Math.max(0, projectScore || 0))}%` }}
                   />
                 </div>
               </div>

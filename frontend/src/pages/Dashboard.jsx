@@ -50,6 +50,13 @@ import LevelComparisonTable from "@/components/ui/LevelComparisonTable";
 import DsaTopicAnalysis from "@/components/dsa/DsaTopicAnalysis";
 import DsaRequirementComparison from "@/components/dsa/DsaRequirementComparison";
 import WhatToDoNext from "@/components/dashboard/WhatToDoNext";
+import {
+  getHeroHeadline,
+  getReadinessTier,
+  getReadinessCTA,
+  formatLevelComparison,
+  getGapStatusInfo,
+} from "@/utils/dynamicCopy";
 
 const DIMENSION_ICONS = {
   dsa: Code2,
@@ -283,21 +290,34 @@ export default function Dashboard() {
   const codingScore = readiness?.dimensions?.dsa?.score !== null && readiness?.dimensions?.dsa?.score !== undefined
     ? readiness.dimensions.dsa.score
     : null;
-  const codingTarget = readiness?.dimensions?.dsa?.requiredScore || 85;
+  const codingTarget = readiness?.dimensions?.dsa?.requiredScore ?? null;
 
   // Pillar 2: Development Stats
   const devScore = githubProfile?.projectScore ?? (readiness?.dimensions?.projects?.score !== null && readiness?.dimensions?.projects?.score !== undefined ? readiness.dimensions.projects.score : null);
-  const devTarget = readiness?.dimensions?.projects?.requiredScore || 80;
+  const devTarget = readiness?.dimensions?.projects?.requiredScore ?? null;
 
   // Pillar 3: Resume Stats
   const resumeScore = userProfile?.resumeScore ?? (readiness?.dimensions?.resume?.score !== null && readiness?.dimensions?.resume?.score !== undefined ? readiness.dimensions.resume.score : null);
-  const resumeTarget = readiness?.dimensions?.resume?.requiredScore || 85;
+  const resumeTarget = readiness?.dimensions?.resume?.requiredScore ?? null;
 
   // Pillar 4: Interview Stats
   const interviewScore = readiness?.dimensions?.communication?.score !== null && readiness?.dimensions?.communication?.score !== undefined
     ? readiness.dimensions.communication.score
     : null;
-  const interviewTarget = readiness?.dimensions?.communication?.requiredScore || 80;
+  const interviewTarget = readiness?.dimensions?.communication?.requiredScore ?? null;
+
+  // Level-aware Dynamic Copy Generation
+  const heroData = useMemo(() => {
+    return getHeroHeadline({
+      readinessScore: readiness?.overallScore,
+      targetCompany: userProfile?.targetCompany,
+      targetRole: userProfile?.targetJobRole,
+      biggestGap: readiness?.biggestGap || gapData?.summary?.topGapName,
+      strongestSkill: readiness?.strongestSkill || userProfile?.topSkills?.[0],
+      recentProgress: readiness?.recentProgress,
+      userName: userProfile?.name,
+    });
+  }, [readiness, userProfile, gapData]);
 
   return (
     <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-zinc-100 p-4 md:p-8 lg:p-10 font-sans selection:bg-zinc-800 selection:text-zinc-100">
@@ -310,13 +330,13 @@ export default function Dashboard() {
           <div className="max-w-3xl space-y-1.5">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-400">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Career Hub • Real-time Multi-Dimensional Placement Readiness</span>
+              <span>{heroData.targetSummary ? `${heroData.targetSummary} • Benchmark Track` : "Placement Benchmark Track"}</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight leading-snug">
-              {userProfile?.name ? `Welcome back, ${userProfile.name}` : "Candidate Career Hub"}
+              {heroData.title}
             </h1>
             <p className="text-xs text-zinc-400 max-w-2xl leading-relaxed">
-              Your comprehensive placement command center for engineering placement readiness, gap analysis, and target benchmarks.
+              {heroData.subtitle}
             </p>
           </div>
 
@@ -363,11 +383,9 @@ export default function Dashboard() {
                   Overall Placement Readiness
                 </span>
                 <span
-                  className={`text-[10px] px-2.5 py-0.5 rounded-full font-medium font-mono border ${getStatusBadge(
-                    readiness?.overallStatus?.key
-                  )}`}
+                  className={`text-[10px] px-2.5 py-0.5 rounded-full font-medium font-mono border ${heroData.badgeClass}`}
                 >
-                  {readiness?.overallStatus?.label || "Competitive Candidate"}
+                  {heroData.tierLabel}
                 </span>
                 {readiness?.explainability?.isReNormalized && (
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-400 border border-zinc-800 font-mono">
@@ -377,48 +395,66 @@ export default function Dashboard() {
               </div>
 
               <div className="flex items-baseline gap-3">
-                <span className="text-4xl md:text-5xl font-bold font-mono text-zinc-100 tracking-tight">
-                  {readiness?.overallScore !== null && readiness?.overallScore !== undefined ? readiness.overallScore : 82}
+                <span className={`text-4xl md:text-5xl font-bold font-mono tracking-tight ${heroData.scoreColor}`}>
+                  {readiness?.overallScore !== null && readiness?.overallScore !== undefined ? readiness.overallScore : "Unassessed"}
                 </span>
-                <span className="text-lg font-mono text-zinc-500">/ 100</span>
+                {readiness?.overallScore !== null && readiness?.overallScore !== undefined && (
+                  <span className="text-lg font-mono text-zinc-500">/ 100</span>
+                )}
 
                 <div className="hidden sm:flex flex-col text-xs text-zinc-400 pl-4 border-l border-zinc-800 space-y-0.5 font-mono">
                   <div>
-                    Benchmark Bar: <span className="text-zinc-200">{readiness?.targetScore || 85} / 100</span>
+                    Benchmark Bar: <span className="text-zinc-200">{readiness?.targetScore !== null && readiness?.targetScore !== undefined ? `${readiness.targetScore} / 100` : "Unassessed"}</span>
                   </div>
                   <div>
                     Net Delta:{" "}
-                    <span className={(readiness?.overallGap || 0) > 0 ? "text-amber-400" : "text-emerald-400"}>
-                      {(readiness?.overallGap || 0) > 0 ? `-${readiness.overallGap} pts to benchmark` : "Benchmark Met (+0)"}
+                    <span className={readiness?.overallGap !== null && readiness?.overallGap !== undefined && readiness.overallGap > 0 ? "text-amber-400" : "text-emerald-400"}>
+                      {readiness?.overallGap !== null && readiness?.overallGap !== undefined
+                        ? readiness.overallGap > 0
+                          ? `-${readiness.overallGap} pts to benchmark`
+                          : "Benchmark Met (+0)"
+                        : "Unassessed"}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <p className="text-xs text-zinc-400 max-w-xl leading-relaxed">
-                {readiness?.overallStatus?.description ||
-                  `Composite placement evaluation calculated for ${userProfile?.targetCompany || "Tier-1 Tech"} ${userProfile?.targetJobRole || "Software Engineer"}.`}
-              </p>
+              <div className="flex items-start gap-2.5 bg-zinc-900/80 border border-zinc-800/80 rounded-xl p-3 max-w-xl text-xs text-zinc-300">
+                <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                <p className="leading-relaxed font-sans">{heroData.mentorNote}</p>
+              </div>
             </div>
 
-            {/* Quick Action Matrix & Breakdown Toggle */}
+            {/* Quick Action Matrix & Level-Based Primary CTA */}
             <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
               <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-2 bg-zinc-900/90 border border-zinc-800 p-3 rounded-xl text-xs font-mono">
                 <div className="text-center p-1">
                   <span className="text-zinc-500 text-[10px] block">Score</span>
-                  <span className={`font-bold ${getScoreColor(readiness?.overallScore || 82)}`}>
-                    {readiness?.overallScore || 82}
+                  <span className={`font-bold ${heroData.scoreColor}`}>
+                    {readiness?.overallScore !== null && readiness?.overallScore !== undefined ? readiness.overallScore : "Unassessed"}
                   </span>
                 </div>
                 <div className="text-center p-1 border-l border-zinc-800">
                   <span className="text-zinc-500 text-[10px] block">Target</span>
-                  <span className="font-bold text-zinc-300">{readiness?.targetScore || 85}</span>
+                  <span className="font-bold text-zinc-300">
+                    {readiness?.targetScore !== null && readiness?.targetScore !== undefined ? readiness.targetScore : "N/A"}
+                  </span>
                 </div>
                 <div className="text-center p-1 border-l border-zinc-800">
                   <span className="text-zinc-500 text-[10px] block">Coverage</span>
-                  <span className="font-bold text-purple-400">{readiness?.activeWeightCoverage || 85}%</span>
+                  <span className="font-bold text-purple-400">
+                    {readiness?.activeWeightCoverage !== null && readiness?.activeWeightCoverage !== undefined ? `${readiness.activeWeightCoverage}%` : "Unassessed"}
+                  </span>
                 </div>
               </div>
+
+              <Link
+                to={heroData.ctaLink}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-950/40 transition-all font-mono"
+              >
+                <span>{heroData.ctaText}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
 
               <button
                 type="button"
@@ -434,20 +470,22 @@ export default function Dashboard() {
           {/* Progress Bar */}
           <div className="space-y-1.5 pt-2 border-t border-zinc-800/80">
             <div className="flex justify-between text-[11px] font-mono text-zinc-500">
-              <span>Current Score: {readiness?.overallScore || 82}%</span>
-              <span>Target Benchmark: {readiness?.targetScore || 85}%</span>
+              <span>Current Score: {readiness?.overallScore !== null && readiness?.overallScore !== undefined ? `${readiness.overallScore}%` : "Unassessed"}</span>
+              <span>Target Benchmark: {readiness?.targetScore !== null && readiness?.targetScore !== undefined ? `${readiness.targetScore}%` : "N/A"}</span>
             </div>
             <div className="relative w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
-              <div
-                className="absolute top-0 bottom-0 w-0.5 bg-zinc-300 z-10"
-                style={{ left: `${readiness?.targetScore || 85}%` }}
-                title={`Target Benchmark: ${readiness?.targetScore || 85}%`}
-              />
+              {readiness?.targetScore !== null && readiness?.targetScore !== undefined && (
+                <div
+                  className="absolute top-0 bottom-0 w-0.5 bg-zinc-300 z-10"
+                  style={{ left: `${readiness.targetScore}%` }}
+                  title={`Target Benchmark: ${readiness.targetScore}%`}
+                />
+              )}
               <div
                 className={`h-full rounded-full transition-all duration-500 ${getProgressBarBg(
-                  readiness?.overallScore || 82
+                  readiness?.overallScore
                 )}`}
-                style={{ width: `${Math.min(100, Math.max(0, readiness?.overallScore || 82))}%` }}
+                style={{ width: `${Math.min(100, Math.max(0, readiness?.overallScore || 0))}%` }}
               />
             </div>
           </div>
@@ -623,7 +661,7 @@ export default function Dashboard() {
               </h2>
             </div>
             <Link
-              to="/app/coding?tab=topics"
+              to="/app/coding"
               className="text-xs text-purple-400 hover:text-purple-300 font-mono inline-flex items-center gap-1 hover:underline"
             >
               <span>Topic Details</span>
@@ -643,30 +681,30 @@ export default function Dashboard() {
         <section className="gsap-reveal grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           <StatCard
             title="Resume ATS Score"
-            value={`${resumeScore}%`}
-            subtitle="ATS Target: 85%"
+            value={resumeScore !== null && resumeScore !== undefined ? `${resumeScore}%` : "Unassessed"}
+            subtitle={resumeTarget !== null ? `ATS Target: ${resumeTarget}%` : "Upload Resume PDF"}
           />
           <StatCard
             title="Projects Portfolio"
             value={
               githubProfile
                 ? `${githubProfile.originalReposCount || 0} Repos`
-                : `${devScore}%`
+                : (devScore !== null ? `${devScore}%` : "Unassessed")
             }
             subtitle={
               githubProfile
                 ? `${githubProfile.totalStars || 0} Stars ⭐`
-                : "15% Weight"
+                : "Connect GitHub"
             }
           />
           <StatCard
             title="Past Interview Score"
-            value={`${interviewScore}%`}
+            value={interviewScore !== null ? `${interviewScore}%` : "Unassessed"}
             subtitle="Avg Communication"
           />
           <StatCard
             title="Active Coverage"
-            value={`${readiness?.activeWeightCoverage || 85}%`}
+            value={readiness?.activeWeightCoverage !== null && readiness?.activeWeightCoverage !== undefined ? `${readiness.activeWeightCoverage}%` : "Unassessed"}
             subtitle="Framework Metrics"
           />
         </section>
@@ -938,7 +976,7 @@ export default function Dashboard() {
                     <div className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
                       <span className="text-zinc-500 block">Target Bar</span>
                       <span className="font-bold text-purple-400">
-                        {readiness?.targetScore ? `${readiness.targetScore}%` : "85%"}
+                        {readiness?.targetScore ? `${readiness.targetScore}%` : "N/A"}
                       </span>
                     </div>
                   </div>

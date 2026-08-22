@@ -24,6 +24,7 @@ import {
   X
 } from "lucide-react";
 import { PY_API_URL } from "@/config/api";
+import { getInterviewMentorCopy } from "@/utils/dynamicCopy";
 
 const COMPANY_FILTERS = [
   "All Companies",
@@ -189,13 +190,13 @@ export default function HRPrep() {
         <div className="text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/90 text-xs font-mono text-neutral-400">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Executive Leadership & Behavioral Mastery Suite
+            Behavioral Strategy & Leadership Principles
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight max-w-5xl mx-auto leading-tight">
-            Behavioral Strategy & Enterprise Culture Principles
+            Behavioral & Culture Fit Interview Mastery
           </h1>
           <p className="text-sm md:text-base text-neutral-400 max-w-3xl mx-auto leading-relaxed">
-            Deconstruct company-specific leadership frameworks, master calibrated STAR responses, and validate narrative impact with instant AI evaluation.
+            Deconstruct company-specific leadership frameworks, master calibrated STAR responses, and validate narrative impact with instant feedback.
           </p>
         </div>
 
@@ -206,7 +207,7 @@ export default function HRPrep() {
             className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
           >
             <BrainCog className="w-3.5 h-3.5 text-neutral-400" />
-            <span>AI Mock Interview</span>
+            <span>Mock Interview</span>
           </Link>
           <Link
             to="/app/hr-prep"
@@ -214,13 +215,6 @@ export default function HRPrep() {
           >
             <Building className="w-3.5 h-3.5 text-blue-600" />
             <span>HR & Leadership Prep</span>
-          </Link>
-          <Link
-            to="/app/communication"
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
-          >
-            <Mic className="w-3.5 h-3.5 text-neutral-400" />
-            <span>Communication Lab</span>
           </Link>
           <Link
             to="/app/company-intel"

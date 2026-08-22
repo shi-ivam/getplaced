@@ -33,6 +33,7 @@ import {
   Legend,
 } from "recharts";
 import { NODE_API_URL } from "@/config/api";
+import { getProgressTrackerMentorCopy } from "@/utils/dynamicCopy";
 
 const DIMENSIONS = [
   { key: "overallScore", label: "Overall Readiness", color: "#a855f7" },
@@ -125,6 +126,11 @@ export default function ProgressTracker() {
   const snapshots = progressData?.snapshots || [];
   const selectedDim = DIMENSIONS.find((d) => d.key === activeDimension) || DIMENSIONS[0];
 
+  const trackerMentor = getProgressTrackerMentorCopy({
+    overallScore: progressData?.overallScore,
+    velocity: progressData?.weeklyVelocityPct ? `+${progressData.weeklyVelocityPct}%/week` : "+4%/week",
+  });
+
   return (
     <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-white">
       <div ref={containerRef} className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">
@@ -136,10 +142,10 @@ export default function ProgressTracker() {
               Velocity & Trajectory Analytics
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
-              Placement Readiness Velocity & Growth
+              {trackerMentor.heading}
             </h1>
             <p className="text-sm md:text-base text-zinc-400 max-w-3xl leading-relaxed">
-              Multi-dimensional skill acceleration models, continuous practice telemetry, and milestone readiness forecasting.
+              {trackerMentor.subtitle} {trackerMentor.velocityInsight}
             </p>
           </div>
 
@@ -163,12 +169,16 @@ export default function ProgressTracker() {
               <span className="text-emerald-400 font-mono">7-Day Trajectory</span>
             </div>
             <div className="text-4xl font-extrabold text-emerald-400 font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left">
-              +{progressData?.weeklyVelocityPct || 4.8}%
+              {progressData?.weeklyVelocityPct !== undefined && progressData?.weeklyVelocityPct !== null
+                ? `+${progressData.weeklyVelocityPct}%`
+                : "0%"}
             </div>
             <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-purple-400" />
               <span>
-                Target reached in ~{progressData?.projectedWeeksToPlacementReady || 3} weeks
+                {progressData?.projectedWeeksToPlacementReady
+                  ? `Target reached in ~${progressData.projectedWeeksToPlacementReady} weeks`
+                  : "Target projection pending"}
               </span>
             </div>
           </div>
@@ -178,12 +188,12 @@ export default function ProgressTracker() {
             <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
               <span>Practice Consistency</span>
               <span className="text-amber-400 font-mono">
-                Best: {progressData?.longestStreak || 12}d
+                Best: {progressData?.longestStreak || 0}d
               </span>
             </div>
             <div className="text-4xl font-extrabold text-amber-400 font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left flex items-center gap-2">
               <Flame className="w-7 h-7 text-amber-400 shrink-0" />
-              <span>{progressData?.dailyStreak || 5} Days</span>
+              <span>{progressData?.dailyStreak || 0} Days</span>
             </div>
             <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
@@ -199,7 +209,7 @@ export default function ProgressTracker() {
             </div>
             <div className="text-4xl font-extrabold text-purple-300 font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left flex items-center gap-2">
               <Code2 className="w-7 h-7 text-purple-400 shrink-0" />
-              <span>{progressData?.totalProblemsSolved || 98}</span>
+              <span>{progressData?.totalProblemsSolved || 0}</span>
             </div>
             <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
               <Target className="w-3.5 h-3.5 text-purple-400" />
@@ -215,11 +225,11 @@ export default function ProgressTracker() {
             </div>
             <div className="text-4xl font-extrabold text-blue-400 font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left flex items-center gap-2">
               <Clock className="w-7 h-7 text-blue-400 shrink-0" />
-              <span>{progressData?.totalStudyHours || 7.5}h</span>
+              <span>{progressData?.totalStudyHours || 0}h</span>
             </div>
             <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
               <Award className="w-3.5 h-3.5 text-blue-400" />
-              <span>{progressData?.totalTasksCompleted || 22} tasks mastered</span>
+              <span>{progressData?.totalTasksCompleted || 0} tasks mastered</span>
             </div>
           </div>
         </section>

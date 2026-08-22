@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -26,6 +26,7 @@ import ResumeActionCenter from "@/components/resume/ResumeActionCenter";
 import ResumeReportOverview from "@/components/resume/ResumeReportOverview";
 import ResumeVersionHistory from "@/components/resume/ResumeVersionHistory";
 import ResumeBuilderEditor from "@/components/resume/ResumeBuilderEditor";
+import { getResumeMentorCopy } from "@/utils/dynamicCopy";
 
 const STORAGE_KEY = "getplaced_resume_versions";
 
@@ -197,6 +198,11 @@ const DEMO_STRUCTURED_ACTIONS = [
 
 export default function AnalyzeResume() {
   const containerRef = useRef(null);
+  const [searchParams] = useSearchParams();
+  const targetRoleFromUrl = searchParams.get("targetRole") || searchParams.get("target_role") || "";
+  const companyFromUrl = searchParams.get("company") || "";
+  const jdFromUrl = searchParams.get("jd") || searchParams.get("jobDescription") || "";
+
   const [activeTab, setActiveTab] = useState("actions"); // 'actions' | 'overview' | 'history' | 'builder'
 
   // Input state
@@ -205,9 +211,9 @@ export default function AnalyzeResume() {
     "Alex Rivera\nSoftware Engineer with 2+ years designing resilient web platforms and microservices.\n\nExperience:\n- Worked on backend APIs and improved performance.\n- Responsible for building the user interface using React.\n\nSkills: JavaScript, Python, HTML, CSS, Git, VS Code\n\nProjects:\n- Distributed Task Scheduler (Go, Redis)"
   );
   const [inputMode, setInputMode] = useState("pdf"); // 'pdf' | 'text'
-  const [jobDescription, setJobDescription] = useState("");
-  const [targetRole, setTargetRole] = useState("Software Engineer");
-  const [showJdInput, setShowJdInput] = useState(false);
+  const [jobDescription, setJobDescription] = useState(jdFromUrl || "");
+  const [targetRole, setTargetRole] = useState(targetRoleFromUrl || "Software Engineer");
+  const [showJdInput, setShowJdInput] = useState(Boolean(jdFromUrl || companyFromUrl));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 

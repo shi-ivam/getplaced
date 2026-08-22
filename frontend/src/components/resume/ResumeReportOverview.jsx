@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Award,
   Check,
@@ -12,9 +12,11 @@ import {
   ChevronRight,
   TrendingUp,
   ShieldCheck,
-  HelpCircle
+  HelpCircle,
+  Sparkles
 } from "lucide-react";
 import jsPDF from "jspdf";
+import { getResumeMentorCopy } from "@/utils/dynamicCopy";
 
 export default function ResumeReportOverview({
   evaluation,
@@ -140,6 +142,16 @@ export default function ResumeReportOverview({
   const missingKeywords = evaluation.missing_keywords || [];
   const totalKeywords = matchedKeywords.length + missingKeywords.length;
 
+  const resumeMentor = useMemo(() => {
+    return getResumeMentorCopy({
+      atsScore: evaluation.ats_score,
+      targetRole,
+      matchedCount: matchedKeywords.length,
+      missingCount: missingKeywords.length,
+      xyzCount: evaluation.bullet_improvements?.length || 0,
+    });
+  }, [evaluation, targetRole, matchedKeywords, missingKeywords]);
+
   return (
     <div className="space-y-6">
       
@@ -186,7 +198,7 @@ export default function ResumeReportOverview({
             <div className="space-y-2 max-w-xl">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-base sm:text-lg font-semibold text-white tracking-tight">
-                  ATS Placement Index
+                  {resumeMentor.heading}
                 </h3>
                 <span
                   className={`px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md border ${
@@ -207,6 +219,11 @@ export default function ResumeReportOverview({
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed break-words">
                 {evaluation.summary_critique}
               </p>
+
+              <div className="flex items-start gap-2 bg-white/[0.03] border border-white/[0.06] rounded-xl p-2.5 text-xs text-neutral-300">
+                <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                <span>{resumeMentor.mentorTip}</span>
+              </div>
             </div>
           </div>
 
@@ -232,15 +249,15 @@ export default function ResumeReportOverview({
         </div>
 
         {/* 2. Category Metrics Breakdown (Fixed Non-overlapping Rows) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-6 border-t border-white/[0.06]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 pt-6 border-t border-white/[0.06]">
           {evaluation.category_scores &&
             Object.entries(evaluation.category_scores).map(([catKey, score]) => {
               const label = catKey.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
               return (
-                <div key={catKey} className="bg-black/30 p-3.5 rounded-xl border border-white/[0.05] space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-neutral-400 truncate font-medium">{label}</span>
-                    <span className="font-mono text-white font-semibold">{score}%</span>
+                <div key={catKey} className="bg-black/30 p-3.5 rounded-xl border border-white/[0.05] space-y-2 min-w-0">
+                  <div className="flex items-center justify-between text-xs gap-1.5">
+                    <span className="text-neutral-400 truncate font-medium flex-1 min-w-0" title={label}>{label}</span>
+                    <span className="font-mono text-white font-semibold shrink-0">{score}%</span>
                   </div>
                   {/* Clean Separate Progress Bar Row */}
                   <div className="w-full bg-white/[0.06] rounded-full h-1.5 overflow-hidden">

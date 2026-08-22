@@ -26,6 +26,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatLevelComparison, getGapStatusInfo } from "@/utils/dynamicCopy";
 
 const CATEGORY_ICONS = {
   dsa: Code2,
@@ -126,7 +127,7 @@ export default function LevelComparisonTable({
     needsImprovementCount: 0,
     notAnalyzedCount: 0,
     averageCurrentLevel: null,
-    averageRequiredLevel: 8.0,
+    averageRequiredLevel: null,
     averageGap: null,
   };
 
@@ -386,9 +387,9 @@ export default function LevelComparisonTable({
                 <th className="py-3 px-4 font-medium">Skill / Topic Area</th>
                 <th className="py-3 px-3 font-medium">Category</th>
                 <th className="py-3 px-4 font-medium min-w-[220px]">
-                  Your Level vs Required (0–10)
+                  YOU vs TARGET (0–10 Scale)
                 </th>
-                <th className="py-3 px-3 font-medium text-center">Net Gap</th>
+                <th className="py-3 px-3 font-medium text-center">To Close</th>
                 <th className="py-3 px-3 font-medium text-center">Status</th>
                 <th className="py-3 px-4 font-medium text-right">Action</th>
               </tr>
@@ -421,7 +422,7 @@ export default function LevelComparisonTable({
               ) : (
                 filteredItems.map((item) => {
                   const Icon = CATEGORY_ICONS[item.category] || Layers;
-                  const statusInfo = getStatusBadge(item.statusKey, item.gap);
+                  const comparison = formatLevelComparison(item.currentLevel, item.requiredLevel, item.gap);
 
                   return (
                     <tr
@@ -459,19 +460,11 @@ export default function LevelComparisonTable({
                       <td className="py-3.5 px-4">
                         <div className="space-y-1.5">
                           <div className="flex justify-between items-baseline text-[11px] font-mono">
-                            <span className="text-zinc-300">
-                              You:{" "}
-                              <strong className={getLevelColor(item.currentLevel)}>
-                                {item.currentLevel !== null ? item.currentLevel.toFixed(1) : "—"}
-                              </strong>
-                              <span className="text-zinc-500"> / 10</span>
+                            <span className="text-zinc-300 font-bold">
+                              {comparison.youText}
                             </span>
                             <span className="text-zinc-400">
-                              Req:{" "}
-                              <strong className="text-zinc-200">
-                                {item.requiredLevel.toFixed(1)}
-                              </strong>
-                              <span className="text-zinc-500"> / 10</span>
+                              {comparison.targetText}
                             </span>
                           </div>
 
@@ -481,7 +474,7 @@ export default function LevelComparisonTable({
                             <div
                               className="absolute top-0 bottom-0 w-0.5 bg-zinc-300 z-10"
                               style={{ left: `${item.requiredLevel * 10}%` }}
-                              title={`Required Level: ${item.requiredLevel}/10`}
+                              title={`Target: ${item.requiredLevel}/10`}
                             />
 
                             {/* Current Level Fill Bar */}
@@ -489,9 +482,9 @@ export default function LevelComparisonTable({
                               <div
                                 className={cn(
                                   "h-full rounded-full transition-all duration-300",
-                                  item.gap >= 0
+                                  comparison.isMet
                                     ? "bg-emerald-400"
-                                    : item.gap >= -2.0
+                                    : comparison.gapNumeric >= -2.0
                                     ? "bg-amber-400"
                                     : "bg-rose-400"
                                 )}
@@ -506,24 +499,16 @@ export default function LevelComparisonTable({
                         </div>
                       </td>
 
-                      {/* Net Gap */}
+                      {/* Net Gap (TO CLOSE) */}
                       <td className="py-3.5 px-3 text-center font-mono">
-                        {item.gap !== null ? (
-                          <span
-                            className={cn(
-                              "inline-block text-xs font-semibold px-2 py-0.5 rounded-md",
-                              item.gap > 0
-                                ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
-                                : item.gap === 0
-                                ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
-                                : "text-amber-400 bg-amber-500/10 border border-amber-500/20"
-                            )}
-                          >
-                            {item.gap > 0 ? `+${item.gap.toFixed(1)}` : item.gap.toFixed(1)}
-                          </span>
-                        ) : (
-                          <span className="text-zinc-500 text-xs">—</span>
-                        )}
+                        <span
+                          className={cn(
+                            "inline-block text-xs font-semibold px-2 py-0.5 rounded-md border",
+                            comparison.badgeClass
+                          )}
+                        >
+                          {comparison.toCloseText}
+                        </span>
                       </td>
 
                       {/* Status Badge */}
@@ -531,11 +516,11 @@ export default function LevelComparisonTable({
                         <span
                           className={cn(
                             "inline-flex items-center gap-1 text-[10px] px-2.5 py-1 rounded-full font-medium border font-mono whitespace-nowrap",
-                            statusInfo.badgeClass
+                            comparison.badgeClass
                           )}
                         >
-                          <span className={cn("w-1.5 h-1.5 rounded-full", statusInfo.dotClass)} />
-                          {statusInfo.label}
+                          <span className={cn("w-1.5 h-1.5 rounded-full", comparison.dotClass)} />
+                          {comparison.humanPhrase}
                         </span>
                       </td>
 
@@ -572,7 +557,7 @@ export default function LevelComparisonTable({
           ) : (
             filteredItems.map((item) => {
               const Icon = CATEGORY_ICONS[item.category] || Layers;
-              const statusInfo = getStatusBadge(item.statusKey, item.gap);
+              const comparison = formatLevelComparison(item.currentLevel, item.requiredLevel, item.gap);
 
               return (
                 <div
@@ -596,37 +581,30 @@ export default function LevelComparisonTable({
                     <span
                       className={cn(
                         "inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium border font-mono shrink-0",
-                        statusInfo.badgeClass
+                        comparison.badgeClass
                       )}
                     >
-                      <span className={cn("w-1.5 h-1.5 rounded-full", statusInfo.dotClass)} />
-                      {statusInfo.label}
+                      <span className={cn("w-1.5 h-1.5 rounded-full", comparison.dotClass)} />
+                      {comparison.humanPhrase}
                     </span>
                   </div>
 
                   {/* Level Numbers & Progress Bar */}
                   <div className="space-y-1.5 bg-zinc-900/70 p-2.5 rounded-lg border border-zinc-800/70">
                     <div className="flex justify-between items-center text-xs font-mono">
-                      <span className="text-zinc-300">
-                        Level:{" "}
-                        <strong className={getLevelColor(item.currentLevel)}>
-                          {item.currentLevel !== null ? item.currentLevel.toFixed(1) : "—"}
-                        </strong>
-                        <span className="text-zinc-500"> / {item.requiredLevel.toFixed(1)} req</span>
+                      <span className="text-zinc-300 font-bold">
+                        {comparison.youText}
+                        <span className="text-zinc-500 font-normal"> / {comparison.targetText}</span>
                       </span>
 
-                      {item.gap !== null ? (
-                        <span
-                          className={cn(
-                            "text-xs font-semibold",
-                            item.gap >= 0 ? "text-emerald-400" : "text-amber-400"
-                          )}
-                        >
-                          Gap: {item.gap > 0 ? `+${item.gap.toFixed(1)}` : item.gap.toFixed(1)}
-                        </span>
-                      ) : (
-                        <span className="text-zinc-500 text-xs">Gap: —</span>
-                      )}
+                      <span
+                        className={cn(
+                          "text-xs font-semibold",
+                          comparison.textColor
+                        )}
+                      >
+                        {comparison.toCloseText}
+                      </span>
                     </div>
 
                     <div className="relative w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
@@ -638,9 +616,9 @@ export default function LevelComparisonTable({
                         <div
                           className={cn(
                             "h-full rounded-full",
-                            item.gap >= 0
+                            comparison.isMet
                               ? "bg-emerald-400"
-                              : item.gap >= -2.0
+                              : comparison.gapNumeric >= -2.0
                               ? "bg-amber-400"
                               : "bg-rose-400"
                           )}
@@ -666,199 +644,202 @@ export default function LevelComparisonTable({
       </div>
 
       {/* Interactive Drill-Down Modal */}
-      {selectedItem && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
-          onClick={() => setSelectedItem(null)}
-        >
+      {selectedItem && (() => {
+        const modalComparison = formatLevelComparison(
+          selectedItem.currentLevel,
+          selectedItem.requiredLevel,
+          selectedItem.gap
+        );
+
+        return (
           <div
-            className="bg-[#141417] border border-zinc-800 w-full max-w-xl rounded-xl p-5 md:p-6 space-y-5 shadow-2xl overflow-y-auto max-h-[90vh]"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={() => setSelectedItem(null)}
           >
-            {/* Modal Header */}
-            <div className="flex items-start justify-between gap-4 border-b border-zinc-800 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
-                  {React.createElement(CATEGORY_ICONS[selectedItem.category] || Layers, {
-                    className: "w-5 h-5",
-                  })}
+            <div
+              className="bg-[#141417] border border-zinc-800 w-full max-w-xl rounded-xl p-5 md:p-6 space-y-5 shadow-2xl overflow-y-auto max-h-[90vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-start justify-between gap-4 border-b border-zinc-800 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
+                    {React.createElement(CATEGORY_ICONS[selectedItem.category] || Layers, {
+                      className: "w-5 h-5",
+                    })}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] px-2 py-0.2 rounded-md bg-zinc-900 text-zinc-400 border border-zinc-800 font-mono uppercase">
+                        {selectedItem.category}
+                      </span>
+                      <span className="text-[10px] text-zinc-500 font-mono">
+                        {selectedItem.importance}
+                      </span>
+                    </div>
+                    <h3 className="text-base md:text-lg font-semibold text-zinc-100 mt-0.5">
+                      {selectedItem.name}
+                    </h3>
+                  </div>
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] px-2 py-0.2 rounded-md bg-zinc-900 text-zinc-400 border border-zinc-800 font-mono uppercase">
-                      {selectedItem.category}
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedItem(null)}
+                  className="p-1 rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Level Comparison Highlight Box (YOU vs TARGET vs TO CLOSE) */}
+              <div className="bg-zinc-900/90 border border-zinc-800 rounded-lg p-4 space-y-3 font-mono">
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="p-2 rounded bg-[#0c0c0e] border border-zinc-800/80">
+                    <span className="text-[10px] text-zinc-500 block uppercase">You</span>
+                    <span className={cn("text-xl font-bold mt-0.5", getLevelColor(selectedItem.currentLevel))}>
+                      {selectedItem.currentLevel !== null ? selectedItem.currentLevel.toFixed(1) : "—"}
                     </span>
-                    <span className="text-[10px] text-zinc-500 font-mono">
-                      {selectedItem.importance}
+                    <span className="text-[10px] text-zinc-500 block">/ 10</span>
+                  </div>
+
+                  <div className="p-2 rounded bg-[#0c0c0e] border border-zinc-800/80">
+                    <span className="text-[10px] text-zinc-500 block uppercase">Target</span>
+                    <span className="text-xl font-bold text-zinc-200 mt-0.5">
+                      {selectedItem.requiredLevel.toFixed(1)}
+                    </span>
+                    <span className="text-[10px] text-zinc-500 block">/ 10</span>
+                  </div>
+
+                  <div className="p-2 rounded bg-[#0c0c0e] border border-zinc-800/80">
+                    <span className="text-[10px] text-zinc-500 block uppercase">To Close</span>
+                    <span className={cn("text-base font-bold mt-1 block", modalComparison.textColor)}>
+                      {modalComparison.toCloseText}
                     </span>
                   </div>
-                  <h3 className="text-base md:text-lg font-semibold text-zinc-100 mt-0.5">
-                    {selectedItem.name}
-                  </h3>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setSelectedItem(null)}
-                className="p-1 rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Level Comparison Highlight Box */}
-            <div className="bg-zinc-900/90 border border-zinc-800 rounded-lg p-4 space-y-3 font-mono">
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="p-2 rounded bg-[#0c0c0e] border border-zinc-800/80">
-                  <span className="text-[10px] text-zinc-500 block uppercase">Your Level</span>
-                  <span className={cn("text-xl font-bold mt-0.5", getLevelColor(selectedItem.currentLevel))}>
-                    {selectedItem.currentLevel !== null ? selectedItem.currentLevel.toFixed(1) : "—"}
-                  </span>
-                  <span className="text-[10px] text-zinc-500 block">/ 10</span>
                 </div>
 
-                <div className="p-2 rounded bg-[#0c0c0e] border border-zinc-800/80">
-                  <span className="text-[10px] text-zinc-500 block uppercase">Required Bar</span>
-                  <span className="text-xl font-bold text-zinc-200 mt-0.5">
-                    {selectedItem.requiredLevel.toFixed(1)}
-                  </span>
-                  <span className="text-[10px] text-zinc-500 block">/ 10</span>
-                </div>
-
-                <div className="p-2 rounded bg-[#0c0c0e] border border-zinc-800/80">
-                  <span className="text-[10px] text-zinc-500 block uppercase">Net Gap</span>
-                  <span className={cn("text-xl font-bold mt-0.5", getGapColor(selectedItem.gap))}>
-                    {selectedItem.gap !== null
-                      ? selectedItem.gap > 0
-                        ? `+${selectedItem.gap.toFixed(1)}`
-                        : selectedItem.gap.toFixed(1)
-                      : "—"}
-                  </span>
-                  <span className="text-[10px] text-zinc-500 block">levels</span>
-                </div>
-              </div>
-
-              {/* Progress Bar with Scale Marks */}
-              <div className="space-y-1 pt-1">
-                <div className="relative w-full bg-[#0c0c0e] rounded-full h-2.5 overflow-hidden border border-zinc-800">
-                  <div
-                    className="absolute top-0 bottom-0 w-0.5 bg-zinc-300 z-10"
-                    style={{ left: `${selectedItem.requiredLevel * 10}%` }}
-                    title={`Required: ${selectedItem.requiredLevel}/10`}
-                  />
-                  {selectedItem.currentLevel !== null && (
+                {/* Progress Bar with Scale Marks */}
+                <div className="space-y-1 pt-1">
+                  <div className="relative w-full bg-[#0c0c0e] rounded-full h-2.5 overflow-hidden border border-zinc-800">
                     <div
-                      className={cn(
-                        "h-full rounded-full transition-all duration-500",
-                        selectedItem.gap >= 0
-                          ? "bg-emerald-400"
-                          : selectedItem.gap >= -2.0
-                          ? "bg-amber-400"
-                          : "bg-rose-400"
-                      )}
-                      style={{
-                        width: `${Math.min(100, Math.max(0, selectedItem.currentLevel * 10))}%`,
-                      }}
+                      className="absolute top-0 bottom-0 w-0.5 bg-zinc-300 z-10"
+                      style={{ left: `${selectedItem.requiredLevel * 10}%` }}
+                      title={`Target: ${selectedItem.requiredLevel}/10`}
                     />
-                  )}
+                    {selectedItem.currentLevel !== null && (
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all duration-500",
+                          modalComparison.isMet
+                            ? "bg-emerald-400"
+                            : modalComparison.gapNumeric >= -2.0
+                            ? "bg-amber-400"
+                            : "bg-rose-400"
+                        )}
+                        style={{
+                          width: `${Math.min(100, Math.max(0, selectedItem.currentLevel * 10))}%`,
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  <div className="flex justify-between text-[9px] text-zinc-500 font-mono px-0.5">
+                    <span>0.0</span>
+                    <span>2.5</span>
+                    <span>5.0</span>
+                    <span>7.5</span>
+                    <span>10.0</span>
+                  </div>
                 </div>
 
-                <div className="flex justify-between text-[9px] text-zinc-500 font-mono px-0.5">
-                  <span>0.0</span>
-                  <span>2.5</span>
-                  <span>5.0</span>
-                  <span>7.5</span>
-                  <span>10.0</span>
-                </div>
-              </div>
-
-              <div className="text-center pt-1">
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full font-medium border font-mono",
-                    getStatusBadge(selectedItem.statusKey, selectedItem.gap).badgeClass
-                  )}
-                >
+                <div className="text-center pt-1">
                   <span
                     className={cn(
-                      "w-2 h-2 rounded-full",
-                      getStatusBadge(selectedItem.statusKey, selectedItem.gap).dotClass
+                      "inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full font-medium border font-mono",
+                      modalComparison.badgeClass
                     )}
-                  />
-                  {selectedItem.status} — {selectedItem.statusDescription}
-                </span>
+                  >
+                    <span
+                      className={cn(
+                        "w-2 h-2 rounded-full",
+                        modalComparison.dotClass
+                      )}
+                    />
+                    {modalComparison.statusLabel} — {modalComparison.humanPhrase}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {/* Evidence Breakdown: Why your level is X */}
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
-                <Info className="w-4 h-4 text-zinc-400" />
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
-                  Why your level is {selectedItem.currentLevel !== null ? `${selectedItem.currentLevel}/10` : "Unassessed"}
-                </h4>
+              {/* Evidence Breakdown: Why your level is X */}
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <Info className="w-4 h-4 text-zinc-400" />
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
+                    Why your level is {selectedItem.currentLevel !== null ? `${selectedItem.currentLevel}/10` : "Unassessed"}
+                  </h4>
+                </div>
+                <ul className="space-y-1.5 bg-zinc-900/50 p-3.5 rounded-lg border border-zinc-800/80">
+                  {selectedItem.evidence && selectedItem.evidence.length > 0 ? (
+                    selectedItem.evidence.map((ev, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-xs text-zinc-300 leading-relaxed">
+                        <span className="text-zinc-500 font-mono mt-0.5">•</span>
+                        <span>{ev}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-xs text-zinc-500 italic">No specific evidence records available.</li>
+                  )}
+                </ul>
               </div>
-              <ul className="space-y-1.5 bg-zinc-900/50 p-3.5 rounded-lg border border-zinc-800/80">
-                {selectedItem.evidence && selectedItem.evidence.length > 0 ? (
-                  selectedItem.evidence.map((ev, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-xs text-zinc-300 leading-relaxed">
-                      <span className="text-zinc-500 font-mono mt-0.5">•</span>
-                      <span>{ev}</span>
-                    </li>
-                  ))
-                ) : (
-                  <li className="text-xs text-zinc-500 italic">No specific evidence records available.</li>
-                )}
-              </ul>
-            </div>
 
-            {/* Actionable Steps: What you need to reach target */}
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-zinc-400" />
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
-                  What you need to reach target bar
-                </h4>
+              {/* Actionable Steps: What you need to reach target */}
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <Target className="w-4 h-4 text-zinc-400" />
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
+                    What you need to reach target bar
+                  </h4>
+                </div>
+                <ul className="space-y-2 bg-zinc-900/50 p-3.5 rounded-lg border border-zinc-800/80">
+                  {selectedItem.improvementSteps && selectedItem.improvementSteps.length > 0 ? (
+                    selectedItem.improvementSteps.map((step, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5 text-xs text-zinc-300 leading-relaxed">
+                        <div className="w-4 h-4 rounded bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[10px] font-mono text-zinc-300 shrink-0 mt-0.5">
+                          {idx + 1}
+                        </div>
+                        <span>{step}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-xs text-zinc-500 italic">Continue practicing and building project depth.</li>
+                  )}
+                </ul>
               </div>
-              <ul className="space-y-2 bg-zinc-900/50 p-3.5 rounded-lg border border-zinc-800/80">
-                {selectedItem.improvementSteps && selectedItem.improvementSteps.length > 0 ? (
-                  selectedItem.improvementSteps.map((step, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5 text-xs text-zinc-300 leading-relaxed">
-                      <div className="w-4 h-4 rounded bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[10px] font-mono text-zinc-300 shrink-0 mt-0.5">
-                        {idx + 1}
-                      </div>
-                      <span>{step}</span>
-                    </li>
-                  ))
-                ) : (
-                  <li className="text-xs text-zinc-500 italic">Continue practicing and building project depth.</li>
-                )}
-              </ul>
-            </div>
 
-            {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-800">
-              <button
-                type="button"
-                onClick={() => setSelectedItem(null)}
-                className="px-3.5 py-1.5 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition-colors cursor-pointer font-sans"
-              >
-                Close
-              </button>
+              {/* Modal Actions */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setSelectedItem(null)}
+                  className="px-3.5 py-1.5 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition-colors cursor-pointer font-sans"
+                >
+                  Close
+                </button>
 
-              <Link
-                to={selectedItem.actionLink || "/app/profile"}
-                onClick={() => setSelectedItem(null)}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold transition-colors cursor-pointer font-sans"
-              >
-                <span>{selectedItem.actionLabel || "Take Action"}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+                <Link
+                  to={selectedItem.actionLink || "/app/profile"}
+                  onClick={() => setSelectedItem(null)}
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold transition-colors cursor-pointer font-sans"
+                >
+                  <span>{selectedItem.actionLabel || "Take Action"}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </section>
   );
 }

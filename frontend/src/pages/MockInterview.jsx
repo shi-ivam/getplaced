@@ -34,6 +34,7 @@ import {
   Check
 } from "lucide-react";
 import { PY_API_URL } from "@/config/api";
+import { getInterviewMentorCopy } from "@/utils/dynamicCopy";
 
 const TARGET_COMPANIES = [
   "Google",
@@ -85,10 +86,20 @@ export default function MockInterview() {
   const [postureStatus, setPostureStatus] = useState("Optimal Posture");
   const [eyeContactScore, setEyeContactScore] = useState(94);
 
-  // Live Feedback modal
+  // Live Feedback & Error State
   const [evaluatingAnswer, setEvaluatingAnswer] = useState(false);
   const [liveFeedback, setLiveFeedback] = useState(null);
   const [showHint, setShowHint] = useState(false);
+  const [evalError, setEvalError] = useState("");
+  const [reportError, setReportError] = useState("");
+
+  const interviewMentor = React.useMemo(() => {
+    return getInterviewMentorCopy({
+      companyName: selectedCompany,
+      interviewType,
+      targetRole: selectedRole,
+    });
+  }, [selectedCompany, interviewType, selectedRole]);
 
   const containerRef = useRef(null);
   const videoRef = useRef(null);
@@ -186,10 +197,6 @@ export default function MockInterview() {
           }
           return prev - 1;
         });
-
-        if (Math.random() > 0.7) {
-          setEyeContactScore(Math.floor(90 + Math.random() * 8));
-        }
       }, 1000);
 
       if (questions[currentIndex] && !audioMuted) {
@@ -271,6 +278,7 @@ export default function MockInterview() {
     if (synthRef.current) synthRef.current.cancel();
 
     setEvaluatingAnswer(true);
+    setEvalError("");
     const qObj = questions[currentIndex];
 
     try {
@@ -304,22 +312,7 @@ export default function MockInterview() {
       setLiveFeedback(answeredItem);
     } catch (e) {
       console.error("Failed to evaluate answer:", e);
-      const fallbackItem = {
-        questionId: qObj.id,
-        question: qObj.question,
-        category: qObj.category,
-        answer: currentAnswer,
-        score: 80,
-        technical_depth_score: 78,
-        communication: { overall_communication_score: 78, filler_words: { total_count: 1 } },
-        star_compliance: { score: 75, star_feedback: "Structured STAR progression." },
-        strengths: ["Clear logical formulation of engineering actions."],
-        areas_for_improvement: ["State measurable system or team outcomes."],
-        suggested_better_answer: currentAnswer,
-        follow_up_question: null
-      };
-      setAnswersHistory([...answersHistory, fallbackItem]);
-      setLiveFeedback(fallbackItem);
+      setEvalError(e.response?.data?.detail || "Answer evaluation failed. Please verify AI backend connection and retry.");
     } finally {
       setEvaluatingAnswer(false);
     }
@@ -327,6 +320,7 @@ export default function MockInterview() {
 
   const handleNextQuestion = () => {
     setLiveFeedback(null);
+    setEvalError("");
     setShowHint(false);
     setCurrentAnswer("");
 
@@ -339,6 +333,7 @@ export default function MockInterview() {
 
   const generateFinalReport = async () => {
     setEvaluatingAnswer(true);
+    setReportError("");
     try {
       const res = await axios.post(`${PY_API_URL}/api/interview/session-report`, {
         company: selectedCompany,
@@ -350,31 +345,7 @@ export default function MockInterview() {
       setPhase("report");
     } catch (e) {
       console.error("Failed to generate session report:", e);
-      setSessionReport({
-        overall_score: 84,
-        recommendation: "Strong Hire",
-        hiring_verdict_summary: `Candidate demonstrated solid technical readiness, clear STAR narrative control, and structured articulation for ${selectedCompany}.`,
-        radar_scores: {
-          Communication: 82,
-          "STAR Structure": 80,
-          "Technical Depth": 86,
-          "Problem Solving": 85,
-          "Culture Fit": 84
-        },
-        strengths: [
-          "Consistent articulation and logical structuring across questions.",
-          "Demonstrated relevant technical background and problem-solving intuition."
-        ],
-        key_growth_areas: [
-          "Incorporate quantifiable metrics in the Result phase of STAR.",
-          "Minimize verbal filler pauses to project higher authority."
-        ],
-        next_prep_steps: [
-          `Practice 2-3 more mock sessions targeting ${selectedCompany} culture principles.`,
-          "Time answers to stay within the optimal 90-120 second window per question."
-        ]
-      });
-      setPhase("report");
+      setReportError(e.response?.data?.detail || "Session report generation failed. Please verify connection and retry.");
     } finally {
       setEvaluatingAnswer(false);
     }
@@ -478,47 +449,40 @@ export default function MockInterview() {
             <div className="text-center space-y-4 gsap-fade-in">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/90 text-xs font-mono text-neutral-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Adaptive Technical & Behavioral Evaluation Chamber
+                Live Interview Simulation & Telemetry
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight max-w-5xl mx-auto leading-tight">
-                Simulated Technical & Culture Interview Environment
+                {interviewMentor.heading}
               </h1>
               <p className="text-sm md:text-base text-neutral-400 max-w-3xl mx-auto leading-relaxed">
-                Full-fidelity AI interviewer with voice synthesis, camera posture tracking, real-time STAR evaluation metrics, and dynamic probe questioning.
+                {interviewMentor.subtitle}
               </p>
             </div>
 
-            {/* Interview Pillar Navigation Tabs Below Title */}
-            <nav className="flex items-center justify-center gap-2 overflow-x-auto pb-1 font-mono text-xs border-b border-neutral-800 pb-4">
-              <Link
-                to="/app/interview"
-                className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-white text-black font-semibold shadow-sm"
-              >
-                <BrainCog className="w-3.5 h-3.5 text-blue-600" />
-                <span>AI Mock Interview</span>
-              </Link>
-              <Link
-                to="/app/hr-prep"
-                className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
-              >
-                <Building className="w-3.5 h-3.5 text-neutral-400" />
-                <span>HR & Leadership Prep</span>
-              </Link>
-              <Link
-                to="/app/communication"
-                className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
-              >
-                <Mic className="w-3.5 h-3.5 text-neutral-400" />
-                <span>Communication Lab</span>
-              </Link>
-              <Link
-                to="/app/company-intel"
-                className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
-              >
-                <Layers className="w-3.5 h-3.5 text-neutral-400" />
-                <span>Company Intelligence</span>
-              </Link>
-            </nav>
+              {/* Interview Pillar Navigation Tabs Below Title */}
+              <nav className="flex items-center justify-center gap-2 overflow-x-auto pb-1 font-mono text-xs border-b border-neutral-800 pb-4">
+                <Link
+                  to="/app/interview"
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-white text-black font-semibold shadow-sm"
+                >
+                  <BrainCog className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Mock Interview</span>
+                </Link>
+                <Link
+                  to="/app/hr-prep"
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
+                >
+                  <Building className="w-3.5 h-3.5 text-neutral-400" />
+                  <span>HR & Leadership Prep</span>
+                </Link>
+                <Link
+                  to="/app/company-intel"
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
+                >
+                  <Layers className="w-3.5 h-3.5 text-neutral-400" />
+                  <span>Company Intelligence</span>
+                </Link>
+              </nav>
 
             {/* Interest / Dense Gapless Bento Configuration */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 grid-flow-dense gsap-fade-in">
@@ -872,6 +836,19 @@ export default function MockInterview() {
                       </>
                     )}
                   </button>
+
+                  {evalError && (
+                    <div className="p-3.5 bg-red-950/60 border border-red-800/80 rounded-xl text-xs text-red-300 flex items-center justify-between gap-3 font-mono">
+                      <span>{evalError}</span>
+                      <button
+                        type="button"
+                        onClick={handleSubmitAnswer}
+                        className="px-3 py-1.5 bg-red-800 hover:bg-red-700 text-white rounded-lg font-mono text-xs font-bold shrink-0 transition"
+                      >
+                        Retry Evaluation
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -975,6 +952,19 @@ export default function MockInterview() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {reportError && (
+          <div className="p-4 bg-red-950/60 border border-red-800/80 rounded-2xl text-xs text-red-300 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono max-w-5xl mx-auto shadow-xl">
+            <span>{reportError}</span>
+            <button
+              type="button"
+              onClick={generateFinalReport}
+              className="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded-xl font-bold text-xs shrink-0 transition"
+            >
+              Retry Session Report Generation
+            </button>
           </div>
         )}
 
