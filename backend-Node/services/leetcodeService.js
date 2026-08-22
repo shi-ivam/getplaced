@@ -132,6 +132,13 @@ const LEETCODE_GRAPHQL_QUERY = `
       statusDisplay
       lang
     }
+    recentAcSubmissionList(username: $username, limit: 15) {
+      title
+      titleSlug
+      timestamp
+      statusDisplay
+      lang
+    }
   }
 `;
 
@@ -387,17 +394,27 @@ export const fetchLeetCodeStats = async (rawUsername) => {
     badge: contestData?.badge?.name || null,
   };
 
-  // Normalize recent submissions
-  const recentSubmissions = (data.recentSubmissionList || []).map((sub) => ({
+  // Normalize recent submissions (falling back to recentAcSubmissionList if needed)
+  const rawRecentSubs =
+    Array.isArray(data.recentSubmissionList) && data.recentSubmissionList.length > 0
+      ? data.recentSubmissionList
+      : Array.isArray(data.recentAcSubmissionList)
+      ? data.recentAcSubmissionList
+      : [];
+
+  const recentSubmissions = rawRecentSubs.map((sub) => ({
     title: sub.title || "",
     titleSlug: sub.titleSlug || "",
     timestamp: String(sub.timestamp || ""),
-    statusDisplay: sub.statusDisplay || "",
+    statusDisplay: sub.statusDisplay || "Accepted",
     lang: sub.lang || "",
   }));
 
   const ranking =
-    matched.profile?.ranking !== undefined && matched.profile?.ranking !== null
+    matched.profile?.ranking !== undefined &&
+    matched.profile?.ranking !== null &&
+    Number(matched.profile.ranking) > 0 &&
+    Number(matched.profile.ranking) < 5000000
       ? Number(matched.profile.ranking)
       : null;
 
@@ -535,7 +552,7 @@ export const classifyConsistencyArchetype = (
 
   // Count active days in the last 30 days if calendar data exists
   let recentActiveCount = 0;
-  if (calendarMap && typeof calendarMap === "object") {
+  if (calendarMap && typeof calendarMap === "object" && !Array.isArray(calendarMap)) {
     const nowSec = Math.floor(Date.now() / 1000);
     const thirtyDaysSec = 30 * 24 * 60 * 60;
     for (const [timestamp, count] of Object.entries(calendarMap)) {
@@ -700,10 +717,12 @@ export const getSubmissionAnalysis = async (userId) => {
   // Parse submission calendar
   let calendarMap = {};
   try {
-    calendarMap =
+    const parsed =
       typeof profile.submissionCalendar === "string"
         ? JSON.parse(profile.submissionCalendar || "{}")
-        : (profile.submissionCalendar || {});
+        : profile.submissionCalendar;
+    calendarMap =
+      parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
   } catch (e) {
     calendarMap = {};
   }
@@ -1040,7 +1059,24 @@ export const formatLeetCodeProfileResponse = (profile) => {
       ? Number(doc.efficiencyRatio)
       : null;
 
-  const archetypeInfo = classifyConsistencyArchetype(activeDays, streak, total);
+  let calendarMap = {};
+  try {
+    const parsed =
+      typeof doc.submissionCalendar === "string"
+        ? JSON.parse(doc.submissionCalendar || "{}")
+        : doc.submissionCalendar;
+    calendarMap =
+      parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch (e) {
+    calendarMap = {};
+  }
+
+  const archetypeInfo = classifyConsistencyArchetype(activeDays, streak, total, calendarMap);
+
+  const cleanRanking =
+    typeof doc.ranking === "number" && doc.ranking > 0 && doc.ranking < 5000000
+      ? doc.ranking
+      : null;
 
   return {
     _id: doc._id,
@@ -1049,7 +1085,7 @@ export const formatLeetCodeProfileResponse = (profile) => {
     profileUrl:
       doc.profileUrl || (doc.username ? `https://leetcode.com/u/${doc.username}/` : ""),
     realName: doc.realName || "",
-    ranking: typeof doc.ranking === "number" && doc.ranking > 0 ? doc.ranking : null,
+    ranking: cleanRanking,
     totalSolved: total,
     easySolved: easy,
     mediumSolved: medium,

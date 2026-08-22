@@ -106,7 +106,10 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
   };
 
   const handleConnect = async (e) => {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setErrorMsg("");
     setSuccessMsg("");
 

@@ -82,7 +82,10 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
   };
 
   const handleConnect = async (e, customUsername = null) => {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setErrorMsg("");
     setSuccessMsg("");
 
@@ -583,7 +586,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 mt-1.5 font-mono">
-                    {profile.ranking ? (
+                    {profile.ranking && profile.ranking < 5000000 ? (
                       <span className="flex items-center gap-1 text-amber-300">
                         <Trophy className="w-3.5 h-3.5 text-amber-400" />
                         Rank #{profile.ranking.toLocaleString()}

@@ -67,6 +67,11 @@ def run_sample_tests(
     script_content = f"""
 import sys, io, time, json, traceback
 from collections import deque
+
+null = None
+true = True
+false = False
+
 {prompt}
 
 # User code
@@ -110,9 +115,9 @@ def serialize_result(val):
 
 def normalize_compare(actual_val, expected_str, formatted_actual):
     exp_clean = expected_str.strip()
-    if exp_clean in ["None", "null"]:
-        return actual_val is None or actual_val == [] or formatted_actual == "None"
-    if exp_clean == "[]" and (actual_val == [] or actual_val is None or formatted_actual == "[]"):
+    if exp_clean in ["None", "null", "none"]:
+        return actual_val is None or actual_val == [] or formatted_actual in ["None", "[]", "null"]
+    if exp_clean == "[]" and (actual_val == [] or actual_val is None or formatted_actual in ["[]", "None"]):
         return True
     if exp_clean.lower() in ["true", "false"]:
         return str(actual_val).lower() == exp_clean.lower()
@@ -121,8 +126,10 @@ def normalize_compare(actual_val, expected_str, formatted_actual):
     if act_str == exp_clean or act_str.replace(" ", "") == exp_clean.replace(" ", ""):
         return True
     try:
-        exp_eval = eval(exp_clean)
-        act_eval = eval(act_str)
+        exp_eval_str = exp_clean.replace("null", "None").replace("true", "True").replace("false", "False")
+        act_eval_str = act_str.replace("null", "None").replace("true", "True").replace("false", "False")
+        exp_eval = eval(exp_eval_str)
+        act_eval = eval(act_eval_str)
         if act_eval == exp_eval:
             return True
         if isinstance(act_eval, (float, int)) and isinstance(exp_eval, (float, int)):
@@ -166,6 +173,12 @@ for idx, tc in enumerate(test_cases):
             'TreeNode': globals().get('TreeNode'),
             'is_same_list': globals().get('is_same_list'),
             'is_same_tree': globals().get('is_same_tree'),
+            'null': None,
+            'true': True,
+            'false': False,
+            'None': None,
+            'True': True,
+            'False': False,
         }}
         
         actual_val = eval(call_code, globals(), call_scope)
@@ -267,6 +280,11 @@ def submit_solution(
 
     script_content = f"""
 import sys, io, time, traceback
+
+null = None
+true = True
+false = False
+
 {prompt}
 
 # User solution code

@@ -132,7 +132,10 @@ export default function LeetCodeSubmissionAnalysis({
 
   // Calendar 30-day activity heatmap data generator
   const recentDaysHeatmap = useMemo(() => {
-    const calendarMap = data?.analysis?.consistency?.calendarMap || {};
+    let calendarMap = data?.analysis?.consistency?.calendarMap;
+    if (!calendarMap || typeof calendarMap !== "object" || Array.isArray(calendarMap)) {
+      calendarMap = {};
+    }
     const days = [];
     const now = new Date();
 
@@ -279,10 +282,15 @@ export default function LeetCodeSubmissionAnalysis({
                   <span>@{profile?.username}</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
-                {profile?.ranking && (
+                {profile?.ranking && profile.ranking < 5000000 ? (
                   <span className="text-zinc-400 flex items-center gap-1">
                     <Trophy className="w-3 h-3 text-amber-400" />
                     Rank #{profile.ranking.toLocaleString()}
+                  </span>
+                ) : (
+                  <span className="text-zinc-500 flex items-center gap-1">
+                    <Trophy className="w-3 h-3 text-zinc-600" />
+                    Unranked
                   </span>
                 )}
                 {consistency?.streak > 0 && (

@@ -827,33 +827,33 @@ export default function Profile() {
           </CardContent>
         </Card>
 
+          {/* Action Button */}
+          <div className="gsap-reveal flex items-center justify-end gap-4 pt-4 border-t border-zinc-800/80">
+            <Button
+              type="submit"
+              disabled={saving}
+              className="bg-zinc-100 hover:bg-white text-zinc-950 font-semibold px-8 py-2.5 rounded-lg shadow-lg shadow-zinc-950/50 flex items-center gap-2 transition-all cursor-pointer text-xs uppercase tracking-wider"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-zinc-950" />
+                  <span>Saving Profile...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4 text-zinc-950" />
+                  <span>Save Profile</span>
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+
         {/* 4. Coding & Project Platforms Section */}
         <div className="gsap-reveal space-y-6">
           <LeetCodeConnectCard />
           <GitHubConnectCard />
         </div>
-
-        {/* Action Button */}
-        <div className="gsap-reveal flex items-center justify-end gap-4 pt-4 border-t border-zinc-800/80">
-          <Button
-            type="submit"
-            disabled={saving}
-            className="bg-zinc-100 hover:bg-white text-zinc-950 font-semibold px-8 py-2.5 rounded-lg shadow-lg shadow-zinc-950/50 flex items-center gap-2 transition-all cursor-pointer text-xs uppercase tracking-wider"
-          >
-            {saving ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin text-zinc-950" />
-                <span>Saving Profile...</span>
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="w-4 h-4 text-zinc-950" />
-                <span>Save Profile</span>
-              </>
-            )}
-          </Button>
-        </div>
-      </form>
       </div>
     </main>
   );
