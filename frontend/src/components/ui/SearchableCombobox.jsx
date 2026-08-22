@@ -130,19 +130,19 @@ export default function SearchableCombobox({
     <div className="space-y-1.5 w-full" ref={containerRef}>
       {label && (
         <div className="flex items-center justify-between">
-          <label htmlFor={id} className="text-gray-300 text-sm font-medium flex items-center gap-1.5">
-            {Icon && <Icon className="w-4 h-4 text-purple-400" />}
+          <label htmlFor={id} className="text-zinc-300 text-xs font-medium flex items-center gap-1.5">
+            {Icon && <Icon className="w-3.5 h-3.5 text-zinc-400" />}
             <span>{label}</span>
-            {required && <span className="text-red-400">*</span>}
+            {required && <span className="text-rose-400">*</span>}
           </label>
-          {helperText && <span className="text-[11px] text-gray-500">{helperText}</span>}
+          {helperText && <span className="text-[11px] text-zinc-500">{helperText}</span>}
         </div>
       )}
 
       {/* Input container */}
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
-          <Search className="w-4 h-4" />
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-500">
+          <Search className="w-3.5 h-3.5" />
         </div>
 
         <input
@@ -156,10 +156,10 @@ export default function SearchableCombobox({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           autoComplete="off"
-          className={`w-full h-10 pl-9 pr-16 rounded-md bg-[#1c1c1c] border text-white text-sm placeholder:text-gray-500 focus:outline-none transition-colors ${
+          className={`w-full h-9 pl-9 pr-14 rounded-lg bg-[#14141c] border text-white text-sm placeholder:text-zinc-600 focus:outline-none transition-colors ${
             error
-              ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-              : "border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+              ? "border-rose-500 focus:border-rose-500"
+              : "border-zinc-800 focus:border-zinc-500"
           }`}
         />
 
@@ -168,7 +168,7 @@ export default function SearchableCombobox({
             <button
               type="button"
               onClick={handleClear}
-              className="p-1 text-gray-400 hover:text-gray-200 rounded hover:bg-gray-800 transition-colors"
+              className="p-1 text-zinc-400 hover:text-zinc-200 rounded hover:bg-zinc-800 transition-colors"
               title="Clear"
             >
               <X className="w-3.5 h-3.5" />
@@ -183,32 +183,32 @@ export default function SearchableCombobox({
                 inputRef.current.focus();
               }
             }}
-            className="p-1 text-gray-400 hover:text-gray-200 rounded hover:bg-gray-800 transition-colors"
+            className="p-1 text-zinc-400 hover:text-zinc-200 rounded hover:bg-zinc-800 transition-colors"
             tabIndex={-1}
           >
-            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? "rotate-180 text-purple-400" : ""}`} />
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? "rotate-180 text-zinc-300" : ""}`} />
           </button>
         </div>
 
         {/* Dropdown menu */}
         {isOpen && (
-          <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-lg bg-[#181818] border border-gray-700/80 shadow-2xl py-1 text-sm">
+          <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-lg bg-[#14141c] border border-zinc-700 shadow-xl py-1 text-sm">
             {/* Custom option prompt */}
             {showCustomOption && (
               <button
                 type="button"
                 onClick={() => handleSelect(searchQuery.trim())}
-                className={`w-full text-left px-3 py-2 flex items-center justify-between border-b border-gray-800/80 transition-colors ${
-                  highlightedIndex === 0 ? "bg-purple-950/70 text-purple-200" : "hover:bg-purple-950/40 text-purple-300"
+                className={`w-full text-left px-3 py-2 flex items-center justify-between border-b border-zinc-800 transition-colors ${
+                  highlightedIndex === 0 ? "bg-zinc-800 text-white" : "hover:bg-zinc-800/60 text-zinc-300"
                 }`}
               >
                 <div className="flex items-center gap-2 truncate">
-                  <Plus className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                  <Plus className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
                   <span className="truncate">
                     {customPromptPrefix} <strong className="text-white font-medium">"{searchQuery.trim()}"</strong>
                   </span>
                 </div>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-900/60 text-purple-300 border border-purple-700/50 uppercase font-bold tracking-wider shrink-0 ml-2">
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 uppercase font-mono tracking-wider shrink-0 ml-2">
                   Custom
                 </span>
               </button>
@@ -228,21 +228,21 @@ export default function SearchableCombobox({
                     onClick={() => handleSelect(option)}
                     className={`w-full text-left px-3 py-2 flex items-center justify-between transition-colors ${
                       isHighlighted
-                        ? "bg-purple-600 text-white font-medium"
+                        ? "bg-zinc-800 text-white font-medium"
                         : isSelected
-                        ? "bg-purple-900/40 text-purple-200"
-                        : "text-gray-300 hover:bg-[#242424] hover:text-white"
+                        ? "bg-zinc-850 text-white font-medium"
+                        : "text-zinc-300 hover:bg-zinc-800/60 hover:text-white"
                     }`}
                   >
                     <span className="truncate">{option}</span>
                     {isSelected && (
-                      <Check className={`w-4 h-4 shrink-0 ml-2 ${isHighlighted ? "text-white" : "text-purple-400"}`} />
+                      <Check className={`w-3.5 h-3.5 shrink-0 ml-2 ${isHighlighted ? "text-white" : "text-zinc-400"}`} />
                     )}
                   </button>
                 );
               })
             ) : !showCustomOption ? (
-              <div className="px-3 py-3 text-center text-xs text-gray-500">
+              <div className="px-3 py-3 text-center text-xs text-zinc-500">
                 No matching options found.
               </div>
             ) : null}
@@ -252,8 +252,8 @@ export default function SearchableCombobox({
 
       {/* Quick suggestions pills */}
       {quickSuggestions && quickSuggestions.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 pt-1">
-          <span className="text-[10px] text-gray-500 font-medium mr-0.5">Popular:</span>
+        <div className="flex flex-wrap items-center gap-1 pt-1">
+          <span className="text-[10px] text-zinc-500 font-mono mr-1">Popular:</span>
           {quickSuggestions.map((item) => {
             const isSelected = value.toLowerCase() === item.toLowerCase();
             return (
@@ -261,10 +261,10 @@ export default function SearchableCombobox({
                 key={item}
                 type="button"
                 onClick={() => handleSelect(item)}
-                className={`text-[11px] px-2 py-0.5 rounded transition-all cursor-pointer ${
+                className={`text-[11px] px-2 py-0.5 rounded font-mono transition-all cursor-pointer ${
                   isSelected
-                    ? "bg-purple-600 text-white font-semibold shadow-sm shadow-purple-900/50"
-                    : "bg-gray-800/80 hover:bg-purple-900/50 hover:text-purple-300 text-gray-400 border border-gray-700/60"
+                    ? "bg-zinc-200 text-zinc-950 font-medium"
+                    : "bg-zinc-900 hover:bg-zinc-800 text-zinc-400 border border-zinc-800"
                 }`}
               >
                 {item}
@@ -274,7 +274,7 @@ export default function SearchableCombobox({
         </div>
       )}
 
-      {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+      {error && <p className="text-rose-400 text-xs mt-1">{error}</p>}
     </div>
   );
 }

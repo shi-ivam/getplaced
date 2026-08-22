@@ -70,6 +70,10 @@ const userSchema = mongoose.Schema(
       trim: true,
       default: "",
     },
+    onboardingCompleted: {
+      type: Boolean,
+      default: false,
+    },
     savedJobs: [
       {
         type: String,

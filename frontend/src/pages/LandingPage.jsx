@@ -9,7 +9,7 @@ import Footer from './Footer'
 
 function LandingPage() {
   return (
-    <main className="overflow-x-hidden w-full max-w-full bg-[#05060d] text-slate-100 min-h-screen selection:bg-purple-500 selection:text-white font-sans">
+    <main className="overflow-x-hidden w-full max-w-full bg-[#1A312C] text-[#FFF4E1] min-h-screen selection:bg-[#89D7B7] selection:text-[#1A312C] font-sans">
       <Navbar />
       <Hero />
       <FeaturesGrid />

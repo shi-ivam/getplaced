@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -191,6 +192,38 @@ export default function CommunicationLab() {
       className="overflow-x-hidden w-full max-w-full bg-[#08090c] text-neutral-100 min-h-screen font-sans selection:bg-neutral-800 selection:text-neutral-100"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8">
+        {/* Interview Pillar Navigation Tabs */}
+        <nav className="flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs border-b border-neutral-800 pb-4">
+          <Link
+            to="/app/interview"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
+          >
+            <BrainCog className="w-3.5 h-3.5 text-neutral-400" />
+            <span>AI Mock Interview</span>
+          </Link>
+          <Link
+            to="/app/hr-prep"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
+          >
+            <Building className="w-3.5 h-3.5 text-neutral-400" />
+            <span>HR & Leadership Prep</span>
+          </Link>
+          <Link
+            to="/app/communication"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-white text-black font-semibold shadow-sm"
+          >
+            <Mic className="w-3.5 h-3.5 text-blue-600" />
+            <span>Communication Lab</span>
+          </Link>
+          <Link
+            to="/app/company-intel"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
+          >
+            <Layers className="w-3.5 h-3.5 text-neutral-400" />
+            <span>Company Intelligence</span>
+          </Link>
+        </nav>
+
         {/* Attention / Wide Cinematic Hero */}
         <div className="text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/90 text-xs font-mono text-neutral-400">

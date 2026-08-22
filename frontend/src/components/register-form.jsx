@@ -40,7 +40,7 @@ export function RegisterForm(props) {
         },
         { withCredentials: true }
       );
-      navigate("/app");
+      navigate("/app/coach");
     } catch (err) {
       console.error("Registration error:", err);
       setError(

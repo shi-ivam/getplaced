@@ -20,22 +20,22 @@ const resumeData = {
 
 const ResumeAnalyzer = () => {
   return (
-    <section id="resume" className="py-20 md:py-32 bg-[#05060d] text-white relative overflow-hidden">
+    <section id="resume" className="py-20 md:py-32 bg-[#1A312C] text-[#FFF4E1] relative overflow-hidden">
       
       {/* Background Glow */}
-      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] bg-[#89D7B7]/10 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
         
         {/* Section Header */}
         <div className="flex flex-col items-center text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-mono uppercase tracking-widest">
-            <FileCheck className="w-3.5 h-3.5 text-cyan-400" /> ATS Radar Telemetry & Action Center
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#428475]/25 border border-[#89D7B7]/30 text-[#89D7B7] text-xs font-mono uppercase tracking-widest">
+            <FileCheck className="w-3.5 h-3.5 text-[#89D7B7]" /> ATS Radar Telemetry & Action Center
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white break-words">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#FFF4E1] break-words">
             Resume Compatibility & Competency Analysis
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base md:text-lg leading-relaxed">
+          <p className="text-[#FFF4E1]/75 text-sm sm:text-base md:text-lg leading-relaxed">
             Real-time keyword matching, semantic skill mapping, and interactive ATS recommendation engine.
           </p>
         </div>
@@ -47,43 +47,43 @@ const ResumeAnalyzer = () => {
           <motion.div 
             whileHover={{ scale: 1.01 }}
             transition={{ duration: 0.3 }}
-            className="lg:col-span-5 rounded-3xl bg-gradient-to-b from-[#101322] to-[#080912] p-6 sm:p-8 border border-white/10 shadow-2xl flex flex-col justify-between h-auto min-h-[420px]"
+            className="lg:col-span-5 rounded-3xl bg-gradient-to-b from-[#1E3A34] to-[#12221e] p-6 sm:p-8 border border-[#428475]/40 shadow-2xl flex flex-col justify-between h-auto min-h-[420px]"
           >
             <div className="space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+              <div className="flex items-center justify-between pb-4 border-b border-[#428475]/30">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#89D7B7]/20 border border-[#89D7B7]/30 flex items-center justify-center text-[#89D7B7] shrink-0">
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-bold text-white text-base truncate">{resumeData.name}</h3>
-                    <p className="text-xs text-slate-400 truncate">{resumeData.role}</p>
+                    <h3 className="font-bold text-[#FFF4E1] text-base truncate">{resumeData.name}</h3>
+                    <p className="text-xs text-[#FFF4E1]/70 truncate">{resumeData.role}</p>
                   </div>
                 </div>
-                <span className="text-[11px] font-mono bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 font-semibold shrink-0">
+                <span className="text-[11px] font-mono bg-[#89D7B7]/15 text-[#89D7B7] px-3 py-1 rounded-full border border-[#89D7B7]/30 font-semibold shrink-0">
                   PASSED ATS
                 </span>
               </div>
 
               {/* Massive Score Display */}
               <div className="text-center py-4 space-y-1">
-                <div className="text-6xl sm:text-7xl font-black font-mono bg-gradient-to-r from-purple-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent">
+                <div className="text-6xl sm:text-7xl font-black font-mono bg-gradient-to-r from-[#FFF4E1] via-[#89D7B7] to-[#428475] bg-clip-text text-transparent">
                   {resumeData.atsScore}%
                 </div>
-                <p className="text-xs uppercase tracking-widest text-slate-400 font-semibold">
+                <p className="text-xs uppercase tracking-widest text-[#FFF4E1]/70 font-semibold">
                   ATS Placement Match vs Tier-1 Tech Benchmarks
                 </p>
               </div>
 
               {/* Keywords Found Pills */}
-              <div className="pt-4 border-t border-white/10 space-y-3">
-                <div className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              <div className="pt-4 border-t border-[#428475]/30 space-y-3">
+                <div className="text-xs font-semibold text-[#FFF4E1]/85 uppercase tracking-wider">
                   Verified Technical Keywords
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {resumeData.keywordsFound.map((kw) => (
-                    <span key={kw} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300 font-mono">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                    <span key={kw} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#1A312C]/80 border border-[#428475]/40 text-xs text-[#FFF4E1] font-mono">
+                      <CheckCircle2 className="w-3 h-3 text-[#89D7B7] shrink-0" />
                       <span className="truncate">{kw}</span>
                     </span>
                   ))}
@@ -91,14 +91,14 @@ const ResumeAnalyzer = () => {
               </div>
             </div>
 
-            <div className="pt-6 mt-6 border-t border-white/10">
+            <div className="pt-6 mt-6 border-t border-[#428475]/30">
               <Link
                 to="/resume"
-                className="flex items-center justify-center gap-2 w-full py-3 bg-white/[0.05] hover:bg-white/10 border border-white/15 rounded-xl text-xs font-semibold text-white transition"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-[#89D7B7]/15 hover:bg-[#89D7B7]/25 border border-[#89D7B7]/30 rounded-xl text-xs font-semibold text-[#FFF4E1] hover:text-white transition"
               >
-                <Zap className="w-3.5 h-3.5 text-emerald-400" />
+                <Zap className="w-3.5 h-3.5 text-[#89D7B7]" />
                 Launch Interactive Action Center
-                <ArrowUpRight className="w-3.5 h-3.5 text-neutral-400" />
+                <ArrowUpRight className="w-3.5 h-3.5 text-[#89D7B7]" />
               </Link>
             </div>
           </motion.div>
@@ -107,30 +107,30 @@ const ResumeAnalyzer = () => {
           <motion.div 
             whileHover={{ scale: 1.01 }}
             transition={{ duration: 0.3 }}
-            className="lg:col-span-7 rounded-3xl bg-[#090b15] p-6 sm:p-8 border border-white/10 shadow-2xl flex flex-col justify-between h-auto min-h-[420px]"
+            className="lg:col-span-7 rounded-3xl bg-[#152824] p-6 sm:p-8 border border-[#428475]/40 shadow-2xl flex flex-col justify-between h-auto min-h-[420px]"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-              <div className="flex items-center gap-2 text-sm font-bold text-slate-200">
-                <TrendingUp className="w-4 h-4 text-purple-400" />
+              <div className="flex items-center gap-2 text-sm font-bold text-[#FFF4E1]">
+                <TrendingUp className="w-4 h-4 text-[#89D7B7]" />
                 <span>Multi-Dimensional Competency Radar</span>
               </div>
-              <span className="text-xs font-mono text-slate-400">BENCHMARK: FAANG SENIOR</span>
+              <span className="text-xs font-mono text-[#89D7B7]/80">BENCHMARK: FAANG SENIOR</span>
             </div>
 
             <div className="w-full h-[300px] sm:h-[340px] flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="70%" data={resumeData.insights}>
-                  <PolarGrid stroke="rgba(255, 255, 255, 0.15)" />
-                  <PolarAngleAxis dataKey="skill" stroke="#94a3b8" tick={{ fill: '#cbd5e1', fontSize: 11 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="rgba(255, 255, 255, 0.1)" />
-                  <Radar name="Candidate Score" dataKey="score" stroke="#c084fc" fill="#a855f7" fillOpacity={0.45} />
+                  <PolarGrid stroke="rgba(66, 132, 117, 0.35)" />
+                  <PolarAngleAxis dataKey="skill" stroke="#428475" tick={{ fill: '#FFF4E1', fontSize: 11 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="rgba(66, 132, 117, 0.25)" />
+                  <Radar name="Candidate Score" dataKey="score" stroke="#89D7B7" fill="#428475" fillOpacity={0.5} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-white/10 text-xs text-slate-400 font-mono">
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-[#428475]/30 text-xs text-[#FFF4E1]/70 font-mono">
               <span>Dynamic ATS Evaluation Engine</span>
-              <span className="text-emerald-400 font-semibold">Ready for Actionable Fixes</span>
+              <span className="text-[#89D7B7] font-semibold">Ready for Actionable Fixes</span>
             </div>
           </motion.div>
 

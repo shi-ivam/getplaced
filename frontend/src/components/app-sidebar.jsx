@@ -21,6 +21,10 @@ import {
   Sparkles,
   Database,
   ChevronDown,
+  FolderGit2,
+  GitFork,
+  Globe,
+  Layers,
 } from "lucide-react";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -38,7 +42,7 @@ import {
 
 const coreItems = [
   {
-    title: "Dashboard",
+    title: "Career Hub",
     url: "/app",
     icon: Home,
   },
@@ -55,6 +59,8 @@ const coreItems = [
   },
 ];
 
+
+
 const navigationGroups = [
   {
     id: "coding",
@@ -62,12 +68,12 @@ const navigationGroups = [
     icon: Terminal,
     items: [
       {
-        title: "Coding Arena",
+        title: "Coding Workspace",
         url: "/app/coding",
         icon: Terminal,
       },
       {
-        title: "DSA Analysis",
+        title: "DSA Analytics",
         url: "/app/dsa",
         icon: Code2,
       },
@@ -84,6 +90,28 @@ const navigationGroups = [
     ],
   },
   {
+    id: "development",
+    title: "Development & Projects",
+    icon: FolderGit2,
+    items: [
+      {
+        title: "Development Workspace",
+        url: "/app/development",
+        icon: FolderGit2,
+      },
+      {
+        title: "Repositories & Portfolios",
+        url: "/app/development?tab=projects",
+        icon: GitFork,
+      },
+      {
+        title: "Live Deployments",
+        url: "/app/development?tab=deployment",
+        icon: Globe,
+      },
+    ],
+  },
+  {
     id: "interview",
     title: "Interview & Soft Skills",
     icon: BrainCog,
@@ -95,14 +123,19 @@ const navigationGroups = [
         badge: "AI",
       },
       {
+        title: "HR & Leadership Prep",
+        url: "/app/hr-prep",
+        icon: BookOpen,
+      },
+      {
         title: "Communication Lab",
         url: "/app/communication",
         icon: Mic,
       },
       {
-        title: "HR Prep Hub",
-        url: "/app/hr-prep",
-        icon: BookOpen,
+        title: "Company Intelligence",
+        url: "/app/company-intel",
+        icon: Building,
       },
       {
         title: "Resume Intelligence",
@@ -141,18 +174,18 @@ const navigationGroups = [
   },
   {
     id: "career",
-    title: "Jobs & Company Intel",
+    title: "Jobs & Opportunities",
     icon: Briefcase,
     items: [
-      {
-        title: "Company Intelligence",
-        url: "/app/company-intel",
-        icon: Building,
-      },
       {
         title: "Job Recommendations",
         url: "/app/job",
         icon: Briefcase,
+      },
+      {
+        title: "Company Dossiers",
+        url: "/app/company-intel",
+        icon: Building,
       },
     ],
   },
@@ -177,7 +210,8 @@ export default function AppSidebar() {
 
   // Collapsible dropdown groups state
   const [openGroups, setOpenGroups] = useState({
-    coding: true,
+    coding: false,
+    development: false,
     interview: false,
     academics: false,
     career: false,
@@ -186,9 +220,10 @@ export default function AppSidebar() {
   // Automatically open the dropdown group that contains the current active route
   useEffect(() => {
     navigationGroups.forEach((group) => {
-      const hasActive = group.items.some((item) =>
-        location.pathname === item.url || location.pathname.startsWith(item.url + "/")
-      );
+      const hasActive = group.items.some((item) => {
+        const itemUrl = item.url.split("?")[0];
+        return location.pathname === itemUrl || location.pathname.startsWith(itemUrl + "/");
+      });
       if (hasActive) {
         setOpenGroups((prev) => ({ ...prev, [group.id]: true }));
       }
@@ -228,7 +263,7 @@ export default function AppSidebar() {
 
           {/* Scrollable Navigation Body */}
           <div className="flex-1 overflow-y-auto space-y-4 px-2 py-2">
-            {/* Core Direct Links (Dashboard, Roadmap, Coach) */}
+            {/* Core Overview */}
             <SidebarGroup className="p-0">
               <SidebarGroupLabel className="px-3 py-1.5 text-[10px] font-semibold text-zinc-500 uppercase tracking-widest font-mono">
                 Core Overview
@@ -288,9 +323,12 @@ export default function AppSidebar() {
               <div className="space-y-1.5">
                 {navigationGroups.map((group) => {
                   const isOpen = openGroups[group.id];
-                  const hasActiveChild = group.items.some((item) =>
-                    location.pathname === item.url || location.pathname.startsWith(item.url + "/")
-                  );
+                  const hasActiveChild = group.items.some((item) => {
+                    const itemUrl = item.url.split("?")[0];
+                    return (
+                      location.pathname === itemUrl || location.pathname.startsWith(itemUrl + "/")
+                    );
+                  });
 
                   return (
                     <div
@@ -303,21 +341,21 @@ export default function AppSidebar() {
                         onClick={() => toggleGroup(group.id)}
                         className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer ${
                           hasActiveChild && !isOpen
-                            ? "text-blue-400 bg-blue-500/10"
+                            ? "text-purple-400 bg-purple-500/10"
                             : "text-zinc-300 hover:text-white hover:bg-zinc-900/60"
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <group.icon
                             className={`w-4 h-4 shrink-0 ${
-                              hasActiveChild ? "text-blue-400" : "text-zinc-400"
+                              hasActiveChild ? "text-purple-400" : "text-zinc-400"
                             }`}
                           />
                           <span className="truncate tracking-tight">{group.title}</span>
                         </div>
                         <div className="flex items-center gap-1.5 text-zinc-500">
                           {hasActiveChild && !isOpen && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
                           )}
                           <ChevronDown
                             className={`w-3.5 h-3.5 transition-transform duration-200 ${
@@ -331,9 +369,10 @@ export default function AppSidebar() {
                       {isOpen && (
                         <div className="border-t border-white/[0.04] bg-zinc-900/20 px-2 py-1.5 space-y-0.5">
                           {group.items.map((subItem) => {
+                            const subItemPath = subItem.url.split("?")[0];
                             const isSubActive =
-                              location.pathname === subItem.url ||
-                              location.pathname.startsWith(subItem.url + "/");
+                              location.pathname === subItemPath ||
+                              location.pathname.startsWith(subItemPath + "/");
 
                             return (
                               <Link
@@ -412,7 +451,7 @@ export default function AppSidebar() {
           </div>
 
           {/* Logout Footer */}
-          <div className="p-3 border-t border-zinc-800/80 bg-zinc-950/60 shrink-0">
+          <div className="p-3 border-t border-zinc-800/80 bg-zinc-900/40 shrink-0">
             <button
               onClick={handleLogout}
               className="w-full flex items-center justify-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-zinc-400 hover:text-rose-300 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer font-mono"
@@ -426,4 +465,3 @@ export default function AppSidebar() {
     </div>
   );
 }
-

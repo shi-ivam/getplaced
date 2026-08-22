@@ -30,7 +30,7 @@ export function LoginForm(props) {
     setError("");
     setLoading(true);
     try {
-      await axios.post(
+      const res = await axios.post(
         `${NODE_API_URL}/api/users/auth`,
         {
           email: email.trim().toLowerCase(),
@@ -38,7 +38,11 @@ export function LoginForm(props) {
         },
         { withCredentials: true }
       );
-      navigate("/app");
+      if (res.data && res.data.onboardingCompleted === false) {
+        navigate("/app/coach");
+      } else {
+        navigate("/app");
+      }
     } catch (err) {
       console.error("Login error:", err);
       setError(

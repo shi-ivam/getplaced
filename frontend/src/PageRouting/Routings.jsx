@@ -16,6 +16,7 @@ import Profile from '@/pages/Profile'
 import DSAContent from '@/pages/DSAcontent'
 import CodingArena from '@/pages/CodingArena'
 import CodingWorkspace from '@/pages/CodingWorkspace'
+import Development from '@/pages/Development'
 
 // Group C Pages (#28 - #44)
 import Academics from '@/pages/Academics'
@@ -41,8 +42,11 @@ function Routings() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/coding" element={<CodingArena />} />
+          <Route path="/development" element={<Development />} />
           <Route path="/job" element={<JobRecommendations />} />
           <Route path="/jobs" element={<JobRecommendations />} />
+          <Route path="/onboarding" element={<CareerCoach />} />
+          <Route path="/onboarding/coach" element={<CareerCoach />} />
 
           {/* Authenticated Dashboard App Shell */}
           <Route path="/app" element={<Layout />}>
@@ -52,6 +56,7 @@ function Routings() {
             <Route path="coding/:slug" element={<CodingWorkspace />} />
             <Route path="problems" element={<CodingArena />} />
             <Route path="problems/:slug" element={<CodingWorkspace />} />
+            <Route path="development" element={<Development />} />
             <Route path="resume" element={<AnalyzeResume />} />
             <Route path="interview" element={<MockInterview />} />
             <Route path="hr-prep" element={<HRPrep />} />

@@ -137,6 +137,228 @@ export const calculateGitHubProjectScore = (profile) => {
  * @param {string} rawUsername - GitHub username or profile URL
  * @returns {Promise<Object>} Normalized GitHub profile snapshot ready for storage
  */
+/**
+ * Fallback parser that scrapes public GitHub profile and repository pages
+ * when the official REST API rate limit is exceeded.
+ *
+ * @param {string} cleanUsername - Normalized GitHub username
+ * @returns {Promise<Object>} Formatted profile data object
+ */
+export const scrapeGitHubUserDataFallback = async (cleanUsername) => {
+  const headers = {
+    "User-Agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  };
+
+  let mainRes;
+  try {
+    mainRes = await axios.get(`https://github.com/${encodeURIComponent(cleanUsername)}`, {
+      headers,
+      timeout: 12000,
+    });
+  } catch (err) {
+    if (err.response?.status === 404) {
+      const notFoundError = new Error(
+        `GitHub user "${cleanUsername}" was not found. Please verify your username or public profile link.`
+      );
+      notFoundError.statusCode = 404;
+      throw notFoundError;
+    }
+    throw err;
+  }
+
+  const reposRes = await axios
+    .get(`https://github.com/${encodeURIComponent(cleanUsername)}?tab=repositories`, {
+      headers,
+      timeout: 12000,
+    })
+    .catch(() => ({ data: "" }));
+
+  const mainHtml = mainRes.data || "";
+  const reposHtml = reposRes.data || "";
+
+  // Extract Avatar
+  const avatarMatch =
+    mainHtml.match(/class="[^"]*avatar-user[^"]*"[^>]*src="([^"]+)"/i) ||
+    mainHtml.match(/<img[^>]*src="([^"]+)"[^>]*class="[^"]*avatar[^"]*"/i) ||
+    mainHtml.match(/<img[^>]*class="[^"]*avatar[^"]*"[^>]*src="([^"]+)"/i);
+  let avatarUrl = avatarMatch ? avatarMatch[1].replace(/&amp;/g, "&") : "";
+
+  // Extract Name
+  const nameMatch = mainHtml.match(/<span[^>]*class="[^"]*p-name[^"]*"[^>]*>([\s\S]*?)<\/span>/i);
+  const name = nameMatch ? nameMatch[1].trim() : "";
+
+  // Extract Bio
+  const bioMatch =
+    mainHtml.match(/<div[^>]*class="[^"]*p-note[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
+    mainHtml.match(/<div[^>]*class="[^"]*user-profile-bio[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+  const bio = bioMatch ? bioMatch[1].replace(/<[^>]+>/g, "").trim() : "";
+
+  // Extract Location & Company
+  const locMatch =
+    mainHtml.match(/itemprop="homeLocation"[^>]*>([\s\S]*?)<\/li>/i) ||
+    mainHtml.match(/<span class="p-label">([\s\S]*?)<\/span>/i);
+  const location = locMatch ? locMatch[1].replace(/<[^>]+>/g, "").trim() : "";
+
+  const compMatch = mainHtml.match(/itemprop="worksFor"[^>]*>([\s\S]*?)<\/li>/i);
+  const company = compMatch ? compMatch[1].replace(/<[^>]+>/g, "").trim() : "";
+
+  // Extract Followers / Following
+  let followers = 0;
+  let following = 0;
+  const followersMatch = mainHtml.match(
+    /href="[^"]*tab=followers"[^>]*>[\s\S]*?<span[^>]*class="[^"]*text-bold[^"]*"[^>]*>([\s\S]*?)<\/span>/i
+  );
+  if (followersMatch) {
+    const raw = followersMatch[1].trim().replace(/,/g, "");
+    followers = raw.endsWith("k") ? Math.round(parseFloat(raw) * 1000) : parseInt(raw, 10) || 0;
+  }
+  const followingMatch = mainHtml.match(
+    /href="[^"]*tab=following"[^>]*>[\s\S]*?<span[^>]*class="[^"]*text-bold[^"]*"[^>]*>([\s\S]*?)<\/span>/i
+  );
+  if (followingMatch) {
+    const raw = followingMatch[1].trim().replace(/,/g, "");
+    following = raw.endsWith("k") ? Math.round(parseFloat(raw) * 1000) : parseInt(raw, 10) || 0;
+  }
+
+  // Extract Repositories
+  const repoBlocks = reposHtml.split(/<li[^>]*itemprop="owns"[^>]*>/i).slice(1);
+  const repositories = [];
+  const languageMap = new Map();
+  let totalStars = 0;
+  let totalForks = 0;
+  let originalReposCount = 0;
+  let forkedReposCount = 0;
+
+  for (const block of repoBlocks) {
+    const nameM =
+      block.match(
+        /itemprop="name codeRepository"[^>]*>[\s\S]*?<a[^>]*href="\/([^"/]+)\/([^"/]+)"[^>]*>([\s\S]*?)<\/a>/i
+      ) || block.match(/<a[^>]*href="\/([^"/]+)\/([^"/]+)"[^>]*itemprop="name codeRepository"/i);
+    if (!nameM) continue;
+    const repoName = (nameM[3] || nameM[2]).replace(/<[^>]+>/g, "").trim();
+
+    const descM = block.match(/itemprop="description"[^>]*>([\s\S]*?)<\/p>/i);
+    const description = descM ? descM[1].replace(/<[^>]+>/g, "").trim() : "";
+
+    const langM = block.match(/itemprop="programmingLanguage"[^>]*>([\s\S]*?)<\/span>/i);
+    const language = langM ? langM[1].trim() : "";
+
+    const starM = block.match(
+      /href="\/[^"/]+\/[^"/]+\/stargazers"[^>]*>[\s\S]*?<\/svg>([\s\S]*?)<\/a>/i
+    );
+    let stars = 0;
+    if (starM) {
+      const raw = starM[1].replace(/<[^>]+>/g, "").trim().replace(/,/g, "");
+      stars = raw.endsWith("k") ? Math.round(parseFloat(raw) * 1000) : parseInt(raw, 10) || 0;
+    }
+
+    const forkM = block.match(
+      /href="\/[^"/]+\/[^"/]+\/forks"[^>]*>[\s\S]*?<\/svg>([\s\S]*?)<\/a>/i
+    );
+    let forks = 0;
+    if (forkM) {
+      const raw = forkM[1].replace(/<[^>]+>/g, "").trim().replace(/,/g, "");
+      forks = raw.endsWith("k") ? Math.round(parseFloat(raw) * 1000) : parseInt(raw, 10) || 0;
+    }
+
+    const isFork = block.includes("forked from");
+    if (isFork) forkedReposCount++;
+    else originalReposCount++;
+
+    totalStars += stars;
+    totalForks += forks;
+    if (language) {
+      languageMap.set(language, (languageMap.get(language) || 0) + 1);
+    }
+
+    repositories.push({
+      githubId: null,
+      name: repoName,
+      fullName: `${cleanUsername}/${repoName}`,
+      description,
+      htmlUrl: `https://github.com/${cleanUsername}/${repoName}`,
+      homepage: "",
+      language,
+      topics: [],
+      stars,
+      forks,
+      watchers: stars,
+      openIssues: 0,
+      size: 100,
+      isFork,
+      isArchived: false,
+      createdAt: null,
+      updatedAt: null,
+      pushedAt: null,
+      defaultBranch: "main",
+      hasLiveDemo: false,
+      liveDemoUrl: "",
+    });
+  }
+
+  // Calculate language distribution
+  const totalReposWithLanguage = Array.from(languageMap.values()).reduce((a, b) => a + b, 0);
+  const languages = Array.from(languageMap.entries())
+    .map(([languageName, repoCount]) => ({
+      languageName,
+      repoCount,
+      percentage:
+        totalReposWithLanguage > 0
+          ? Math.round((repoCount / totalReposWithLanguage) * 1000) / 10
+          : 0,
+    }))
+    .sort((a, b) => b.repoCount - a.repoCount);
+
+  // Top repositories
+  const originalRepos = repositories.filter((r) => !r.isFork);
+  const forkedRepos = repositories.filter((r) => r.isFork);
+  originalRepos.sort((a, b) => b.stars - a.stars);
+  forkedRepos.sort((a, b) => b.stars - a.stars);
+
+  let topRepositories = originalRepos.slice(0, 6);
+  if (topRepositories.length < 6 && forkedRepos.length > 0) {
+    const remaining = 6 - topRepositories.length;
+    topRepositories = topRepositories.concat(forkedRepos.slice(0, remaining));
+  }
+
+  const profileData = {
+    username: cleanUsername,
+    profileUrl: `https://github.com/${cleanUsername}`,
+    avatarUrl,
+    name,
+    bio,
+    company,
+    location,
+    blog: "",
+    publicReposCount: repositories.length,
+    followers,
+    following,
+    totalStars,
+    totalForks,
+    originalReposCount,
+    forkedReposCount,
+    repositories,
+    languages,
+    topRepositories,
+    lastSyncedAt: new Date(),
+    syncStatus: "synced",
+    syncError: "",
+  };
+
+  profileData.projectScore = calculateGitHubProjectScore(profileData);
+  return profileData;
+};
+
+/**
+ * Fetches public user profile and repositories from GitHub REST API v3 with automatic
+ * web scraper fallback if API rate limits are reached.
+ * Supports optional GITHUB_TOKEN environment variable for higher rate limits.
+ *
+ * @param {string} rawUsername - GitHub username or profile URL
+ * @returns {Promise<Object>} Normalized GitHub profile snapshot ready for storage
+ */
 export const fetchGitHubUserData = async (rawUsername) => {
   const cleanUsername = extractGitHubUsername(rawUsername);
 
@@ -153,9 +375,10 @@ export const fetchGitHubUserData = async (rawUsername) => {
 
   const token = process.env.GITHUB_TOKEN?.trim();
   if (token) {
-    headers.Authorization = token.startsWith("Bearer ") || token.startsWith("token ")
-      ? token
-      : `Bearer ${token}`;
+    headers.Authorization =
+      token.startsWith("Bearer ") || token.startsWith("token ")
+        ? token
+        : `Bearer ${token}`;
   }
 
   let userResponse;
@@ -179,7 +402,7 @@ export const fetchGitHubUserData = async (rawUsername) => {
     userResponse = userRes.data;
     reposResponse = Array.isArray(reposRes.data) ? reposRes.data : [];
   } catch (err) {
-    console.error("GitHub API request failed:", err.message);
+    console.warn("GitHub REST API request failed:", err.message, "- trying fallback profile reader");
 
     if (err.response?.status === 404) {
       const notFoundError = new Error(
@@ -189,19 +412,27 @@ export const fetchGitHubUserData = async (rawUsername) => {
       throw notFoundError;
     }
 
-    if (err.response?.status === 403) {
-      const rateLimitError = new Error(
-        "GitHub API rate limit reached. Please try again in a few moments or provide a GITHUB_TOKEN."
-      );
-      rateLimitError.statusCode = 429;
-      throw rateLimitError;
-    }
+    // If rate limited or restricted, fall back to public profile reader
+    try {
+      return await scrapeGitHubUserDataFallback(cleanUsername);
+    } catch (fallbackErr) {
+      if (fallbackErr.statusCode === 404) {
+        throw fallbackErr;
+      }
+      if (err.response?.status === 403) {
+        const rateLimitError = new Error(
+          "GitHub API rate limit reached and fallback reader timed out. Please try again in a moment."
+        );
+        rateLimitError.statusCode = 429;
+        throw rateLimitError;
+      }
 
-    const networkError = new Error(
-      `Failed to connect to GitHub API: ${err.message || "Network timeout"}`
-    );
-    networkError.statusCode = 502;
-    throw networkError;
+      const networkError = new Error(
+        `Failed to connect to GitHub: ${err.message || "Network error"}`
+      );
+      networkError.statusCode = 502;
+      throw networkError;
+    }
   }
 
   const rawRepos = reposResponse;

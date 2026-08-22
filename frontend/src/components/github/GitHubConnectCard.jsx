@@ -329,16 +329,16 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
   };
 
   return (
-    <Card className="bg-[#141414] border-gray-800/80 shadow-md">
-      <CardHeader className="pb-4 border-b border-gray-800/60">
+    <Card className="bg-[#0d0e15] border-zinc-800 shadow-none">
+      <CardHeader className="pb-4 border-b border-zinc-800/80">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
               <FolderGit2 className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <CardTitle className="text-lg text-white">GitHub Project & Portfolio Analysis</CardTitle>
+                <CardTitle className="text-base font-semibold text-white">GitHub Portfolio</CardTitle>
                 {connected && (
                   <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">
                     <CheckCircle2 className="w-3 h-3" />
@@ -346,11 +346,11 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                   </span>
                 )}
               </div>
-              <CardDescription className="text-gray-400 text-xs">
-                {connected
-                  ? "Real-time project depth evaluation, star engagement, technology stack distribution, and repository showcase."
-                  : "Connect your public GitHub username to import engineering projects, star validation, language diversity, and boost your Projects readiness score."}
-              </CardDescription>
+              {!connected && (
+                <CardDescription className="text-zinc-400 text-xs mt-0.5">
+                  Connect your public GitHub username to import repositories, language distribution, and project stats.
+                </CardDescription>
+              )}
             </div>
           </div>
 
@@ -362,10 +362,10 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                 size="sm"
                 onClick={handleSync}
                 disabled={syncing || disconnecting}
-                className="bg-[#1c1c1c] hover:bg-zinc-800 text-zinc-200 border-gray-700 text-xs h-8 px-3 flex items-center gap-1.5 cursor-pointer"
+                className="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border-zinc-800 text-xs h-8 px-3 flex items-center gap-1.5 cursor-pointer"
                 title="Fetch latest repositories from GitHub"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin text-purple-400" : ""}`} />
+                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin text-zinc-200" : "text-zinc-400"}`} />
                 <span>{syncing ? "Syncing..." : "Refresh Data"}</span>
               </Button>
 
@@ -448,7 +448,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
               disabled={syncing}
               className="bg-amber-900/40 hover:bg-amber-900/70 border-amber-600 text-amber-100 text-xs h-7 px-3 shrink-0 self-start sm:self-auto cursor-pointer"
             >
-              <RefreshCw className={`w-3 h-3 mr-1 ${syncing ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 mr-1 ${syncing ? "animate-spin" : ""}`} />
               {syncing ? "Retrying..." : "Retry Sync"}
             </Button>
           </div>
@@ -459,21 +459,21 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
         {/* ------------------------------------------------------------- */}
         {!connected && (
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-[#18181b] via-[#141417] to-purple-950/20 border border-zinc-800 rounded-xl p-5 md:p-6 space-y-5">
+            <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-5 md:p-6 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-400" />
+                    <Sparkles className="w-4 h-4 text-zinc-400" />
                     <h3 className="text-sm font-semibold text-white">
-                      Connect your GitHub Account
+                      Connect GitHub Account
                     </h3>
                   </div>
                   <p className="text-xs text-zinc-400 max-w-xl">
-                    Import your repositories, track language distribution, highlight live demos, and unlock the Projects (15% weight) readiness scoring.
+                    Import your repositories to calculate project readiness and technology breakdown.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-3 py-1 rounded-full shrink-0 self-start sm:self-auto font-mono">
+                <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full shrink-0 self-start sm:self-auto font-mono">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Public Read-Only</span>
                 </div>
@@ -487,7 +487,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                     value={inputUsername}
                     onChange={(e) => setInputUsername(e.target.value)}
                     placeholder="e.g. torvalds, @username, or https://github.com/username"
-                    className="bg-[#1c1c1c] border-zinc-700 text-white placeholder:text-zinc-500 focus:border-purple-500 text-sm h-11 pr-10 font-mono"
+                    className="bg-[#0f1017] border-zinc-700 text-white placeholder:text-zinc-500 focus:border-zinc-500 text-sm h-10 pr-10 font-mono"
                     disabled={connecting}
                   />
                   {inputUsername && (
@@ -504,149 +504,77 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                 <Button
                   type="submit"
                   disabled={connecting || !inputUsername.trim()}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-6 h-11 rounded-lg shadow-lg shadow-purple-950/40 flex items-center justify-center gap-2 shrink-0 cursor-pointer text-sm"
+                  className="bg-white hover:bg-zinc-200 text-zinc-950 font-medium px-5 h-10 rounded-lg flex items-center justify-center gap-2 shrink-0 cursor-pointer text-xs"
                 >
                   {connecting ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                       Analyzing Repositories...
                     </>
                   ) : (
                     <>
-                      <FolderGit2 className="w-4 h-4" />
+                      <FolderGit2 className="w-3.5 h-3.5" />
                       Connect GitHub
                     </>
                   )}
                 </Button>
               </form>
-
-              {/* Feature Highlights Badges */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 border-t border-zinc-800/80 text-[11px] font-mono text-zinc-400">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                  <span>Repo & Star Analysis</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-                  <span>Language Frequency</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  <span>Live Demo Detection</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                  <span>Projects Dimension (15%)</span>
-                </div>
-              </div>
             </div>
           </div>
         )}
 
         {/* ------------------------------------------------------------- */}
-        {/* CONNECTED STATE */}
+        {/* CONNECTED STATE DASHBOARD */}
         {/* ------------------------------------------------------------- */}
         {connected && profile && (
           <div className="space-y-6">
-            {/* 1. Header Profile Banner */}
-            <div className="bg-gradient-to-r from-purple-950/30 via-[#18181b] to-zinc-900/40 border border-purple-900/30 rounded-xl p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-start md:items-center gap-4">
-                {profile.avatarUrl ? (
+            {/* 1. Header Hero Card with Profile Metadata */}
+            <div className="bg-[#14141c] border border-zinc-800 p-4 md:p-5 rounded-xl">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                {/* Avatar + Identity */}
+                <div className="flex items-center gap-4">
                   <img
-                    src={profile.avatarUrl}
+                    src={profile.avatarUrl || `https://github.com/${profile.username}.png`}
                     alt={profile.username}
-                    className="w-14 h-14 rounded-xl border border-purple-500/30 object-cover shrink-0 shadow-inner bg-zinc-900"
+                    className="w-12 h-12 rounded-xl border border-zinc-800 object-cover bg-zinc-900 shrink-0"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png";
+                    }}
                   />
-                ) : (
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold text-2xl font-mono shrink-0 shadow-inner">
-                    {profile.username?.charAt(0)?.toUpperCase() || "G"}
-                  </div>
-                )}
-
-                <div className="space-y-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-bold text-white text-base md:text-lg">
-                      {profile.name || profile.username}
-                    </h3>
-                    <a
-                      href={profile.profileUrl || `https://github.com/${profile.username}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-purple-300 hover:text-purple-200 font-mono bg-purple-950/60 px-2.5 py-0.5 rounded border border-purple-800/60 transition-colors cursor-pointer"
-                      title="Open GitHub profile in new tab"
-                    >
-                      <span>@{profile.username}</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-
-                  {profile.bio && (
-                    <p className="text-xs text-zinc-300 line-clamp-2 max-w-xl">
-                      {profile.bio}
-                    </p>
-                  )}
-
-                  {/* Metadata Row */}
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 pt-0.5 font-mono">
-                    {profile.location && (
-                      <span className="flex items-center gap-1 text-zinc-400">
-                        <MapPin className="w-3 h-3 text-zinc-500" />
-                        {profile.location}
-                      </span>
-                    )}
-
-                    {profile.company && (
-                      <span className="flex items-center gap-1 text-zinc-400">
-                        <Building className="w-3 h-3 text-zinc-500" />
-                        {profile.company}
-                      </span>
-                    )}
-
-                    {profile.blog && (
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-bold text-white text-base">
+                        {profile.name || profile.username}
+                      </h3>
                       <a
-                        href={profile.blog.startsWith("http") ? profile.blog : `https://${profile.blog}`}
+                        href={profile.profileUrl || `https://github.com/${profile.username}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-purple-400 hover:underline"
+                        className="text-xs font-mono text-zinc-400 hover:text-white inline-flex items-center gap-1 transition-colors"
                       >
-                        <Link2 className="w-3 h-3 text-purple-500" />
-                        {profile.blog.replace(/^https?:\/\//, "")}
+                        <span>@{profile.username}</span>
+                        <ExternalLink className="w-3 h-3 text-zinc-400" />
                       </a>
-                    )}
-
-                    {profile.lastSyncedAt && (
-                      <span
-                        className="flex items-center gap-1 text-zinc-500"
-                        title={formatFullDateTime(profile.lastSyncedAt)}
-                      >
-                        <Clock className="w-3 h-3 text-zinc-500" />
-                        Synced {formatRelativeTime(profile.lastSyncedAt)}
-                      </span>
+                    </div>
+                    {profile.bio && (
+                      <p className="text-xs text-zinc-300 mt-1 max-w-xl line-clamp-2">
+                        {profile.bio}
+                      </p>
                     )}
                   </div>
                 </div>
-              </div>
 
-              {/* Project Dimension Score Badge */}
-              <div className="flex items-center gap-3.5 bg-zinc-900/90 border border-zinc-800 px-4 py-3 rounded-xl shrink-0 self-start md:self-auto">
-                <div className="space-y-0.5">
-                  <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-400">
-                    Project Readiness
-                  </div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-2xl font-bold font-mono text-white">
-                      {projectScore}
-                    </span>
-                    <span className="text-xs font-mono text-zinc-500">/ 100</span>
-                  </div>
-                </div>
-
-                <div className="pl-3 border-l border-zinc-800 space-y-0.5">
-                  <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-400">
-                    Status
+                {/* Readiness Project Score Badge */}
+                <div className="bg-[#0f1017] border border-zinc-800/80 px-3.5 py-2.5 rounded-lg flex items-center gap-3 shrink-0 self-start md:self-auto">
+                  <div>
+                    <div className="text-[10px] text-zinc-400 font-mono uppercase">Projects Score</div>
+                    <div className="text-lg font-bold font-mono text-white">
+                      {projectScore}/100
+                    </div>
                   </div>
                   <span
-                    className={`inline-block text-[11px] px-2 py-0.5 rounded-full font-medium font-mono border ${getScoreBadgeClass(
+                    className={`px-2 py-0.5 rounded text-[11px] font-mono font-semibold border ${getScoreBadgeClass(
                       projectScore
                     )}`}
                   >
@@ -658,70 +586,63 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
 
             {/* 2. Portfolio Quick Metrics (4 Cards) */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-              <div className="bg-[#18181b]/80 border border-zinc-800/80 rounded-xl p-4 space-y-1">
+              <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-1">
                 <div className="flex items-center justify-between text-zinc-400">
                   <span className="text-[10px] uppercase font-mono tracking-wider">Total Repos</span>
-                  <BookOpen className="w-4 h-4 text-purple-400" />
+                  <BookOpen className="w-4 h-4 text-zinc-400" />
                 </div>
                 <div className="text-2xl font-bold font-mono text-white">
                   {profile.publicReposCount || (profile.repositories ? profile.repositories.length : 0)}
                 </div>
-                <p className="text-[11px] text-zinc-500 font-mono">Public codebases</p>
               </div>
 
-              <div className="bg-[#18181b]/80 border border-zinc-800/80 rounded-xl p-4 space-y-1">
+              <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-1">
                 <div className="flex items-center justify-between text-zinc-400">
                   <span className="text-[10px] uppercase font-mono tracking-wider">Original Projects</span>
-                  <FolderGit2 className="w-4 h-4 text-emerald-400" />
+                  <FolderGit2 className="w-4 h-4 text-zinc-400" />
                 </div>
-                <div className="text-2xl font-bold font-mono text-emerald-400">
+                <div className="text-2xl font-bold font-mono text-zinc-200">
                   {profile.originalReposCount || 0}
                 </div>
-                <p className="text-[11px] text-zinc-500 font-mono">Non-fork repositories</p>
               </div>
 
-              <div className="bg-[#18181b]/80 border border-zinc-800/80 rounded-xl p-4 space-y-1">
+              <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-1">
                 <div className="flex items-center justify-between text-zinc-400">
                   <span className="text-[10px] uppercase font-mono tracking-wider">Total Stars</span>
-                  <Star className="w-4 h-4 text-amber-400" />
+                  <Star className="w-4 h-4 text-zinc-400" />
                 </div>
-                <div className="text-2xl font-bold font-mono text-amber-400">
+                <div className="text-2xl font-bold font-mono text-zinc-200">
                   {profile.totalStars || 0}
                 </div>
-                <p className="text-[11px] text-zinc-500 font-mono">Community stars ⭐</p>
               </div>
 
-              <div className="bg-[#18181b]/80 border border-zinc-800/80 rounded-xl p-4 space-y-1">
+              <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-1">
                 <div className="flex items-center justify-between text-zinc-400">
                   <span className="text-[10px] uppercase font-mono tracking-wider">Total Forks</span>
-                  <GitFork className="w-4 h-4 text-sky-400" />
+                  <GitFork className="w-4 h-4 text-zinc-400" />
                 </div>
-                <div className="text-2xl font-bold font-mono text-sky-400">
+                <div className="text-2xl font-bold font-mono text-zinc-200">
                   {profile.totalForks || 0}
                 </div>
-                <p className="text-[11px] text-zinc-500 font-mono">Downstream forks</p>
               </div>
             </div>
 
             {/* 3. Top Languages Breakdown */}
             {languagesList.length > 0 && (
-              <div className="bg-[#18181b]/70 border border-zinc-800/80 rounded-xl p-4 md:p-5 space-y-3.5">
+              <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 md:p-5 space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Code2 className="w-4 h-4 text-purple-400" />
+                    <Code2 className="w-4 h-4 text-zinc-400" />
                     <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
                       Technology & Language Breakdown
                     </h4>
                   </div>
-                  <span className="text-[11px] text-zinc-500 font-mono">
-                    {languagesList.length} language{languagesList.length === 1 ? "" : "s"} identified
-                  </span>
                 </div>
 
                 {/* Multi-segment Colored Bar */}
                 <div className="w-full h-3 bg-zinc-900 rounded-full overflow-hidden flex shadow-inner">
                   {languagesList.slice(0, 7).map((lang, idx) => {
-                    const color = LANGUAGE_COLORS[lang.languageName] || "#a855f7";
+                    const color = LANGUAGE_COLORS[lang.languageName] || "#a1a1aa";
                     return (
                       <div
                         key={idx}
@@ -736,11 +657,11 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                 {/* Language Pill Badges */}
                 <div className="flex flex-wrap items-center gap-2 pt-1">
                   {languagesList.map((lang, idx) => {
-                    const color = LANGUAGE_COLORS[lang.languageName] || "#a855f7";
+                    const color = LANGUAGE_COLORS[lang.languageName] || "#a1a1aa";
                     return (
                       <div
                         key={idx}
-                        className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-zinc-900/80 border border-zinc-800 text-xs font-mono text-zinc-300"
+                        className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#0f1017] border border-zinc-800 text-xs font-mono text-zinc-300"
                       >
                         <span
                           className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -765,8 +686,8 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                   onClick={() => setActiveTab("featured")}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
                     activeTab === "featured"
-                      ? "bg-purple-600/20 text-purple-300 border border-purple-500/40 font-semibold shadow-sm"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
+                      ? "bg-zinc-200 text-zinc-950 font-medium"
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
                   }`}
                 >
                   <Star className="w-3.5 h-3.5" />
@@ -778,18 +699,14 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                   onClick={() => setActiveTab("all")}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
                     activeTab === "all"
-                      ? "bg-purple-600/20 text-purple-300 border border-purple-500/40 font-semibold shadow-sm"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
+                      ? "bg-zinc-200 text-zinc-950 font-medium"
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
                   }`}
                 >
                   <FolderGit2 className="w-3.5 h-3.5" />
                   <span>All Repositories ({repositories.length})</span>
                 </button>
               </div>
-
-              <span className="text-[11px] text-zinc-500 font-mono hidden sm:inline">
-                {activeTab === "featured" ? "Ranked by stars & original code" : "Searchable codebase catalog"}
-              </span>
             </div>
 
             {/* Tab 1: Featured Repositories Grid */}
@@ -813,17 +730,17 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
             {activeTab === "all" && (
               <div className="space-y-4">
                 {/* Filter Controls Bar */}
-                <div className="bg-[#18181b]/90 border border-zinc-800 p-3.5 rounded-xl space-y-3">
+                <div className="bg-[#14141c] border border-zinc-800 p-3.5 rounded-xl space-y-3">
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     {/* Search Input */}
                     <div className="relative flex-1">
-                      <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
                       <Input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search repositories by name, topic, or description..."
-                        className="pl-9 bg-[#121214] border-zinc-700 text-white placeholder:text-zinc-500 text-xs h-9"
+                        className="pl-9 bg-[#0f1017] border-zinc-700 text-white placeholder:text-zinc-600 text-xs h-9"
                       />
                       {searchQuery && (
                         <button
@@ -841,7 +758,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                       <select
                         value={selectedLanguage}
                         onChange={(e) => setSelectedLanguage(e.target.value)}
-                        className="bg-[#121214] border border-zinc-700 rounded-md text-xs text-zinc-200 px-2.5 py-1.5 focus:outline-none focus:border-purple-500 font-mono cursor-pointer h-9"
+                        className="bg-[#0f1017] border border-zinc-700 rounded-md text-xs text-zinc-200 px-2.5 py-1.5 focus:outline-none focus:border-zinc-500 font-mono cursor-pointer h-9"
                       >
                         <option value="all">All Languages</option>
                         {languagesList.map((lang) => (
@@ -857,7 +774,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                       <select
                         value={selectedType}
                         onChange={(e) => setSelectedType(e.target.value)}
-                        className="bg-[#121214] border border-zinc-700 rounded-md text-xs text-zinc-200 px-2.5 py-1.5 focus:outline-none focus:border-purple-500 font-mono cursor-pointer h-9"
+                        className="bg-[#0f1017] border border-zinc-700 rounded-md text-xs text-zinc-200 px-2.5 py-1.5 focus:outline-none focus:border-zinc-500 font-mono cursor-pointer h-9"
                       >
                         <option value="all">All Types</option>
                         <option value="original">Original Only</option>
@@ -870,7 +787,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                       <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className="bg-[#121214] border border-zinc-700 rounded-md text-xs text-zinc-200 px-2.5 py-1.5 focus:outline-none focus:border-purple-500 font-mono cursor-pointer h-9"
+                        className="bg-[#0f1017] border border-zinc-700 rounded-md text-xs text-zinc-200 px-2.5 py-1.5 focus:outline-none focus:border-zinc-500 font-mono cursor-pointer h-9"
                       >
                         <option value="stars">Sort: Most Stars ⭐</option>
                         <option value="updated">Sort: Recently Updated</option>
@@ -894,7 +811,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                           setSelectedType("all");
                           setSortBy("stars");
                         }}
-                        className="text-purple-400 hover:text-purple-300 underline cursor-pointer"
+                        className="text-zinc-300 hover:text-white underline cursor-pointer"
                       >
                         Reset filters
                       </button>
@@ -913,7 +830,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                         setSelectedLanguage("all");
                         setSelectedType("all");
                       }}
-                      className="text-purple-400 hover:underline cursor-pointer"
+                      className="text-zinc-300 hover:underline cursor-pointer"
                     >
                       Clear search & filters
                     </button>
@@ -935,34 +852,34 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
 }
 
 function RepositoryCard({ repo }) {
-  const langColor = LANGUAGE_COLORS[repo.language] || "#a855f7";
+  const langColor = LANGUAGE_COLORS[repo.language] || "#a1a1aa";
 
   return (
-    <div className="bg-[#18181b]/80 hover:bg-[#1c1c20] border border-zinc-800/80 hover:border-zinc-700 rounded-xl p-4.5 flex flex-col justify-between space-y-3.5 transition-all group">
-      <div className="space-y-2.5">
+    <div className="bg-[#14141c] hover:bg-[#181924] border border-zinc-800 hover:border-zinc-700 rounded-xl p-4 flex flex-col justify-between space-y-3 transition-all group">
+      <div className="space-y-2">
         {/* Title & Badges Header */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 truncate">
-            <FolderGit2 className="w-4 h-4 text-purple-400 shrink-0" />
+            <FolderGit2 className="w-4 h-4 text-zinc-400 shrink-0" />
             <a
               href={repo.htmlUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-semibold text-white hover:text-purple-300 truncate font-mono flex items-center gap-1 group-hover:underline"
+              className="text-sm font-semibold text-white hover:text-zinc-200 truncate font-mono flex items-center gap-1 group-hover:underline"
             >
               <span>{repo.name}</span>
-              <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-purple-400" />
+              <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-400" />
             </a>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0 font-mono text-[10px]">
             {repo.isFork && (
-              <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
+              <span className="px-1.5 py-0.2 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
                 Fork
               </span>
             )}
             {repo.isArchived && (
-              <span className="px-1.5 py-0.2 rounded bg-amber-950/60 text-amber-400 border border-amber-800">
+              <span className="px-1.5 py-0.2 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
                 Archived
               </span>
             )}
@@ -980,7 +897,7 @@ function RepositoryCard({ repo }) {
             {repo.topics.slice(0, 4).map((topic, i) => (
               <span
                 key={i}
-                className="text-[10px] px-2 py-0.5 rounded-full bg-purple-950/50 text-purple-300 border border-purple-800/50 font-mono"
+                className="text-[10px] px-2 py-0.5 rounded-full bg-[#0f1017] text-zinc-300 border border-zinc-800 font-mono"
               >
                 #{topic}
               </span>
@@ -1007,8 +924,8 @@ function RepositoryCard({ repo }) {
             </span>
           )}
 
-          <span className="flex items-center gap-1 text-amber-400/90" title={`${repo.stars} stars`}>
-            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" />
+          <span className="flex items-center gap-1 text-zinc-300" title={`${repo.stars} stars`}>
+            <Star className="w-3.5 h-3.5 text-zinc-400 fill-zinc-400/20" />
             <span>{repo.stars || 0}</span>
           </span>
 
@@ -1027,9 +944,9 @@ function RepositoryCard({ repo }) {
               href={repo.liveDemoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-950/70 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-700/60 text-[11px] font-medium transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 text-[11px] font-medium transition-colors cursor-pointer"
             >
-              <Globe className="w-3 h-3 text-emerald-400" />
+              <Globe className="w-3 h-3 text-zinc-400" />
               <span>Live Demo</span>
             </a>
           )}

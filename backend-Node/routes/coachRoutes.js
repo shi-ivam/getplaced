@@ -3,6 +3,8 @@ import {
   getSession,
   sendMessage,
   applyProfile,
+  connectGitHub,
+  connectLeetCode,
 } from "../controllers/coachController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 
@@ -11,5 +13,8 @@ const router = express.Router();
 router.route("/session").get(protect, getSession);
 router.route("/message").post(protect, sendMessage);
 router.route("/apply-profile").post(protect, applyProfile);
+router.route("/connect-github").post(protect, connectGitHub);
+router.route("/connect-leetcode").post(protect, connectLeetCode);
 
 export default router;
+

@@ -93,7 +93,39 @@ export default function CompanyIntelligence() {
         <div className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[400px] bg-violet-900/10 blur-[160px]" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 space-y-8">
+        {/* Interview Pillar Navigation Tabs */}
+        <nav className="flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs border-b border-zinc-900 pb-4">
+          <Link
+            to="/app/interview"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+          >
+            <Brain className="w-3.5 h-3.5 text-zinc-400" />
+            <span>AI Mock Interview</span>
+          </Link>
+          <Link
+            to="/app/hr-prep"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+          >
+            <Award className="w-3.5 h-3.5 text-zinc-400" />
+            <span>HR & Leadership Prep</span>
+          </Link>
+          <Link
+            to="/app/communication"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+          >
+            <Cpu className="w-3.5 h-3.5 text-zinc-400" />
+            <span>Communication Lab</span>
+          </Link>
+          <Link
+            to="/app/company-intel"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-white text-black font-semibold shadow-sm"
+          >
+            <Building2 className="w-3.5 h-3.5 text-violet-600" />
+            <span>Company Intelligence</span>
+          </Link>
+        </nav>
+
         {/* Navigation Bar */}
         <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-zinc-900">
           <div className="flex items-center gap-3">

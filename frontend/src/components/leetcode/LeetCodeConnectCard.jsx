@@ -335,16 +335,16 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
       : 1;
 
   return (
-    <Card className="bg-[#141414] border-gray-800/80 shadow-md">
-      <CardHeader className="pb-4 border-b border-gray-800/60">
+    <Card className="bg-[#0d0e15] border-zinc-800 shadow-none">
+      <CardHeader className="pb-4 border-b border-zinc-800/80">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
               <Code2 className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <CardTitle className="text-lg text-white">LeetCode Problem Analysis</CardTitle>
+                <CardTitle className="text-base font-semibold text-white">LeetCode Analytics</CardTitle>
                 {connected && (
                   <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">
                     <CheckCircle2 className="w-3 h-3" />
@@ -352,11 +352,11 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                   </span>
                 )}
               </div>
-              <CardDescription className="text-gray-400 text-xs">
-                {connected
-                  ? "Real-time algorithmic analytics, difficulty breakdown, submission accuracy, contest standing, and topic strengths."
-                  : "Connect your public LeetCode profile to import solved problems, topic mastery, contest rating, and benchmark placement readiness."}
-              </CardDescription>
+              {!connected && (
+                <CardDescription className="text-zinc-400 text-xs mt-0.5">
+                  Connect your public LeetCode profile to import problems, contest rating, and topic analytics.
+                </CardDescription>
+              )}
             </div>
           </div>
 
@@ -372,10 +372,10 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                   setSuccessMsg("");
                 }}
                 disabled={syncing || disconnecting || connecting}
-                className="bg-[#1c1c1c] hover:bg-zinc-800 text-zinc-300 border-gray-700 text-xs h-8 px-2.5 flex items-center gap-1.5 cursor-pointer"
+                className="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800 text-xs h-8 px-2.5 flex items-center gap-1.5 cursor-pointer"
                 title="Connect a different LeetCode account"
               >
-                <ArrowLeftRight className="w-3.5 h-3.5 text-amber-400" />
+                <ArrowLeftRight className="w-3.5 h-3.5 text-zinc-400" />
                 <span className="hidden sm:inline">Change Account</span>
               </Button>
 
@@ -385,10 +385,10 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                 size="sm"
                 onClick={handleSync}
                 disabled={syncing || disconnecting || connecting}
-                className="bg-[#1c1c1c] hover:bg-zinc-800 text-zinc-200 border-gray-700 text-xs h-8 px-3 flex items-center gap-1.5 cursor-pointer"
+                className="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border-zinc-800 text-xs h-8 px-3 flex items-center gap-1.5 cursor-pointer"
                 title="Fetch latest stats from LeetCode"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin text-amber-400" : ""}`} />
+                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin text-zinc-200" : "text-zinc-400"}`} />
                 <span>{syncing ? "Syncing..." : "Refresh Data"}</span>
               </Button>
 
@@ -433,10 +433,10 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
       <CardContent className="pt-6 space-y-6">
         {/* Change Account Inline Modal */}
         {connected && isChangingAccount && (
-          <div className="bg-zinc-900/90 border border-amber-500/30 rounded-xl p-4 space-y-3">
+          <div className="bg-[#14141c] border border-zinc-700 rounded-xl p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ArrowLeftRight className="w-4 h-4 text-amber-400" />
+                <ArrowLeftRight className="w-4 h-4 text-zinc-400" />
                 <span className="text-xs font-semibold text-white font-mono">
                   Switch LeetCode Account
                 </span>
@@ -445,43 +445,32 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                 Current: @{profile?.username}
               </span>
             </div>
-            <p className="text-xs text-zinc-400">
-              Enter the new LeetCode username or profile link below. Your current connection remains active until the new profile is verified.
-            </p>
+
             <form
               onSubmit={(e) => handleConnect(e, changeUsernameInput)}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5"
+              className="flex flex-col sm:flex-row gap-2 pt-1"
             >
               <Input
                 type="text"
                 value={changeUsernameInput}
                 onChange={(e) => setChangeUsernameInput(e.target.value)}
-                placeholder="new username or https://leetcode.com/u/new_user/"
-                className="bg-[#141414] border-gray-700 text-white placeholder:text-gray-600 focus:border-amber-500 text-xs h-9 font-mono flex-1"
-                disabled={connecting}
+                placeholder="e.g. neetcode or https://leetcode.com/u/neetcode/"
+                className="bg-[#0f1017] border-zinc-700 text-white placeholder:text-zinc-600 focus:border-zinc-500 text-xs h-9 font-mono flex-1"
               />
               <div className="flex items-center gap-2">
                 <Button
                   type="submit"
+                  size="sm"
                   disabled={connecting || !changeUsernameInput.trim()}
-                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs h-9 px-3.5 font-medium cursor-pointer"
+                  className="bg-white hover:bg-zinc-200 text-zinc-950 text-xs h-9 px-3.5 font-medium cursor-pointer"
                 >
-                  {connecting ? (
-                    <>
-                      <RefreshCw className="w-3 h-3 animate-spin mr-1" />
-                      Verifying...
-                    </>
-                  ) : (
-                    "Verify & Switch"
-                  )}
+                  {connecting ? "Connecting..." : "Verify & Switch"}
                 </Button>
                 <Button
                   type="button"
+                  size="sm"
                   variant="ghost"
-                  onClick={() => {
-                    setIsChangingAccount(false);
-                    setChangeUsernameInput("");
-                  }}
+                  onClick={() => setIsChangingAccount(false)}
                   className="text-zinc-400 hover:text-white text-xs h-9 px-2.5 cursor-pointer"
                 >
                   Cancel
@@ -491,7 +480,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
           </div>
         )}
 
-        {/* Messages */}
+        {/* Alerts & Messages */}
         {successMsg && (
           <div className="flex items-center gap-2 bg-emerald-950/70 border border-emerald-600/60 text-emerald-200 px-3.5 py-2.5 rounded-lg text-xs font-medium">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -505,37 +494,35 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
               <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
               <span>{errorMsg}</span>
             </div>
-            <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-              <button
-                type="button"
-                onClick={() => setErrorMsg("")}
-                className="text-[11px] underline hover:text-white cursor-pointer font-mono"
-              >
-                Dismiss
-              </button>
-              <a
-                href="https://leetcode.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[11px] text-amber-300 hover:text-amber-200 underline font-mono flex items-center gap-0.5 cursor-pointer"
-              >
-                <span>Check on LeetCode</span>
-                <ExternalLink className="w-2.5 h-2.5" />
-              </a>
-            </div>
+            {errorMsg.toLowerCase().includes("not found") && (
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[11px] text-zinc-400">Try demo?</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInputUsername("neetcode");
+                    handleConnect(null, "neetcode");
+                  }}
+                  className="text-[11px] text-zinc-300 hover:text-white underline font-mono flex items-center gap-0.5 cursor-pointer"
+                >
+                  <span>neetcode</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </button>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Graceful sync failure banner */}
+        {/* Graceful sync failure alert */}
         {profile?.syncStatus === "failed" && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-950/40 border border-amber-600/50 text-amber-200 p-3.5 rounded-xl text-xs">
             <div className="flex items-start sm:items-center gap-2.5">
               <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
               <div>
                 <span className="font-semibold text-amber-300">
-                  Unable to fetch latest LeetCode data.
+                  Unable to refresh live stats from LeetCode.
                 </span>{" "}
-                <span>Showing your last successfully synced data.</span>
+                <span>Showing your cached submission snapshot.</span>
                 {profile.syncError && (
                   <div className="text-[11px] text-amber-400/80 font-mono mt-0.5">
                     Reason: {profile.syncError}
@@ -563,9 +550,9 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
         {connected && profile ? (
           <div className="space-y-6">
             {/* 1. LeetCode Profile Summary Banner */}
-            <div className="bg-gradient-to-r from-amber-950/25 via-[#18181b] to-purple-950/25 border border-amber-900/30 rounded-xl p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-purple-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-xl font-mono shrink-0 shadow-inner">
+                <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-200 font-bold text-xl font-mono shrink-0 shadow-inner">
                   {profile.username?.charAt(0)?.toUpperCase() || "L"}
                 </div>
                 <div>
@@ -577,7 +564,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                       href={profile.profileUrl || `https://leetcode.com/u/${profile.username}/`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-mono bg-amber-950/60 px-2.5 py-0.5 rounded border border-amber-800/60 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 text-xs text-zinc-300 hover:text-white font-mono bg-zinc-900 px-2.5 py-0.5 rounded border border-zinc-800 transition-colors cursor-pointer"
                       title="Open LeetCode profile in new tab"
                     >
                       <span>@{profile.username}</span>
@@ -587,8 +574,8 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
 
                   <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 mt-1.5 font-mono">
                     {profile.ranking && profile.ranking < 5000000 ? (
-                      <span className="flex items-center gap-1 text-amber-300">
-                        <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="flex items-center gap-1 text-zinc-300">
+                        <Trophy className="w-3.5 h-3.5 text-zinc-400" />
                         Rank #{profile.ranking.toLocaleString()}
                       </span>
                     ) : (
@@ -599,8 +586,8 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                     )}
 
                     {contestRating !== null && (
-                      <span className="flex items-center gap-1 text-purple-300">
-                        <Award className="w-3.5 h-3.5 text-purple-400" />
+                      <span className="flex items-center gap-1 text-zinc-300">
+                        <Award className="w-3.5 h-3.5 text-zinc-400" />
                         Rating: {contestRating.toLocaleString()}
                       </span>
                     )}
@@ -658,8 +645,8 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                 onClick={() => setActiveView("overview")}
                 className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
                   activeView === "overview"
-                    ? "bg-amber-600/20 text-amber-300 border border-amber-500/40 font-semibold shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
+                    ? "bg-zinc-200 text-zinc-950 font-medium"
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
                 }`}
               >
                 <Layers className="w-3.5 h-3.5" />
@@ -671,8 +658,8 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                 onClick={() => setActiveView("submissions")}
                 className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
                   activeView === "submissions"
-                    ? "bg-sky-600/20 text-sky-300 border border-sky-500/40 font-semibold shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
+                    ? "bg-zinc-200 text-zinc-950 font-medium"
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
                 }`}
               >
                 <Activity className="w-3.5 h-3.5" />
@@ -722,7 +709,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
               {/* Individual Difficulty Breakdown Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Easy Card */}
-                <div className="bg-[#18181b]/80 border border-emerald-900/30 rounded-xl p-4 space-y-2.5 relative overflow-hidden">
+                <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-2.5 relative overflow-hidden">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-400" />
@@ -732,7 +719,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                       {easySolved}
                     </span>
                   </div>
-                  <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-emerald-500 h-full rounded-full transition-all duration-500"
                       style={{
@@ -743,14 +730,13 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                       }}
                     />
                   </div>
-                  <div className="flex justify-between text-[11px] text-zinc-500 font-mono">
-                    <span>Foundation</span>
-                    <span className="text-emerald-400/90 font-semibold">{easyPct}% of solved</span>
+                  <div className="flex justify-end text-[11px] text-zinc-500 font-mono">
+                    <span className="text-zinc-300 font-medium">{easyPct}% of solved</span>
                   </div>
                 </div>
 
                 {/* Medium Card */}
-                <div className="bg-[#18181b]/80 border border-amber-900/30 rounded-xl p-4 space-y-2.5 relative overflow-hidden">
+                <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-2.5 relative overflow-hidden">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold font-mono uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-amber-400" />
@@ -760,7 +746,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                       {mediumSolved}
                     </span>
                   </div>
-                  <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-amber-500 h-full rounded-full transition-all duration-500"
                       style={{
@@ -771,14 +757,13 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                       }}
                     />
                   </div>
-                  <div className="flex justify-between text-[11px] text-zinc-500 font-mono">
-                    <span>Core Placement Bar</span>
-                    <span className="text-amber-400/90 font-semibold">{mediumPct}% of solved</span>
+                  <div className="flex justify-end text-[11px] text-zinc-500 font-mono">
+                    <span className="text-zinc-300 font-medium">{mediumPct}% of solved</span>
                   </div>
                 </div>
 
                 {/* Hard Card */}
-                <div className="bg-[#18181b]/80 border border-rose-900/30 rounded-xl p-4 space-y-2.5 relative overflow-hidden">
+                <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-2.5 relative overflow-hidden">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold font-mono uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-rose-400" />
@@ -788,7 +773,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                       {hardSolved}
                     </span>
                   </div>
-                  <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-rose-500 h-full rounded-full transition-all duration-500"
                       style={{
@@ -799,9 +784,8 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                       }}
                     />
                   </div>
-                  <div className="flex justify-between text-[11px] text-zinc-500 font-mono">
-                    <span>Advanced Mastery</span>
-                    <span className="text-rose-400/90 font-semibold">{hardPct}% of solved</span>
+                  <div className="flex justify-end text-[11px] text-zinc-500 font-mono">
+                    <span className="text-zinc-300 font-medium">{hardPct}% of solved</span>
                   </div>
                 </div>
               </div>
@@ -810,23 +794,23 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
             {/* 3. Middle Section: Submission Activity & Contest & Rating */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Submission Activity Card */}
-              <div className="bg-[#18181b]/70 border border-zinc-800/80 rounded-xl p-4 space-y-3.5">
+              <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-sky-400" />
+                    <Activity className="w-4 h-4 text-zinc-400" />
                     <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
                       Submission Activity
                     </h4>
                   </div>
                   {acceptanceRate !== null && (
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-sky-950/60 text-sky-300 border border-sky-800/60">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800">
                       {acceptanceRate}% Success Rate
                     </span>
                   )}
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  <div className="bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg space-y-0.5">
+                  <div className="bg-[#0f1017] border border-zinc-800/80 p-2.5 rounded-lg space-y-0.5">
                     <div className="text-[10px] text-zinc-400 font-mono uppercase">Total Submissions</div>
                     <div className="text-sm font-bold font-mono text-white">
                       {totalSubmissions !== null
@@ -835,8 +819,8 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                     </div>
                   </div>
 
-                  <div className="bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg space-y-0.5">
-                    <div className="text-[10px] text-emerald-400/90 font-mono uppercase">Accepted</div>
+                  <div className="bg-[#0f1017] border border-zinc-800/80 p-2.5 rounded-lg space-y-0.5">
+                    <div className="text-[10px] text-zinc-400 font-mono uppercase">Accepted</div>
                     <div className="text-sm font-bold font-mono text-emerald-400">
                       {acceptedSubmissions !== null
                         ? acceptedSubmissions.toLocaleString()
@@ -844,8 +828,8 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                     </div>
                   </div>
 
-                  <div className="bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg space-y-0.5 col-span-2 sm:col-span-1">
-                    <div className="text-[10px] text-rose-400/90 font-mono uppercase">Rejected / Other</div>
+                  <div className="bg-[#0f1017] border border-zinc-800/80 p-2.5 rounded-lg space-y-0.5 col-span-2 sm:col-span-1">
+                    <div className="text-[10px] text-zinc-400 font-mono uppercase">Rejected / Other</div>
                     <div className="text-sm font-bold font-mono text-rose-400">
                       {rejectedSubmissions !== null
                         ? rejectedSubmissions.toLocaleString()
@@ -863,39 +847,30 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                     </div>
                     <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-sky-500 to-emerald-500 h-full rounded-full transition-all duration-500"
+                        className="bg-zinc-200 h-full rounded-full transition-all duration-500"
                         style={{ width: `${Math.min(100, Math.max(0, acceptanceRate))}%` }}
                       />
                     </div>
                   </div>
                 )}
-
-                <div className="text-[11px] text-zinc-500 font-mono flex items-center gap-1.5 pt-1">
-                  <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span>
-                    {acceptanceRate !== null && acceptanceRate >= 60
-                      ? "High submission accuracy indicates solid test-case reasoning and first-try correctness."
-                      : "Refining edge-case testing before submitting improves acceptance efficiency."}
-                  </span>
-                </div>
               </div>
 
               {/* Contest & Rating Card */}
-              <div className="bg-[#18181b]/70 border border-zinc-800/80 rounded-xl p-4 space-y-3.5">
+              <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-purple-400" />
+                    <Trophy className="w-4 h-4 text-zinc-400" />
                     <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
                       Contest & Rating
                     </h4>
                   </div>
                   {contestBadge ? (
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-purple-950/70 text-purple-300 border border-purple-800/60 flex items-center gap-1">
-                      <Crown className="w-3 h-3 text-amber-400" />
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800 flex items-center gap-1">
+                      <Crown className="w-3 h-3 text-zinc-400" />
                       {contestBadge}
                     </span>
                   ) : contestRating !== null ? (
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-purple-950/70 text-purple-300 border border-purple-800/60">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800">
                       Active Competitor
                     </span>
                   ) : null}
@@ -903,17 +878,17 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                   {/* Contest Rating */}
-                  <div className="bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg space-y-0.5">
+                  <div className="bg-[#0f1017] border border-zinc-800/80 p-2.5 rounded-lg space-y-0.5">
                     <div className="text-[10px] text-zinc-400 font-mono uppercase">Contest Rating</div>
-                    <div className="text-sm font-bold font-mono text-purple-300">
+                    <div className="text-sm font-bold font-mono text-zinc-200">
                       {contestRating !== null ? contestRating.toLocaleString() : "Not available"}
                     </div>
                   </div>
 
                   {/* Global Contest Rank */}
-                  <div className="bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg space-y-0.5">
+                  <div className="bg-[#0f1017] border border-zinc-800/80 p-2.5 rounded-lg space-y-0.5">
                     <div className="text-[10px] text-zinc-400 font-mono uppercase">Global Rank</div>
-                    <div className="text-sm font-bold font-mono text-amber-300">
+                    <div className="text-sm font-bold font-mono text-zinc-200">
                       {contestGlobalRank !== null
                         ? `#${contestGlobalRank.toLocaleString()}`
                         : "Not available"}
@@ -921,7 +896,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                   </div>
 
                   {/* Contests Attended (distinguish 0 from null!) */}
-                  <div className="bg-zinc-900/80 border border-zinc-800/60 p-2.5 rounded-lg space-y-0.5 col-span-2 sm:col-span-1">
+                  <div className="bg-[#0f1017] border border-zinc-800/80 p-2.5 rounded-lg space-y-0.5 col-span-2 sm:col-span-1">
                     <div className="text-[10px] text-zinc-400 font-mono uppercase">Attended</div>
                     <div className="text-sm font-bold font-mono text-white">
                       {contestsAttended !== null
@@ -933,37 +908,28 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
 
                 {/* Top Percentage / Performance Note */}
                 {contestTopPercentage !== null && (
-                  <div className="flex items-center justify-between text-[11px] font-mono bg-purple-950/30 border border-purple-900/40 p-2 rounded-lg">
-                    <span className="text-purple-300">Competitive Standing</span>
-                    <span className="text-amber-300 font-semibold">
+                  <div className="flex items-center justify-between text-[11px] font-mono bg-zinc-900 border border-zinc-800 p-2 rounded-lg">
+                    <span className="text-zinc-400">Competitive Standing</span>
+                    <span className="text-zinc-200 font-semibold">
                       Top {contestTopPercentage}% of all contestants
                     </span>
                   </div>
                 )}
-
-                <div className="text-[11px] text-zinc-500 font-mono flex items-center gap-1.5 pt-1">
-                  <Award className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                  <span>
-                    {contestRating !== null
-                      ? "Weekly & Biweekly contest performance showcases speed and real-time algorithmic agility."
-                      : "Participate in LeetCode contests to unlock global competitive ratings and percentile benchmarks."}
-                  </span>
-                </div>
               </div>
             </div>
 
             {/* 4. Programming Languages Card */}
-            <div className="bg-[#18181b]/70 border border-zinc-800/80 rounded-xl p-4 space-y-3.5">
+            <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-3.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Code2 className="w-4 h-4 text-amber-400" />
+                  <Code2 className="w-4 h-4 text-zinc-400" />
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
                     Programming Languages
                   </h4>
                 </div>
                 {primaryLanguage && (
-                  <div className="flex items-center gap-1.5 bg-amber-950/70 border border-amber-700/60 px-2.5 py-0.5 rounded-md text-[11px] font-mono text-amber-300">
-                    <Crown className="w-3 h-3 text-amber-400" />
+                  <div className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-2.5 py-0.5 rounded-md text-[11px] font-mono text-zinc-200">
+                    <Crown className="w-3 h-3 text-zinc-400" />
                     <span>Primary: <strong>{primaryLanguage.name}</strong> ({primaryLanguage.solved} solved)</span>
                   </div>
                 )}
@@ -982,13 +948,13 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                         key={lang.languageName || idx}
                         className={`p-3 rounded-lg border transition-all ${
                           isPrimary
-                            ? "bg-amber-950/20 border-amber-700/50 shadow-sm"
-                            : "bg-zinc-900/60 border-zinc-800/70"
+                            ? "bg-[#0f1017] border-zinc-700"
+                            : "bg-[#0f1017] border-zinc-800/80"
                         }`}
                       >
                         <div className="flex items-center justify-between text-xs mb-1.5">
                           <span className="font-semibold text-zinc-200 flex items-center gap-1.5">
-                            {isPrimary && <Star className="w-3 h-3 text-amber-400 fill-amber-400" />}
+                            {isPrimary && <Star className="w-3 h-3 text-zinc-300 fill-zinc-300" />}
                             {lang.languageName}
                           </span>
                           <span className="font-mono text-zinc-400">
@@ -998,7 +964,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                         <div className="w-full bg-zinc-950 rounded-full h-1.5 overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-500 ${
-                              isPrimary ? "bg-amber-400" : "bg-zinc-600"
+                              isPrimary ? "bg-zinc-200" : "bg-zinc-600"
                             }`}
                             style={{
                               width: `${Math.min(
@@ -1024,25 +990,24 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
 
             {/* 5. Topic Strengths Section */}
             {topicTags.length > 0 && (
-              <div className="bg-[#18181b]/70 border border-zinc-800/80 rounded-xl p-4 space-y-3">
+              <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-purple-400" />
+                    <Layers className="w-4 h-4 text-zinc-400" />
                     <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
                       Topic Strengths ({topicTags.length})
                     </h4>
                   </div>
-                  <span className="text-[11px] text-zinc-500 font-mono">Problems Solved by Topic</span>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {(showAllTopics ? topicTags : topicTags.slice(0, 16)).map((tag, idx) => (
                     <div
                       key={tag.tagSlug || idx}
-                      className="inline-flex items-center gap-1.5 bg-[#1a1a1e] hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 px-2.5 py-1 rounded-md text-xs transition-colors"
+                      className="inline-flex items-center gap-1.5 bg-[#0f1017] hover:bg-zinc-800 border border-zinc-800 px-2.5 py-1 rounded-md text-xs transition-colors"
                     >
                       <span className="text-zinc-300 font-medium">{tag.tagName}</span>
-                      <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-purple-950/70 text-purple-300 border border-purple-800/60">
+                      <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
                         {tag.problemsSolved}
                       </span>
                     </div>
@@ -1054,7 +1019,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                     <button
                       type="button"
                       onClick={() => setShowAllTopics((prev) => !prev)}
-                      className="text-xs text-purple-400 hover:text-purple-300 font-mono flex items-center gap-1 cursor-pointer transition-colors"
+                      className="text-xs text-zinc-400 hover:text-white font-mono flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       {showAllTopics ? (
                         <>
@@ -1074,17 +1039,14 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
             )}
 
             {/* 6. Recent Submissions Section */}
-            <div className="bg-[#18181b]/70 border border-zinc-800/80 rounded-xl p-4 space-y-3">
+            <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-sky-400" />
+                  <Clock className="w-4 h-4 text-zinc-400" />
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
                     Recent Submissions
                   </h4>
                 </div>
-                <span className="text-[11px] text-zinc-500 font-mono">
-                  {recentSubmissions.length} recent activity logs
-                </span>
               </div>
 
               {recentSubmissions.length > 0 ? (
@@ -1097,7 +1059,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                     return (
                       <div
                         key={idx}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between text-xs py-2 px-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 gap-2 hover:border-zinc-700 transition-colors"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between text-xs py-2 px-3 rounded-lg bg-[#0f1017] border border-zinc-800/80 gap-2 hover:border-zinc-700 transition-colors"
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           {isAccepted ? (
@@ -1111,7 +1073,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                                 href={`https://leetcode.com/problems/${sub.titleSlug}/`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-zinc-200 hover:text-amber-400 font-medium truncate inline-flex items-center gap-1 cursor-pointer transition-colors"
+                                className="text-zinc-200 hover:text-white font-medium truncate inline-flex items-center gap-1 cursor-pointer transition-colors"
                               >
                                 <span>{sub.title || sub.titleSlug}</span>
                                 <ExternalLink className="w-2.5 h-2.5 text-zinc-500 shrink-0" />

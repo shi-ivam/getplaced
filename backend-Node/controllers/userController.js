@@ -24,6 +24,7 @@ const authUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      onboardingCompleted: Boolean(user.onboardingCompleted),
     })
   } else {
     res.status(401)
@@ -54,6 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
     name: name.trim(),
     email: normalizedEmail,
     password,
+    onboardingCompleted: false,
   })
 
   if (!user) {
@@ -67,6 +69,7 @@ const registerUser = asyncHandler(async (req, res) => {
     _id: user._id,
     name: user.name,
     email: user.email,
+    onboardingCompleted: false,
   })
 })
 
@@ -112,6 +115,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
       targetCompany,
       targetCompanyNormalized,
       locationPreference: user.locationPreference || "",
+      onboardingCompleted: Boolean(user.onboardingCompleted),
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     })
@@ -145,8 +149,13 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     targetRole,
     targetCompany,
     locationPreference,
+    onboardingCompleted,
     password,
   } = req.body
+
+  if (onboardingCompleted !== undefined) {
+    user.onboardingCompleted = Boolean(onboardingCompleted)
+  }
 
   if (name !== undefined) {
     if (typeof name !== "string" || !name.trim()) {
@@ -266,6 +275,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     targetCompany: finalCompany,
     targetCompanyNormalized: finalCompanyNormalized,
     locationPreference: updatedUser.locationPreference || "",
+    onboardingCompleted: Boolean(updatedUser.onboardingCompleted),
     createdAt: updatedUser.createdAt,
     updatedAt: updatedUser.updatedAt,
   })
