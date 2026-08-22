@@ -8,8 +8,8 @@ import "./customCalendar.css";
 
 const upcomingModules = [
   { time: "09:00 AM", title: "Graph Algorithms & Topological Sort", type: "DSA Prep", status: "Scheduled", route: "/app/dsa" },
-  { time: "02:30 PM", title: "System Design: Distributed Rate Limiter", type: "AI Mock", status: "Upcoming", route: "/app/interview" },
-  { time: "06:00 PM", title: "Behavioral STAR Method Review", type: "AI Telemetry", status: "Pending", route: "/app/communication" }
+  { time: "02:30 PM", title: "System Design: Distributed Rate Limiter", type: "Interview", status: "Upcoming", route: "/app/interview" },
+  { time: "06:00 PM", title: "Behavioral STAR Method Review", type: "Behavioral", status: "Pending", route: "/app/hr-prep" }
 ];
 
 const CrazyCalendar = () => {
@@ -41,7 +41,7 @@ END:VCALENDAR`;
     document.body.removeChild(link);
 
     setSynced(true);
-    setSyncNotice("Calendar synced! iCal schedule downloaded & connected.");
+    setSyncNotice("iCal schedule exported successfully.");
     setTimeout(() => setSyncNotice(""), 4000);
   };
 
@@ -60,13 +60,13 @@ END:VCALENDAR`;
         {/* Section Header */}
         <div className="flex flex-col items-center text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#428475]/25 border border-[#89D7B7]/30 text-[#89D7B7] text-xs font-mono uppercase tracking-widest mb-4">
-            <CalendarIcon className="w-3.5 h-3.5 text-[#89D7B7]" /> Automated Schedule
+            <CalendarIcon className="w-3.5 h-3.5 text-[#89D7B7]" /> Schedule
           </div>
           <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight max-w-4xl text-[#FFF4E1]">
-            Structured Placement Preparation Roadmap
+            Preparation Schedule & Milestones
           </h2>
           <p className="mt-4 text-[#FFF4E1]/75 text-base md:text-lg max-w-2xl">
-            Synchronize mock interview milestones, daily DSA challenges, and resume reviews in one unified calendar.
+            Track daily problem sets, interview sessions, and milestones in a unified calendar.
           </p>
         </div>
 
@@ -80,7 +80,7 @@ END:VCALENDAR`;
             className="lg:col-span-6 rounded-3xl bg-gradient-to-b from-[#1E3A34] to-[#12221e] p-6 md:p-8 border border-[#428475]/40 shadow-2xl flex flex-col items-center justify-center"
           >
             <div className="flex items-center gap-2 text-[#89D7B7] mb-6 text-sm font-semibold uppercase tracking-wider">
-              <CalendarIcon className="w-4 h-4 text-[#89D7B7]" /> Select Milestone Date
+              <CalendarIcon className="w-4 h-4 text-[#89D7B7]" /> Milestone Calendar
             </div>
             
             <div className="w-full flex justify-center">
@@ -94,14 +94,14 @@ END:VCALENDAR`;
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <div className="inline-flex items-center gap-2 bg-[#428475]/30 px-5 py-2 rounded-full border border-[#89D7B7]/40 text-xs text-[#89D7B7] font-mono">
-                <span>Active Target:</span>
+                <span>Selected Date:</span>
                 <span className="font-bold text-[#FFF4E1]">{date.toDateString()}</span>
               </div>
               <button
                 onClick={() => navigate("/app/roadmap")}
                 className="px-4 py-2 rounded-full bg-[#89D7B7]/15 hover:bg-[#89D7B7]/30 border border-[#89D7B7]/40 text-xs text-[#FFF4E1] font-semibold flex items-center gap-1.5 transition cursor-pointer"
               >
-                <span>View Full Roadmap</span>
+                <span>Full Roadmap</span>
                 <ExternalLink className="w-3.5 h-3.5 text-[#89D7B7]" />
               </button>
             </div>
@@ -110,9 +110,9 @@ END:VCALENDAR`;
           {/* Daily Milestone Cards (6 Cols) */}
           <div className="lg:col-span-6 space-y-4">
             <div className="text-xs font-mono text-[#FFF4E1]/65 uppercase tracking-widest mb-2 flex items-center justify-between">
-              <span>DAILY PREPARATION TIMELINE</span>
+              <span>DAILY TIMELINE</span>
               <span className="text-[#89D7B7] font-semibold flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-[#89D7B7]" /> AI Synced
+                <Sparkles className="w-3 h-3 text-[#89D7B7]" /> Synced
               </span>
             </div>
 
@@ -144,15 +144,15 @@ END:VCALENDAR`;
             <div className="p-6 rounded-2xl bg-gradient-to-r from-[#1A312C] to-[#428475]/40 border border-[#89D7B7]/30 mt-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#FFF4E1]/90 font-medium">
                 <div>
-                  <span className="font-semibold block text-[#FFF4E1]">Integrated Google & Outlook Calendar Sync</span>
-                  <span className="text-[11px] text-[#FFF4E1]/65">Sync daily interview milestones directly into your calendar.</span>
+                  <span className="font-semibold block text-[#FFF4E1]">Calendar Synchronization</span>
+                  <span className="text-[11px] text-[#FFF4E1]/65">Export milestones and scheduled sessions to iCal, Google, or Outlook.</span>
                 </div>
                 <button
                   onClick={handleConnectSync}
                   className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#89D7B7] text-[#1A312C] hover:bg-[#a6e6ce] font-bold text-xs transition cursor-pointer shrink-0 shadow-md"
                 >
                   {synced ? <Check className="w-3.5 h-3.5" /> : <Download className="w-3.5 h-3.5" />}
-                  <span>{synced ? "Synced (.ics Exported)" : "Connect Sync"}</span>
+                  <span>{synced ? "Exported (.ics)" : "Export (.ics)"}</span>
                 </button>
               </div>
               {syncNotice && (

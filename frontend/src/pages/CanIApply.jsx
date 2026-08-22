@@ -36,6 +36,7 @@ import {
   Globe,
   Database,
   ArrowUpRight,
+  X,
 } from "lucide-react";
 import { NODE_API_URL, PY_API_URL } from "@/config/api";
 import SearchableCombobox from "@/components/ui/SearchableCombobox";
@@ -862,13 +863,13 @@ export default function CanIApply() {
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-[#FAF8F2]">{item.label}</span>
                           <span
-                            className={`text-[10px] font-mono px-2 py-0.2 rounded border ${
+                            className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                               item.isPassed
                                 ? "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
                                 : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                             }`}
                           >
-                            {item.isPassed ? "Benchmarked ✓" : `-${item.gap} pts Deficit`}
+                            {item.isPassed ? "Benchmarked" : `-${item.gap} pts Deficit`}
                           </span>
                         </div>
                         <p className="text-xs text-[#A8A59C]">{item.detail}</p>
@@ -903,10 +904,10 @@ export default function CanIApply() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono font-bold uppercase text-[#C7F36B] tracking-wider flex items-center gap-1.5">
                     <FileText className="w-4 h-4" />
-                    <span>Dimension 3: GitHub Engineering Depth & ATS Screening</span>
+                    <span>Dimension 3: Resume ATS, Projects & Online Presence ({benchmark.primaryLanguage})</span>
                   </span>
                   <span className="text-[10px] font-mono text-[#A8A59C]">
-                    Benchmarked Score: {dimensions.profile.score}% / {benchmark.targetProjectScore}%
+                    Benchmarked Score: {dimensions.profile.score}% / {benchmark.targetResumeScore}%
                   </span>
                 </div>
 
@@ -920,13 +921,13 @@ export default function CanIApply() {
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-[#FAF8F2]">{item.label}</span>
                           <span
-                            className={`text-[10px] font-mono px-2 py-0.2 rounded border ${
+                            className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                               item.isPassed
                                 ? "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
                                 : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                             }`}
                           >
-                            {item.isPassed ? "Benchmarked ✓" : `-${item.gap} pts Deficit`}
+                            {item.isPassed ? "Benchmarked" : `-${item.gap} pts Deficit`}
                           </span>
                         </div>
                         <p className="text-xs text-[#A8A59C]">{item.detail}</p>
@@ -978,13 +979,13 @@ export default function CanIApply() {
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-[#FAF8F2]">{item.label}</span>
                           <span
-                            className={`text-[10px] font-mono px-2 py-0.2 rounded border ${
+                            className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                               item.isPassed
                                 ? "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
                                 : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                             }`}
                           >
-                            {item.isPassed ? "Benchmarked ✓" : `-${item.gap} pts Deficit`}
+                            {item.isPassed ? "Benchmarked" : `-${item.gap} pts Deficit`}
                           </span>
                         </div>
                         <p className="text-xs text-[#A8A59C]">{item.detail}</p>
@@ -1095,7 +1096,7 @@ export default function CanIApply() {
                     className="p-3.5 rounded-2xl bg-[#11110F]/60 border border-[#3A3831] space-y-1"
                   >
                     <div className="text-xs font-bold text-[#FAF8F2] flex items-center gap-1.5">
-                      <span className="text-[#C7F36B] font-bold">✓</span>
+                      <Check className="w-3.5 h-3.5 text-[#C7F36B] shrink-0" />
                       <span>{item.title}</span>
                     </div>
                     <p className="text-[11px] text-[#A8A59C] leading-relaxed font-mono">
@@ -1219,8 +1220,9 @@ export default function CanIApply() {
                 type="button"
                 onClick={() => setShowOpeningsDrawer(false)}
                 className="p-1.5 rounded-lg text-[#A8A59C] hover:text-[#FAF8F2] hover:bg-[#24231F] transition-colors"
+                aria-label="Close modal"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 

@@ -143,20 +143,20 @@ export default function PlacementRoadmap() {
 
   return (
     <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-white">
-      <div ref={containerRef} className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">
-        {/* Editorial Wide Header */}
-        <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
-          <div className="space-y-3 max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono uppercase tracking-widest">
-              <Compass className="w-3.5 h-3.5" />
-              Dynamic Preparation Trajectory
+      <div ref={containerRef} className="p-6 md:p-10 max-w-6xl mx-auto space-y-8">
+        {/* Editorial Header */}
+        <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-800">
+          <div className="space-y-2 max-w-3xl">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-mono">
+              <Compass className="w-3.5 h-3.5 text-purple-400" />
+              <span>Preparation Trajectory</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
-              Placement Preparation Roadmap
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+              Placement Roadmap
             </h1>
-            <p className="text-sm md:text-base text-zinc-400 max-w-3xl leading-relaxed">
-              {roadmap?.timelineWeeks || 8}-Week targeted milestone roadmap calibrated for{" "}
-              <span className="text-white font-semibold">{roadmap?.targetCompany || "Microsoft"}</span>{" "}
+            <p className="text-xs text-zinc-400 max-w-2xl leading-relaxed">
+              {roadmap?.timelineWeeks || 8}-Week milestone roadmap calibrated for{" "}
+              <span className="text-zinc-200 font-medium">{roadmap?.targetCompany || "Target Company"}</span>{" "}
               ({roadmap?.targetRole || "Software Development Engineer"}).
             </p>
           </div>
@@ -164,41 +164,43 @@ export default function PlacementRoadmap() {
           <button
             type="button"
             onClick={() => setShowConfigModal(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 hover:bg-zinc-200 text-xs font-semibold shadow-lg transition-all active:scale-95 cursor-pointer shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-100 text-zinc-950 hover:bg-white text-xs font-semibold font-mono transition-colors active:scale-95 cursor-pointer shrink-0"
           >
-            <Sliders className="w-4 h-4 text-purple-600" />
-            Customize Timeline
+            <Sliders className="w-3.5 h-3.5 text-zinc-700" />
+            <span>Adjust Timeline</span>
           </button>
         </header>
 
-        {/* Aggregate Completion Banner */}
-        <section className="gsap-fade-item rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-4">
+        {/* Completion Progress Card */}
+        <section className="gsap-fade-item rounded-2xl bg-[#121215] border border-zinc-800 p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <span className="text-xs font-mono uppercase text-zinc-400 block mb-1">
-                Milestone Trajectory Completion
+              <span className="text-[11px] font-mono text-zinc-500 block mb-1">
+                Roadmap Completion
               </span>
-              <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono">
-                {roadmap?.overallProgress || 35}% Ready
+              <div className="text-2xl font-bold text-white font-mono">
+                {roadmap?.overallProgress !== undefined && roadmap?.overallProgress !== null
+                  ? `${roadmap.overallProgress}%`
+                  : "Unassessed"}
               </div>
             </div>
 
             <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
-              <Calendar className="w-4 h-4 text-purple-400" />
-              <span>Horizon: {roadmap?.timelineWeeks || 8} Weeks Total</span>
+              <Calendar className="w-3.5 h-3.5 text-purple-400" />
+              <span>Timeline: {roadmap?.timelineWeeks || 8} Weeks</span>
             </div>
           </div>
 
-          <div className="w-full bg-zinc-950 rounded-full h-3 overflow-hidden border border-white/5">
+          <div className="w-full bg-zinc-950 rounded-full h-2 overflow-hidden border border-zinc-800">
             <div
-              className="bg-gradient-to-r from-purple-500 to-indigo-500 h-3 rounded-full transition-all duration-700"
-              style={{ width: `${roadmap?.overallProgress || 35}%` }}
+              className="bg-purple-500 h-2 rounded-full transition-all duration-500"
+              style={{ width: `${roadmap?.overallProgress || 0}%` }}
             />
           </div>
         </section>
 
         {/* Phase Selector Grid */}
-        <section className="gsap-fade-item grid grid-cols-1 md:grid-cols-3 gap-4">
+        <section className="gsap-fade-item grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {phases.map((p, idx) => (
             <button
               key={p.phaseNumber}
@@ -207,19 +209,19 @@ export default function PlacementRoadmap() {
                 setSelectedPhaseIdx(idx);
                 setSelectedWeekIdx(0);
               }}
-              className={`p-6 rounded-3xl border text-left transition-all duration-300 cursor-pointer ${
+              className={`p-5 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
                 selectedPhaseIdx === idx
-                  ? "bg-zinc-900 border-purple-500/50 shadow-xl ring-1 ring-purple-500/40 scale-[1.01]"
-                  : "bg-zinc-950/60 border-white/10 hover:border-white/20 text-zinc-400 hover:text-white"
+                  ? "bg-zinc-900 border-purple-500/60"
+                  : "bg-[#121215] border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white"
               }`}
             >
-              <div className="text-xs font-mono font-bold text-purple-400 uppercase tracking-wider">
+              <div className="text-[10px] font-mono font-semibold text-purple-400 uppercase tracking-wider">
                 Phase {p.phaseNumber} ({p.durationWeeks} Weeks)
               </div>
-              <div className="text-base font-bold text-white mt-1.5 line-clamp-1 tracking-tight">
+              <div className="text-sm font-bold text-white mt-1 line-clamp-1 tracking-tight">
                 {p.title}
               </div>
-              <div className="text-xs text-zinc-400 mt-2 line-clamp-2 leading-relaxed">
+              <div className="text-xs text-zinc-400 mt-1.5 line-clamp-2 leading-relaxed">
                 {p.description}
               </div>
             </button>
@@ -228,16 +230,16 @@ export default function PlacementRoadmap() {
 
         {/* Current Week Subtabs */}
         {weeks.length > 0 && (
-          <div className="gsap-fade-item flex items-center gap-2 overflow-x-auto pb-1">
+          <div className="gsap-fade-item flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs">
             {weeks.map((w, idx) => (
               <button
                 key={w.weekNumber}
                 type="button"
                 onClick={() => setSelectedWeekIdx(idx)}
-                className={`px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                className={`px-3.5 py-2 rounded-lg font-medium whitespace-nowrap transition-all duration-200 cursor-pointer ${
                   selectedWeekIdx === idx
-                    ? "bg-white text-zinc-950 font-semibold shadow-md"
-                    : "bg-zinc-900 text-zinc-400 hover:text-white border border-white/10"
+                    ? "bg-zinc-100 text-zinc-950 font-semibold shadow-sm"
+                    : "bg-[#121215] text-zinc-400 hover:text-white border border-zinc-800"
                 }`}
               >
                 Week {w.weekNumber}: {w.title}
@@ -247,75 +249,76 @@ export default function PlacementRoadmap() {
         )}
 
         {/* Tasks & Milestones List */}
-        <section className="gsap-fade-item rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-6">
-          <div>
-            <h3 className="text-xl font-bold text-white tracking-tight">
+        <section className="gsap-fade-item rounded-2xl bg-[#121215] border border-zinc-800 p-6 md:p-7 space-y-5">
+          <div className="border-b border-zinc-800 pb-3">
+            <h3 className="text-base font-bold text-white tracking-tight">
               Week {currentWeek?.weekNumber}: {currentWeek?.title}
             </h3>
             <p className="text-xs text-zinc-400 mt-1">{currentWeek?.objective}</p>
           </div>
 
-          <div className="space-y-3 pt-2">
+          <div className="space-y-2.5">
             {tasks.map((task) => {
               const IconComp = TASK_TYPE_ICONS[task.type] || Target;
 
               return (
                 <div
                   key={task.id}
-                  className={`p-5 rounded-2xl border transition-all duration-200 ${
+                  className={`p-4 rounded-xl border transition-all duration-200 ${
                     task.completed
-                      ? "bg-zinc-950/40 border-white/5 opacity-60"
-                      : "bg-zinc-950/90 border-white/10 hover:border-purple-500/40"
+                      ? "bg-zinc-950/40 border-zinc-800/40 opacity-60"
+                      : "bg-zinc-900/60 border-zinc-800 hover:border-zinc-700"
                   }`}
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-3.5">
                     <button
                       type="button"
                       onClick={() => handleToggleTask(task.id)}
                       className="mt-0.5 text-zinc-500 hover:text-purple-400 transition-colors shrink-0 cursor-pointer"
                     >
                       {task.completed ? (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                       ) : (
-                        <Circle className="w-5 h-5" />
+                        <Circle className="w-4 h-4" />
                       )}
                     </button>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                        <span className="text-[10px] font-mono font-semibold uppercase px-2.5 py-0.5 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20">
-                          {task.type.toUpperCase()}
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span className="text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800">
+                          {task.type}
                         </span>
 
-                        <div className="flex items-center gap-1 text-xs text-zinc-400 font-mono">
-                          <Clock className="w-3.5 h-3.5" />
+                        <div className="flex items-center gap-1 text-xs text-zinc-500 font-mono">
+                          <Clock className="w-3 h-3" />
                           <span>{task.estimatedMinutes} mins</span>
                         </div>
 
-                        <div className="flex items-center gap-1 text-xs text-emerald-400 font-mono font-semibold bg-emerald-500/10 px-2.5 py-0.5 rounded-md border border-emerald-500/20 ml-auto">
-                          <TrendingUp className="w-3.5 h-3.5" />
-                          <span>+{task.impactScore}% Boost</span>
+                        <div className="flex items-center gap-1 text-xs text-emerald-400 font-mono font-medium bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 ml-auto">
+                          <TrendingUp className="w-3 h-3" />
+                          <span>+{task.impactScore}%</span>
                         </div>
                       </div>
 
                       <h4
-                        className={`text-sm font-bold tracking-tight ${
+                        className={`text-xs font-semibold tracking-tight ${
                           task.completed ? "text-zinc-500 line-through" : "text-white"
                         }`}
                       >
                         {task.title}
                       </h4>
 
-                      <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                      <p className="text-xs text-zinc-400 mt-1 leading-relaxed font-sans">
                         {task.description}
                       </p>
 
-                      <div className="mt-4">
+                      <div className="mt-3">
                         <Link
                           to={task.actionUrl || "/app/coding"}
-                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors"
+                          className="inline-flex items-center gap-1 text-xs font-mono text-purple-400 hover:text-purple-300 transition-colors"
                         >
-                          Execute Task <ArrowRight className="w-3.5 h-3.5" />
+                          <span>Start Task</span>
+                          <ArrowRight className="w-3 h-3" />
                         </Link>
                       </div>
                     </div>
@@ -328,49 +331,49 @@ export default function PlacementRoadmap() {
 
         {/* Modal: Customize Timeline */}
         {showConfigModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
-            <div className="bg-zinc-900 border border-white/15 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6">
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <h3 className="text-lg font-bold text-white tracking-tight">
-                  Calibrate Preparation Roadmap
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                <h3 className="text-sm font-semibold text-white tracking-tight">
+                  Adjust Roadmap Timeline
                 </h3>
                 <button
                   type="button"
                   onClick={() => setShowConfigModal(false)}
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                  className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3.5">
                 <div>
-                  <label className="text-xs text-zinc-400 font-mono block mb-1.5">
-                    Target Enterprise
+                  <label className="text-xs text-zinc-400 font-mono block mb-1">
+                    Target Company
                   </label>
                   <input
                     type="text"
                     value={targetCompany}
                     onChange={(e) => setTargetCompany(e.target.value)}
-                    className="w-full bg-zinc-950 text-white text-xs rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-purple-400"
+                    className="w-full bg-zinc-900 text-white text-xs rounded-xl px-3 py-2 border border-zinc-800 focus:outline-none focus:border-zinc-600 font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-zinc-400 font-mono block mb-1.5">
-                    Target Profile / Role
+                  <label className="text-xs text-zinc-400 font-mono block mb-1">
+                    Target Role
                   </label>
                   <input
                     type="text"
                     value={targetRole}
                     onChange={(e) => setTargetRole(e.target.value)}
-                    className="w-full bg-zinc-950 text-white text-xs rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-purple-400"
+                    className="w-full bg-zinc-900 text-white text-xs rounded-xl px-3 py-2 border border-zinc-800 focus:outline-none focus:border-zinc-600 font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-zinc-400 font-mono block mb-1.5">
-                    Preparation Duration
+                  <label className="text-xs text-zinc-400 font-mono block mb-1">
+                    Timeline
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {[4, 8, 12].map((w) => (
@@ -378,10 +381,10 @@ export default function PlacementRoadmap() {
                         key={w}
                         type="button"
                         onClick={() => setTimelineWeeks(w)}
-                        className={`py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                        className={`py-2 rounded-xl text-xs font-mono font-semibold border transition-all cursor-pointer ${
                           timelineWeeks === w
-                            ? "bg-white text-zinc-950 border-white shadow-md"
-                            : "bg-zinc-950 text-zinc-400 border-white/10 hover:text-white"
+                            ? "bg-zinc-100 text-zinc-950 border-zinc-100"
+                            : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white"
                         }`}
                       >
                         {w} Weeks
@@ -391,20 +394,20 @@ export default function PlacementRoadmap() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setShowConfigModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white"
+                  className="px-3.5 py-2 text-xs font-mono text-zinc-400 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleRegenerateRoadmap}
-                  className="px-5 py-2.5 rounded-xl bg-white text-zinc-950 hover:bg-zinc-200 text-xs font-semibold shadow-md transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-zinc-100 text-zinc-950 hover:bg-white text-xs font-semibold font-mono transition-colors cursor-pointer"
                 >
-                  Generate Roadmap
+                  Update Roadmap
                 </button>
               </div>
             </div>

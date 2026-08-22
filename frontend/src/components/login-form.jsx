@@ -63,9 +63,9 @@ export function LoginForm(props) {
     <div className={cn("flex flex-col gap-6", className)} {...rest}>
       <Card className="bg-[#121212] border-gray-800 text-white">
         <CardHeader>
-          <CardTitle className="text-2xl text-white">Login</CardTitle>
+          <CardTitle className="text-2xl text-white">Sign In</CardTitle>
           <CardDescription className="text-gray-400">
-            Enter your credentials below to access your getPlaced account
+            Enter your credentials to access your getPlaced account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -114,10 +114,10 @@ export function LoginForm(props) {
                 {loading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    Logging in...
+                    Signing in...
                   </>
                 ) : (
-                  "Login"
+                  "Sign In"
                 )}
               </Button>
 
@@ -128,7 +128,7 @@ export function LoginForm(props) {
                 className="w-full border-gray-700 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white text-xs flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                Fill Test User Credentials
+                Use Demo Credentials
               </Button>
             </div>
 

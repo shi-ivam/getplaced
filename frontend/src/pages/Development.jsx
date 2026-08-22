@@ -243,7 +243,7 @@ export default function Development() {
           <div className="space-y-1.5 max-w-3xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/50 border border-emerald-800/50 text-emerald-400 text-xs font-mono">
               <FolderGit2 className="w-3.5 h-3.5" />
-              <span>Development & Engineering Pillar • Portfolio, Tech Stack & Deployments</span>
+              <span>Engineering Portfolio & Deployments</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight">
               {devMentor.heading}
@@ -326,10 +326,10 @@ export default function Development() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
                       <Sparkles className="w-3 h-3 text-emerald-400" />
-                      Development & Projects Readiness
+                      Project Readiness
                     </span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">
-                      15% Framework Weight
+                      15% Weight
                     </span>
                   </div>
 
@@ -347,7 +347,7 @@ export default function Development() {
                         Status:{" "}
                         <span className={projectScore !== null && targetScore !== null && projectScore >= targetScore ? "text-emerald-400" : "text-amber-400"}>
                           {projectScore !== null && targetScore !== null
-                            ? projectScore >= targetScore ? "Target Met (+0)" : `Gap: -${targetScore - projectScore} pts`
+                            ? projectScore >= targetScore ? "Target Met" : `Gap: -${targetScore - projectScore} pts`
                             : "Unassessed"}
                         </span>
                       </div>
@@ -373,7 +373,7 @@ export default function Development() {
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6 border-l lg:border-l-0 lg:border-t border-zinc-800 pl-3 lg:pl-0 lg:pt-2">
                     <span className="text-zinc-500 text-[11px]">Status</span>
                     <span className="font-semibold text-emerald-300 font-sans">
-                      {githubProfile ? "Verified Profile" : "Unconnected"}
+                      {githubProfile ? "Verified Profile" : "Not Connected"}
                     </span>
                   </div>
                 </div>
@@ -424,7 +424,7 @@ export default function Development() {
                 <div className="text-2xl font-bold font-mono text-amber-400">
                   {githubProfile?.totalStars || 0}
                 </div>
-                <p className="text-[11px] text-zinc-500 font-mono">Community recognition</p>
+                <p className="text-[11px] text-zinc-500 font-mono">Across public repositories</p>
               </div>
 
               <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors space-y-1">
@@ -435,7 +435,7 @@ export default function Development() {
                 <div className="text-2xl font-bold font-mono text-sky-400">
                   {githubProfile?.totalForks || 0}
                 </div>
-                <p className="text-[11px] text-zinc-500 font-mono">Forks & contributions</p>
+                <p className="text-[11px] text-zinc-500 font-mono">Downstream repositories</p>
               </div>
 
               <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors space-y-1">
@@ -458,7 +458,7 @@ export default function Development() {
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-amber-400" />
                   <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-300 font-mono">
-                    Featured Production Repositories
+                    Featured Repositories
                   </h3>
                 </div>
                 <button
@@ -466,7 +466,7 @@ export default function Development() {
                   onClick={() => setActiveTab("projects")}
                   className="text-xs text-emerald-400 hover:text-emerald-300 font-mono flex items-center gap-1 cursor-pointer"
                 >
-                  <span>Explore all repositories</span>
+                  <span>View all repositories</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -538,7 +538,7 @@ export default function Development() {
                 <div className="p-8 rounded-xl bg-[#121215] border border-dashed border-zinc-800 text-center space-y-3">
                   <FolderGit2 className="w-8 h-8 text-zinc-600 mx-auto" />
                   <p className="text-xs text-zinc-400 font-mono">
-                    Connect your GitHub account in the Projects tab to automatically pull and evaluate your repositories.
+                    Connect your GitHub account to import and evaluate repositories.
                   </p>
                   <button
                     type="button"
@@ -561,13 +561,13 @@ export default function Development() {
                   <div className="flex items-center gap-2">
                     <Cpu className="w-4 h-4 text-emerald-400" />
                     <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-emerald-300">
-                      Technology Matrix
+                      Technology Profile
                     </h4>
                   </div>
                   <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-emerald-400 transition-transform group-hover:translate-x-0.5" />
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Evaluate current vs required proficiency for {userProfile?.targetJobRole || "Engineering"} skills (React, Node.js, SQL, Docker).
+                  Compare verified technical proficiency against {userProfile?.targetJobRole || "Software Engineer"} benchmark requirements.
                 </p>
               </div>
 
@@ -579,13 +579,13 @@ export default function Development() {
                   <div className="flex items-center gap-2">
                     <Globe className="w-4 h-4 text-sky-400" />
                     <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-sky-300">
-                      Live Deployment Lab
+                      Live Deployments
                     </h4>
                   </div>
                   <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-sky-400 transition-transform group-hover:translate-x-0.5" />
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Test and verify live production endpoints, inspect HTTP latency, and ensure recruiter-accessible demos.
+                  Test deployed project endpoints, check HTTP response codes, and verify latency.
                 </p>
               </div>
 
@@ -597,13 +597,13 @@ export default function Development() {
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-purple-400" />
                     <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-purple-300">
-                      Architecture Modules
+                      Engineering Learning
                     </h4>
                   </div>
                   <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-purple-400 transition-transform group-hover:translate-x-0.5" />
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Explore 6 high-impact system design & development tracks including microservices, caching, and CI/CD pipelines.
+                  Curated learning tracks covering system design, containerization, caching, and CI/CD.
                 </p>
               </div>
             </section>
@@ -626,11 +626,11 @@ export default function Development() {
                   <div className="flex items-center gap-2">
                     <Cpu className="w-5 h-5 text-emerald-400" />
                     <h3 className="text-base font-bold text-zinc-100">
-                      Technology Proficiency & Stack Alignment
+                      Technology Proficiency
                     </h3>
                   </div>
                   <p className="text-xs text-zinc-400 mt-1">
-                    Comparing candidate technical evidence against target role ({userProfile?.targetJobRole || "Software Engineer"}) expectations.
+                    Evaluated technical proficiency against {userProfile?.targetJobRole || "Software Engineer"} requirements.
                   </p>
                 </div>
 
@@ -705,7 +705,7 @@ export default function Development() {
                         {skill.improvementSteps && skill.improvementSteps.length > 0 && (
                           <div className="text-[11px] text-zinc-400 pt-2 border-t border-zinc-800/60 font-sans">
                             <span className="text-emerald-400 font-mono text-[10px] uppercase font-bold block mb-0.5">
-                              Recommended Upgrade
+                              Recommended Action
                             </span>
                             <p className="line-clamp-2">{skill.improvementSteps[0]}</p>
                           </div>
@@ -716,7 +716,7 @@ export default function Development() {
                 </div>
               ) : (
                 <div className="p-8 text-center text-xs text-zinc-500 font-mono">
-                  Loading technology competency matrix...
+                  Loading technology profile...
                 </div>
               )}
             </div>
@@ -732,17 +732,17 @@ export default function Development() {
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-5 h-5 text-emerald-400" />
                     <h3 className="text-base font-bold text-zinc-100">
-                      Engineering Requirements & Skill Evidence
+                      Requirements & Evidence
                     </h3>
                   </div>
                   <p className="text-xs text-zinc-400 mt-1">
-                    Multi-source verification combining GitHub commits, repositories, project complexity, and coursework.
+                    Verified evidence from repositories, commit history, and coursework.
                   </p>
                 </div>
 
                 <div className="flex items-center gap-2 text-xs font-mono">
                   <span className="text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-3 py-1 rounded-md">
-                    Verified Multi-Tier Audit
+                    Verified Evidence
                   </span>
                 </div>
               </div>
@@ -786,7 +786,7 @@ export default function Development() {
 
                         <div className="space-y-1">
                           <span className="text-[10px] uppercase font-mono font-bold text-emerald-400">
-                            Actionable Steps to Close Gap
+                            Recommended Actions
                           </span>
                           <ul className="space-y-1 text-zinc-400">
                             {item.improvementSteps?.map((step, i) => (
@@ -803,7 +803,7 @@ export default function Development() {
                 </div>
               ) : (
                 <div className="p-8 text-center text-xs text-zinc-500 font-mono">
-                  Loading engineering requirements matrix...
+                  Loading requirements...
                 </div>
               )}
             </div>
@@ -818,10 +818,10 @@ export default function Development() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Globe className="w-5 h-5 text-sky-400" />
-                  <h3 className="text-base font-bold text-zinc-100">Live Demo Verification & Health Probe</h3>
+                  <h3 className="text-base font-bold text-zinc-100">Live Deployment Health Probe</h3>
                 </div>
                 <p className="text-xs text-zinc-400 max-w-xl">
-                  Test your deployed project URLs (Vercel, Netlify, Render, AWS) to ensure sub-500ms response times and zero CORS/SSL errors for recruiters.
+                  Verify endpoint availability, SSL status, and response latency across deployed URLs.
                 </p>
               </div>
 
@@ -839,7 +839,7 @@ export default function Development() {
                   disabled={testingUrl || !testUrl.trim()}
                   className="px-6 py-2.5 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-lg transition-all shrink-0 cursor-pointer font-mono"
                 >
-                  {testingUrl ? "Probing URL..." : "Verify Live Health"}
+                  {testingUrl ? "Probing..." : "Verify Endpoint"}
                 </button>
               </form>
 
@@ -854,7 +854,7 @@ export default function Development() {
                   <div className="flex items-center justify-between">
                     <span className="font-bold flex items-center gap-1.5">
                       {testResult.isLive ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-                      {testResult.isLive ? "HTTP 200 OK — Live Demo Accessible" : "Unreachable / Host Failure"}
+                      {testResult.isLive ? "HTTP 200 OK — Endpoint Accessible" : "Unreachable / Host Failure"}
                     </span>
                     {testResult.responseTimeMs && (
                       <span>Latency: {testResult.responseTimeMs}ms</span>
@@ -869,7 +869,7 @@ export default function Development() {
             <div className="bg-[#121215] border border-zinc-800/90 rounded-2xl p-6 md:p-8 space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
                 <h4 className="text-xs uppercase font-mono font-bold text-zinc-300 tracking-wider">
-                  Connected Repository Live Deployments
+                  Detected Repository Deployments
                 </h4>
                 <span className="text-xs font-mono text-zinc-500">
                   {githubProfile?.repositories?.filter((r) => r.hasLiveDemo).length || 0} Demos Detected
@@ -926,7 +926,7 @@ export default function Development() {
                   <Globe className="w-8 h-8 text-zinc-600 mx-auto" />
                   <p>No repository descriptions contain live demo links yet.</p>
                   <p className="text-zinc-500 text-[11px]">
-                    Tip: Add your Vercel or Netlify preview URL in your GitHub repository's homepage field or README to auto-detect.
+                    Include preview URLs in your repository homepage field or README to auto-detect.
                   </p>
                 </div>
               )}
@@ -940,10 +940,10 @@ export default function Development() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-300 font-mono">
-                  6 Full-Stack & System Design Tracks
+                  Engineering System Tracks
                 </h3>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Curated architectural blueprints to build production-grade portfolio projects.
+                  Curated modules for distributed systems, containerization, and infrastructure.
                 </p>
               </div>
             </div>
@@ -979,7 +979,7 @@ export default function Development() {
 
                   <div className="space-y-2 pt-3 border-t border-zinc-800/60">
                     <div className="flex justify-between text-[11px] font-mono text-zinc-500">
-                      <span>Curriculum Mastery</span>
+                      <span>Progress</span>
                       <span className="text-emerald-400 font-semibold">{track.progress}%</span>
                     </div>
                     <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
@@ -993,7 +993,7 @@ export default function Development() {
                       className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-medium transition-colors font-mono mt-1"
                     >
                       <Play className="w-3 h-3 fill-current text-emerald-400" />
-                      <span>Start Architecture Module</span>
+                      <span>Start Track</span>
                     </Link>
                   </div>
                 </div>
@@ -1048,7 +1048,7 @@ export default function Development() {
                 <span className="font-bold text-zinc-200">{selectedRepoModal.language || "TypeScript"}</span>
               </div>
               <div className="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800">
-                <span className="text-[10px] text-zinc-500 block">Stars ⭐</span>
+                <span className="text-[10px] text-zinc-500 block">Stars</span>
                 <span className="font-bold text-amber-400">{selectedRepoModal.stars || 0}</span>
               </div>
               <div className="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800">
@@ -1060,14 +1060,14 @@ export default function Development() {
             {/* Architecture Verdict */}
             <div className="p-3.5 bg-zinc-900/60 border border-zinc-800/80 rounded-xl space-y-1 text-xs">
               <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-semibold block">
-                Portfolio Assessment Verdict
+                Repository Assessment
               </span>
               <p className="text-zinc-300 font-sans leading-relaxed text-xs">
                 {selectedRepoModal.isFork
                   ? "Open-source contribution and upstream repository fork."
                   : (selectedRepoModal.stars > 5 || selectedRepoModal.hasLiveDemo)
-                  ? "High-impact production project with verified architectural complexity."
-                  : "Standard application repository. Deploy live demo to maximize recruiter impact."}
+                  ? "Production project with verified architectural complexity."
+                  : "Application repository. Add a live deployment URL to demonstrate availability."}
               </p>
             </div>
 

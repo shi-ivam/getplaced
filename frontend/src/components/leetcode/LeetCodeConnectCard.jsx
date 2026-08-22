@@ -454,7 +454,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                 type="text"
                 value={changeUsernameInput}
                 onChange={(e) => setChangeUsernameInput(e.target.value)}
-                placeholder="e.g. neetcode or https://leetcode.com/u/neetcode/"
+                placeholder="e.g. username or profile URL"
                 className="bg-[#0f1017] border-zinc-700 text-white placeholder:text-zinc-600 focus:border-zinc-500 text-xs h-9 font-mono flex-1"
               />
               <div className="flex items-center gap-2">
@@ -489,27 +489,9 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
         )}
 
         {errorMsg && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-rose-950/70 border border-rose-600/60 text-rose-200 px-3.5 py-2.5 rounded-lg text-xs font-medium">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-              <span>{errorMsg}</span>
-            </div>
-            {errorMsg.toLowerCase().includes("not found") && (
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[11px] text-zinc-400">Try demo?</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setInputUsername("neetcode");
-                    handleConnect(null, "neetcode");
-                  }}
-                  className="text-[11px] text-zinc-300 hover:text-white underline font-mono flex items-center gap-0.5 cursor-pointer"
-                >
-                  <span>neetcode</span>
-                  <ExternalLink className="w-2.5 h-2.5" />
-                </button>
-              </div>
-            )}
+          <div className="flex items-center gap-2 bg-rose-950/70 border border-rose-600/60 text-rose-200 px-3.5 py-2.5 rounded-lg text-xs font-medium">
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            <span>{errorMsg}</span>
           </div>
         )}
 

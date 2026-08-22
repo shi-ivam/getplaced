@@ -82,7 +82,7 @@ const squadSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      default: "⚡",
+      default: "",
     },
     targetTier: {
       type: String,

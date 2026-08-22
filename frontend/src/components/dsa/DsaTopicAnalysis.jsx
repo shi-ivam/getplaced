@@ -176,11 +176,11 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-zinc-400" />
               <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
-                Category Proficiency Distribution
+                Category Breakdown
               </h3>
             </div>
             <span className="text-[11px] text-zinc-500 font-mono">
-              {categoriesList.length} Taxonomy Modules
+              {categoriesList.length} Categories
             </span>
           </div>
 
@@ -194,7 +194,7 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
                   onClick={() => setSelectedCategory(isSelected ? "all" : cat.id)}
                   className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer space-y-1.5 flex flex-col justify-between ${
                     isSelected
-                      ? "bg-purple-950/40 border-purple-500 text-white shadow-sm shadow-purple-900/30"
+                      ? "bg-zinc-800 border-zinc-600 text-white"
                       : "bg-[#16161a] border-zinc-800/80 hover:border-zinc-700 text-zinc-300 hover:text-white"
                   }`}
                 >
@@ -213,7 +213,7 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
                           ? cat.averageLevel >= 8.0
                             ? "text-emerald-400"
                             : cat.averageLevel >= 6.5
-                            ? "text-sky-400"
+                            ? "text-zinc-200"
                             : "text-amber-400"
                           : "text-zinc-600"
                       }`}
@@ -229,7 +229,7 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
       )}
 
       {/* 3. Search and Filtering Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#121215] border border-zinc-800/80 p-3.5 rounded-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#121215] border border-zinc-800/80 p-3 rounded-xl">
         <div className="flex flex-1 items-center gap-2 max-w-md">
           <div className="relative w-full">
             <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -238,7 +238,7 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search topics (e.g. Trie, Dynamic Programming, BFS, Two Pointers)..."
-              className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-purple-500 font-sans"
+              className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 font-sans"
             />
           </div>
         </div>
@@ -259,7 +259,7 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
                 onClick={() => setStatusFilter(tab.id)}
                 className={`px-2.5 py-1 rounded-md transition-all cursor-pointer text-[11px] ${
                   statusFilter === tab.id
-                    ? "bg-purple-600 text-white font-medium shadow-sm"
+                    ? "bg-zinc-100 text-zinc-950 font-bold"
                     : "text-zinc-400 hover:text-zinc-200"
                 }`}
               >

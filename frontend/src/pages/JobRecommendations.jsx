@@ -245,6 +245,14 @@ export default function JobRecommendations() {
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
+              onClick={() => navigate("/app/can-i-apply")}
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#24231F] hover:bg-[#2e2d27] text-[#FAF8F2] border border-[#3A3831] transition-all flex items-center gap-1.5"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#C7F36B]" />
+              <span>Can I Apply?</span>
+            </button>
+            <button
+              type="button"
               onClick={() => navigate("/app/company-intel")}
               className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#24231F] hover:bg-[#2e2d27] text-[#FAF8F2] border border-[#3A3831] transition-all flex items-center gap-1.5"
             >

@@ -148,10 +148,10 @@ export default function DsaRequirementComparison({
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                <Target className="w-3.5 h-3.5 text-purple-400" />
+                <Target className="w-3.5 h-3.5 text-zinc-400" />
                 Target Company Benchmark
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-medium font-mono">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-300 border border-zinc-800 font-medium font-mono">
                 {data.tierLabel || "Standard Benchmark"}
               </span>
               {isConnected ? (
@@ -167,7 +167,7 @@ export default function DsaRequirementComparison({
 
             <div className="flex flex-wrap items-center gap-2 text-lg md:text-xl font-bold text-zinc-100">
               <span className="inline-flex items-center gap-1.5">
-                <Building2 className="w-5 h-5 text-purple-400" />
+                <Building2 className="w-5 h-5 text-zinc-300" />
                 {effectiveCompany && effectiveCompany !== "Not Selected" ? effectiveCompany : "General Industry Target"}
               </span>
               <span className="text-zinc-600">/</span>
@@ -189,13 +189,13 @@ export default function DsaRequirementComparison({
               disabled={refreshing}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-mono text-zinc-300 transition-colors cursor-pointer disabled:opacity-50"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-purple-400" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-zinc-400" : ""}`} />
               <span>{refreshing ? "Syncing..." : "Refresh"}</span>
             </button>
 
             <Link
               to="/app/profile"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg bg-purple-600 hover:bg-purple-500 text-white transition-all shadow-sm shadow-purple-900/40 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-950 transition-all cursor-pointer font-semibold"
             >
               <span>{hasTarget ? "Change Target" : "Set Target"}</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -214,7 +214,7 @@ export default function DsaRequirementComparison({
                 No Target Company Configured
               </h4>
               <p className="text-xs text-zinc-400 mt-0.5">
-                Using default tech benchmarks. Set your dream company in Profile to unlock company-tailored difficulty requirements.
+                Using default tech benchmarks. Set your target company in Profile to unlock company-tailored difficulty requirements.
               </p>
             </div>
           </div>
@@ -229,21 +229,21 @@ export default function DsaRequirementComparison({
       )}
 
       {!isConnected && (
-        <div className="rounded-xl bg-purple-500/5 border border-purple-500/20 p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <Code2 className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
+            <Code2 className="w-5 h-5 text-zinc-400 shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-xs font-semibold text-purple-300 uppercase tracking-wider font-mono">
+              <h4 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
                 LeetCode Profile Not Connected
               </h4>
               <p className="text-xs text-zinc-400 mt-0.5">
-                Connect your LeetCode username in Profile settings to automatically sync your solved Easy, Medium, and Hard counts and verify your score.
+                Connect your LeetCode username in Profile settings to sync your solved Easy, Medium, and Hard counts and verify your score.
               </p>
             </div>
           </div>
           <Link
             to="/app/profile"
-            className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-md bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium transition-colors shrink-0 shadow-sm shadow-purple-900/30"
+            className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-md bg-zinc-100 hover:bg-zinc-200 text-zinc-950 text-xs font-semibold transition-colors shrink-0"
           >
             <span>Connect LeetCode</span>
             <ChevronRight className="w-3.5 h-3.5" />

@@ -196,10 +196,10 @@ const Hero = () => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#428475]/30 border border-[#89D7B7]/40 text-[#89D7B7] text-xs md:text-sm font-semibold tracking-wide shadow-[0_0_25px_rgba(137,215,183,0.18)]"
+            className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#428475]/30 border border-[#89D7B7]/40 text-[#89D7B7] text-xs md:text-sm font-semibold tracking-wide"
           >
-            <Sparkles className="w-4 h-4 text-[#89D7B7] animate-pulse" />
-            <span>Live Telemetry Engine</span>
+            <Sparkles className="w-4 h-4 text-[#89D7B7]" />
+            <span>Interview Telemetry Engine</span>
           </motion.div>
 
           {/* Main Editorial H1 */}
@@ -220,7 +220,7 @@ const Hero = () => {
             transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className="text-base sm:text-xl md:text-2xl text-[#FFF4E1]/80 max-w-3xl mb-12 font-normal leading-relaxed"
           >
-            Real-time biometric interview assessment, AI resume ATS optimization, and structured DSA prep built to elevate candidates into top tier offers.
+            Real-time biometric interview assessment, ATS resume optimization, and structured problem roadmaps for technical hiring rounds.
           </motion.p>
 
           {/* Dual High-Contrast CTAs */}
@@ -234,7 +234,7 @@ const Hero = () => {
               onClick={() => navigate("/register")}
               className="w-full sm:w-auto px-9 py-4 rounded-full bg-[#89D7B7] text-[#1A312C] font-bold text-sm uppercase tracking-wider hover:bg-[#a6e6ce] transition-all duration-300 transform hover:scale-[1.03] active:scale-[0.98] shadow-[0_10px_35px_rgba(137,215,183,0.3)] flex items-center justify-center gap-2 group cursor-pointer"
             >
-              <span>Get Placed Now</span>
+              <span>Get Started</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-[#1A312C]" />
             </button>
             
@@ -246,7 +246,7 @@ const Hero = () => {
               className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#1A312C]/80 backdrop-blur-md text-[#FFF4E1] border border-[#428475]/60 font-semibold text-sm hover:bg-[#428475]/30 hover:border-[#89D7B7]/60 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
             >
               <Play className="w-4 h-4 text-[#89D7B7] fill-[#89D7B7]" />
-              <span>Explore Platform</span>
+              <span>Platform Overview</span>
             </button>
           </motion.div>
 
@@ -268,7 +268,7 @@ const Hero = () => {
                     <div className="w-3 h-3 rounded-full bg-[#89D7B7]" />
                   </div>
                   <span className="text-xs font-mono text-[#FFF4E1]/60 tracking-wider">
-                    AI_MOCK_INTERVIEW_SESSION // LIVE_TELEMETRY
+                    INTERVIEW_SESSION // TELEMETRY
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-xs font-mono">
@@ -277,7 +277,7 @@ const Hero = () => {
                   </span>
                   <div className="flex items-center gap-2 text-[#89D7B7] bg-[#89D7B7]/15 px-3 py-1 rounded-full border border-[#89D7B7]/30 font-semibold">
                     <span className="w-2 h-2 rounded-full bg-[#89D7B7] animate-ping" />
-                    LIVE CANVAS FPS: {telemetry.fps}
+                    CANVAS FPS: {telemetry.fps}
                   </div>
                 </div>
               </div>
@@ -291,11 +291,11 @@ const Hero = () => {
                   
                   <div className="absolute top-4 left-4 bg-[#1A312C]/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-[#428475]/40 text-xs text-[#FFF4E1] font-medium flex items-center gap-2">
                     <ShieldCheck className="w-3.5 h-3.5 text-[#89D7B7]" />
-                    <span>Live Browser Telemetry Stream • Neural Mesh</span>
+                    <span>Live Biometric Stream &bull; Mesh</span>
                   </div>
 
                   <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs text-[#FFF4E1]/85 font-mono bg-[#1A312C]/90 backdrop-blur-md px-4 py-2.5 rounded-xl border border-[#428475]/40">
-                    <span>Topic: System Design & Microservices</span>
+                    <span>Topic: System Architecture & APIs</span>
                     <span className="text-[#89D7B7] font-semibold">Latency: {telemetry.latency}</span>
                   </div>
                 </div>
@@ -304,7 +304,7 @@ const Hero = () => {
                 <div className="flex flex-col justify-between space-y-3 text-left">
                   <div className="flex items-center justify-between pb-2 border-b border-[#428475]/30">
                     <span className="text-xs font-bold uppercase tracking-wider text-[#89D7B7] flex items-center gap-1.5">
-                      <Activity className="w-4 h-4 text-[#89D7B7]" /> Measured Telemetry
+                      <Activity className="w-4 h-4 text-[#89D7B7]" /> Telemetry
                     </span>
                     <span className="text-[10px] font-mono text-[#FFF4E1]/60">{telemetry.renderTimeMs}ms/frame</span>
                   </div>
@@ -312,28 +312,28 @@ const Hero = () => {
                   <div className="space-y-2.5">
                     <div className="p-3 rounded-xl bg-[#1A312C]/80 border border-[#428475]/35 hover:border-[#89D7B7]/50 transition-colors">
                       <div className="flex items-center text-xs text-[#FFF4E1]/70 mb-1">
-                        <Mic className="w-3.5 h-3.5 text-[#89D7B7] mr-1.5" /> Speech Articulation
+                        <Mic className="w-3.5 h-3.5 text-[#89D7B7] mr-1.5" /> Speech Pacing
                       </div>
                       <div className="text-xs font-semibold text-[#FFF4E1] font-mono">{telemetry.speech}</div>
                     </div>
 
                     <div className="p-3 rounded-xl bg-[#1A312C]/80 border border-[#428475]/35 hover:border-[#89D7B7]/50 transition-colors">
                       <div className="flex items-center text-xs text-[#FFF4E1]/70 mb-1">
-                        <Eye className="w-3.5 h-3.5 text-[#89D7B7] mr-1.5" /> Eye Tracking Focus
+                        <Eye className="w-3.5 h-3.5 text-[#89D7B7] mr-1.5" /> Gaze Focus
                       </div>
                       <div className="text-xs font-semibold text-[#FFF4E1] font-mono">{telemetry.eye}</div>
                     </div>
 
                     <div className="p-3 rounded-xl bg-[#1A312C]/80 border border-[#428475]/35 hover:border-[#89D7B7]/50 transition-colors">
                       <div className="flex items-center text-xs text-[#FFF4E1]/70 mb-1">
-                        <UserCheck className="w-3.5 h-3.5 text-[#89D7B7] mr-1.5" /> Posture Alignment
+                        <UserCheck className="w-3.5 h-3.5 text-[#89D7B7] mr-1.5" /> Posture
                       </div>
                       <div className="text-xs font-semibold text-[#FFF4E1] font-mono">{telemetry.posture}</div>
                     </div>
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-gradient-to-r from-[#1A312C] to-[#428475]/40 border border-[#89D7B7]/40">
-                    <div className="text-[11px] text-[#89D7B7] font-medium uppercase tracking-wider mb-1">Overall Confidence Score</div>
+                    <div className="text-[11px] text-[#89D7B7] font-medium uppercase tracking-wider mb-1">Readiness Index</div>
                     <div className="text-sm font-bold text-[#FFF4E1] font-mono">{telemetry.confidence}</div>
                   </div>
 

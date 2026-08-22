@@ -165,34 +165,34 @@ export default function PlacementArena() {
     <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-white">
       <div ref={containerRef} className="p-6 md:p-10 max-w-7xl mx-auto space-y-8">
         {/* Editorial Wide Header */}
-        <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
-          <div className="space-y-3 max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono uppercase tracking-widest">
-              <Swords className="w-3.5 h-3.5" />
-              Competitive Readiness League
+        <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-800/80">
+          <div className="space-y-2.5 max-w-4xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono uppercase tracking-wider">
+              <Swords className="w-3.5 h-3.5 text-zinc-400" />
+              Competitive League
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
-              Placement Arena & Squad Battles
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
+              Placement Arena & Squads
             </h1>
-            <p className="text-sm md:text-base text-zinc-400 max-w-3xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-3xl leading-relaxed">
               Campus leaderboards, peer accountability squads, and weekly sprint challenges.
             </p>
           </div>
 
           {/* Compact Rank & Momentum Bar */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <div className="px-4 py-3 rounded-2xl bg-zinc-900/90 border border-white/10 flex items-center gap-4 shadow-xl font-mono text-xs">
+            <div className="px-4 py-3 rounded-xl bg-zinc-900/90 border border-zinc-800 flex items-center gap-4 font-mono text-xs">
               <div className="flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-yellow-400" />
+                <Trophy className="w-4 h-4 text-zinc-400" />
                 <div>
                   <span className="text-zinc-500 text-[10px] block">Your Rank</span>
-                  <span className="text-yellow-300 font-bold text-sm">
+                  <span className="text-zinc-100 font-bold text-sm">
                     {leaderboardData?.userRank ? `#${leaderboardData.userRank}` : "Unranked"}
                   </span>
                 </div>
               </div>
 
-              <div className="h-7 w-px bg-white/10" />
+              <div className="h-7 w-px bg-zinc-800" />
 
               <div>
                 <span className="text-zinc-500 text-[10px] block">Delta to #1</span>
@@ -203,11 +203,11 @@ export default function PlacementArena() {
                 </span>
               </div>
 
-              <div className="h-7 w-px bg-white/10" />
+              <div className="h-7 w-px bg-zinc-800" />
 
               <div>
                 <span className="text-zinc-500 text-[10px] block">Tier</span>
-                <span className="text-purple-300 font-semibold">
+                <span className="text-zinc-300 font-semibold">
                   {currentUserEntry?.tier || "Silver"}
                 </span>
               </div>
@@ -216,7 +216,7 @@ export default function PlacementArena() {
         </header>
 
         {/* Tab Navigation Pill Bar */}
-        <div className="gsap-fade-item flex items-center gap-2 border-b border-white/10 pb-4">
+        <div className="gsap-fade-item flex items-center gap-2 border-b border-zinc-800/80 pb-4">
           {[
             { key: "leaderboard", label: "National & Campus Leaderboard", icon: Trophy },
             { key: "squad", label: "Peer Accountability Squad", icon: Users },
@@ -228,13 +228,13 @@ export default function PlacementArena() {
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer ${
                   activeTab === tab.key
-                    ? "bg-white text-zinc-950 shadow-md"
-                    : "bg-zinc-900 text-zinc-400 hover:text-white border border-white/10"
+                    ? "bg-zinc-100 text-zinc-950 font-bold"
+                    : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800"
                 }`}
               >
-                <IconComp className="w-4 h-4" />
+                <IconComp className="w-3.5 h-3.5" />
                 {tab.label}
               </button>
             );
@@ -243,14 +243,14 @@ export default function PlacementArena() {
 
         {/* TAB 1: LEADERBOARD */}
         {activeTab === "leaderboard" && (
-          <section className="gsap-fade-item rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-6">
+          <section className="gsap-fade-item rounded-xl bg-[#121215] border border-zinc-800/80 p-6 md:p-8 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-xl font-bold text-white tracking-tight">
+                <h3 className="text-lg font-bold text-white tracking-tight">
                   Verified Candidate Rankings
                 </h3>
-                <p className="text-xs text-zinc-400 mt-1">
-                  Evaluated across composite 7-dimension readiness index, verified LeetCode solves, and streak momentum
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Evaluated across readiness score, verified LeetCode solves, and streak momentum
                 </p>
               </div>
 
@@ -369,14 +369,14 @@ export default function PlacementArena() {
                 {/* Left 2 Columns: Squad Details & Target */}
                 <div className="lg:col-span-2 space-y-6">
                   {/* Squad Banner */}
-                  <div className="rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl relative overflow-hidden space-y-6">
+                  <div className="rounded-xl bg-[#121215] border border-zinc-800/80 p-6 space-y-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-500/40 text-purple-300 font-mono font-extrabold text-xl flex items-center justify-center">
-                          <Users className="w-7 h-7" />
+                        <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono font-bold text-lg flex items-center justify-center">
+                          <Users className="w-6 h-6" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-white tracking-tight">
+                          <h3 className="text-lg font-bold text-white tracking-tight">
                             {squadData.name}
                           </h3>
                           <p className="text-xs text-zinc-400 mt-0.5">{squadData.description}</p>
@@ -384,27 +384,27 @@ export default function PlacementArena() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-bold px-3.5 py-1.5 rounded-xl bg-zinc-950 text-purple-300 border border-purple-500/30">
+                        <span className="text-xs font-mono font-bold px-3 py-1 rounded-lg bg-zinc-950 text-zinc-300 border border-zinc-800">
                           Invite Code: {squadData.code}
                         </span>
                       </div>
                     </div>
 
                     {/* Collective Weekly Target */}
-                    <div className="p-5 rounded-2xl bg-zinc-950/80 border border-white/5 space-y-3">
+                    <div className="p-4 rounded-xl bg-zinc-950/80 border border-zinc-800/60 space-y-3">
                       <div className="flex items-center justify-between text-xs text-zinc-300">
                         <span className="font-semibold text-white">
                           {squadData.weeklyGoal?.title || "Weekly Collective Target"}
                         </span>
-                        <span className="font-mono text-purple-400 font-bold">
+                        <span className="font-mono text-zinc-300 font-bold">
                           {squadData.weeklyGoal?.currentCount || 0} /{" "}
                           {squadData.weeklyGoal?.targetCount || 0} Solved
                         </span>
                       </div>
 
-                      <div className="w-full bg-zinc-900 rounded-full h-2.5 overflow-hidden">
+                      <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
                         <div
-                          className="bg-gradient-to-r from-purple-500 to-indigo-500 h-2.5 rounded-full"
+                          className="bg-zinc-200 h-2 rounded-full"
                           style={{
                             width: `${Math.min(
                               100,
@@ -421,19 +421,19 @@ export default function PlacementArena() {
                   </div>
 
                   {/* Squad Members Roster */}
-                  <div className="rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-4">
-                    <h4 className="text-base font-bold text-white tracking-tight">
+                  <div className="rounded-xl bg-[#121215] border border-zinc-800/80 p-6 space-y-4">
+                    <h4 className="text-sm font-bold text-white tracking-tight">
                       Active Squad Members ({squadData.members?.length || 0})
                     </h4>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                       {(squadData.members || []).map((m, idx) => (
                         <div
                           key={idx}
-                          className="p-4 rounded-2xl bg-zinc-950/80 border border-white/5 flex items-center justify-between"
+                          className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800/60 flex items-center justify-between"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-purple-500/20 text-purple-300 font-bold flex items-center justify-center text-xs font-mono">
+                            <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold flex items-center justify-center text-xs font-mono">
                               {m.name.charAt(0)}
                             </div>
                             <div>
@@ -459,23 +459,23 @@ export default function PlacementArena() {
                 </div>
 
                 {/* Right Column: Squad Activity & Cheer Wall */}
-                <div className="rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl flex flex-col h-[540px]">
-                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/10">
-                    <MessageSquare className="w-4 h-4 text-purple-400" />
-                    <h4 className="text-sm font-bold text-white tracking-tight">
-                      Squad Activity & Peer Cheer Wall
+                <div className="rounded-xl bg-[#121215] border border-zinc-800/80 p-6 flex flex-col h-[520px]">
+                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-zinc-800/80">
+                    <MessageSquare className="w-4 h-4 text-zinc-400" />
+                    <h4 className="text-xs font-bold text-white tracking-tight uppercase font-mono">
+                      Squad Stream
                     </h4>
                   </div>
 
                   {/* Messages Stream */}
-                  <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                  <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
                     {(squadData.messages || []).map((msg, idx) => (
                       <div
                         key={idx}
-                        className="p-3.5 rounded-2xl bg-zinc-950/80 border border-white/5 text-xs space-y-1"
+                        className="p-3 rounded-lg bg-zinc-950/80 border border-zinc-800/60 text-xs space-y-1"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-purple-300">{msg.senderName}</span>
+                          <span className="font-semibold text-zinc-200">{msg.senderName}</span>
                           <span className="text-[10px] text-zinc-500 font-mono">
                             {new Date(msg.createdAt).toLocaleTimeString([], {
                               hour: "2-digit",
@@ -491,47 +491,47 @@ export default function PlacementArena() {
                   {/* Message Input */}
                   <form
                     onSubmit={handleSendMessage}
-                    className="mt-4 pt-3 border-t border-white/10 flex gap-2"
+                    className="mt-4 pt-3 border-t border-zinc-800/80 flex gap-2"
                   >
                     <input
                       type="text"
-                      placeholder="Share progress or cheer squad..."
+                      placeholder="Share progress or message squad..."
                       value={chatMessage}
                       onChange={(e) => setChatMessage(e.target.value)}
-                      className="flex-1 bg-zinc-950 text-xs text-white px-3.5 py-2.5 rounded-xl border border-white/10 focus:outline-none focus:border-purple-400"
+                      className="flex-1 bg-zinc-950 text-xs text-white px-3 py-2 rounded-lg border border-zinc-800 focus:outline-none focus:border-zinc-600"
                     />
                     <button
                       type="submit"
-                      className="p-2.5 rounded-xl bg-white text-zinc-950 hover:bg-zinc-200 transition-all cursor-pointer shrink-0"
+                      className="p-2 rounded-lg bg-zinc-100 text-zinc-950 hover:bg-zinc-200 transition-all cursor-pointer shrink-0"
                     >
-                      <Send className="w-4 h-4" />
+                      <Send className="w-3.5 h-3.5" />
                     </button>
                   </form>
                 </div>
               </div>
             ) : (
-              <div className="rounded-3xl bg-zinc-900/60 border border-white/10 p-12 text-center max-w-xl mx-auto space-y-5 shadow-2xl">
-                <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 mx-auto flex items-center justify-center">
-                  <Users className="w-7 h-7" />
+              <div className="rounded-xl bg-[#121215] border border-zinc-800/80 p-10 text-center max-w-xl mx-auto space-y-4">
+                <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 mx-auto flex items-center justify-center">
+                  <Users className="w-6 h-6" />
                 </div>
-                <h3 className="text-2xl font-bold text-white tracking-tight">
+                <h3 className="text-xl font-bold text-white tracking-tight">
                   Join or Form a Placement Squad
                 </h3>
                 <p className="text-xs text-zinc-400 leading-relaxed max-w-md mx-auto">
                   Build peer accountability groups of 4-6 candidates to share mock interviews, coordinate technical problem solving, and climb the campus leaderboard together.
                 </p>
-                <div className="flex items-center justify-center gap-3 pt-3">
+                <div className="flex items-center justify-center gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => setShowCreateSquadModal(true)}
-                    className="px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold text-xs hover:bg-zinc-200 transition-all cursor-pointer shadow-lg"
+                    className="px-4 py-2 rounded-lg bg-zinc-100 text-zinc-950 font-semibold text-xs hover:bg-zinc-200 transition-all cursor-pointer"
                   >
-                    Create New Squad
+                    Create Squad
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowJoinSquadModal(true)}
-                    className="px-5 py-2.5 rounded-xl bg-zinc-950 border border-white/10 text-white font-semibold text-xs hover:bg-zinc-900 transition-all cursor-pointer"
+                    className="px-4 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-white font-semibold text-xs hover:bg-zinc-800 transition-all cursor-pointer"
                   >
                     Join with Invite Code
                   </button>
@@ -544,60 +544,60 @@ export default function PlacementArena() {
         {/* TAB 3: WEEKLY CHALLENGES */}
         {activeTab === "challenges" && (
           <div className="space-y-6">
-            <section className="gsap-fade-item rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-6">
+            <section className="gsap-fade-item rounded-xl bg-[#121215] border border-zinc-800/80 p-6 md:p-8 space-y-6">
               <div>
-                <h3 className="text-xl font-bold text-white tracking-tight">
+                <h3 className="text-lg font-bold text-white tracking-tight">
                   Active Placement Sprint Challenges
                 </h3>
-                <p className="text-xs text-zinc-400 mt-1">
-                  Complete time-bounded sprint challenges to boost readiness index and unlock exclusive profile accolades
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Complete time-bounded sprint challenges to boost readiness index and unlock achievements
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-1">
                 {challenges.map((chal) => {
                   const isJoined = joinedChallenges[chal.id];
                   return (
                     <div
                       key={chal.id}
-                      className="group bg-zinc-950/80 border border-white/10 hover:border-purple-500/40 rounded-3xl p-6 shadow-xl flex flex-col justify-between transition-all duration-300"
+                      className="group bg-[#0e0e11] border border-zinc-800/80 hover:border-zinc-700 rounded-xl p-5 flex flex-col justify-between transition-all duration-200"
                     >
                       <div>
-                        <div className="flex items-start justify-between gap-2 mb-4">
-                          <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                        <div className="flex items-start justify-between gap-2 mb-3">
+                          <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800">
                             {chal.category}
                           </span>
-                          <span className="text-yellow-300 font-mono font-bold text-xs">
+                          <span className="text-amber-400 font-mono font-bold text-xs">
                             +{chal.xpReward} XP
                           </span>
                         </div>
 
-                        <h4 className="text-base font-bold text-white mb-2 tracking-tight group-hover:text-purple-300 transition-colors">
+                        <h4 className="text-sm font-bold text-white mb-1.5 tracking-tight group-hover:text-zinc-200 transition-colors">
                           {chal.title}
                         </h4>
-                        <p className="text-xs text-zinc-400 leading-relaxed mb-6">
+                        <p className="text-xs text-zinc-400 leading-relaxed mb-5">
                           {chal.description}
                         </p>
                       </div>
 
-                      <div className="pt-4 border-t border-white/5 space-y-3">
+                      <div className="pt-3 border-t border-zinc-800/60 space-y-3">
                         <div className="flex items-center justify-between text-xs text-zinc-400 font-mono">
-                          <span className="flex items-center gap-1.5 text-amber-400">
-                            <Clock className="w-3.5 h-3.5" /> {chal.endsInDays} days left
+                          <span className="flex items-center gap-1 text-amber-400 text-[11px]">
+                            <Clock className="w-3 h-3" /> {chal.endsInDays} days left
                           </span>
-                          <span>{chal.participantsCount + (isJoined ? 1 : 0)} joined</span>
+                          <span className="text-[11px]">{chal.participantsCount + (isJoined ? 1 : 0)} joined</span>
                         </div>
 
                         <button
                           type="button"
                           onClick={() => handleJoinChallenge(chal.id)}
-                          className={`w-full py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                          className={`w-full py-2 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer ${
                             isJoined
                               ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
-                              : "bg-white text-zinc-950 hover:bg-zinc-200 shadow-md active:scale-95"
+                              : "bg-zinc-100 text-zinc-950 hover:bg-zinc-200"
                           }`}
                         >
-                          {isJoined ? "Challenge Enrolled" : "Enroll in Sprint"}
+                          {isJoined ? "Enrolled" : "Enroll in Sprint"}
                         </button>
                       </div>
                     </div>
@@ -611,55 +611,55 @@ export default function PlacementArena() {
         {/* Modal: Create Squad */}
         {showCreateSquadModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-            <div className="bg-zinc-900 border border-white/15 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <h3 className="text-lg font-bold text-white tracking-tight">Create Placement Squad</h3>
+            <div className="bg-[#121215] border border-zinc-800 rounded-xl p-6 max-w-md w-full space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                <h3 className="text-base font-bold text-white tracking-tight">Create Placement Squad</h3>
                 <button
                   type="button"
                   onClick={() => setShowCreateSquadModal(false)}
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                  className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <form onSubmit={handleCreateSquad} className="space-y-4">
+              <form onSubmit={handleCreateSquad} className="space-y-3.5">
                 <div>
-                  <label className="text-xs text-zinc-400 font-mono block mb-1.5">Squad Name</label>
+                  <label className="text-xs text-zinc-400 font-mono block mb-1">Squad Name</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. FAANG Apex Grinders"
+                    placeholder="e.g. Tier-1 Systems Group"
                     value={newSquadName}
                     onChange={(e) => setNewSquadName(e.target.value)}
-                    className="w-full bg-zinc-950 text-white text-xs rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-purple-400"
+                    className="w-full bg-zinc-950 text-white text-xs rounded-lg px-3 py-2 border border-zinc-800 focus:outline-none focus:border-zinc-600"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-zinc-400 font-mono block mb-1.5">
+                  <label className="text-xs text-zinc-400 font-mono block mb-1">
                     Mission / Target
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Aiming for Tier 1 product offers in campus drives"
+                    placeholder="e.g. Focused daily prep for product company technical rounds"
                     value={newSquadDesc}
                     onChange={(e) => setNewSquadDesc(e.target.value)}
-                    className="w-full bg-zinc-950 text-white text-xs rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-purple-400"
+                    className="w-full bg-zinc-950 text-white text-xs rounded-lg px-3 py-2 border border-zinc-800 focus:outline-none focus:border-zinc-600"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-800">
                   <button
                     type="button"
                     onClick={() => setShowCreateSquadModal(false)}
-                    className="px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white"
+                    className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-white text-zinc-950 text-xs font-semibold hover:bg-zinc-200 transition-all cursor-pointer"
+                    className="px-4 py-1.5 rounded-lg bg-zinc-100 text-zinc-950 text-xs font-semibold hover:bg-zinc-200 transition-all cursor-pointer"
                   >
                     Form Squad
                   </button>
@@ -672,23 +672,23 @@ export default function PlacementArena() {
         {/* Modal: Join Squad */}
         {showJoinSquadModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-            <div className="bg-zinc-900 border border-white/15 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <h3 className="text-lg font-bold text-white tracking-tight">
-                  Join Existing Placement Squad
+            <div className="bg-[#121215] border border-zinc-800 rounded-xl p-6 max-w-md w-full space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                <h3 className="text-base font-bold text-white tracking-tight">
+                  Join Existing Squad
                 </h3>
                 <button
                   type="button"
                   onClick={() => setShowJoinSquadModal(false)}
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                  className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <form onSubmit={handleJoinSquad} className="space-y-4">
+              <form onSubmit={handleJoinSquad} className="space-y-3.5">
                 <div>
-                  <label className="text-xs text-zinc-400 font-mono block mb-1.5">
+                  <label className="text-xs text-zinc-400 font-mono block mb-1">
                     Squad Invite Code
                   </label>
                   <input
@@ -697,21 +697,21 @@ export default function PlacementArena() {
                     placeholder="Enter 6-character code"
                     value={joinCode}
                     onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                    className="w-full bg-zinc-950 text-white text-sm font-mono rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-purple-400 uppercase"
+                    className="w-full bg-zinc-950 text-white text-xs font-mono rounded-lg px-3 py-2 border border-zinc-800 focus:outline-none focus:border-zinc-600 uppercase"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-800">
                   <button
                     type="button"
                     onClick={() => setShowJoinSquadModal(false)}
-                    className="px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white"
+                    className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-white text-zinc-950 text-xs font-semibold hover:bg-zinc-200 transition-all cursor-pointer"
+                    className="px-4 py-1.5 rounded-lg bg-zinc-100 text-zinc-950 text-xs font-semibold hover:bg-zinc-200 transition-all cursor-pointer"
                   >
                     Join Squad
                   </button>

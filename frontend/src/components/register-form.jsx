@@ -55,9 +55,9 @@ export function RegisterForm(props) {
     <div className={cn("flex flex-col gap-6", className)} {...rest}>
       <Card className="bg-[#121212] border-gray-800 text-white">
         <CardHeader>
-          <CardTitle className="text-2xl text-white">Create an Account</CardTitle>
+          <CardTitle className="text-2xl text-white">Create Account</CardTitle>
           <CardDescription className="text-gray-400">
-            Sign up to build your placement readiness profile
+            Enter your details to create a getPlaced account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -120,7 +120,7 @@ export function RegisterForm(props) {
                     Creating account...
                   </>
                 ) : (
-                  "Sign Up"
+                  "Create Account"
                 )}
               </Button>
             </div>
@@ -128,7 +128,7 @@ export function RegisterForm(props) {
             <div className="mt-4 text-center text-sm text-gray-400">
               Already have an account?{" "}
               <Link to="/login" className="text-purple-400 underline underline-offset-4 hover:text-purple-300">
-                Log in
+                Sign in
               </Link>
             </div>
           </form>

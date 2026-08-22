@@ -14,7 +14,6 @@ ROUTES = {
     "coding.png": "/app/coding",
     "resume.png": "/app/resume",
     "interview.png": "/app/interview",
-    "communication.png": "/app/communication",
     "company.png": "/app/company-intel",
     "roadmap.png": "/app/roadmap",
     "progress.png": "/app/progress",

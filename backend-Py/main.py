@@ -48,9 +48,6 @@ from services.interview_service import (
     evaluate_interview_answer,
     generate_session_report
 )
-from services.communication_service import (
-    analyze_communication_skills
-)
 from services.company_intelligence_service import (
     get_company_intelligence,
     list_featured_companies
@@ -393,29 +390,6 @@ def session_report_api(req: SessionReportRequest):
         return report
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
-
-
-# ==========================================
-# 3. Communication Skill Analysis API
-# ==========================================
-
-class CommunicationAnalyzeRequest(BaseModel):
-    text: str
-    audio_duration_seconds: Optional[float] = None
-    target_context: Optional[str] = "Technical / Behavioral Interview"
-
-@app.post("/api/communication/analyze")
-def analyze_communication_api(req: CommunicationAnalyzeRequest):
-    """Deep communication analysis: filler words, STAR compliance, clarity, confidence, WPM."""
-    try:
-        result = analyze_communication_skills(
-            text=req.text,
-            audio_duration_seconds=req.audio_duration_seconds,
-            target_context=req.target_context
-        )
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Communication analysis failed: {str(e)}")
 
 
 # ==========================================

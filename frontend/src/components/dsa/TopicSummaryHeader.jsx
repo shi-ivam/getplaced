@@ -44,9 +44,9 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-purple-400 flex items-center gap-1.5 font-bold">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-300 flex items-center gap-1.5 font-bold">
               <Code2 className="w-3.5 h-3.5" />
-              DSA Proficiency Engine
+              Topic Analysis
             </span>
 
             {isConnected ? (
@@ -94,11 +94,11 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
         </div>
 
         {/* LeetCode Sync / Connect Status Widget */}
-        <div className="bg-zinc-900/90 border border-zinc-800 p-4 rounded-xl shrink-0 flex flex-col justify-between space-y-3 self-start lg:self-auto min-w-[240px]">
+        <div className="bg-zinc-900/90 border border-zinc-800 p-4 rounded-xl shrink-0 flex flex-col justify-between space-y-3 self-start lg:self-auto min-w-[260px]">
           {isConnected && leetcodeUser ? (
-            <div className="space-y-2 font-mono text-xs">
+            <div className="space-y-2.5 font-mono text-xs">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-zinc-500 text-[11px]">LeetCode</span>
+                <span className="text-zinc-500 text-[11px]">LeetCode Solved</span>
                 <a
                   href={leetcodeUser.profileUrl || `https://leetcode.com/u/${leetcodeUser.username}/`}
                   target="_blank"
@@ -110,17 +110,28 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
                 </a>
               </div>
 
-              <div className="flex items-center justify-between text-zinc-300 text-[11px]">
-                <span className="text-zinc-500">Solved:</span>
-                <span>
-                  {leetcodeUser.totalSolved} ({leetcodeUser.mediumSolved}M · {leetcodeUser.hardSolved}H)
+              {/* Solved Big Numbers & Difficulty Breakdown Badges */}
+              <div className="flex items-baseline justify-between pt-1">
+                <span className="text-2xl font-bold text-zinc-100 font-mono">
+                  {leetcodeUser.totalSolved || 0}
                 </span>
+                <div className="flex items-center gap-1.5 text-[10px]">
+                  <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                    {leetcodeUser.easySolved || 0}E
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold">
+                    {leetcodeUser.mediumSolved || 0}M
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold">
+                    {leetcodeUser.hardSolved || 0}H
+                  </span>
+                </div>
               </div>
 
               {leetcodeUser.ranking && (
-                <div className="flex items-center justify-between text-zinc-300 text-[11px]">
+                <div className="flex items-center justify-between text-zinc-300 text-[11px] pt-1 border-t border-zinc-800/80">
                   <span className="text-zinc-500">Global Rank:</span>
-                  <span className="text-amber-300">#{leetcodeUser.ranking.toLocaleString()}</span>
+                  <span className="text-amber-300 font-semibold">#{leetcodeUser.ranking.toLocaleString()}</span>
                 </div>
               )}
             </div>
@@ -131,7 +142,7 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
                 <span>Connect LeetCode</span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-snug">
-                Import your verified problem-solving stats for automated gap detection.
+                Import verified problem statistics for automated topic gap detection.
               </p>
               <Link
                 to="/app/profile"

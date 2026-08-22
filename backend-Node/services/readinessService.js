@@ -458,7 +458,7 @@ const evaluateProjectsDimension = (user, githubProfile = null) => {
     const statusObj = getStatusFromScore(score);
     const topLanguage = githubProfile.languages?.[0]?.languageName || "Full-stack";
 
-    let noteText = `Synced from GitHub (@${githubProfile.username}): ${githubProfile.originalReposCount || 0} original repos, ${githubProfile.totalStars || 0} stars ⭐, ${githubProfile.totalForks || 0} forks 🍴 across ${githubProfile.publicReposCount || 0} public projects. Primary stack: ${topLanguage}.`;
+    let noteText = `Synced from GitHub (@${githubProfile.username}): ${githubProfile.originalReposCount || 0} original repos, ${githubProfile.totalStars || 0} stars, ${githubProfile.totalForks || 0} forks across ${githubProfile.publicReposCount || 0} public projects. Primary stack: ${topLanguage}.`;
 
     return {
       score,

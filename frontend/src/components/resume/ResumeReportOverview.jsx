@@ -289,7 +289,7 @@ export default function ResumeReportOverview({
               Keyword Alignment Matrix
             </h3>
             <p className="text-xs text-neutral-400">
-              Deterministic skill and competency matching against industry placement benchmarks.
+              Skill and competency matching against role requirements.
             </p>
           </div>
 
@@ -332,7 +332,7 @@ export default function ResumeReportOverview({
           {(keywordFilter === "all" || keywordFilter === "matched") && matchedKeywords.length > 0 && (
             <div className="space-y-2.5">
               <span className="text-[11px] font-mono text-emerald-400 uppercase tracking-wider block">
-                Verified Technical Keywords & Competencies ({matchedKeywords.length})
+                Matched Keywords & Skills ({matchedKeywords.length})
               </span>
               <div className="flex flex-wrap gap-2">
                 {matchedKeywords.map((k, i) => (
@@ -355,7 +355,7 @@ export default function ResumeReportOverview({
           {(keywordFilter === "all" || keywordFilter === "missing") && missingKeywords.length > 0 && (
             <div className="space-y-2.5 pt-2">
               <span className="text-[11px] font-mono text-amber-400 uppercase tracking-wider block">
-                Target Skill Gaps & Recommended Keywords ({missingKeywords.length})
+                Missing Keywords & Skills ({missingKeywords.length})
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {missingKeywords.map((k, i) => (
@@ -389,10 +389,10 @@ export default function ResumeReportOverview({
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
                 <Zap className="w-3.5 h-3.5 text-amber-400" />
-                Google XYZ Bullet Optimizations
+                XYZ Bullet Improvements
               </h3>
               <p className="text-[11px] text-neutral-400 font-mono mt-0.5">
-                Formula: Accomplished [X], as measured by [Y], by doing [Z]
+                Formula: Accomplished [X], measured by [Y], by doing [Z]
               </p>
             </div>
           </div>
@@ -406,7 +406,7 @@ export default function ResumeReportOverview({
                 {/* Original */}
                 <div className="space-y-1">
                   <span className="text-[10px] uppercase font-mono tracking-wider text-rose-400 block">
-                    Current Formulation (Before)
+                    Original
                   </span>
                   <p className="text-xs text-neutral-400 italic pl-3 border-l-2 border-rose-500/40 break-words leading-relaxed">
                     "{item.original}"
@@ -417,7 +417,7 @@ export default function ResumeReportOverview({
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] uppercase font-mono tracking-wider text-emerald-400 block">
-                      Optimized Google XYZ (After)
+                      Improved (XYZ Formula)
                     </span>
                     <button
                       onClick={() => handleCopyBullet(item.improved_xyz, i)}
@@ -470,7 +470,7 @@ export default function ResumeReportOverview({
         <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 space-y-4 backdrop-blur-xl">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
             <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-            Formatting & OCR Verification Flags
+            Formatting & Structural Flags
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {evaluation.formatting_flags.map((flag, idx) => (

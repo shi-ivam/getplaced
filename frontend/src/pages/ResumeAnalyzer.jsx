@@ -160,13 +160,13 @@ const ResumeAnalyzer = () => {
         {/* Section Header */}
         <div className="flex flex-col items-center text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#428475]/25 border border-[#89D7B7]/30 text-[#89D7B7] text-xs font-mono uppercase tracking-widest">
-            <FileCheck className="w-3.5 h-3.5 text-[#89D7B7]" /> ATS Radar Telemetry & Action Center
+            <FileCheck className="w-3.5 h-3.5 text-[#89D7B7]" /> ATS Resume Scoring
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#FFF4E1] break-words">
-            Resume Compatibility & Competency Analysis
+            Resume Analysis & Competency Matrix
           </h2>
           <p className="text-[#FFF4E1]/75 text-sm sm:text-base md:text-lg leading-relaxed">
-            Real-time keyword matching, semantic skill mapping, and interactive ATS recommendation engine.
+            Keyword verification, skill mapping, and ATS match scoring against role requirements.
           </p>
         </div>
 
@@ -192,11 +192,11 @@ const ResumeAnalyzer = () => {
                 </div>
                 {resumeData.isDemo ? (
                   <span className="text-[11px] font-mono bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/30 font-semibold shrink-0">
-                    INTERACTIVE DEMO MODE
+                    DEMO MODE
                   </span>
                 ) : (
                   <span className="text-[11px] font-mono bg-[#89D7B7]/15 text-[#89D7B7] px-3 py-1 rounded-full border border-[#89D7B7]/30 font-semibold shrink-0">
-                    PASSED ATS
+                    VERIFIED ATS
                   </span>
                 )}
               </div>
@@ -207,27 +207,27 @@ const ResumeAnalyzer = () => {
                   {resumeData.atsScore}%
                 </div>
                 <p className="text-xs uppercase tracking-widest text-[#FFF4E1]/70 font-semibold">
-                  ATS Placement Match vs Tier-1 Tech Benchmarks
+                  ATS Score vs Industry Benchmarks
                 </p>
               </div>
 
               {/* File Uploader for Interactive Demo / New Upload */}
               <div className="p-4 rounded-2xl bg-[#1A312C]/90 border border-[#428475]/40 space-y-3">
                 <div className="flex items-center justify-between text-xs font-semibold text-[#89D7B7]">
-                  <span>Upload & Analyze Your Resume</span>
+                  <span>Upload Resume</span>
                   <UploadCloud className="w-4 h-4 text-[#89D7B7]" />
                 </div>
                 <label className="flex flex-col items-center justify-center p-3 border-2 border-dashed border-[#428475]/60 hover:border-[#89D7B7] rounded-xl bg-[#12221e]/60 cursor-pointer transition text-center group">
                   {uploading ? (
                     <div className="flex items-center gap-2 text-xs text-[#89D7B7] font-mono">
-                      <Loader2 className="w-4 h-4 animate-spin" /> Analyzing resume AST...
+                      <Loader2 className="w-4 h-4 animate-spin" /> Parsing resume...
                     </div>
                   ) : (
                     <>
                       <span className="text-xs text-[#FFF4E1]/80 font-medium group-hover:text-white">
-                        Click to select PDF or DOCX
+                        Select PDF or DOCX file
                       </span>
-                      <span className="text-[10px] text-[#FFF4E1]/50 mt-0.5">Instant ATS match score parsing</span>
+                      <span className="text-[10px] text-[#FFF4E1]/50 mt-0.5">Parses text and scores keywords</span>
                     </>
                   )}
                   <input
@@ -254,7 +254,7 @@ const ResumeAnalyzer = () => {
               {/* Keywords Found Pills */}
               <div className="pt-4 border-t border-[#428475]/30 space-y-3">
                 <div className="text-xs font-semibold text-[#FFF4E1]/85 uppercase tracking-wider">
-                  Verified Technical Keywords
+                  Detected Keywords
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {resumeData.keywordsFound.map((kw) => (
@@ -273,7 +273,7 @@ const ResumeAnalyzer = () => {
                 className="flex items-center justify-center gap-2 w-full py-3 bg-[#89D7B7]/15 hover:bg-[#89D7B7]/25 border border-[#89D7B7]/30 rounded-xl text-xs font-semibold text-[#FFF4E1] hover:text-white transition"
               >
                 <Zap className="w-3.5 h-3.5 text-[#89D7B7]" />
-                Launch Interactive Action Center
+                Open Detailed Resume View
                 <ArrowUpRight className="w-3.5 h-3.5 text-[#89D7B7]" />
               </Link>
             </div>
@@ -288,7 +288,7 @@ const ResumeAnalyzer = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2 text-sm font-bold text-[#FFF4E1]">
                 <TrendingUp className="w-4 h-4 text-[#89D7B7]" />
-                <span>Multi-Dimensional Competency Radar</span>
+                <span>Skill Competency Matrix</span>
               </div>
               <span className="text-xs font-mono text-[#89D7B7]/80">
                 {resumeData.isDemo ? "BENCHMARK: DEMO CANDIDATE" : `USER: ${resumeData.name.toUpperCase()}`}
@@ -307,9 +307,9 @@ const ResumeAnalyzer = () => {
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-[#428475]/30 text-xs text-[#FFF4E1]/70 font-mono">
-              <span>Dynamic ATS Evaluation Engine</span>
+              <span>ATS Competency Model</span>
               <span className="text-[#89D7B7] font-semibold">
-                {resumeData.isDemo ? "Upload file above to analyze" : "Live User Data Grounded"}
+                {resumeData.isDemo ? "Upload a file to recalculate" : "User data loaded"}
               </span>
             </div>
           </motion.div>

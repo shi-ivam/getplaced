@@ -583,21 +583,21 @@ export default function AnalyzeResume() {
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="space-y-1.5 max-w-2xl">
               <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
-                  ATS Action Matrix
+                  ATS Evaluation Matrix
                 </span>
                 {isProfileLinked && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                    <ShieldCheck className="w-3 h-3" /> Candidate Profile Linked
+                    <ShieldCheck className="w-3 h-3" /> Profile Linked
                   </span>
                 )}
               </div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
-                Resume Action Center & ATS Intelligence
+                Resume Intelligence & ATS Analysis
               </h1>
               <p className="text-xs sm:text-sm text-neutral-400 font-normal">
-                Interactive recommendation selector, customizable change previews, and verified ATS score recalculation.
+                Select recommendations, review proposed edits, and recalculate ATS scores.
               </p>
             </div>
 
@@ -607,7 +607,7 @@ export default function AnalyzeResume() {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 hover:border-zinc-600 text-xs font-mono text-zinc-200 transition-colors"
               >
                 <Bot className="w-3.5 h-3.5 text-purple-400" />
-                <span>AI Career Coach</span>
+                <span>Career Coach</span>
                 <ChevronRight className="w-3 h-3 text-zinc-500" />
               </Link>
             </div>
@@ -643,7 +643,7 @@ export default function AnalyzeResume() {
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              ATS Report & Radar
+              ATS Report
             </button>
 
             <button
@@ -731,12 +731,12 @@ export default function AnalyzeResume() {
               {loading ? (
                 <>
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  Analyzing ATS Vectors...
+                  Analyzing Resume...
                 </>
               ) : (
                 <>
                   <Sparkles className="w-3.5 h-3.5" />
-                  Analyze / Refresh ATS Audit
+                  Analyze Resume
                 </>
               )}
             </button>
@@ -748,7 +748,7 @@ export default function AnalyzeResume() {
               <label className="flex-1 flex items-center gap-3 p-3 bg-black/30 border border-dashed border-white/[0.12] hover:border-white/30 rounded-xl cursor-pointer transition">
                 <UploadCloud className="w-5 h-5 text-neutral-400 shrink-0" />
                 <span className="text-xs text-neutral-300 truncate">
-                  {file ? file.name : "Select or drag PDF resume (OCR enabled)"}
+                  {file ? file.name : "Select or drag PDF resume"}
                 </span>
                 <input
                   type="file"
@@ -772,7 +772,7 @@ export default function AnalyzeResume() {
                 rows={3}
                 value={rawText}
                 onChange={(e) => setRawText(e.target.value)}
-                placeholder="Paste raw markdown or plaintext resume content..."
+                placeholder="Paste resume text or markdown..."
                 className="w-full px-3.5 py-2 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-neutral-200 focus:outline-none focus:border-white/30 resize-none font-mono"
               />
             </div>
@@ -785,7 +785,7 @@ export default function AnalyzeResume() {
                 rows={2}
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
-                placeholder="Paste target job spec to align semantic keyword matching..."
+                placeholder="Paste target job description to match keywords..."
                 className="w-full px-3.5 py-2 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-neutral-200 focus:outline-none focus:border-white/30 resize-none font-sans"
               />
             </div>

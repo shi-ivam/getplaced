@@ -2,6 +2,7 @@ import os
 import sqlite3
 import json
 import math
+import re
 import urllib.request
 import pandas as pd
 from typing import Optional, List, Dict, Any
@@ -295,6 +296,25 @@ def get_stats() -> Dict[str, Any]:
         "hard": hard
     }
 
+def clean_explanation(response_text: Optional[str]) -> str:
+    if not response_text:
+        return "Optimal solution provided in completion code."
+    
+    # Strip markdown code blocks (```python ... ``` or ``` ... ```)
+    cleaned = re.sub(r"```[\s\S]*?```", "", response_text).strip()
+    
+    # Remove phrases like "Here's the implementation:", "Below is the code:", etc.
+    cleaned = re.sub(r"(?i)(Here'?s?|Below is)\s+the\s+(Python\s+)?(implementation|code|solution|approach)[:\.\s]*$", "", cleaned).strip()
+    cleaned = re.sub(r"(?i)(Here'?s?|Below is)\s+the\s+(Python\s+)?(implementation|code|solution|approach)[:\.\s]*\n", "\n", cleaned).strip()
+    
+    # Strip leading section headers like "### Explanation:"
+    cleaned = re.sub(r"^(###?\s*(Explanation|Approach|Solution|Implementation)[:\s]*)", "", cleaned, flags=re.IGNORECASE).strip()
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    
+    if cleaned and len(cleaned) > 10:
+        return cleaned
+    return "Refer to the optimal step-by-step implementation in the reference code below."
+
 def get_solution(task_id: str) -> Optional[Dict[str, Any]]:
     conn = get_db_connection()
     cur = conn.cursor()
@@ -317,7 +337,7 @@ def get_solution(task_id: str) -> Optional[Dict[str, Any]]:
         "tags": parsed_tags,
         "starter_code": row["starter_code"],
         "completion": row["completion"],
-        "explanation": row["response"] if row["response"] else "Optimal solution provided in completion code."
+        "explanation": clean_explanation(row["response"])
     }
 
 def get_random_problem(difficulty: Optional[str] = None, tag: Optional[str] = None) -> Optional[Dict[str, Any]]:

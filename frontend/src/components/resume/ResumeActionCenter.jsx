@@ -385,11 +385,11 @@ export default function ResumeActionCenter({
                 Resume Action Center
               </h2>
               <span className="px-2 py-0.5 text-[10px] font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-md">
-                Interactive Fix Engine
+                Recommendation Engine
               </span>
             </div>
             <p className="text-xs text-neutral-400">
-              Select specific recommendations, preview AI-formulated enhancements, and recalculate verified ATS impact.
+              Select specific recommendations, preview suggested enhancements, and calculate ATS impact.
             </p>
           </div>
 
@@ -397,7 +397,7 @@ export default function ResumeActionCenter({
           <div className="flex flex-wrap items-center gap-2">
             <div className="px-3 py-1.5 bg-black/40 border border-white/[0.08] rounded-xl flex items-center gap-2 text-xs">
               <span className="font-semibold text-white font-mono">{totalCount}</span>
-              <span className="text-neutral-400">Total Issues</span>
+              <span className="text-neutral-400">Issues</span>
             </div>
             {highImpactCount > 0 && (
               <div className="px-3 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-1.5 text-xs text-rose-300">
@@ -443,23 +443,26 @@ export default function ResumeActionCenter({
 
           {/* Quick Selection Buttons */}
           <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {selectedIds.size < filteredActions.filter((a) => a.status !== "RESOLVED").length ? (
-              <button
-                onClick={handleSelectAll}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-neutral-200 border border-white/[0.08] rounded-xl text-xs font-medium transition"
-              >
-                <CheckSquare className="w-3.5 h-3.5 text-neutral-400" />
-                Select All ({filteredActions.filter((a) => a.status !== "RESOLVED").length})
-              </button>
-            ) : (
-              <button
-                onClick={handleDeselectAll}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-neutral-200 border border-white/[0.08] rounded-xl text-xs font-medium transition"
-              >
-                <Square className="w-3.5 h-3.5 text-neutral-400" />
-                Deselect All
-              </button>
-            )}
+            <button
+              onClick={handleSelectAll}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-neutral-200 border border-white/[0.08] rounded-xl text-xs font-medium transition"
+            >
+              <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
+              Select All ({filteredActions.filter((a) => a.status !== "RESOLVED").length})
+            </button>
+
+            <button
+              onClick={handleDeselectAll}
+              disabled={selectedIds.size === 0}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition border ${
+                selectedIds.size > 0
+                  ? "bg-white/[0.05] hover:bg-white/[0.1] text-neutral-200 border-white/[0.08]"
+                  : "bg-white/[0.02] text-neutral-600 border-white/[0.04] cursor-not-allowed"
+              }`}
+            >
+              <Square className="w-3.5 h-3.5 text-neutral-400" />
+              Deselect All
+            </button>
 
             {highImpactCount > 0 && (
               <button
@@ -476,8 +479,8 @@ export default function ResumeActionCenter({
                 onClick={handleFixSelected}
                 className="flex items-center gap-2 px-4 py-1.5 bg-white text-black font-semibold rounded-xl text-xs shadow-md hover:bg-neutral-200 active:scale-[0.99] transition"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                Fix Selected ({selectedIds.size})
+                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                Apply Selected Fixes ({selectedIds.size})
               </button>
             )}
           </div>
@@ -524,13 +527,13 @@ export default function ResumeActionCenter({
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    Resume Optimizations Applied Successfully
+                    Resume Optimizations Applied
                     <span className="px-2 py-0.5 text-[10px] font-mono uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded">
                       Verified
                     </span>
                   </h3>
                   <p className="text-xs text-neutral-300 mt-0.5">
-                    {lastApplyResult.summary || "ATS evaluation recalculated against updated content."}
+                    {lastApplyResult.summary || "ATS evaluation updated for revised content."}
                   </p>
                 </div>
               </div>
@@ -684,8 +687,8 @@ export default function ResumeActionCenter({
 
                         {/* Status Badge */}
                         {isResolved ? (
-                          <span className="px-2 py-0.5 text-[10px] font-mono uppercase bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded">
-                            ✓ Resolved
+                          <span className="px-2 py-0.5 text-[10px] font-mono uppercase bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded flex items-center gap-1">
+                            <Check className="w-3 h-3" /> Resolved
                           </span>
                         ) : isSkipped ? (
                           <span className="px-2 py-0.5 text-[10px] font-mono uppercase bg-white/[0.05] text-neutral-400 border border-white/[0.08] rounded">
@@ -706,14 +709,14 @@ export default function ResumeActionCenter({
                       </div>
 
                       {/* Title */}
-                      <h4 className={`text-xs sm:text-sm font-semibold tracking-tight truncate ${
+                      <h4 className={`text-xs sm:text-sm font-semibold tracking-tight break-words leading-snug ${
                         isResolved ? "text-neutral-300 line-through" : "text-white"
                       }`}>
                         {action.title}
                       </h4>
 
                       {/* Short Description */}
-                      <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-neutral-400 leading-relaxed break-words">
                         {action.description}
                       </p>
                     </div>
@@ -724,10 +727,10 @@ export default function ResumeActionCenter({
                     {!isResolved && (
                       <button
                         onClick={() => handleFixSingle(action)}
-                        className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white text-black font-semibold rounded-lg text-xs shadow-sm hover:bg-neutral-200 transition"
+                        className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 bg-white text-black font-semibold rounded-lg text-xs shadow-sm hover:bg-neutral-200 transition"
                       >
-                        <Sparkles className="w-3 h-3" />
-                        Fix
+                        <Sparkles className="w-3 h-3 text-emerald-600" />
+                        Apply Fix
                       </button>
                     )}
 
@@ -754,7 +757,7 @@ export default function ResumeActionCenter({
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                         <div className="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl space-y-1">
                           <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-400 block">
-                            WHAT Needs Modification
+                            Modification
                           </span>
                           <p className="text-neutral-300 leading-relaxed">
                             {action.what || action.title}
@@ -763,7 +766,7 @@ export default function ResumeActionCenter({
 
                         <div className="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl space-y-1">
                           <span className="text-[10px] font-mono uppercase tracking-wider text-rose-400 block">
-                            WHY Current Phrasing Falls Short
+                            Current Limitation
                           </span>
                           <p className="text-neutral-300 leading-relaxed">
                             {action.why || action.reason}
@@ -772,7 +775,7 @@ export default function ResumeActionCenter({
 
                         <div className="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl space-y-1">
                           <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 block">
-                            IMPACT on Candidate Index
+                            Impact
                           </span>
                           <p className="text-neutral-300 leading-relaxed">
                             {action.impactExplanation || "Increases recruiter ranking index and verified ATS score."}
@@ -781,7 +784,7 @@ export default function ResumeActionCenter({
 
                         <div className="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl space-y-1">
                           <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 block">
-                            HOW to Implement
+                            Implementation
                           </span>
                           <p className="text-neutral-300 leading-relaxed">
                             {action.how || "Click 'Fix' or 'Edit Manually' to preview and apply the suggested optimization."}
@@ -800,7 +803,7 @@ export default function ResumeActionCenter({
                             {/* Before */}
                             <div className="p-3 bg-rose-500/[0.03] border border-rose-500/20 rounded-xl space-y-1">
                               <span className="text-[10px] font-mono uppercase text-rose-400 block">
-                                Current Text (Before)
+                                Original
                               </span>
                               <p className="text-xs text-neutral-300 italic">
                                 "{action.currentText || "Vague phrasing or missing required sections."}"
@@ -811,7 +814,7 @@ export default function ResumeActionCenter({
                             <div className="p-3 bg-emerald-500/[0.04] border border-emerald-500/30 rounded-xl space-y-1">
                               <div className="flex items-center justify-between">
                                 <span className="text-[10px] font-mono uppercase text-emerald-400 block">
-                                  Optimized High-Impact (After)
+                                  Recommended (XYZ Metric)
                                 </span>
                                 {action.metricAdded && (
                                   <span className="text-[9px] font-mono bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded">
@@ -895,8 +898,8 @@ export default function ResumeActionCenter({
                   onClick={handleFixSelected}
                   className="flex items-center gap-1.5 px-4 py-2 bg-white text-black font-semibold rounded-xl text-xs shadow-lg hover:bg-neutral-200 active:scale-[0.99] transition"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Fix Selected →
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                  Apply Selected Fixes
                 </button>
               </div>
             </div>
@@ -919,10 +922,10 @@ export default function ResumeActionCenter({
                 <div className="space-y-0.5">
                   <h3 className="text-sm font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-emerald-400" />
-                    Review & Customize Resume Optimizations
+                    Review & Edit Resume Optimizations
                   </h3>
                   <p className="text-xs text-neutral-400">
-                    Inspect AI-formulated enhancements. You can edit the text before confirming.
+                    Review suggested enhancements. You can edit text before confirming.
                   </p>
                 </div>
                 <button
@@ -956,7 +959,7 @@ export default function ResumeActionCenter({
                     {item.currentText && (
                       <div className="space-y-1">
                         <span className="text-[10px] font-mono uppercase text-rose-400 block">
-                          Before (Original):
+                          Original:
                         </span>
                         <p className="text-xs text-neutral-400 italic pl-3 border-l-2 border-rose-500/40">
                           "{item.currentText}"
@@ -969,14 +972,14 @@ export default function ResumeActionCenter({
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-mono uppercase text-emerald-400 flex items-center gap-1.5">
                           <Edit3 className="w-3 h-3" />
-                          After (Editable Recommendation):
+                          Recommended (Editable):
                         </span>
                         <button
                           type="button"
                           onClick={() => handleResetToSuggestion(item.actionId)}
                           className="text-[10px] text-neutral-400 hover:text-white font-mono"
                         >
-                          Reset to AI Suggestion
+                          Reset to Suggestion
                         </button>
                       </div>
 

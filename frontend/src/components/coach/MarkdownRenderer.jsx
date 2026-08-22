@@ -46,7 +46,7 @@ function CodeBlock({ node, inline, className, children, ...props }) {
 
   if (inline) {
     return (
-      <code className="px-1.5 py-0.5 rounded bg-zinc-800/80 text-emerald-300 font-mono text-[11px] border border-zinc-700/50 break-words" {...props}>
+      <code className="px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-200 font-mono text-[11px] border border-zinc-800 break-words" {...props}>
         {children}
       </code>
     );
@@ -57,21 +57,21 @@ function CodeBlock({ node, inline, className, children, ...props }) {
   ].includes(language);
 
   return (
-    <div className="my-3.5 rounded-xl border border-zinc-800/90 bg-[#08080c] overflow-hidden shadow-md max-w-full">
-      <div className="px-3.5 sm:px-4 py-2 bg-zinc-900/90 border-b border-zinc-800/80 flex items-center justify-between text-xs font-mono text-zinc-400">
-        <span className="uppercase text-[10px] font-bold tracking-wider text-zinc-400 bg-zinc-800/60 px-2 py-0.5 rounded border border-zinc-700/40">
+    <div className="my-3 rounded-xl border border-zinc-800 bg-[#09090b] overflow-hidden max-w-full">
+      <div className="px-3.5 py-1.5 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between text-xs font-mono text-zinc-400">
+        <span className="uppercase text-[10px] font-bold tracking-wider text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
           {language || "code"}
         </span>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleCopy}
-            className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-md bg-zinc-800/70 hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-zinc-300 cursor-pointer font-sans"
+            className="flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-850 hover:text-zinc-100 transition-colors text-zinc-400 cursor-pointer font-mono border border-zinc-800"
           >
             {copied ? (
               <>
                 <Check className="w-3 h-3 text-emerald-400" />
-                <span className="text-emerald-400 font-medium">Copied!</span>
+                <span className="text-emerald-400">Copied</span>
               </>
             ) : (
               <>
@@ -85,15 +85,15 @@ function CodeBlock({ node, inline, className, children, ...props }) {
             <button
               type="button"
               onClick={() => navigate("/app/coding")}
-              className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 transition-colors cursor-pointer font-sans font-medium"
+              className="flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition-colors cursor-pointer font-mono"
             >
-              <Terminal className="w-3 h-3 text-emerald-400" />
+              <Terminal className="w-3 h-3 text-zinc-400" />
               <span>Sandbox</span>
             </button>
           )}
         </div>
       </div>
-      <div className="p-4 overflow-x-auto font-mono text-xs text-zinc-200 leading-relaxed scrollbar-thin">
+      <div className="p-3.5 overflow-x-auto font-mono text-xs text-zinc-200 leading-relaxed scrollbar-thin">
         <pre className="!bg-transparent !p-0 !m-0">
           <code>{codeString}</code>
         </pre>
@@ -126,15 +126,15 @@ function CustomLink({ href = "", children, ...props }) {
       onClick={handleClick}
       target={isInternalApp ? undefined : "_blank"}
       rel={isInternalApp ? undefined : "noopener noreferrer"}
-      className="inline-flex items-center gap-1.5 font-medium text-emerald-300 hover:text-emerald-200 transition-all duration-150 px-2 py-0.5 rounded-md bg-emerald-950/30 hover:bg-emerald-900/40 border border-emerald-500/20 hover:border-emerald-500/40 text-xs font-sans align-baseline cursor-pointer group shadow-sm my-0.5"
+      className="inline-flex items-center gap-1.5 font-medium text-zinc-200 hover:text-white transition-colors px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-sans align-baseline cursor-pointer my-0.5"
       {...props}
     >
-      <Icon className="w-3.5 h-3.5 text-emerald-400 shrink-0 group-hover:scale-105 transition-transform" />
+      <Icon className="w-3 h-3 text-zinc-400 shrink-0" />
       <span className="truncate">{cleanedChildren}</span>
       {isInternalApp ? (
-        <ArrowRight className="w-3 h-3 text-emerald-400/70 group-hover:translate-x-0.5 group-hover:text-emerald-300 transition-all shrink-0" />
+        <ArrowRight className="w-3 h-3 text-zinc-500 shrink-0" />
       ) : (
-        <ExternalLink className="w-3 h-3 text-emerald-400/70 shrink-0" />
+        <ExternalLink className="w-3 h-3 text-zinc-500 shrink-0" />
       )}
     </a>
   );
@@ -144,7 +144,7 @@ export default function MarkdownRenderer({ content }) {
   if (!content) return null;
 
   return (
-    <div className="prose prose-invert max-w-none text-zinc-200 text-xs sm:text-sm leading-relaxed space-y-3 font-sans [&_.katex-display]:overflow-x-auto [&_.katex-display]:py-2 [&_.katex]:text-emerald-200">
+    <div className="prose prose-invert max-w-none text-zinc-200 text-xs sm:text-sm leading-relaxed space-y-2.5 font-sans [&_.katex-display]:overflow-x-auto [&_.katex-display]:py-2 [&_.katex]:text-zinc-200">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
@@ -152,54 +152,54 @@ export default function MarkdownRenderer({ content }) {
           code: CodeBlock,
           a: CustomLink,
           h1: ({ node, ...props }) => (
-            <h1 className="text-base sm:text-lg font-semibold text-zinc-100 tracking-tight mt-4 mb-2 pb-1.5 border-b border-zinc-800/80" {...props} />
+            <h1 className="text-base sm:text-lg font-semibold text-zinc-100 tracking-tight mt-4 mb-2 pb-1.5 border-b border-zinc-800" {...props} />
           ),
           h2: ({ node, ...props }) => (
-            <h2 className="text-sm sm:text-base font-semibold text-zinc-100 tracking-tight mt-3.5 mb-1.5 flex items-center gap-2 text-emerald-400" {...props} />
+            <h2 className="text-sm sm:text-base font-semibold text-zinc-100 tracking-tight mt-3 mb-1.5" {...props} />
           ),
           h3: ({ node, ...props }) => (
-            <h3 className="text-xs sm:text-sm font-semibold text-zinc-200 tracking-tight mt-3 mb-1" {...props} />
+            <h3 className="text-xs sm:text-sm font-semibold text-zinc-200 tracking-tight mt-2.5 mb-1" {...props} />
           ),
           h4: ({ node, ...props }) => (
-            <h4 className="text-[11px] font-semibold text-zinc-400 mt-2.5 mb-1 uppercase tracking-wider font-mono" {...props} />
+            <h4 className="text-[11px] font-semibold text-zinc-400 mt-2 mb-1 uppercase tracking-wider font-mono" {...props} />
           ),
           p: ({ node, ...props }) => (
-            <p className="my-2 leading-relaxed text-zinc-200 text-xs sm:text-sm" {...props} />
+            <p className="my-1.5 leading-relaxed text-zinc-200 text-xs sm:text-sm" {...props} />
           ),
           ul: ({ node, ...props }) => (
-            <ul className="my-2 space-y-1.5 text-zinc-200 text-xs sm:text-sm list-disc list-inside marker:text-emerald-400" {...props} />
+            <ul className="my-1.5 space-y-1 text-zinc-200 text-xs sm:text-sm list-disc list-inside marker:text-zinc-500" {...props} />
           ),
           ol: ({ node, ...props }) => (
-            <ol className="my-2 space-y-1.5 text-zinc-200 list-decimal list-inside text-xs sm:text-sm marker:text-emerald-400 font-mono" {...props} />
+            <ol className="my-1.5 space-y-1 text-zinc-200 list-decimal list-inside text-xs sm:text-sm marker:text-zinc-500 font-mono" {...props} />
           ),
           li: ({ node, ...props }) => (
             <li className="leading-relaxed" {...props} />
           ),
           blockquote: ({ node, ...props }) => (
-            <blockquote className="my-3 pl-3.5 py-1.5 border-l-2 border-emerald-500/70 bg-emerald-950/10 text-zinc-300 rounded-r text-xs sm:text-sm italic leading-relaxed" {...props} />
+            <blockquote className="my-2.5 pl-3 py-1 border-l-2 border-zinc-700 bg-zinc-900/40 text-zinc-300 rounded-r text-xs sm:text-sm leading-relaxed" {...props} />
           ),
           table: ({ node, ...props }) => (
-            <div className="my-3.5 overflow-x-auto rounded-xl border border-zinc-800/80 bg-zinc-950/50 shadow-inner">
+            <div className="my-3 overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950">
               <table className="w-full text-left text-xs font-sans border-collapse" {...props} />
             </div>
           ),
           thead: ({ node, ...props }) => (
-            <thead className="bg-zinc-900/90 text-zinc-200 font-mono text-[11px] uppercase tracking-wider border-b border-zinc-800" {...props} />
+            <thead className="bg-zinc-900 text-zinc-200 font-mono text-[11px] uppercase tracking-wider border-b border-zinc-800" {...props} />
           ),
           tbody: ({ node, ...props }) => (
-            <tbody className="divide-y divide-zinc-800/50" {...props} />
+            <tbody className="divide-y divide-zinc-800" {...props} />
           ),
           tr: ({ node, ...props }) => (
-            <tr className="hover:bg-zinc-900/40 transition-colors" {...props} />
+            <tr className="hover:bg-zinc-900/50 transition-colors" {...props} />
           ),
           th: ({ node, ...props }) => (
-            <th className="px-3.5 py-2.5 font-semibold text-zinc-200" {...props} />
+            <th className="px-3.5 py-2 font-semibold text-zinc-200" {...props} />
           ),
           td: ({ node, ...props }) => (
-            <td className="px-3.5 py-2.5 text-zinc-300 align-top" {...props} />
+            <td className="px-3.5 py-2 text-zinc-300 align-top" {...props} />
           ),
           hr: ({ node, ...props }) => (
-            <hr className="my-4 border-zinc-800/80" {...props} />
+            <hr className="my-3 border-zinc-800" {...props} />
           ),
         }}
       >

@@ -30,21 +30,12 @@ export default function Academics() {
   const containerRef = useRef(null);
   const [academicData, setAcademicData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isEditingSemesters, setIsEditingSemesters] = useState(false);
-  const [semesters, setSemesters] = useState([
-    { semesterNumber: 1, sgpa: 8.85, credits: 20.5, isCompleted: true },
-    { semesterNumber: 2, sgpa: 8.73, credits: 24.5, isCompleted: true },
-    { semesterNumber: 3, sgpa: 9.09, credits: 30.5, isCompleted: true },
-    { semesterNumber: 4, sgpa: 9.06, credits: 29.5, isCompleted: true },
-    { semesterNumber: 5, sgpa: null, credits: 24.0, isCompleted: false },
-    { semesterNumber: 6, sgpa: null, credits: 24.0, isCompleted: false },
-    { semesterNumber: 7, sgpa: null, credits: 20.0, isCompleted: false },
-    { semesterNumber: 8, sgpa: null, credits: 16.0, isCompleted: false },
-  ]);
-  const [tenthPct, setTenthPct] = useState(88.5);
-  const [twelfthPct, setTwelfthPct] = useState(86.0);
+  const [semesters, setSemesters] = useState([]);
+  const [tenthPct, setTenthPct] = useState(null);
+  const [twelfthPct, setTwelfthPct] = useState(null);
   const [activeBacklogs, setActiveBacklogs] = useState(0);
-  const [branch, setBranch] = useState("Electronics and Computer Engineering");
+  const [branch, setBranch] = useState("");
+  const [isEditingSemesters, setIsEditingSemesters] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
@@ -56,10 +47,10 @@ export default function Academics() {
         if (res.data?.academic) {
           setAcademicData(res.data.academic);
           setSemesters(res.data.academic.semesters || []);
-          setTenthPct(res.data.academic.tenthPercentage || 88.5);
-          setTwelfthPct(res.data.academic.twelfthPercentage || 86.0);
+          setTenthPct(res.data.academic.tenthPercentage ?? null);
+          setTwelfthPct(res.data.academic.twelfthPercentage ?? null);
           setActiveBacklogs(res.data.academic.activeBacklogs || 0);
-          setBranch(res.data.academic.branch || "Computer Science & Engineering");
+          setBranch(res.data.academic.branch || "");
         }
       } catch (err) {
         console.warn("Could not load academic profile from backend:", err.message);
@@ -102,7 +93,7 @@ export default function Academics() {
       const completedSems = semesters.filter((s) => s.isCompleted && s.sgpa !== null);
       const totalSgpa = completedSems.reduce((acc, s) => acc + s.sgpa, 0);
       const computedCgpa =
-        completedSems.length > 0 ? Number((totalSgpa / completedSems.length).toFixed(2)) : 8.0;
+        completedSems.length > 0 ? Number((totalSgpa / completedSems.length).toFixed(2)) : null;
 
       const res = await axios.put(
         `${NODE_API_URL}/api/academics/profile`,
@@ -128,8 +119,8 @@ export default function Academics() {
     }
   };
 
-  const currentCgpa = academicData?.currentCgpa || 8.5;
-  const targetCgpa = academicData?.targetCgpa || 8.8;
+  const currentCgpa = academicData?.currentCgpa ?? null;
+  const targetCgpa = academicData?.targetCgpa ?? null;
 
   return (
     <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-white">
@@ -145,7 +136,7 @@ export default function Academics() {
               Academic Transcript & Placement Cutoffs
             </h1>
             <p className="text-sm md:text-base text-zinc-400 max-w-3xl leading-relaxed">
-              Real-time CGPA tracking, semester SGPA history, target score calculations, and eligibility screening across 35+ top recruiters.
+              CGPA tracking, semester SGPA history, target score calculations, and eligibility screening across 35+ top recruiters.
             </p>
           </div>
 
@@ -161,7 +152,7 @@ export default function Academics() {
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600/15 border border-blue-500/30 text-blue-300 hover:text-white hover:bg-blue-600/25 text-xs font-semibold transition-all duration-200"
             >
               <Database className="w-3.5 h-3.5 text-blue-400" />
-              <span>VTOP Live Sync & Marksheets</span>
+              <span>VTOP Live Sync</span>
               <ExternalLink className="w-3 h-3 text-blue-400" />
             </Link>
 
@@ -198,11 +189,11 @@ export default function Academics() {
               <span className="text-purple-400 font-mono">Tier-1 Target: 8.00+</span>
             </div>
             <div className="text-4xl font-extrabold text-white font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left">
-              {currentCgpa}
+              {currentCgpa !== null ? currentCgpa : "Unassessed"}
             </div>
             <div className="text-xs text-emerald-400 mt-3 flex items-center gap-1.5 font-medium">
               <TrendingUp className="w-3.5 h-3.5" />
-              <span>Target Goal: {targetCgpa} CGPA</span>
+              <span>Target Goal: {targetCgpa !== null ? `${targetCgpa} CGPA` : "Unset"}</span>
             </div>
           </div>
 
@@ -213,11 +204,11 @@ export default function Academics() {
               <span className="text-zinc-500 font-mono">10th / 12th</span>
             </div>
             <div className="text-3xl font-bold text-white font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left">
-              {tenthPct}% / {twelfthPct}%
+              {tenthPct !== null ? `${tenthPct}%` : "N/A"} / {twelfthPct !== null ? `${twelfthPct}%` : "N/A"}
             </div>
             <div className="text-xs text-emerald-400 mt-3 flex items-center gap-1.5 font-medium">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Clears 60% & 75% benchmarks</span>
+              <span>{tenthPct && twelfthPct ? "Clears 60% & 75% benchmarks" : "Enter Board Scores"}</span>
             </div>
           </div>
 
@@ -256,7 +247,7 @@ export default function Academics() {
               <span className="text-purple-400 font-mono">{academicData?.degree || "B.Tech"}</span>
             </div>
             <div className="text-base font-bold text-white truncate tracking-tight group-hover:scale-[1.01] transition-transform duration-500 origin-left">
-              {branch}
+              {branch || "Unspecified Branch"}
             </div>
             <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
               <Award className="w-3.5 h-3.5 text-zinc-500" />

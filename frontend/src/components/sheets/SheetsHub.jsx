@@ -39,14 +39,14 @@ const CATEGORY_TABS = [
   { id: "competitive_programming", label: "CP Sheet (1)", icon: Trophy },
 ];
 
-export default function SheetsHub({ initialSheetId = null, onSelectSheet = null }) {
+export default function SheetsHub({ initialSheetId = null, onSelectSheet = null, initialSearch = "" }) {
   const [selectedSheetId, setSelectedSheetId] = useState(initialSheetId);
   const [overviewData, setOverviewData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const [activeCategoryTab, setActiveCategoryTab] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearch || "");
   const [searchResults, setSearchResults] = useState(null);
   const [searching, setSearching] = useState(false);
 
@@ -140,30 +140,30 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null 
       <div className="gsap-reveal flex flex-col gap-6 pb-6 border-b border-zinc-800/80">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono">
-              <Sparkles className="w-3.5 h-3.5" />
-              Striver & Placement Curricula Hub
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono">
+              <Layers className="w-3.5 h-3.5 text-zinc-400" />
+              Curriculum & Problem Sets
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-              Master Data Structures, System Design & Core CS
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight">
+              DSA Sheets & Curriculum Tracks
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-sans">
-              28 complete interview sheets and topic playlists by Striver (takeUforward) with 3,150 problems, 2,088 offline tutorials, video lectures, and live Monaco IDE sandbox integration.
+              28 structured interview sheets and playlists featuring 3,150 problems, 2,088 offline tutorials, and integrated sandbox execution.
             </p>
           </div>
 
           {/* Global Stats Counter */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            <div className="px-3.5 py-2.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 text-xs font-mono shadow-md">
-              <span className="text-zinc-500 block text-[10px] uppercase">Curated Lists</span>
-              <span className="text-white font-bold text-sm">28 Lists</span>
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap font-mono text-xs">
+            <div className="px-3.5 py-2.5 rounded-xl bg-zinc-900/90 border border-zinc-800">
+              <span className="text-zinc-500 block text-[10px] uppercase">Curated Sets</span>
+              <span className="text-zinc-100 font-bold text-sm">28 Lists</span>
             </div>
-            <div className="px-3.5 py-2.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 text-xs font-mono shadow-md">
+            <div className="px-3.5 py-2.5 rounded-xl bg-zinc-900/90 border border-zinc-800">
               <span className="text-zinc-500 block text-[10px] uppercase">Total Problems</span>
-              <span className="text-purple-400 font-bold text-sm">3,150 Items</span>
+              <span className="text-zinc-100 font-bold text-sm">3,150 Items</span>
             </div>
-            <div className="px-3.5 py-2.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 text-xs font-mono shadow-md">
-              <span className="text-zinc-500 block text-[10px] uppercase">Offline Tutorials</span>
+            <div className="px-3.5 py-2.5 rounded-xl bg-zinc-900/90 border border-zinc-800">
+              <span className="text-zinc-500 block text-[10px] uppercase">Tutorials</span>
               <span className="text-emerald-400 font-bold text-sm">2,088 Articles</span>
             </div>
           </div>
@@ -181,9 +181,9 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null 
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveCategoryTab(tab.id)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg whitespace-nowrap transition-all duration-150 cursor-pointer ${
                     isActive
-                      ? "bg-zinc-100 text-zinc-950 font-bold shadow-md"
+                      ? "bg-zinc-100 text-zinc-950 font-bold"
                       : "bg-zinc-900/80 text-zinc-400 hover:text-white border border-zinc-800/80"
                   }`}
                 >
@@ -201,25 +201,25 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null 
         <div className="gsap-reveal space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
-              <Flame className="w-3.5 h-3.5 text-purple-400" />
-              Featured Master Sheets
+              <Target className="w-3.5 h-3.5 text-zinc-400" />
+              Core Study Tracks
             </h3>
-            <span className="text-[11px] text-zinc-500 font-mono">Most popular placement tracks</span>
+            <span className="text-[11px] text-zinc-500 font-mono">High-yield interview sets</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <SpotlightCard
               title="Striver's A2Z DSA Sheet"
               subtitle="474 Problems · 18 Sections"
-              description="Learn DSA from scratch to advanced FAANG interview readiness."
+              description="Comprehensive path from fundamental patterns to advanced interview topics."
               badge="Complete Path"
-              badgeColor="bg-purple-500/10 text-purple-400 border-purple-500/20"
+              badgeColor="bg-zinc-800 text-zinc-200 border-zinc-700"
               onClick={() => setSelectedSheetId("strivers-a2z-dsa-sheet")}
             />
             <SpotlightCard
               title="Striver's SDE Sheet"
               subtitle="191 Problems · 27 Sections"
-              description="Top coding interview problems frequently asked in tier-1 companies."
+              description="Core problem set frequently tested in tier-1 technical interviews."
               badge="High Yield"
               badgeColor="bg-amber-500/10 text-amber-400 border-amber-500/20"
               onClick={() => setSelectedSheetId("strivers-sde-sheet")}
@@ -227,15 +227,15 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null 
             <SpotlightCard
               title="Blind 75 LeetCode Sheet"
               subtitle="75 Problems · 10 Sections"
-              description="The essential 75 LeetCode problems every engineer must master."
-              badge="FAANG Core"
+              description="Essential pattern-covering problem set for technical assessments."
+              badge="Core 75"
               badgeColor="bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
               onClick={() => setSelectedSheetId("blind-75-sheet")}
             />
             <SpotlightCard
               title="Striver 79 Last Moment Sheet"
               subtitle="79 Problems · 11 Sections"
-              description="High-yield last-minute rapid revision for upcoming interviews."
+              description="Focused high-yield review for upcoming technical interview rounds."
               badge="Speed Prep"
               badgeColor="bg-rose-500/10 text-rose-400 border-rose-500/20"
               onClick={() => setSelectedSheetId("strivers-79-sheet")}
@@ -251,13 +251,13 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null 
             <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search 3,150 problems across all 28 sheets (e.g. Two Sum, LRU Cache, Graph, B-Tree)..."
+              placeholder="Search 3,150 problems (e.g. Two Sum, LRU Cache, BFS, Dynamic Programming)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-zinc-950/90 border border-zinc-800 rounded-2xl pl-10 pr-4 py-3 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors shadow-inner"
+              className="w-full bg-zinc-950/90 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
             />
             {searching && (
-              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-purple-400 border-t-transparent animate-spin" />
+              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-zinc-400 border-t-transparent animate-spin" />
             )}
           </div>
         </div>
@@ -431,17 +431,17 @@ function SpotlightCard({ title, subtitle, description, badge, badgeColor, onClic
   return (
     <div
       onClick={onClick}
-      className="group p-5 rounded-2xl bg-gradient-to-b from-[#16161c] to-[#0e0e11] border border-zinc-800/90 hover:border-purple-500/50 shadow-xl hover:shadow-purple-500/5 cursor-pointer transition-all duration-300 flex flex-col justify-between space-y-4"
+      className="group p-5 rounded-xl bg-[#121215] border border-zinc-800/90 hover:border-zinc-700 cursor-pointer transition-all duration-200 flex flex-col justify-between space-y-4"
     >
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${badgeColor}`}>
             {badge}
           </span>
-          <ArrowRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-purple-400 group-hover:translate-x-1 transition-all" />
+          <ArrowRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300 group-hover:translate-x-0.5 transition-all" />
         </div>
 
-        <h3 className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors tracking-tight">
+        <h3 className="text-sm font-bold text-white group-hover:text-zinc-200 transition-colors tracking-tight">
           {title}
         </h3>
         <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed font-sans">{description}</p>
@@ -461,7 +461,7 @@ function SheetCard({ sheet, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="group p-5 rounded-2xl bg-[#0e0e11] border border-zinc-800/80 hover:border-purple-500/50 shadow-lg hover:shadow-purple-500/5 cursor-pointer transition-all duration-300 flex flex-col justify-between space-y-4"
+      className="group p-5 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 cursor-pointer transition-all duration-200 flex flex-col justify-between space-y-4"
     >
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -477,7 +477,7 @@ function SheetCard({ sheet, onClick }) {
         </div>
 
         <div>
-          <h3 className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors tracking-tight leading-snug line-clamp-2">
+          <h3 className="text-sm font-bold text-white group-hover:text-zinc-200 transition-colors tracking-tight leading-snug line-clamp-2">
             {sheet.title}
           </h3>
           {sheet.description && (
@@ -511,9 +511,9 @@ function SheetCard({ sheet, onClick }) {
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-1 text-xs font-semibold text-purple-400 group-hover:text-purple-300">
+        <div className="flex items-center justify-between pt-1 text-xs font-semibold text-zinc-300 group-hover:text-white">
           <span>Open Sheet</span>
-          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform text-zinc-400" />
         </div>
       </div>
     </div>

@@ -167,7 +167,7 @@ export async function joinSquadByCode(userId, userName, code) {
   squad.messages.unshift({
     senderId: userId,
     senderName: "System",
-    text: `${userName || "Candidate"} joined the squad! Welcome aboard! 🎉`,
+    text: `${userName || "Candidate"} joined the squad! Welcome aboard!`,
     type: "system",
     createdAt: new Date(),
   });
@@ -183,7 +183,7 @@ export async function createSquad(userId, userName, squadData) {
     name: squadData.name,
     code,
     description: squadData.description || "Campus placement peer group.",
-    avatar: squadData.avatar || "🚀",
+    avatar: squadData.avatar || "",
     targetTier: squadData.targetTier || "Tier 1 Product Companies",
     creatorId: userId,
     members: [

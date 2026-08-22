@@ -102,25 +102,22 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
   }, [readinessScore, streakDays, completedCount, totalCount, userProfile]);
 
   return (
-    <div className="bg-[#18181b] border border-gray-800/80 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-      {/* Decorative gradient blur */}
-      <div className="absolute top-0 right-0 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-6 relative overflow-hidden">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 relative z-10">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400">
-              <Zap className="w-5 h-5" />
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-purple-400">
+              <Zap className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 {dynamicCopy.title}
-                <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-normal border border-purple-500/30">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-400 font-mono font-normal border border-zinc-800">
                   {dynamicCopy.badgeText}
                 </span>
               </h2>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-zinc-400 mt-0.5">
                 {dynamicCopy.subtitle}
               </p>
             </div>
@@ -129,39 +126,40 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
 
         {/* Daily Streak & Velocity */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#222] border border-gray-800 text-xs text-gray-300">
-            <span className="text-amber-400 font-bold font-mono">{dynamicCopy.streakNote}</span>
+          <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300">
+            <span className="text-amber-400 font-semibold">{dynamicCopy.streakNote}</span>
           </div>
           <Link
             to="/app/roadmap"
-            className="flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 font-medium transition-colors"
+            className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white font-mono transition-colors"
           >
-            Full Roadmap <ArrowRight className="w-3.5 h-3.5" />
+            <span>Roadmap</span>
+            <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
       </div>
 
       {/* Daily Progress Tracker */}
-      <div className="mb-6 p-4 rounded-xl bg-[#121214] border border-gray-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="mb-6 p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <div className="text-xs text-gray-400 font-medium">Daily Goal Progress</div>
-          <div className="text-sm font-semibold text-white mt-0.5">
+          <div className="text-[11px] text-zinc-400 font-mono">Daily Progress</div>
+          <div className="text-xs font-medium text-zinc-200 mt-0.5">
             {dynamicCopy.progressSummary}
           </div>
         </div>
         <div className="flex items-center gap-3 min-w-[180px]">
-          <div className="flex-1 bg-gray-800 rounded-full h-2 overflow-hidden">
+          <div className="flex-1 bg-zinc-950 rounded-full h-1.5 overflow-hidden border border-zinc-800">
             <div
-              className="bg-gradient-to-r from-purple-500 to-indigo-500 h-2 rounded-full transition-all duration-500"
+              className="bg-purple-500 h-1.5 rounded-full transition-all duration-500"
               style={{ width: `${progressPct}%` }}
             />
           </div>
-          <span className="text-xs font-bold text-purple-400">{progressPct}%</span>
+          <span className="text-xs font-mono text-purple-400">{progressPct}%</span>
         </div>
       </div>
 
       {/* Task Cards List */}
-      <div className="space-y-3 relative z-10">
+      <div className="space-y-2.5">
         {recommendations.map((item) => {
           const isDone = completedTaskIds.has(item.id);
           const IconComp = CATEGORY_ICONS[item.category] || Target;
@@ -170,10 +168,10 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
           return (
             <div
               key={item.id}
-              className={`group p-4 rounded-xl border transition-all duration-200 ${
+              className={`p-4 rounded-xl border transition-all duration-200 ${
                 isDone
-                  ? "bg-[#141416]/50 border-gray-800/40 opacity-60"
-                  : "bg-[#1e1e24]/70 hover:bg-[#23232b] border-gray-800/80 hover:border-purple-500/40"
+                  ? "bg-zinc-950/40 border-zinc-800/40 opacity-60"
+                  : "bg-zinc-900/50 hover:bg-zinc-900 border-zinc-800 hover:border-zinc-700"
               }`}
             >
               <div className="flex items-start gap-3">
@@ -181,57 +179,57 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
                 <button
                   type="button"
                   onClick={() => handleToggleComplete(item.id)}
-                  className="mt-0.5 text-gray-500 hover:text-purple-400 transition-colors shrink-0"
+                  className="mt-0.5 text-zinc-500 hover:text-purple-400 transition-colors shrink-0 cursor-pointer"
                 >
                   {isDone ? (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   ) : (
-                    <Circle className="w-5 h-5" />
+                    <Circle className="w-4 h-4" />
                   )}
                 </button>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-md border ${colorClass}`}>
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${colorClass}`}>
                       {item.categoryLabel}
                     </span>
 
                     {item.priority === "CRITICAL" && (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">
-                        HIGH PRIORITY
+                      <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                        Priority
                       </span>
                     )}
 
-                    <div className="flex items-center gap-1 text-[11px] text-gray-400 ml-auto">
-                      <Clock className="w-3 h-3 text-gray-500" />
+                    <div className="flex items-center gap-1 text-[11px] text-zinc-500 font-mono ml-auto">
+                      <Clock className="w-3 h-3 text-zinc-500" />
                       <span>{item.estimatedMinutes} mins</span>
                     </div>
 
-                    <div className="flex items-center gap-1 text-[11px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                    <div className="flex items-center gap-1 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                       <TrendingUp className="w-3 h-3" />
                       <span>{item.impactReadinessBoost}</span>
                     </div>
                   </div>
 
                   <h3
-                    className={`text-sm font-semibold transition-colors ${
-                      isDone ? "text-gray-400 line-through" : "text-white group-hover:text-purple-300"
+                    className={`text-xs font-semibold transition-colors ${
+                      isDone ? "text-zinc-500 line-through" : "text-zinc-100"
                     }`}
                   >
                     {item.title}
                   </h3>
 
-                  <p className="text-xs text-gray-400 mt-1 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-zinc-400 mt-1 line-clamp-2 leading-relaxed font-sans">
                     {item.description}
                   </p>
 
                   <div className="mt-3 flex items-center justify-between">
                     <Link
                       to={item.actionUrl}
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-purple-400 hover:text-purple-300 hover:underline transition-colors"
+                      className="inline-flex items-center gap-1 text-xs font-mono text-purple-400 hover:text-purple-300 hover:underline transition-colors"
                     >
-                      {item.actionLabel || "Start Task"}
+                      <span>{item.actionLabel || "Start Task"}</span>
                       <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>

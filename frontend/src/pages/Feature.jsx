@@ -41,7 +41,7 @@ const FeaturesGrid = () => {
             calculatedReadiness = Math.round(data.overallReadiness);
           }
           if (data.breakdown?.interview?.score) {
-            tone = data.breakdown.interview.score > 80 ? "Articulate & Poised" : "Elevated";
+            tone = data.breakdown.interview.score > 80 ? "Articulate & Poised" : "Clear & Structured";
           }
         }
 
@@ -90,10 +90,10 @@ const FeaturesGrid = () => {
         {/* Section Header */}
         <div className="flex flex-col items-center text-center mb-16 md:mb-24">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#428475]/25 border border-[#89D7B7]/30 text-[#89D7B7] text-xs font-mono uppercase tracking-widest mb-4">
-            <Zap className="w-3.5 h-3.5 text-[#89D7B7]" /> Platform Architecture & Telemetry
+            <Zap className="w-3.5 h-3.5 text-[#89D7B7]" /> System Architecture
           </div>
           <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight max-w-4xl text-[#FFF4E1]">
-            Engineering Precision for Placement Excellence
+            Core Platform Capabilities
           </h2>
         </div>
 
@@ -113,17 +113,17 @@ const FeaturesGrid = () => {
                 <Bot className="w-6 h-6" />
               </div>
               <h3 className="text-2xl md:text-3xl font-bold text-[#FFF4E1] mb-3 tracking-tight">
-                Neural AI Interview Simulation
+                Technical Interview Simulation
               </h3>
               <p className="text-[#FFF4E1]/75 text-sm md:text-base leading-relaxed mb-6">
-                Engineered with real-time biometric feedback analyzing voice pitch, eye tracking, posture, and technical clarity during live mock sessions.
+                Real-time telemetry measuring speech pacing, gaze focus, posture alignment, and technical communication.
               </p>
             </div>
 
             {/* Micro Graphic Component with Dynamic Telemetry */}
             <div className="rounded-2xl bg-[#1A312C]/90 border border-[#428475]/35 p-5 backdrop-blur-md">
               <div className="flex items-center justify-between text-xs font-mono text-[#FFF4E1]/70 mb-3">
-                <span>SPEECH_ANALYSIS_ENGINE</span>
+                <span>AUDIO_ANALYSIS</span>
                 <span className="text-[#89D7B7] font-semibold">{telemetryData.accuracy} ACCURACY</span>
               </div>
               <div className="h-2 w-full bg-[#12221e] rounded-full overflow-hidden">
@@ -149,10 +149,10 @@ const FeaturesGrid = () => {
                   <FileSearch className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl md:text-2xl font-bold text-[#FFF4E1] mb-2 tracking-tight">
-                  ATS Resume Optimization Radar
+                  ATS Resume Analysis
                 </h3>
                 <p className="text-[#FFF4E1]/75 text-sm leading-relaxed max-w-md">
-                  Parse, score, and reconstruct your resume against top tech company job descriptions to pass enterprise ATS screeners.
+                  Parse and benchmark resume content against industry job requirements with automated keyword matching.
                 </p>
               </div>
               <div className="hidden sm:flex flex-col items-end justify-center">
@@ -162,7 +162,7 @@ const FeaturesGrid = () => {
             </div>
           </motion.div>
 
-          {/* Bento Card 3: DSA LeetCode Arena */}
+          {/* Bento Card 3: DSA Arena */}
           <motion.div
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
@@ -173,14 +173,14 @@ const FeaturesGrid = () => {
                 <Code2 className="w-5 h-5" />
               </div>
               <h3 className="text-lg font-bold text-[#FFF4E1] mb-1.5 tracking-tight">
-                {telemetryData.problemCount.toLocaleString()}+ LeetCode Arena
+                {telemetryData.problemCount.toLocaleString()}+ Problem Arena
               </h3>
               <p className="text-[#FFF4E1]/75 text-xs leading-relaxed">
-                Full-scale coding environment with live Python test sandbox, Monaco IDE, and Gemini AI hints.
+                Integrated code editor with test runners, execution sandboxes, and structured problem sets.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-[#428475]/25 flex items-center justify-between text-xs text-[#89D7B7]">
-              <span className="font-semibold">Explore Arena</span>
+              <span className="font-semibold">Open Arena</span>
               <Zap className="w-3.5 h-3.5 text-[#89D7B7]" />
             </div>
           </motion.div>
@@ -196,10 +196,10 @@ const FeaturesGrid = () => {
                 <BarChart3 className="w-5 h-5" />
               </div>
               <h3 className="text-lg font-bold text-[#FFF4E1] mb-1.5 tracking-tight">
-                Readiness Analytics ({telemetryData.readinessScore}/100)
+                Readiness Index ({telemetryData.readinessScore}/100)
               </h3>
               <p className="text-[#FFF4E1]/75 text-xs leading-relaxed">
-                Track behavioral, technical, and communication scores across your preparation lifecycle.
+                Continuous scoring across technical assessments, behavioral rounds, and resume metrics.
               </p>
             </div>
           </motion.div>

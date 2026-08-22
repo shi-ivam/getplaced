@@ -27,6 +27,7 @@ import {
   ChevronUp,
   Radio,
   BookOpen,
+  X,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,6 +78,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
   const [selectedLanguage, setSelectedLanguage] = useState("all");
   const [selectedType, setSelectedType] = useState("all"); // 'all' | 'original' | 'fork'
   const [sortBy, setSortBy] = useState("stars"); // 'stars' | 'updated' | 'pushed' | 'name' | 'size'
+  const [selectedRepoModal, setSelectedRepoModal] = useState(null);
 
   // Fetch connected profile on mount
   useEffect(() => {
@@ -348,7 +350,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
               </div>
               {!connected && (
                 <CardDescription className="text-zinc-400 text-xs mt-0.5">
-                  Connect your public GitHub username to import repositories, language distribution, and project stats.
+                  Import public repositories, language distribution, and project statistics.
                 </CardDescription>
               )}
             </div>
@@ -432,7 +434,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                 <span className="font-semibold text-amber-300">
                   Unable to refresh GitHub repositories.
                 </span>{" "}
-                <span>Showing your cached repository snapshot.</span>
+                <span>Showing cached repository snapshot.</span>
                 {profile.syncError && (
                   <div className="text-[11px] text-amber-400/80 font-mono mt-0.5">
                     Reason: {profile.syncError}
@@ -469,7 +471,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                     </h3>
                   </div>
                   <p className="text-xs text-zinc-400 max-w-xl">
-                    Import your repositories to calculate project readiness and technology breakdown.
+                    Import public repositories to evaluate projects and language breakdown.
                   </p>
                 </div>
 
@@ -494,9 +496,9 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                     <button
                       type="button"
                       onClick={() => setInputUsername("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-white"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-white p-1"
                     >
-                      ✕
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
@@ -509,7 +511,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                   {connecting ? (
                     <>
                       <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      Analyzing Repositories...
+                      Connecting...
                     </>
                   ) : (
                     <>
@@ -634,7 +636,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                   <div className="flex items-center gap-2">
                     <Code2 className="w-4 h-4 text-zinc-400" />
                     <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
-                      Technology & Language Breakdown
+                      Language Distribution
                     </h4>
                   </div>
                 </div>
@@ -719,7 +721,11 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {topReposList.map((repo, idx) => (
-                      <RepositoryCard key={repo.githubId || idx} repo={repo} />
+                      <RepositoryCard
+                        key={repo.githubId || idx}
+                        repo={repo}
+                        onSelectRepo={setSelectedRepoModal}
+                      />
                     ))}
                   </div>
                 )}
@@ -739,16 +745,16 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search repositories by name, topic, or description..."
+                        placeholder="Search repositories..."
                         className="pl-9 bg-[#0f1017] border-zinc-700 text-white placeholder:text-zinc-600 text-xs h-9"
                       />
                       {searchQuery && (
                         <button
                           type="button"
                           onClick={() => setSearchQuery("")}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-white"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-white p-1"
                         >
-                          ✕
+                          <X className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </div>
@@ -789,7 +795,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                         onChange={(e) => setSortBy(e.target.value)}
                         className="bg-[#0f1017] border border-zinc-700 rounded-md text-xs text-zinc-200 px-2.5 py-1.5 focus:outline-none focus:border-zinc-500 font-mono cursor-pointer h-9"
                       >
-                        <option value="stars">Sort: Most Stars ⭐</option>
+                        <option value="stars">Sort: Most Stars</option>
                         <option value="updated">Sort: Recently Updated</option>
                         <option value="pushed">Sort: Recently Pushed</option>
                         <option value="name">Sort: Name (A-Z)</option>
@@ -838,7 +844,11 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {filteredRepositories.map((repo, idx) => (
-                      <RepositoryCard key={repo.githubId || idx} repo={repo} />
+                      <RepositoryCard
+                        key={repo.githubId || idx}
+                        repo={repo}
+                        onSelectRepo={setSelectedRepoModal}
+                      />
                     ))}
                   </div>
                 )}
@@ -847,11 +857,120 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
           </div>
         )}
       </CardContent>
+
+      {/* Progressive Project Detail Modal */}
+      {selectedRepoModal && (
+        <div
+          onClick={() => setSelectedRepoModal(null)}
+          className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#121215] border border-zinc-800 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl relative"
+          >
+            <div className="flex items-start justify-between border-b border-zinc-800 pb-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <FolderGit2 className="w-4 h-4 text-emerald-400" />
+                  <h3 className="text-sm font-bold text-white font-mono">
+                    {selectedRepoModal.name}
+                  </h3>
+                  {selectedRepoModal.isFork && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 font-mono">
+                      Fork
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-zinc-400 font-sans">
+                  {selectedRepoModal.description || "Production repository codebase."}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedRepoModal(null)}
+                className="text-zinc-500 hover:text-white p-1 rounded-lg hover:bg-zinc-800"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Metrics Matrix */}
+            <div className="grid grid-cols-3 gap-2.5 text-center text-xs font-mono">
+              <div className="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800">
+                <span className="text-[10px] text-zinc-500 block">Language</span>
+                <span className="font-bold text-zinc-200">{selectedRepoModal.language || "TypeScript"}</span>
+              </div>
+              <div className="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800">
+                <span className="text-[10px] text-zinc-500 block">Stars</span>
+                <span className="font-bold text-amber-400">{selectedRepoModal.stars || 0}</span>
+              </div>
+              <div className="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800">
+                <span className="text-[10px] text-zinc-500 block">Forks</span>
+                <span className="font-bold text-sky-400">{selectedRepoModal.forks || 0}</span>
+              </div>
+            </div>
+
+            {/* Architecture Verdict */}
+            <div className="p-3.5 bg-zinc-900/60 border border-zinc-800/80 rounded-xl space-y-1 text-xs">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-semibold block">
+                Repository Assessment
+              </span>
+              <p className="text-zinc-300 font-sans leading-relaxed text-xs">
+                {selectedRepoModal.isFork
+                  ? "Open-source contribution and upstream repository fork."
+                  : (selectedRepoModal.stars > 5 || selectedRepoModal.hasLiveDemo)
+                  ? "Production project with verified architectural complexity."
+                  : "Application repository. Add a live demo URL to demonstrate availability."}
+              </p>
+            </div>
+
+            {/* Topics */}
+            {selectedRepoModal.topics && selectedRepoModal.topics.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-mono uppercase text-zinc-500 block">Topics</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedRepoModal.topics.map((t, i) => (
+                    <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-300 border border-zinc-800 font-mono">
+                      #{t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="pt-2 border-t border-zinc-800 flex items-center justify-between gap-3">
+              {selectedRepoModal.hasLiveDemo && selectedRepoModal.liveDemoUrl && (
+                <a
+                  href={selectedRepoModal.liveDemoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold text-center flex items-center justify-center gap-1.5"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>Open Live Demo</span>
+                </a>
+              )}
+              <a
+                href={selectedRepoModal.htmlUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium text-center flex items-center justify-center gap-1.5"
+              >
+                <FolderGit2 className="w-3.5 h-3.5" />
+                <span>View on GitHub</span>
+                <ExternalLink className="w-3 h-3 text-zinc-500" />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
 
-function RepositoryCard({ repo }) {
+function RepositoryCard({ repo, onSelectRepo }) {
   const langColor = LANGUAGE_COLORS[repo.language] || "#a1a1aa";
 
   return (
@@ -939,6 +1058,16 @@ function RepositoryCard({ repo }) {
 
         {/* Links */}
         <div className="flex items-center gap-2">
+          {onSelectRepo && (
+            <button
+              type="button"
+              onClick={() => onSelectRepo(repo)}
+              className="text-zinc-400 hover:text-emerald-400 text-[11px] font-mono px-2 py-0.5 rounded hover:bg-zinc-800 transition-colors cursor-pointer"
+            >
+              [ Details ]
+            </button>
+          )}
+
           {repo.hasLiveDemo && repo.liveDemoUrl && (
             <a
               href={repo.liveDemoUrl}

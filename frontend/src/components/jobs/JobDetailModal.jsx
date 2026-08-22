@@ -497,9 +497,10 @@ export default function JobDetailModal({
                     {(job.matchedSkills || []).map((s, idx) => (
                       <span
                         key={idx}
-                        className="text-xs font-mono px-2.5 py-1 rounded-lg bg-[#C7F36B]/10 text-[#C7F36B] border border-[#C7F36B]/30"
+                        className="text-xs font-mono px-2.5 py-1 rounded-lg bg-[#C7F36B]/10 text-[#C7F36B] border border-[#C7F36B]/30 flex items-center gap-1"
                       >
-                        ✓ {s}
+                        <Check className="w-3 h-3 text-[#C7F36B]" />
+                        <span>{s}</span>
                       </span>
                     ))}
                   </div>

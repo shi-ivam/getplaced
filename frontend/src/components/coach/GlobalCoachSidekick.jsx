@@ -332,58 +332,54 @@ export default function GlobalCoachSidekick() {
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="relative flex items-center gap-2.5 px-5 py-3 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-zinc-950 font-medium text-xs shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer border border-emerald-300/40 backdrop-blur-md"
+            className="relative flex items-center gap-2 px-4 py-2.5 rounded-full bg-zinc-900 text-zinc-100 hover:text-white font-medium text-xs shadow-xl hover:bg-zinc-800 transition-all duration-200 cursor-pointer border border-zinc-700 backdrop-blur-md font-mono"
           >
-            <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 opacity-30 blur-md group-hover:opacity-60 transition-opacity -z-10 animate-pulse" />
-            <div className="w-5 h-5 rounded-full bg-zinc-950/20 flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5 text-zinc-950 fill-zinc-950 animate-pulse" />
+            <div className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
+              <Sparkles className="w-2.5 h-2.5 text-emerald-400" />
             </div>
-            <span className="font-bold tracking-tight">getPlacedAI</span>
-            <span className="hidden sm:inline-block text-[10px] font-mono opacity-80 bg-zinc-950/20 px-1.5 py-0.5 rounded">
-              ⌘K
+            <span className="font-semibold tracking-tight font-sans">Career Coach</span>
+            <span className="hidden sm:inline-block text-[10px] font-mono text-zinc-400 bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-700">
+              Cmd+K
             </span>
           </button>
         </div>
       )}
 
-      {/* 2. FULLSCREEN BACKDROP OVERLAY (GRADUAL BLUR & BACKGROUND UNINTERACTIVE) */}
+      {/* 2. FULLSCREEN BACKDROP OVERLAY */}
       {isOpen && (
         <div
           ref={backdropRef}
           onClick={handleClose}
           className="fixed inset-0 z-40 bg-black/60 cursor-pointer"
-          title="Click backdrop to dismiss getPlacedAI"
+          title="Click backdrop to dismiss"
         />
       )}
 
-      {/* 3. ASSISTANT POPUP DRAWER (BOTTOM MIDDLE WITH SLIDE-UP REVEAL) */}
+      {/* 3. ASSISTANT POPUP DRAWER */}
       {isOpen && (
         <div
           ref={popupRef}
-          className={`fixed z-50 transition-[width,height] duration-300 ease-out flex flex-col bg-[#09090b]/95 backdrop-blur-2xl border border-zinc-800/90 shadow-[0_0_80px_rgba(16,185,129,0.2)] rounded-3xl overflow-hidden ${
+          className={`fixed z-50 transition-[width,height] duration-300 ease-out flex flex-col bg-[#0c0c0e] border border-zinc-800 shadow-2xl rounded-2xl overflow-hidden ${
             isExpanded
               ? "bottom-3 left-3 right-3 sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2 sm:w-[960px] md:w-[1120px] lg:w-[1240px] max-w-[96vw] h-[calc(100dvh-1.5rem)] sm:h-[88vh] max-h-[calc(100dvh-1.5rem)] sm:max-h-[88vh]"
               : "bottom-3 left-3 right-3 sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2 sm:w-[760px] md:w-[840px] lg:w-[920px] max-w-[94vw] h-[calc(100dvh-1.5rem)] sm:h-[680px] max-h-[calc(100dvh-1.5rem)] sm:max-h-[88vh]"
           }`}
         >
-          {/* Subtle gradient accent border top */}
-          <div className="h-0.5 w-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500 shrink-0" />
-
           {/* Header */}
           <div
             ref={headerRef}
-            className="px-4 py-3.5 border-b border-zinc-800/80 bg-zinc-950/90 flex items-center justify-between shrink-0"
+            className="px-4 py-3 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between shrink-0"
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 fill-emerald-400/20" />
+              <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 text-emerald-400 flex items-center justify-center">
+                <Sparkles className="w-3.5 h-3.5" />
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <h3 className="text-xs font-semibold text-zinc-100">getPlacedAI</h3>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <h3 className="text-xs font-semibold text-zinc-100">Career Coach</h3>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 </div>
-                <span className="text-[10px] font-mono text-zinc-400">
+                <span className="text-[10px] font-mono text-zinc-500">
                   Surface: {location.pathname.replace("/app/", "") || "Overview"}
                 </span>
               </div>
@@ -422,7 +418,7 @@ export default function GlobalCoachSidekick() {
             {loadingHistory && (
               <div className="flex items-center justify-center py-10 text-zinc-500 gap-2 font-mono text-xs">
                 <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
-                <span>Loading placement coach...</span>
+                <span>Loading coach...</span>
               </div>
             )}
 
@@ -438,7 +434,7 @@ export default function GlobalCoachSidekick() {
                   className={`flex gap-2.5 ${isCoach ? "items-start" : "items-end justify-end"}`}
                 >
                   {isCoach && (
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                    <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                       <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
                     </div>
                   )}
@@ -446,7 +442,7 @@ export default function GlobalCoachSidekick() {
                   <div
                     className={`max-w-[92%] sm:max-w-[88%] rounded-2xl px-4 py-3.5 ${
                       isCoach
-                        ? "bg-[#0e0e13]/85 border border-zinc-800/90 text-zinc-200 shadow-sm"
+                        ? "bg-zinc-900/60 border border-zinc-800 text-zinc-200 shadow-sm"
                         : "bg-zinc-100 text-zinc-950 font-medium"
                     }`}
                   >
@@ -477,8 +473,8 @@ export default function GlobalCoachSidekick() {
                           >
                             {speakingMsgIdx === idx ? (
                               <>
-                                <VolumeX className="w-3 h-3 text-emerald-400 animate-pulse" />
-                                <span className="text-emerald-400 font-mono">Speaking...</span>
+                                <VolumeX className="w-3 h-3 text-emerald-400" />
+                                <span className="text-emerald-400 font-mono">Playing</span>
                               </>
                             ) : (
                               <>
@@ -499,12 +495,12 @@ export default function GlobalCoachSidekick() {
 
             {sending && (
               <div className="flex items-start gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                   <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
                 </div>
-                <div className="bg-[#0e0e13]/85 border border-zinc-800/90 rounded-2xl px-4 py-3 text-xs text-zinc-400 flex items-center gap-2 font-mono">
+                <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-zinc-400 flex items-center gap-2 font-mono">
                   <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
-                  <span>Executing platform tools & synthesizing...</span>
+                  <span>Processing response...</span>
                 </div>
               </div>
             )}
@@ -512,13 +508,13 @@ export default function GlobalCoachSidekick() {
 
           {/* Quick-Select Suggestion Chips */}
           {chips && chips.length > 0 && (
-            <div className="px-3.5 py-2 bg-zinc-950/80 border-t border-zinc-800/60 flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shrink-0">
+            <div className="px-3.5 py-2 bg-zinc-950 border-t border-zinc-800/60 flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shrink-0">
               {chips.map((chip, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => handleSendMessage(chip)}
-                  className="shrink-0 text-[11px] px-2.5 py-1 rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition-colors font-sans cursor-pointer text-left"
+                  className="shrink-0 text-[11px] px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition-colors font-sans cursor-pointer text-left"
                 >
                   {chip}
                 </button>
@@ -533,7 +529,7 @@ export default function GlobalCoachSidekick() {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="p-3 border-t border-zinc-800/80 bg-zinc-950/90 flex items-center gap-2 shrink-0"
+            className="p-3 border-t border-zinc-800 bg-zinc-950 flex items-center gap-2 shrink-0"
           >
             <button
               type="button"
@@ -552,14 +548,14 @@ export default function GlobalCoachSidekick() {
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Ask coach anything, audit gaps, update roadmap..."
-              className="flex-1 bg-zinc-900 border border-zinc-800/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/40 transition-all font-sans"
+              placeholder="Ask anything about requirements, roadmap, gaps..."
+              className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-all font-sans"
             />
 
             <button
               type="submit"
               disabled={!inputMessage.trim() || sending}
-              className="p-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-950 font-semibold transition-all cursor-pointer"
+              className="p-2 rounded-xl bg-zinc-100 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed text-zinc-950 font-semibold transition-all cursor-pointer"
             >
               <Send className="w-4 h-4" />
             </button>

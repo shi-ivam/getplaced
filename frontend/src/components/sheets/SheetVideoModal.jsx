@@ -40,16 +40,16 @@ export default function SheetVideoModal({ videoUrl, title, onClose }) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-[#0c0c0e] border border-zinc-800 rounded-3xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl p-4 sm:p-6 space-y-4"
+        className="bg-[#0c0c0e] border border-zinc-800 rounded-xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden p-4 sm:p-6 space-y-4"
       >
         <div className="flex items-center justify-between gap-4 pb-3 border-b border-zinc-800/80 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="p-2 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 shrink-0">
+            <div className="p-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 shrink-0">
               <Play className="w-4 h-4 fill-current" />
             </div>
             <div className="min-w-0">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block">Video Solution Lecture</span>
-              <h3 className="text-sm sm:text-base font-bold text-white truncate">{title || "Striver Video Solution"}</h3>
+              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block">Video Solution</span>
+              <h3 className="text-sm sm:text-base font-bold text-white truncate">{title || "Video Solution"}</h3>
             </div>
           </div>
 
@@ -58,15 +58,15 @@ export default function SheetVideoModal({ videoUrl, title, onClose }) {
               href={videoUrl}
               target="_blank"
               rel="noreferrer"
-              className="p-2 text-zinc-400 hover:text-white rounded-xl bg-zinc-900 border border-zinc-800 transition-colors inline-flex items-center gap-1 text-xs"
-              title="Open directly on YouTube"
+              className="p-2 text-zinc-400 hover:text-white rounded-lg bg-zinc-900 border border-zinc-800 transition-colors inline-flex items-center gap-1 text-xs"
+              title="Open on YouTube"
             >
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
             <button
               type="button"
               onClick={onClose}
-              className="p-2 text-zinc-400 hover:text-white rounded-xl bg-zinc-900 border border-zinc-800 hover:border-rose-500/50 hover:text-rose-300 transition-colors cursor-pointer"
+              className="p-2 text-zinc-400 hover:text-white rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -74,7 +74,7 @@ export default function SheetVideoModal({ videoUrl, title, onClose }) {
         </div>
 
         {/* Video Frame with strict height bounds to avoid window overflow */}
-        <div className="relative aspect-video w-full max-h-[65vh] rounded-2xl overflow-hidden bg-black border border-zinc-800 shadow-inner shrink-0">
+        <div className="relative aspect-video w-full max-h-[65vh] rounded-xl overflow-hidden bg-black border border-zinc-800 shrink-0">
           <iframe
             src={embedUrl}
             title={title || "Video lecture"}

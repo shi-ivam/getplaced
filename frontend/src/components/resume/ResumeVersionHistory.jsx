@@ -41,10 +41,10 @@ export default function ResumeVersionHistory({
           <div className="space-y-1">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
               <History className="w-4 h-4 text-neutral-400" />
-              Resume Version History & Score Trajectory
+              Version History & Score Trajectory
             </h2>
             <p className="text-xs text-neutral-400">
-              Preserves previous revisions and tracks cumulative ATS improvements over time.
+              Review previous versions and track ATS improvements over time.
             </p>
           </div>
 

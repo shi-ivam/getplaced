@@ -129,10 +129,10 @@ export default function ResumeBuilderEditor({
           <div className="space-y-1">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
               <Edit3 className="w-4 h-4 text-neutral-400" />
-              Interactive Resume Authoring & AI Polish
+              Resume Builder & Section Editor
             </h2>
             <p className="text-xs text-neutral-400">
-              Live resume builder with in-line Google XYZ bullet enhancers and direct ATS sync.
+              Structured resume editor with XYZ metric bullet enhancements and ATS synchronization.
             </p>
           </div>
 
@@ -149,7 +149,7 @@ export default function ResumeBuilderEditor({
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white text-black font-semibold rounded-xl text-xs shadow-sm hover:bg-neutral-200 transition"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              Evaluate in ATS Engine
+              Evaluate ATS Score
             </button>
           </div>
         </div>
@@ -211,7 +211,7 @@ export default function ResumeBuilderEditor({
               className="flex items-center gap-1 text-[11px] text-neutral-300 hover:text-white bg-white/[0.05] border border-white/[0.08] px-2.5 py-1 rounded-lg transition font-mono"
             >
               <Sparkles className="w-3 h-3 text-emerald-400" />
-              {isImprovingSection ? "Optimizing..." : "AI Polish"}
+              {isImprovingSection ? "Optimizing..." : "Polish Summary"}
             </button>
           </div>
           <textarea
@@ -226,7 +226,7 @@ export default function ResumeBuilderEditor({
         <div className="space-y-4 pt-2 border-t border-white/[0.06]">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400">
-              Work Experience & Impact Bullets
+              Work Experience & Bullets
             </span>
             <button
               onClick={() => {
@@ -282,7 +282,7 @@ export default function ResumeBuilderEditor({
                 {/* Bullets List */}
                 <div className="space-y-2 pt-1">
                   <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider block">
-                    Impact Bullet Points (Google XYZ):
+                    Impact Bullet Points (XYZ Framework):
                   </span>
                   {exp.bullets.map((bullet, bIdx) => (
                     <div key={bIdx} className="flex items-center gap-2">
@@ -302,7 +302,7 @@ export default function ResumeBuilderEditor({
                         className="flex items-center gap-1 px-2.5 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-neutral-200 rounded-lg text-[11px] font-medium shrink-0 transition font-mono"
                       >
                         <Sparkles className="w-3 h-3 text-emerald-400" />
-                        {improvingBulletKey === `${expIdx}-${bIdx}` ? "..." : "AI Improve (XYZ)"}
+                        {improvingBulletKey === `${expIdx}-${bIdx}` ? "..." : "Enhance Bullet"}
                       </button>
                     </div>
                   ))}
@@ -321,7 +321,7 @@ export default function ResumeBuilderEditor({
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
                 <Zap className="w-3.5 h-3.5 text-amber-400" />
-                Select Google XYZ Bullet Rewrite
+                Select Bullet Improvement (XYZ Formula)
               </h3>
               <button
                 onClick={() => setBulletImprovementModal(null)}
@@ -333,7 +333,7 @@ export default function ResumeBuilderEditor({
 
             <div className="space-y-3">
               <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400 block">
-                Primary High-Impact Formulation:
+                Recommended Formulation:
               </span>
               <div
                 onClick={() => applyImprovedBullet(bulletImprovementModal.data.improved_xyz)}
@@ -345,7 +345,7 @@ export default function ResumeBuilderEditor({
               {bulletImprovementModal.data.alternative_versions?.length > 0 && (
                 <div className="space-y-2 pt-2">
                   <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block">
-                    Alternative Angle Options:
+                    Alternative Options:
                   </span>
                   {bulletImprovementModal.data.alternative_versions.map((alt, idx) => (
                     <div

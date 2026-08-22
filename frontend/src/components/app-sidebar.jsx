@@ -44,38 +44,36 @@ import {
 
 const coreItems = [
   {
-    title: "Career Hub",
+    title: "Overview",
     url: "/app",
     icon: Home,
   },
   {
-    title: "Placement Roadmap",
+    title: "Roadmap",
     url: "/app/roadmap",
     icon: Target,
   },
   {
-    title: "AI Career Coach",
+    title: "Career Coach",
     url: "/app/coach",
     icon: Sparkles,
     badge: "AI",
   },
 ];
 
-
-
 const navigationGroups = [
   {
     id: "coding",
-    title: "Coding & DSA Arena",
+    title: "Coding & Problems",
     icon: Terminal,
     items: [
       {
-        title: "Coding Workspace",
+        title: "Workspace",
         url: "/app/coding",
         icon: Terminal,
       },
       {
-        title: "Study Plan",
+        title: "Study Sheets",
         url: "/app/sheets",
         icon: Layers,
         badge: "28 Lists",
@@ -86,7 +84,7 @@ const navigationGroups = [
         icon: Code2,
       },
       {
-        title: "Placement Arena",
+        title: "Contest Arena",
         url: "/app/arena",
         icon: Swords,
       },
@@ -94,21 +92,21 @@ const navigationGroups = [
   },
   {
     id: "development",
-    title: "Development & Projects",
+    title: "Projects & Code",
     icon: FolderGit2,
     items: [
       {
-        title: "Development Workspace",
+        title: "Workspace",
         url: "/app/development",
         icon: FolderGit2,
       },
       {
-        title: "Repositories & Portfolios",
+        title: "Repositories",
         url: "/app/development?tab=projects",
         icon: GitFork,
       },
       {
-        title: "Live Deployments",
+        title: "Deployments",
         url: "/app/development?tab=deployment",
         icon: Globe,
       },
@@ -116,27 +114,27 @@ const navigationGroups = [
   },
   {
     id: "interview",
-    title: "Interview & Soft Skills",
+    title: "Interview Prep",
     icon: BrainCog,
     items: [
       {
-        title: "AI Mock Interview",
+        title: "Mock Interview",
         url: "/app/interview",
         icon: BrainCog,
         badge: "AI",
       },
       {
-        title: "HR & Leadership Prep",
+        title: "HR & Behavioral",
         url: "/app/hr-prep",
         icon: BookOpen,
       },
       {
-        title: "Company Intelligence",
+        title: "Company Intel",
         url: "/app/company-intel",
         icon: Building,
       },
       {
-        title: "Resume Intelligence",
+        title: "Resume ATS",
         url: "/app/resume",
         icon: FileText,
       },
@@ -144,27 +142,27 @@ const navigationGroups = [
   },
   {
     id: "academics",
-    title: "Academics & Performance",
+    title: "Academic Progress",
     icon: GraduationCap,
     items: [
       {
-        title: "VTOP Sync & Marksheet",
+        title: "VTOP Sync",
         url: "/app/vtop",
         icon: Database,
         badge: "Sync",
       },
       {
-        title: "Academics & Eligibility",
+        title: "Eligibility",
         url: "/app/academics",
         icon: GraduationCap,
       },
       {
-        title: "Progress & Velocity",
+        title: "Progress Tracker",
         url: "/app/progress",
         icon: TrendingUp,
       },
       {
-        title: "Milestones & Badges",
+        title: "Milestones",
         url: "/app/milestones",
         icon: Award,
       },
@@ -172,22 +170,22 @@ const navigationGroups = [
   },
   {
     id: "career",
-    title: "Jobs & Opportunities",
+    title: "Jobs & Applications",
     icon: Briefcase,
     items: [
       {
-        title: "Which Role Fits Me?",
+        title: "Role Fit Assessment",
         url: "/app/role-fit",
         icon: Compass,
-        badge: "AI Fit",
+        badge: "Fit",
       },
       {
-        title: "Job Recommendations",
+        title: "Job Listings",
         url: "/app/job",
         icon: Briefcase,
       },
       {
-        title: "Can I Apply?",
+        title: "Application Eligibility",
         url: "/app/can-i-apply",
         icon: ShieldCheck,
         badge: "Check",
@@ -276,7 +274,7 @@ export default function AppSidebar() {
             {/* Core Overview */}
             <SidebarGroup className="p-0">
               <SidebarGroupLabel className="px-3 py-1.5 text-[10px] font-semibold text-zinc-500 uppercase tracking-widest font-mono">
-                Core Overview
+                Overview
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu className="space-y-0.5">
@@ -327,7 +325,7 @@ export default function AppSidebar() {
             {/* Categorized Dropdown Groups */}
             <SidebarGroup className="p-0 space-y-2">
               <SidebarGroupLabel className="px-3 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-widest font-mono">
-                Platform Modules
+                Navigation
               </SidebarGroupLabel>
 
               <div className="space-y-1.5">
@@ -427,7 +425,7 @@ export default function AppSidebar() {
             {/* General Settings Menu */}
             <SidebarGroup className="pt-2 border-t border-zinc-800/60 p-0">
               <SidebarGroupLabel className="px-3 py-1.5 text-[10px] font-semibold text-zinc-500 uppercase tracking-widest font-mono">
-                Account Management
+                Account
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu className="space-y-0.5">
@@ -467,7 +465,7 @@ export default function AppSidebar() {
               className="w-full flex items-center justify-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-zinc-400 hover:text-rose-300 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer font-mono"
             >
               <LogOut className="w-4 h-4" />
-              <span>Log Out</span>
+              <span>Sign Out</span>
             </button>
           </div>
         </SidebarContent>

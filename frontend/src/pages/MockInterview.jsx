@@ -450,7 +450,7 @@ export default function MockInterview() {
             <div className="text-center space-y-4 gsap-fade-in">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/90 text-xs font-mono text-neutral-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live Interview Simulation & Telemetry
+                Simulation & Telemetry
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight max-w-5xl mx-auto leading-tight">
                 {interviewMentor.heading}
@@ -505,7 +505,7 @@ export default function MockInterview() {
                   ))}
                 </select>
                 <p className="text-[11px] text-neutral-500">
-                  Calibrates interview evaluation bars and company-specific principles.
+                  Calibrates evaluation criteria to target standards.
                 </p>
               </div>
 
@@ -527,7 +527,7 @@ export default function MockInterview() {
                   ))}
                 </select>
                 <p className="text-[11px] text-neutral-500">
-                  Selects role-specific technical depth and domain expectations.
+                  Adjusts technical depth and domain expectations.
                 </p>
               </div>
 
@@ -542,10 +542,10 @@ export default function MockInterview() {
                   onChange={(e) => setInterviewType(e.target.value)}
                   className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm font-medium text-white focus:outline-none focus:border-neutral-500 transition"
                 >
-                  <option value="Mixed">Mixed (System Architecture + Behavioral + Culture)</option>
-                  <option value="HR">Behavioral & Leadership Principles (STAR Focus)</option>
-                  <option value="Technical">Technical Execution & Distributed Concepts</option>
-                  <option value="System Design">System Design & Tradeoff Formulation</option>
+                  <option value="Mixed">Mixed (System Architecture + Behavioral)</option>
+                  <option value="HR">Behavioral & Leadership Principles (STAR)</option>
+                  <option value="Technical">Technical Execution & Concepts</option>
+                  <option value="System Design">System Design & Trade-offs</option>
                 </select>
               </div>
 
@@ -561,9 +561,9 @@ export default function MockInterview() {
                       onChange={(e) => setDifficulty(e.target.value)}
                       className="w-full px-3.5 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm font-medium text-white focus:outline-none focus:border-neutral-500 transition"
                     >
-                      <option value="Easy">Standard / Associate</option>
-                      <option value="Medium">Mid-Level / SDE-1</option>
-                      <option value="Hard">Senior / Tier-1 Bar</option>
+                      <option value="Easy">Standard</option>
+                      <option value="Medium">Intermediate</option>
+                      <option value="Hard">Advanced</option>
                     </select>
                   </div>
                   <div>
@@ -592,8 +592,8 @@ export default function MockInterview() {
                 >
                   <Play className="w-4 h-4 fill-current" />
                   {evaluatingAnswer
-                    ? "Initializing Chamber..."
-                    : "Enter Live Mock Interview Chamber"}
+                    ? "Preparing Session..."
+                    : "Start Mock Session"}
                 </button>
               </div>
             </div>
@@ -651,12 +651,12 @@ export default function MockInterview() {
                       </div>
                       <div>
                         <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                          Senior Hiring Committee Evaluator
+                          Interviewer
                         </h3>
                         <span className="text-[11px] text-neutral-400 font-mono">
                           {interviewerSpeaking
-                            ? "Voice synthesis broadcasting..."
-                            : "Listening to candidate audio..."}
+                            ? "Speaking..."
+                            : "Listening..."}
                         </span>
                       </div>
                     </div>
@@ -702,7 +702,7 @@ export default function MockInterview() {
                     <div className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-xs text-neutral-300 space-y-1 gsap-fade-in">
                       <span className="font-semibold text-neutral-200 flex items-center gap-1.5">
                         <HelpCircle className="w-3.5 h-3.5 text-neutral-400" />
-                        STAR Response Framing Structure:
+                        STAR Guidance:
                       </span>
                       <p className="text-neutral-400 leading-relaxed font-mono text-[11px]">
                         {questions[currentIndex]?.star_tips}
@@ -778,10 +778,10 @@ export default function MockInterview() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="text-xs uppercase tracking-wider font-mono text-neutral-400 flex items-center gap-2">
-                      <span>Candidate Response Terminal</span>
+                      <span>Your Response</span>
                       {isRecordingAudio && (
                         <span className="text-[11px] text-red-400 animate-pulse font-mono">
-                          Transcribing audio stream...
+                          Transcribing audio...
                         </span>
                       )}
                     </label>
@@ -797,7 +797,7 @@ export default function MockInterview() {
                       {isRecordingAudio ? (
                         <>
                           <Square className="w-3 h-3 fill-current" />
-                          Halt Recording
+                          Stop Recording
                         </>
                       ) : (
                         <>
@@ -812,7 +812,7 @@ export default function MockInterview() {
                     rows={4}
                     value={currentAnswer}
                     onChange={(e) => setCurrentAnswer(e.target.value)}
-                    placeholder="Speak into microphone or input your structured STAR answer..."
+                    placeholder="Speak or type your STAR response..."
                     className="w-full p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-500 transition resize-none leading-relaxed"
                   />
 
@@ -828,12 +828,12 @@ export default function MockInterview() {
                     {evaluatingAnswer ? (
                       <>
                         <Sparkles className="w-3.5 h-3.5 animate-spin" />
-                        Evaluating STAR Architecture & Communication...
+                        Evaluating response...
                       </>
                     ) : (
                       <>
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        Submit Answer for Multi-Vector Evaluation
+                        Submit Answer
                       </>
                     )}
                   </button>
@@ -846,7 +846,7 @@ export default function MockInterview() {
                         onClick={handleSubmitAnswer}
                         className="px-3 py-1.5 bg-red-800 hover:bg-red-700 text-white rounded-lg font-mono text-xs font-bold shrink-0 transition"
                       >
-                        Retry Evaluation
+                        Retry
                       </button>
                     </div>
                   )}
@@ -864,7 +864,7 @@ export default function MockInterview() {
                         {liveFeedback.score}
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-white">Instant Diagnostics</h3>
+                        <h3 className="text-sm font-bold text-white">Evaluation Feedback</h3>
                         <span className="text-xs text-neutral-400 font-mono">
                           Score: {liveFeedback.score}/100
                         </span>
@@ -872,17 +872,17 @@ export default function MockInterview() {
                     </div>
 
                     <span className="px-2.5 py-1 text-xs rounded-full bg-neutral-950 text-neutral-300 border border-neutral-800 font-mono">
-                      STAR Score: {liveFeedback.star_compliance?.score || 70}%
+                      STAR: {liveFeedback.star_compliance?.score || 70}%
                     </span>
                   </div>
 
                   <div className="space-y-3">
-                    {/* Good (Strengths) & Improve (Targeted Refinements) */}
+                    {/* Strengths & Areas to Improve */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
                         <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          Good
+                          Strengths
                         </span>
                         <ul className="text-xs text-neutral-300 space-y-0.5">
                           {liveFeedback.strengths?.slice(0, 3).map((s, i) => (
@@ -897,7 +897,7 @@ export default function MockInterview() {
                       <div className="p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
                         <span className="text-xs font-semibold text-amber-400 flex items-center gap-1.5">
                           <AlertTriangle className="w-3.5 h-3.5" />
-                          Improve
+                          Areas to Improve
                         </span>
                         <ul className="text-xs text-neutral-300 space-y-0.5">
                           {liveFeedback.areas_for_improvement?.slice(0, 3).map((a, i) => (
@@ -910,12 +910,12 @@ export default function MockInterview() {
                       </div>
                     </div>
 
-                    {/* One Tip (Crisp Takeaway) */}
+                    {/* Key Recommendation */}
                     <div className="p-3 bg-neutral-950/90 border border-neutral-800/80 rounded-xl flex items-start gap-2.5 text-xs text-neutral-300">
                       <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
                       <div>
                         <span className="font-bold text-neutral-200 block text-[11px] uppercase tracking-wider font-mono">
-                          One Actionable Tip:
+                          Key Recommendation:
                         </span>
                         <p className="text-neutral-300">
                           {liveFeedback.one_tip ||
@@ -946,12 +946,12 @@ export default function MockInterview() {
                           onClick={() => setShowLiveModelAnswer(!showLiveModelAnswer)}
                           className="text-xs font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1 cursor-pointer"
                         >
-                          <span>{showLiveModelAnswer ? "Hide Polished Model Answer" : "View Polished STAR Model Answer [ Details ]"}</span>
+                          <span>{showLiveModelAnswer ? "Hide Model Answer" : "Show Model Answer"}</span>
                         </button>
                         {showLiveModelAnswer && (
                           <div className="mt-2 p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
                             <span className="text-xs font-semibold text-neutral-300">
-                              Exemplary Formulation:
+                              Model Answer:
                             </span>
                             <p className="text-xs text-neutral-400 leading-relaxed">
                               {liveFeedback.suggested_better_answer}
@@ -970,8 +970,8 @@ export default function MockInterview() {
                     >
                       <span>
                         {currentIndex + 1 < questions.length
-                          ? "Advance to Next Question"
-                          : "Finalize & Generate Session Report"}
+                          ? "Next Question"
+                          : "View Final Report"}
                       </span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
@@ -1012,7 +1012,7 @@ export default function MockInterview() {
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2.5">
                       <h2 className="text-xl md:text-2xl font-bold text-white">
-                        Executive Evaluation Assessment
+                        Interview Assessment Report
                       </h2>
                       <span className="px-3 py-0.5 text-xs font-bold rounded-full border bg-neutral-950 text-white border-neutral-700">
                         {sessionReport.recommendation}
@@ -1030,14 +1030,14 @@ export default function MockInterview() {
                     className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-neutral-200 text-neutral-950 rounded-xl text-xs font-bold transition"
                   >
                     <Download className="w-3.5 h-3.5" />
-                    Export PDF Assessment
+                    Export PDF
                   </button>
                   <button
                     onClick={() => setPhase("lobby")}
                     className="flex items-center gap-2 px-4 py-2.5 bg-neutral-950 hover:bg-neutral-800 text-neutral-300 rounded-xl text-xs font-medium border border-neutral-800 transition"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
-                    New Assessment
+                    Start New Session
                   </button>
                 </div>
               </div>
@@ -1068,7 +1068,7 @@ export default function MockInterview() {
               <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 space-y-3">
                 <h3 className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  Primary Demonstrated Strengths
+                  Demonstrated Strengths
                 </h3>
                 <ul className="space-y-2">
                   {sessionReport.strengths?.map((s, idx) => (
@@ -1083,7 +1083,7 @@ export default function MockInterview() {
               <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 space-y-3">
                 <h3 className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber-400" />
-                  Growth & Refinement Imperatives
+                  Areas for Improvement
                 </h3>
                 <ul className="space-y-2">
                   {sessionReport.key_growth_areas?.map((g, idx) => (
@@ -1100,7 +1100,7 @@ export default function MockInterview() {
             <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 space-y-4">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
                 <BarChart2 className="w-4 h-4 text-neutral-400" />
-                Individual Question Audits
+                Question Breakdown
               </h3>
 
               <div className="space-y-3">
@@ -1123,7 +1123,7 @@ export default function MockInterview() {
 
                     <div className="text-xs text-neutral-300 bg-neutral-900/50 p-3 rounded-lg border border-neutral-800/60 leading-relaxed">
                       <span className="text-[10px] font-mono uppercase text-neutral-500 block mb-1">
-                        Candidate Answer:
+                        Candidate Response:
                       </span>
                       "{ans.answer}"
                     </div>
@@ -1131,7 +1131,7 @@ export default function MockInterview() {
                     {ans.suggested_better_answer && (
                       <div className="text-xs text-neutral-400 bg-neutral-900/30 p-3 rounded-lg border border-neutral-800/40 leading-relaxed">
                         <span className="text-[10px] font-mono uppercase text-neutral-400 block mb-1">
-                          Engineered STAR Model:
+                          Suggested Model Answer:
                         </span>
                         "{ans.suggested_better_answer}"
                       </div>

@@ -13,5 +13,10 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "src"),
     },
+    // Ensure only one React instance is resolved across all packages
+    dedupe: ["react", "react-dom", "react-router-dom"],
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom"],
   },
 })

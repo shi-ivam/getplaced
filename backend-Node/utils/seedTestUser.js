@@ -58,7 +58,7 @@ const seedTestUser = async () => {
     }
 
     console.log("\n==========================================");
-    console.log("✅ TEST USER SEEDED SUCCESSFULLY!");
+    console.log("TEST USER SEEDED SUCCESSFULLY!");
     console.log("==========================================");
     console.log(`Email:      ${testEmail}`);
     console.log(`Password:   ${testPassword}`);

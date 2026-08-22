@@ -1,11 +1,11 @@
-# 🌐 getPlaced — Project Surfaces & Architecture Specification
+# getPlaced — Project Surfaces & Architecture Specification
 
 > **Purpose of this Document:**  
 > This document serves as the single source of truth for all surfaces, routes, APIs, data structures, and implementation statuses across the **getPlaced** codebase. It is written with precise technical accuracy to eliminate guesswork and hallucinations when onboarding engineers or planning new features.
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 1. [System Architecture & Topology](#1-system-architecture--topology)
 2. [Environment Configuration Matrix](#2-environment-configuration-matrix)
 3. [Surface Inventory & Status Overview](#3-surface-inventory--status-overview)
@@ -94,7 +94,7 @@ The **getPlaced** platform is a polyglot microservice/monorepo application organ
 | **Candidate Dashboard**| `/app` | `pages/Dashboard.jsx` | `backend-Node`<br>`GET /api/readiness`<br>`GET /api/users/profile` | **Fully Functional** (Dynamic 7-dimension readiness engine, target gap analysis, re-normalized weighting) |
 | **Resume Analyzer** | `/resume`<br>`/app/resume` | `pages/AnalyzeResume.jsx` | `backend-Py`<br>`POST /analyze-resume/`<br>Google Gemini 1.5 Flash + OCR | **Fully Functional** (PDF upload, OCR fallback, AI prompt, PDF export) |
 | **Job Recommendations**| `/app/job` | `pages/JobRecommendations.jsx` | `backend-Node`<br>`GET /job-recommendations`<br>RapidAPI JSearch | **Fully Functional** (Real-time RapidAPI fetch + client-side search) |
-| **DSA & Striver Placement Curricula** | `/app/dsa`<br>`/app/sheets`<br>`/sheets` | `pages/DSAcontent.jsx`<br>`components/sheets/*`<br>`services/sheetsService.js` | `backend-Py`<br>`GET /api/sheets`<br>`GET /api/sheets/:id`<br>`GET /api/sheets/articles/:slug`<br>`GET /api/sheets/search`<br>SQLite 2,088 Articles DB + 28 Master Sheets | **Fully Functional & Production Ready** (Interactive problem tree, offline tutorial reader with C++/Java/Python snippets, live Monaco sandbox launcher, 3,150 problems) |
+| **DSA & Study Plan Curricula** | `/app/dsa`<br>`/app/sheets`<br>`/sheets` | `pages/DSAcontent.jsx`<br>`components/sheets/*`<br>`services/sheetsService.js` | `backend-Py`<br>`GET /api/sheets`<br>`GET /api/sheets/:id`<br>`GET /api/sheets/articles/:slug`<br>`GET /api/sheets/search`<br>SQLite 2,088 Articles DB + 28 Master Sheets | **Fully Functional & Production Ready** (Interactive problem tree, offline tutorial reader with C++/Java/Python snippets, live Monaco sandbox launcher, 3,150 problems) |
 | **AI Mock Interview** | `/app/interview` *(Sidebar link)* | `Hero.jsx` (Mockup)<br>`Meeting.jsx` (Calendar) | Planned (MediaPipe / WebRTC / Gemini) | **Visual Prototype / Planned Surface** |
 
 ---
@@ -145,18 +145,18 @@ The **getPlaced** platform is a polyglot microservice/monorepo application organ
   * Uses shadcn `SidebarProvider` with collapsible drawer on mobile devices (`SidebarTrigger`).
   * Dark themed `#121212` background with subtle radial grid dots.
 * **Navigation Links in Sidebar:**
-  * 🏠 **Dashboard** (`/app`): Linked to `Dashboard.jsx`.
-  * 🧠 **Interview** (`/app/interview`): Menu item configured with `BrainCog` icon (Needs route registration in `Routings.jsx`).
-  * 📄 **Resume** (`/app/resume`): Linked to `AnalyzeResume.jsx`.
-  * 💼 **Job Recommendation** (`/app/job`): Linked to `JobRecommendations.jsx`.
-  * 👤 **Profile** (`#`), ⚙️ **Setting** (`#`), 🚪 **Log Out** (`#`): Currently placeholder anchors.
+  * **Dashboard** (`/app`): Linked to `Dashboard.jsx`.
+  * **Interview** (`/app/interview`): Menu item configured with `BrainCog` icon (Needs route registration in `Routings.jsx`).
+  * **Resume** (`/app/resume`): Linked to `AnalyzeResume.jsx`.
+  * **Job Recommendation** (`/app/job`): Linked to `JobRecommendations.jsx`.
+  * **Profile** (`#`), **Setting** (`#`), **Log Out** (`#`): Currently placeholder anchors.
 
 ---
 
 ### Surface 4: Candidate Dashboard Surface (`/app`)
 * **File:** `frontend/src/pages/Dashboard.jsx`.
 * **Sections Present:**
-  1. **Greeting Header:** Currently static (`👋 Welcome, Pravin!`).
+  1. **Greeting Header:** Currently static (`Welcome, Pravin!`).
   2. **KPI Stats Grid:** 4 `StatCard` widgets:
      * Resume Score (`82%`)
      * Interviews Given (`5`)
@@ -186,7 +186,7 @@ The **getPlaced** platform is a polyglot microservice/monorepo application organ
      * Response payload: `{ "analysis": "<clean analysis string>" }`.
   6. **Frontend Result Display & Export:**
      * Displays analysis inside a styled monospaced output block.
-     * Provides a *"⬇️ Download PDF Report"* button that utilizes `jspdf` (`doc.splitTextToSize` with standard A4 layout) to generate and download `Resume_Analysis_Report.pdf` directly in the browser.
+     * Provides a *"Download PDF Report"* button that utilizes `jspdf` (`doc.splitTextToSize` with standard A4 layout) to generate and download `Resume_Analysis_Report.pdf` directly in the browser.
 
 ---
 

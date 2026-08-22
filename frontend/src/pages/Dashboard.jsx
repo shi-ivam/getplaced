@@ -328,9 +328,9 @@ export default function Dashboard() {
         {/* ========================================================================= */}
         <header className="gsap-reveal flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-zinc-800/80 pb-6">
           <div className="max-w-3xl space-y-1.5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>{heroData.targetSummary ? `${heroData.targetSummary} • Benchmark Track` : "Placement Benchmark Track"}</span>
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span>{heroData.targetSummary ? `${heroData.targetSummary} · Benchmark Track` : "Benchmark Track"}</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight leading-snug">
               {heroData.title}
@@ -340,19 +340,19 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <Link
               to="/app/role-fit"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#C7F36B]/15 hover:bg-[#C7F36B]/25 text-[#C7F36B] border border-[#C7F36B]/30 text-xs font-semibold font-mono transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 text-xs font-mono transition-colors"
             >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Which Role Fits Me?</span>
+              <Compass className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Role Fit</span>
             </Link>
 
             {hasTarget ? (
-              <div className="inline-flex items-center gap-2 bg-zinc-900/90 border border-zinc-800 px-3.5 py-2 rounded-xl text-xs">
-                <Target className="w-3.5 h-3.5 text-purple-400" />
-                <span className="text-zinc-500 font-mono">TARGET:</span>
+              <div className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-3 py-2 rounded-lg text-xs">
+                <Target className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="text-zinc-500 font-mono">Target:</span>
                 <span className="font-semibold text-zinc-200 font-mono">
                   {userProfile.targetCompany || "Any"} / {userProfile.targetJobRole || "Developer"}
                 </span>
@@ -363,17 +363,17 @@ export default function Dashboard() {
             ) : (
               <Link
                 to="/app/profile"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg font-mono"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold font-mono transition-colors"
               >
                 <Target className="w-3.5 h-3.5" />
-                <span>Configure Target</span>
+                <span>Set Target</span>
               </Link>
             )}
 
             <button
               type="button"
               onClick={handleStartAuditModal}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 text-xs font-medium font-mono transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 text-xs font-mono transition-colors cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
               <span>Audit Readiness</span>
@@ -382,13 +382,13 @@ export default function Dashboard() {
         </header>
 
         {/* Readiness Overview Hero Banner */}
-        <section className="gsap-reveal rounded-2xl bg-gradient-to-br from-[#121215] via-[#15151a] to-zinc-900/40 border border-zinc-800/90 p-6 md:p-8 space-y-6">
+        <section className="gsap-reveal rounded-2xl bg-[#121215] border border-zinc-800 p-6 md:p-8 space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <Sparkles className="w-3 h-3 text-purple-400" />
-                  Overall Placement Readiness
+                  Placement Readiness
                 </span>
                 <span
                   className={`text-[10px] px-2.5 py-0.5 rounded-full font-medium font-mono border ${heroData.badgeClass}`}
@@ -412,10 +412,10 @@ export default function Dashboard() {
 
                 <div className="hidden sm:flex flex-col text-xs text-zinc-400 pl-4 border-l border-zinc-800 space-y-0.5 font-mono">
                   <div>
-                    Benchmark Bar: <span className="text-zinc-200">{readiness?.targetScore !== null && readiness?.targetScore !== undefined ? `${readiness.targetScore} / 100` : "Unassessed"}</span>
+                    Target Benchmark: <span className="text-zinc-200">{readiness?.targetScore !== null && readiness?.targetScore !== undefined ? `${readiness.targetScore} / 100` : "Unassessed"}</span>
                   </div>
                   <div>
-                    Net Delta:{" "}
+                    Delta:{" "}
                     <span className={readiness?.overallGap !== null && readiness?.overallGap !== undefined && readiness.overallGap > 0 ? "text-amber-400" : "text-emerald-400"}>
                       {readiness?.overallGap !== null && readiness?.overallGap !== undefined
                         ? readiness.overallGap > 0
@@ -427,7 +427,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-2.5 bg-zinc-900/80 border border-zinc-800/80 rounded-xl p-3 max-w-xl text-xs text-zinc-300">
+              <div className="flex items-start gap-2.5 bg-zinc-900 border border-zinc-800/80 rounded-xl p-3 max-w-xl text-xs text-zinc-300">
                 <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
                 <p className="leading-relaxed font-sans">{heroData.mentorNote}</p>
               </div>
@@ -435,7 +435,7 @@ export default function Dashboard() {
 
             {/* Quick Action Matrix & Level-Based Primary CTA */}
             <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
-              <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-2 bg-zinc-900/90 border border-zinc-800 p-3 rounded-xl text-xs font-mono">
+              <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-2 bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-xs font-mono">
                 <div className="text-center p-1">
                   <span className="text-zinc-500 text-[10px] block">Score</span>
                   <span className={`font-bold ${heroData.scoreColor}`}>
@@ -458,7 +458,7 @@ export default function Dashboard() {
 
               <Link
                 to={heroData.ctaLink}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-950/40 transition-all font-mono"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold transition-colors font-mono"
               >
                 <span>{heroData.ctaText}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -467,10 +467,10 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => setShowExplainModal(!showExplainModal)}
-                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 text-xs font-medium transition-colors border border-zinc-800 font-mono cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-medium transition-colors border border-zinc-800 font-mono cursor-pointer"
               >
                 <HelpCircle className="w-3.5 h-3.5 text-zinc-400" />
-                <span>{showExplainModal ? "Hide Methodology" : "View Scoring Methodology"}</span>
+                <span>{showExplainModal ? "Hide Methodology" : "Methodology"}</span>
               </button>
             </div>
           </div>
@@ -501,16 +501,16 @@ export default function Dashboard() {
 
         {/* Explainability Breakdown (Collapsible) */}
         {showExplainModal && readiness && (
-          <section className="gsap-reveal rounded-2xl bg-[#141417] border border-zinc-800 p-5 md:p-6 space-y-4">
+          <section className="gsap-reveal rounded-2xl bg-[#121215] border border-zinc-800 p-5 md:p-6 space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
                   <Info className="w-4 h-4 text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-zinc-200">Scoring Engine Methodology</h3>
+                  <h3 className="text-sm font-semibold text-zinc-200">Scoring Methodology</h3>
                   <p className="text-[11px] text-zinc-500">
-                    Dynamically re-normalized weighted average formula across 7 dimensions
+                    Weighted average across assessed readiness dimensions
                   </p>
                 </div>
               </div>
@@ -524,7 +524,7 @@ export default function Dashboard() {
               </button>
             </div>
 
-            <div className="bg-zinc-900/90 rounded-xl p-3.5 border border-zinc-800 space-y-2 font-mono text-xs text-zinc-300">
+            <div className="bg-zinc-900 rounded-xl p-3.5 border border-zinc-800 space-y-2 font-mono text-xs text-zinc-300">
               <div className="text-zinc-400 text-[11px] uppercase tracking-wider">Formula:</div>
               <div className="bg-[#0c0c0e] p-2.5 rounded-lg text-zinc-200 text-center font-bold text-xs overflow-x-auto">
                 Weighted Score = Σ(AvailableScore_i × Weight_i) / Σ(AvailableWeight_i)
@@ -545,11 +545,11 @@ export default function Dashboard() {
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4 text-rose-400" />
                 <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-widest font-mono">
-                  Top 3 Priority Readiness Gaps
+                  Priority Gaps
                 </h3>
               </div>
               <span className="text-[11px] text-zinc-500 font-mono">
-                Highest weight impact on benchmark score
+                Highest impact on benchmark score
               </span>
             </div>
 
@@ -564,7 +564,7 @@ export default function Dashboard() {
                 return (
                   <div
                     key={gapItem.id || gIdx}
-                    className="p-4 rounded-xl bg-[#121215] border border-zinc-800/90 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-3 group"
+                    className="p-4 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-3 group"
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
@@ -606,7 +606,7 @@ export default function Dashboard() {
                       </div>
 
                       <p className="text-[11px] text-zinc-400 line-clamp-1 leading-normal font-sans">
-                        {gapItem.recommendation || `Close ${gapPoints} pt gap to meet ${userProfile?.targetCompany || "tier"} hiring standard.`}
+                        {gapItem.recommendation || `Close ${gapPoints} pt gap to meet benchmark.`}
                       </p>
                     </div>
 
@@ -637,98 +637,98 @@ export default function Dashboard() {
         <section className="gsap-reveal space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-widest font-mono">
-              Global Platform Tools & Accelerators
+              Platform Navigation
             </h3>
-            <span className="text-[11px] text-zinc-500 font-mono">Direct Quick Actions</span>
+            <span className="text-[11px] text-zinc-500 font-mono">Direct shortcuts</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
             <Link
               to="/app/role-fit"
-              className="p-3 rounded-xl bg-[#121215] border border-[#C7F36B]/30 hover:border-[#C7F36B]/60 transition-colors flex flex-col items-center text-center space-y-1.5 group"
+              className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-[#C7F36B]/10 border border-[#C7F36B]/20 flex items-center justify-center text-[#C7F36B] group-hover:scale-105 transition-transform">
-                <Compass className="w-4 h-4 text-[#C7F36B]" />
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400 transition-transform">
+                <Compass className="w-4 h-4" />
               </div>
-              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Role Discovery</span>
-              <span className="text-[10px] text-[#C7F36B] font-mono">Which Role Fits?</span>
+              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Role Fit</span>
+              <span className="text-[10px] text-zinc-500 font-mono">Assessment</span>
             </Link>
 
             <Link
               to="/app/profile"
-              className="p-3 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
+              className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
               <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-purple-400">
                 <Target className="w-4 h-4" />
               </div>
-              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Profile & Target</span>
-              <span className="text-[10px] text-zinc-500 font-mono">Recruiter View</span>
+              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Profile</span>
+              <span className="text-[10px] text-zinc-500 font-mono">Target Settings</span>
             </Link>
 
             <Link
               to="/app/coach"
-              className="p-3 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
+              className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
               <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-purple-400">
                 <Sparkles className="w-4 h-4 text-purple-400" />
               </div>
-              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">AI Career Coach</span>
-              <span className="text-[10px] text-zinc-500 font-mono">What-If Simulator</span>
+              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Career Coach</span>
+              <span className="text-[10px] text-zinc-500 font-mono">Advisory</span>
             </Link>
 
             <Link
               to="/app/arena"
-              className="p-3 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
+              className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
               <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-amber-400">
                 <Swords className="w-4 h-4 text-amber-400" />
               </div>
-              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Placement Arena</span>
-              <span className="text-[10px] text-zinc-500 font-mono">1v1 Battles</span>
+              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Coding Arena</span>
+              <span className="text-[10px] text-zinc-500 font-mono">Practice</span>
             </Link>
 
             <Link
               to="/app/roadmap"
-              className="p-3 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
+              className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
               <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400">
                 <Compass className="w-4 h-4 text-emerald-400" />
               </div>
-              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Tech Roadmap</span>
-              <span className="text-[10px] text-zinc-500 font-mono">Weekly Milestones</span>
+              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Roadmap</span>
+              <span className="text-[10px] text-zinc-500 font-mono">Milestones</span>
             </Link>
 
             <Link
               to="/app/job"
-              className="p-3 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
+              className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
               <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-indigo-400">
                 <Briefcase className="w-4 h-4 text-indigo-400" />
               </div>
               <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Job Matching</span>
-              <span className="text-[10px] text-zinc-500 font-mono">Live Drives</span>
+              <span className="text-[10px] text-zinc-500 font-mono">Openings</span>
             </Link>
 
             <Link
               to="/app/can-i-apply"
-              className="p-3 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
+              className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
               <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
               </div>
-              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Can I Apply?</span>
-              <span className="text-[10px] text-zinc-500 font-mono">Readiness Audit</span>
+              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Eligibility</span>
+              <span className="text-[10px] text-zinc-500 font-mono">Criteria Check</span>
             </Link>
 
             <Link
               to="/app/academics"
-              className="p-3 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
+              className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
               <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-pink-400">
                 <GraduationCap className="w-4 h-4 text-pink-400" />
               </div>
-              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Academics / VTOP</span>
-              <span className="text-[10px] text-zinc-500 font-mono">CGPA Sync</span>
+              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Academics</span>
+              <span className="text-[10px] text-zinc-500 font-mono">VTOP Sync</span>
             </Link>
           </div>
         </section>
@@ -835,30 +835,26 @@ export default function Dashboard() {
       {showAuditModal && (
         <div
           onClick={handleCloseAuditModal}
-          className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-all"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all"
         >
           <div
             onClick={(e) => e.stopPropagation()}
             className="bg-[#121215] border border-zinc-800 rounded-2xl max-w-lg w-full p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden"
           >
-            {/* Ambient Background Glow */}
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
             {/* Modal Header */}
             <div className="flex items-start justify-between relative">
-              <div className="space-y-1.5 pr-6">
-                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-purple-950/60 border border-purple-800/40 text-[10px] font-mono text-purple-300">
-                  <Sparkles className="w-3 h-3 text-purple-400 animate-pulse" />
-                  <span>Real-time Placement Engine</span>
+              <div className="space-y-1 pr-6">
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-400">
+                  <Sparkles className="w-3 h-3 text-purple-400" />
+                  <span>Placement Audit</span>
                 </div>
-                <h3 className="text-lg font-bold text-white tracking-tight">
+                <h3 className="text-base font-bold text-white tracking-tight">
                   Multi-Pillar Placement Audit
                 </h3>
                 <p className="text-xs text-zinc-400">
                   Calibrating readiness against{" "}
                   <span className="text-zinc-200 font-medium">
-                    {userProfile?.targetCompany || "Enterprise Tier-1"}
+                    {userProfile?.targetCompany || "Benchmark"}
                     {userProfile?.targetJobRole ? ` (${userProfile.targetJobRole})` : ""}
                   </span>{" "}
                   standards.
@@ -868,7 +864,7 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={handleCloseAuditModal}
-                className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/80 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition-colors cursor-pointer"
                 title="Close modal (Esc)"
               >
                 <X className="w-4 h-4" />
@@ -880,8 +876,8 @@ export default function Dashboard() {
               <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500">
                 <span>
                   {auditCompleted
-                    ? "Audit Completed (100%)"
-                    : `Analyzing Pillar ${auditStep} of 5 (${Math.round((auditStep / 5) * 100)}%)`}
+                    ? "Audit Complete (100%)"
+                    : `Pillar ${auditStep} of 5 (${Math.round((auditStep / 5) * 100)}%)`}
                 </span>
                 <span className={auditCompleted ? "text-emerald-400" : "text-purple-400"}>
                   {auditCompleted ? "100%" : `${Math.round((auditStep / 5) * 100)}%`}
@@ -898,48 +894,48 @@ export default function Dashboard() {
             </div>
 
             {/* Timed Step Sequence (5 Core Pillars) */}
-            <div className="space-y-2.5 font-mono text-xs">
+            <div className="space-y-2 font-mono text-xs">
               {[
                 {
                   step: 1,
-                  title: "Academics & CGPA Cutoffs",
-                  label: "Syncing Academics & CGPA eligibility cutoffs",
+                  title: "Academics & CGPA",
+                  label: "Academics and grade eligibility cutoffs",
                   icon: GraduationCap,
                   detail: userProfile?.cgpa
-                    ? `CGPA: ${userProfile.cgpa} • VTOP Sync Active`
-                    : "Evaluating university grade benchmarks",
+                    ? `CGPA: ${userProfile.cgpa} · Verified`
+                    : "Evaluating academic grade benchmarks",
                 },
                 {
                   step: 2,
                   title: "GitHub & Code Quality",
-                  label: "Evaluating GitHub codebases & engineering depth",
+                  label: "GitHub repository and code analysis",
                   icon: FolderGit2,
                   detail: githubProfile
-                    ? `${githubProfile.originalReposCount || 0} Repos • ${githubProfile.totalStars || 0} Stars`
+                    ? `${githubProfile.originalReposCount || 0} Repos · ${githubProfile.totalStars || 0} Stars`
                     : "Analyzing commit frequency & architecture",
                 },
                 {
                   step: 3,
-                  title: "DSA & Problem-Solving Benchmarks",
-                  label: "Scanning LeetCode problem-solving benchmarks",
+                  title: "DSA Benchmarks",
+                  label: "DSA and problem-solving benchmarks",
                   icon: Code2,
-                  detail: "DSA patterns, dynamic programming & topic readiness",
+                  detail: "DSA patterns, algorithms & topic readiness",
                 },
                 {
                   step: 4,
-                  title: "Resume ATS & Google XYZ Metrics",
-                  label: "Auditing Resume ATS format, keywords & Google XYZ metrics",
+                  title: "Resume ATS",
+                  label: "Resume ATS and keyword analysis",
                   icon: FileText,
                   detail: userProfile?.resumeScore !== null && userProfile?.resumeScore !== undefined
-                    ? `Google GENAI ATS Score: ${userProfile.resumeScore}/100 • ${userProfile?.resumeAnalysis?.bullet_improvements?.length || 0} XYZ Bullets Verified`
-                    : "Upload PDF to calculate real ATS score & Google XYZ metrics",
+                    ? `ATS Score: ${userProfile.resumeScore}/100 · ${userProfile?.resumeAnalysis?.bullet_improvements?.length || 0} bullets quantified`
+                    : "Upload PDF to evaluate ATS score and keywords",
                 },
                 {
                   step: 5,
-                  title: "Multi-Dimensional Readiness Synthesis",
-                  label: `Synthesizing ${userProfile?.targetCompany || "Tier-1"} placement readiness score`,
+                  title: "Composite Synthesis",
+                  label: `Synthesizing ${userProfile?.targetCompany || "target"} readiness score`,
                   icon: BrainCog,
-                  detail: "Dynamically re-normalized weighted composite model",
+                  detail: "Weighted multi-dimension evaluation model",
                 },
               ].map(({ step, label, detail }) => {
                 const isPassed = auditStep > step || auditCompleted;
@@ -948,21 +944,21 @@ export default function Dashboard() {
                 return (
                   <div key={step} className="space-y-1.5">
                     <div
-                      className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                      className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${
                         isPassed
-                          ? "bg-emerald-950/30 border-emerald-800/50 text-emerald-300"
+                          ? "bg-zinc-900 border-zinc-800 text-zinc-300"
                           : isCurrent
-                          ? "bg-purple-950/40 border-purple-800/60 text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.1)]"
-                          : "bg-zinc-900/40 border-zinc-800/60 text-zinc-500"
+                          ? "bg-zinc-900 border-purple-500/50 text-zinc-200"
+                          : "bg-zinc-950/60 border-zinc-900 text-zinc-500"
                       }`}
                     >
-                      <div className="flex items-center gap-3 min-w-0 pr-2">
+                      <div className="flex items-center gap-2.5 min-w-0 pr-2">
                         {isPassed ? (
                           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                         ) : isCurrent ? (
                           <RefreshCw className="w-4 h-4 text-purple-400 animate-spin shrink-0" />
                         ) : (
-                          <Circle className="w-4 h-4 text-zinc-600 shrink-0" />
+                          <Circle className="w-4 h-4 text-zinc-700 shrink-0" />
                         )}
                         <div className="min-w-0">
                           <div className="font-sans text-xs font-medium truncate">{label}</div>
@@ -972,31 +968,31 @@ export default function Dashboard() {
                       <span
                         className={`text-[10px] font-mono px-2 py-0.5 rounded shrink-0 ${
                           isPassed
-                            ? "bg-emerald-900/40 text-emerald-300 border border-emerald-800/40"
+                            ? "bg-zinc-800 text-emerald-400 border border-zinc-700"
                             : isCurrent
-                            ? "bg-purple-900/40 text-purple-300 border border-purple-800/40"
-                            : "bg-zinc-800/40 text-zinc-600 border border-zinc-800/40"
+                            ? "bg-purple-950 text-purple-300 border border-purple-800/40"
+                            : "bg-zinc-900 text-zinc-600 border border-zinc-800/40"
                         }`}
                       >
-                        {isPassed ? "DONE" : isCurrent ? "SCANNING..." : "QUEUED"}
+                        {isPassed ? "DONE" : isCurrent ? "SCANNING" : "QUEUED"}
                       </span>
                     </div>
 
                     {step === 4 && (isCurrent || isPassed) && (
-                      <div className="p-3 rounded-xl bg-purple-950/20 border border-purple-800/40 space-y-2 font-mono text-xs">
+                      <div className="p-3 rounded-lg bg-zinc-900 border border-zinc-800 space-y-2 font-mono text-xs">
                         <div className="flex items-center justify-between">
-                          <span className="text-purple-300 font-semibold flex items-center gap-1.5">
+                          <span className="text-zinc-200 font-semibold flex items-center gap-1.5">
                             <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                            Google GENAI Resume Audit
+                            Resume ATS Audit
                           </span>
                           {userProfile?.resumeScore !== null && userProfile?.resumeScore !== undefined ? (
-                            <span className="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800/60 text-emerald-300 text-[10px] font-bold">
+                            <span className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-emerald-400 text-[10px] font-bold">
                               ATS: {userProfile.resumeScore}/100
                             </span>
                           ) : (
-                            <label className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold cursor-pointer transition-colors flex items-center gap-1 shrink-0">
+                            <label className="px-2.5 py-1 rounded-md bg-zinc-100 hover:bg-white text-zinc-950 text-[10px] font-semibold cursor-pointer transition-colors flex items-center gap-1 shrink-0">
                               <Upload className="w-3 h-3" />
-                              <span>{auditResumeUploading ? "Analyzing..." : "Upload Resume PDF"}</span>
+                              <span>{auditResumeUploading ? "Analyzing..." : "Upload Resume"}</span>
                               <input
                                 type="file"
                                 accept=".pdf,.doc,.docx,.txt"
@@ -1014,15 +1010,15 @@ export default function Dashboard() {
                               <div className="flex flex-wrap items-center gap-1">
                                 <span className="text-zinc-500">Keywords:</span>
                                 {userProfile.resumeAnalysis.matched_keywords.slice(0, 5).map((k, i) => (
-                                  <span key={i} className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-300">
+                                  <span key={i} className="px-1.5 py-0.5 rounded bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300">
                                     {typeof k === "string" ? k : k.keyword}
                                   </span>
                                 ))}
                               </div>
                             )}
                             {userProfile.resumeAnalysis.bullet_improvements?.length > 0 && (
-                              <p className="text-[10px] text-purple-300">
-                                ✓ Google XYZ Metrics: {userProfile.resumeAnalysis.bullet_improvements.length} bullet points quantified
+                              <p className="text-[10px] text-zinc-400">
+                                Quantified Bullets: {userProfile.resumeAnalysis.bullet_improvements.length} points verified
                               </p>
                             )}
                           </div>
@@ -1037,16 +1033,16 @@ export default function Dashboard() {
 
             {/* Quick Skip option during active scan */}
             {!auditCompleted && (
-              <div className="flex items-center justify-between pt-1 border-t border-zinc-800/60">
+              <div className="flex items-center justify-between pt-1 border-t border-zinc-800">
                 <span className="text-[11px] text-zinc-500 font-mono">
-                  Calibrating model weights...
+                  Synthesizing audit...
                 </span>
                 <button
                   type="button"
                   onClick={handleSkipAudit}
-                  className="text-xs text-purple-400 hover:text-purple-300 font-mono font-medium underline transition-colors cursor-pointer"
+                  className="text-xs text-zinc-400 hover:text-zinc-200 font-mono underline transition-colors cursor-pointer"
                 >
-                  Skip to Results &rarr;
+                  Skip to Results
                 </button>
               </div>
             )}
@@ -1054,16 +1050,16 @@ export default function Dashboard() {
             {/* Completed Results Summary Card */}
             {auditCompleted && (
               <div className="space-y-4 pt-2 border-t border-zinc-800">
-                <div className="bg-zinc-900/90 rounded-xl border border-zinc-800 p-4 space-y-3 font-mono">
+                <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4 space-y-3 font-mono">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-[10px] uppercase tracking-wider text-zinc-500 block">
                         Composite Readiness
                       </span>
-                      <span className="text-xl font-bold text-emerald-400">
+                      <span className="text-xl font-bold text-zinc-100">
                         {readiness?.overallScore !== null && readiness?.overallScore !== undefined
                           ? readiness.overallScore
-                          : "Pending Sync"}{" "}
+                          : "Pending"}{" "}
                         {readiness?.overallScore !== null && readiness?.overallScore !== undefined && (
                           <span className="text-xs text-zinc-500 font-normal">/ 100</span>
                         )}
@@ -1074,26 +1070,26 @@ export default function Dashboard() {
                         readiness?.overallStatus?.key
                       )}`}
                     >
-                      {readiness?.overallStatus?.label || "Competitive Candidate"}
+                      {readiness?.overallStatus?.label || "Evaluated"}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-2 pt-2 border-t border-zinc-800/80 text-[10px] text-center">
-                    <div className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
+                  <div className="grid grid-cols-4 gap-2 pt-2 border-t border-zinc-800 text-[10px] text-center">
+                    <div className="bg-zinc-950 p-2 rounded-lg border border-zinc-800">
                       <span className="text-zinc-500 block">DSA</span>
-                      <span className="font-bold text-zinc-200">{codingScore !== null ? `${codingScore}%` : "Not Linked"}</span>
+                      <span className="font-bold text-zinc-200">{codingScore !== null ? `${codingScore}%` : "—"}</span>
                     </div>
-                    <div className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
+                    <div className="bg-zinc-950 p-2 rounded-lg border border-zinc-800">
                       <span className="text-zinc-500 block">Projects</span>
-                      <span className="font-bold text-zinc-200">{devScore !== null ? `${devScore}%` : "Not Linked"}</span>
+                      <span className="font-bold text-zinc-200">{devScore !== null ? `${devScore}%` : "—"}</span>
                     </div>
-                    <div className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
+                    <div className="bg-zinc-950 p-2 rounded-lg border border-zinc-800">
                       <span className="text-zinc-500 block">Resume</span>
-                      <span className="font-bold text-purple-300">{resumeScore !== null ? `${resumeScore}%` : "Not Uploaded"}</span>
+                      <span className="font-bold text-zinc-200">{resumeScore !== null ? `${resumeScore}%` : "—"}</span>
                     </div>
-                    <div className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
+                    <div className="bg-zinc-950 p-2 rounded-lg border border-zinc-800">
                       <span className="text-zinc-500 block">Target Bar</span>
-                      <span className="font-bold text-purple-400">
+                      <span className="font-bold text-zinc-200">
                         {readiness?.targetScore ? `${readiness.targetScore}%` : "N/A"}
                       </span>
                     </div>
@@ -1104,15 +1100,15 @@ export default function Dashboard() {
                   <button
                     type="button"
                     onClick={handleCloseAuditModal}
-                    className="flex-1 py-3 bg-white hover:bg-neutral-200 text-neutral-950 font-bold rounded-xl text-xs shadow-lg transition-all cursor-pointer font-sans"
+                    className="flex-1 py-2.5 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold rounded-lg text-xs transition-colors cursor-pointer font-sans"
                   >
-                    Enter Career Hub Command Center
+                    Enter Dashboard
                   </button>
 
                   <button
                     type="button"
                     onClick={handleStartAuditModal}
-                    className="p-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 rounded-xl transition-colors cursor-pointer"
+                    className="p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 rounded-lg transition-colors cursor-pointer"
                     title="Re-run Audit"
                   >
                     <RefreshCw className="w-4 h-4" />
@@ -1129,7 +1125,7 @@ export default function Dashboard() {
 
 function StatCard({ title, value, subtitle }) {
   return (
-    <div className="bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 p-4 rounded-xl space-y-1 transition-colors">
+    <div className="bg-[#121215] border border-zinc-800 hover:border-zinc-700 p-4 rounded-xl space-y-1 transition-colors">
       <h3 className="text-xs font-medium text-zinc-400">{title}</h3>
       <p className="text-2xl font-bold font-mono text-zinc-100 tracking-tight">{value}</p>
       {subtitle && <p className="text-[11px] text-zinc-500 font-mono">{subtitle}</p>}

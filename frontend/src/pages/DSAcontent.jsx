@@ -44,11 +44,11 @@ export default function DSAContent({ defaultTab = null }) {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight flex items-center gap-3">
-                <Code2 className="w-7 h-7 text-purple-400" />
-                DSA Problem-Solving Bar & Study Sheets
+                <Code2 className="w-6 h-6 text-zinc-300" />
+                Curriculum Sheets & DSA Analytics
               </h1>
               <p className="text-xs text-zinc-400 mt-1">
-                28 structured master sheets, target company benchmark gap analysis, and Monaco IDE problem solver.
+                Structured interview sheets, company benchmark gap analysis, and problem-solving metrics.
               </p>
             </div>
           </div>

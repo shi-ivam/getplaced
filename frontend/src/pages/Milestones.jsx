@@ -126,8 +126,8 @@ export default function Milestones() {
     return m.category === activeCategory;
   });
 
-  const currentTier = milestonesData?.currentTier || "Platinum";
-  const totalXp = milestonesData?.totalXp || 1250;
+  const currentTier = milestonesData?.currentTier || "Unassessed";
+  const totalXp = milestonesData?.totalXp || 0;
 
   return (
     <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-white">
@@ -172,8 +172,8 @@ export default function Milestones() {
             <div className="text-left sm:text-right">
               <span className="text-xs text-zinc-400 font-mono">Milestone Completion Ratio</span>
               <div className="text-xl font-bold font-mono text-white mt-0.5">
-                {milestonesData?.unlockedCount || 7} / {milestonesData?.totalMilestonesCount || 14}{" "}
-                Badges ({milestonesData?.completionRatePct || 50}%)
+                {milestonesData?.unlockedCount || 0} / {milestonesData?.totalMilestonesCount || 0}{" "}
+                Badges ({milestonesData?.completionRatePct || 0}%)
               </div>
             </div>
           </div>

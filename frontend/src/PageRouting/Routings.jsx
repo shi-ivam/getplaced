@@ -62,15 +62,15 @@ function Routings() {
             <div className="min-h-screen bg-[#1A312C] text-[#FFF4E1] p-8 max-w-4xl mx-auto space-y-6 pt-20">
               <h1 className="text-4xl font-extrabold text-[#FFF4E1]">Terms of Service</h1>
               <p className="text-[#FFF4E1]/80 leading-relaxed text-sm">
-                Welcome to getPlaced. By accessing or using our platform, AI mock interview engine, resume ATS optimization tools, and learning resources, you agree to bound by these terms.
+                Welcome to getPlaced. By accessing or using the platform, interview simulation tools, resume analysis, and preparation resources, you agree to these terms.
               </p>
               <h2 className="text-xl font-bold text-[#89D7B7]">1. User Account & Security</h2>
               <p className="text-[#FFF4E1]/80 text-sm">
-                Users are responsible for maintaining the confidentiality of their credentials. Telemetry and mock interview data are protected under zero-knowledge encryption standards.
+                Users are responsible for maintaining credential confidentiality. Session telemetry and simulation data are protected under standard encryption protocols.
               </p>
               <h2 className="text-xl font-bold text-[#89D7B7]">2. Platform Usage & AI Telemetry</h2>
               <p className="text-[#FFF4E1]/80 text-sm">
-                The platform provides real-time biometrics, speech feedback, and DSA sandboxes for placement preparation. User data is isolated and never sold or used for public model training.
+                The platform provides interview practice, speech analysis, and coding environments for placement preparation. User data is isolated and never used for public model training.
               </p>
             </div>
           } />

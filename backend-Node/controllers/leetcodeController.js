@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import LeetCodeProfile from "../models/leetcodeProfileModel.js";
+import CodingWorkspace from "../models/codingWorkspaceModel.js";
 import {
   fetchLeetCodeStats,
   extractLeetCodeUsername,
@@ -184,5 +185,146 @@ export const disconnectLeetCodeProfile = asyncHandler(async (req, res) => {
       ? `LeetCode profile @${deleted.username} disconnected successfully`
       : "No LeetCode profile was connected",
     connected: false,
+  });
+});
+
+/**
+ * @desc    Get user's coding workspace state (solved problems, drafts, submissions)
+ * @route   GET /api/leetcode/workspace
+ * @access  Private
+ */
+export const getWorkspaceState = asyncHandler(async (req, res) => {
+  if (!req.user || !req.user._id) {
+    res.status(401);
+    throw new Error("Not authorized");
+  }
+
+  let ws = await CodingWorkspace.findOne({ userId: req.user._id });
+  if (!ws) {
+    ws = await CodingWorkspace.create({
+      userId: req.user._id,
+      solvedProblems: {},
+      drafts: {},
+      submissions: {},
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    solvedProblems: ws.solvedProblems ? Object.fromEntries(ws.solvedProblems) : {},
+    drafts: ws.drafts ? Object.fromEntries(ws.drafts) : {},
+    submissions: ws.submissions ? Object.fromEntries(ws.submissions) : {},
+  });
+});
+
+/**
+ * @desc    Save problem code draft in workspace
+ * @route   POST /api/leetcode/draft
+ * @access  Private
+ */
+export const saveDraft = asyncHandler(async (req, res) => {
+  if (!req.user || !req.user._id) {
+    res.status(401);
+    throw new Error("Not authorized");
+  }
+
+  const { slug, code } = req.body;
+  if (!slug) {
+    res.status(400);
+    throw new Error("Problem slug is required");
+  }
+
+  let ws = await CodingWorkspace.findOne({ userId: req.user._id });
+  if (!ws) {
+    ws = new CodingWorkspace({ userId: req.user._id, solvedProblems: {}, drafts: {}, submissions: {} });
+  }
+
+  if (!ws.drafts) ws.drafts = new Map();
+  ws.drafts.set(slug, code || "");
+  await ws.save();
+
+  res.status(200).json({ success: true, slug, code });
+});
+
+/**
+ * @desc    Record problem submission in workspace
+ * @route   POST /api/leetcode/submission
+ * @access  Private
+ */
+export const recordWorkspaceSubmission = asyncHandler(async (req, res) => {
+  if (!req.user || !req.user._id) {
+    res.status(401);
+    throw new Error("Not authorized");
+  }
+
+  const { slug, subData } = req.body;
+  if (!slug || !subData) {
+    res.status(400);
+    throw new Error("Slug and submission data are required");
+  }
+
+  let ws = await CodingWorkspace.findOne({ userId: req.user._id });
+  if (!ws) {
+    ws = new CodingWorkspace({ userId: req.user._id, solvedProblems: {}, drafts: {}, submissions: {} });
+  }
+
+  if (!ws.submissions) ws.submissions = new Map();
+  const currentList = ws.submissions.get(slug) || [];
+  const newSubmission = {
+    id: Date.now(),
+    timestamp: new Date(),
+    status: subData.status || "Evaluated",
+    runtime_ms: subData.runtime_ms,
+    memory_mb: subData.memory_mb,
+    beats_runtime_pct: subData.beats_runtime_pct,
+    passed_count: subData.passed_count,
+    total_count: subData.total_count,
+    error: subData.error,
+  };
+
+  const updatedList = [newSubmission, ...currentList].slice(0, 30);
+  ws.submissions.set(slug, updatedList);
+  await ws.save();
+
+  res.status(200).json({ success: true, slug, submissions: updatedList });
+});
+
+/**
+ * @desc    Mark problem as solved in workspace
+ * @route   POST /api/leetcode/solved
+ * @access  Private
+ */
+export const markProblemAsSolved = asyncHandler(async (req, res) => {
+  if (!req.user || !req.user._id) {
+    res.status(401);
+    throw new Error("Not authorized");
+  }
+
+  const { slug, details } = req.body;
+  if (!slug) {
+    res.status(400);
+    throw new Error("Slug is required");
+  }
+
+  let ws = await CodingWorkspace.findOne({ userId: req.user._id });
+  if (!ws) {
+    ws = new CodingWorkspace({ userId: req.user._id, solvedProblems: {}, drafts: {}, submissions: {} });
+  }
+
+  if (!ws.solvedProblems) ws.solvedProblems = new Map();
+  ws.solvedProblems.set(slug, {
+    solvedAt: new Date(),
+    runtimeMs: details?.runtime_ms || details?.runtimeMs,
+    beatsPct: details?.beats_runtime_pct || details?.beatsPct,
+    difficulty: details?.difficulty || "",
+    title: details?.title || "",
+  });
+
+  await ws.save();
+
+  res.status(200).json({
+    success: true,
+    slug,
+    solvedProblems: Object.fromEntries(ws.solvedProblems),
   });
 });

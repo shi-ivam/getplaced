@@ -2,7 +2,7 @@
 
 AI-powered placement preparation and career development platform designed to supercharge interview readiness, resume optimization, and DSA progress tracking.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Category | Technologies |
 |----------|-------------|
@@ -13,7 +13,7 @@ AI-powered placement preparation and career development platform designed to sup
 
 ---
 
-## 🔑 Environment Variables & AI Configuration
+## Environment Variables & AI Configuration
 
 All AI-related features (including **Resume Analyzer**, ATS scoring, profile strength assessment, and career advice) require a valid Google Cloud / Gemini API key. Ensure `GOOGLE_API_KEY` is configured in your `.env` file before running the application.
 
@@ -33,11 +33,11 @@ cp .env.example .env
 | `VITE_NODE_API_URL` | Frontend | URL of the Node.js API (default: `http://localhost:3000`) |
 | `VITE_PY_API_URL` | Frontend | URL of the Python AI API (default: `http://localhost:8000`) |
 
-> ⚠️ **Important**: For any AI-related functionality, make sure `GOOGLE_API_KEY` is set to your active API key in `.env` (or `backend-Py/.env`). The Python backend dynamically reads this key to power all resume analysis and AI features.
+> **Important**: For any AI-related functionality, make sure `GOOGLE_API_KEY` is set to your active API key in `.env` (or `backend-Py/.env`). The Python backend dynamically reads this key to power all resume analysis and AI features.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Docker Compose (Recommended)
 

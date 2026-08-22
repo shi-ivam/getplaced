@@ -194,10 +194,10 @@ export default function HRPrep() {
             Behavioral Strategy & Leadership Principles
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight max-w-5xl mx-auto leading-tight">
-            Behavioral & Culture Fit Interview Mastery
+            Behavioral & Leadership Preparation
           </h1>
           <p className="text-sm md:text-base text-neutral-400 max-w-3xl mx-auto leading-relaxed">
-            Deconstruct company-specific leadership frameworks, master calibrated STAR responses, and validate narrative impact with instant feedback.
+            Structured STAR response practice calibrated against company-specific leadership frameworks.
           </p>
         </div>
 
@@ -234,11 +234,11 @@ export default function HRPrep() {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-white" />
                 <h3 className="text-xs uppercase font-mono font-bold text-white tracking-wider">
-                  The STAR Methodology Distribution Blueprint
+                  STAR Response Framework
                 </h3>
               </div>
               <span className="text-[11px] text-neutral-500 font-mono">
-                Optimal behavioral response architecture
+                Target allocation for behavioral answers
               </span>
             </div>
 
@@ -251,7 +251,7 @@ export default function HRPrep() {
                   </span>
                 </div>
                 <p className="text-xs text-neutral-400 leading-relaxed">
-                  Establish technical context, team scale, and system constraints succinctly.
+                  Context, constraints, and project scope.
                 </p>
               </div>
 
@@ -263,7 +263,7 @@ export default function HRPrep() {
                   </span>
                 </div>
                 <p className="text-xs text-neutral-400 leading-relaxed">
-                  Define your exact individual responsibility and critical success metric.
+                  Your specific responsibility and primary objective.
                 </p>
               </div>
 
@@ -275,7 +275,7 @@ export default function HRPrep() {
                   </span>
                 </div>
                 <p className="text-xs text-neutral-400 leading-relaxed">
-                  Elaborate on architectural decisions, trade-offs made, and technical execution.
+                  Technical decisions, trade-offs, and execution steps.
                 </p>
               </div>
 
@@ -287,7 +287,7 @@ export default function HRPrep() {
                   </span>
                 </div>
                 <p className="text-xs text-neutral-400 leading-relaxed">
-                  Deliver quantifiable business metrics, latency deltas, and institutional learnings.
+                  Quantifiable outcomes, metrics, and key learnings.
                 </p>
               </div>
             </div>
@@ -327,7 +327,7 @@ export default function HRPrep() {
               className="flex items-center gap-1.5 text-xs text-neutral-300 hover:text-white px-3.5 py-2 bg-neutral-950 hover:bg-neutral-800 rounded-xl border border-neutral-800 transition font-mono"
             >
               <RotateCcw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-              Generate Fresh Prompt Bank
+              Refresh Prompts
             </button>
           </div>
         </div>
@@ -356,7 +356,7 @@ export default function HRPrep() {
                 {q.why_asked && (
                   <div className="text-xs text-neutral-400 border-t border-neutral-800/80 pt-3 space-y-1">
                     <span className="text-neutral-300 font-semibold block">
-                      Core Evaluator Inquiry:
+                      Evaluator Intent:
                     </span>
                     <p className="text-neutral-400 leading-relaxed">{q.why_asked}</p>
                   </div>
@@ -366,7 +366,7 @@ export default function HRPrep() {
                   <div className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-xs space-y-1">
                     <span className="text-neutral-300 font-semibold flex items-center gap-1.5">
                       <HelpCircle className="w-3.5 h-3.5 text-neutral-400" />
-                      STAR Framing Strategy:
+                      STAR Strategy:
                     </span>
                     <p className="text-neutral-400 font-mono text-[11px] leading-relaxed">
                       {q.star_tips}
@@ -405,7 +405,7 @@ export default function HRPrep() {
                   className="flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-neutral-200 text-neutral-950 rounded-xl text-xs font-bold transition shadow"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  Practice & Evaluate
+                  Practice Response
                 </button>
               </div>
             </div>
@@ -419,7 +419,7 @@ export default function HRPrep() {
               <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <BrainCog className="w-4 h-4 text-neutral-400" />
-                  Candidate Response Simulation Sandbox
+                  Practice Response
                 </h3>
                 <button
                   onClick={() => setActiveQuestion(null)}
@@ -443,7 +443,7 @@ export default function HRPrep() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-xs uppercase tracking-wider font-mono text-neutral-400">
-                    Candidate Formulation
+                    Your Response
                   </label>
                   <button
                     onClick={handleToggleVoice}
@@ -456,12 +456,12 @@ export default function HRPrep() {
                     {isRecording ? (
                       <>
                         <Square className="w-3 h-3 fill-current" />
-                        Halt Voice Input
+                        Stop Recording
                       </>
                     ) : (
                       <>
                         <Mic className="w-3 h-3 text-neutral-300" />
-                        Record Speech
+                        Record Voice
                       </>
                     )}
                   </button>
@@ -471,7 +471,7 @@ export default function HRPrep() {
                   rows={5}
                   value={practiceAnswer}
                   onChange={(e) => setPracticeAnswer(e.target.value)}
-                  placeholder="Articulate your structured Situation, Task, Action, and quantifiable Result..."
+                  placeholder="Type or record your response (Situation, Task, Action, Result)..."
                   className="w-full p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-500 resize-none leading-relaxed"
                 />
 
@@ -485,8 +485,8 @@ export default function HRPrep() {
                   }`}
                 >
                   {evaluating
-                    ? "Evaluating STAR Architecture..."
-                    : "Evaluate Response with AI"}
+                    ? "Evaluating..."
+                    : "Evaluate Response"}
                 </button>
               </div>
 
@@ -495,7 +495,7 @@ export default function HRPrep() {
                 <div className="space-y-3.5 pt-3 border-t border-neutral-800 font-sans">
                   <div className="flex items-center justify-between bg-neutral-950 p-3 rounded-xl border border-neutral-800">
                     <span className="text-xs font-semibold text-neutral-300">
-                      Overall Evaluation Score:
+                      Overall Score:
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-lg font-mono font-bold text-white">
@@ -517,7 +517,7 @@ export default function HRPrep() {
                   {evaluationResult.star_compliance && (
                     <div className="space-y-1.5">
                       <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block">
-                        STAR Structure Audit:
+                        STAR Components:
                       </span>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         {["situation", "task", "action", "result"].map((k) => {
@@ -532,7 +532,7 @@ export default function HRPrep() {
                                   : "bg-neutral-950 border-rose-500/40 text-rose-400"
                               }`}
                             >
-                              {k.toUpperCase()}: {detected ? "✓ Verified" : "✗ Missing"}
+                              {k.toUpperCase()}: {detected ? "Verified" : "Missing"}
                             </div>
                           );
                         })}
@@ -545,7 +545,7 @@ export default function HRPrep() {
                     <div className="p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
                       <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        Good (Strengths)
+                        Strengths
                       </span>
                       <ul className="text-xs text-neutral-300 space-y-0.5">
                         {(evaluationResult.strengths || [
@@ -563,7 +563,7 @@ export default function HRPrep() {
                     <div className="p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
                       <span className="text-xs font-semibold text-amber-400 flex items-center gap-1.5">
                         <AlertTriangle className="w-3.5 h-3.5" />
-                        Improve (Refinements)
+                        Areas to Improve
                       </span>
                       <ul className="text-xs text-neutral-300 space-y-0.5">
                         {(evaluationResult.areas_for_improvement || [
@@ -584,12 +584,12 @@ export default function HRPrep() {
                     <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
                     <div>
                       <span className="font-bold text-neutral-200 block text-[11px] uppercase tracking-wider font-mono">
-                        One Key Tip:
+                        Key Tip:
                       </span>
                       <p className="text-neutral-300">
                         {evaluationResult.one_tip ||
                           evaluationResult.key_takeaway ||
-                          "Focus 50% of your time on the Action phase detailing your direct technical contribution and trade-offs."}
+                          "Focus on the Action phase detailing your direct technical contribution and trade-offs."}
                       </p>
                     </div>
                   </div>
@@ -602,12 +602,12 @@ export default function HRPrep() {
                         onClick={() => setShowModelAnswer(!showModelAnswer)}
                         className="text-xs font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1 cursor-pointer"
                       >
-                        <span>{showModelAnswer ? "Hide Polished Model Answer" : "View Polished STAR Model Answer [ Details ]"}</span>
+                        <span>{showModelAnswer ? "Hide Model Answer" : "Show Model Answer"}</span>
                       </button>
                       {showModelAnswer && (
                         <div className="mt-2 p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
                           <span className="text-xs font-bold text-neutral-200 block">
-                            Polished STAR Model Answer:
+                            Model Answer:
                           </span>
                           <p className="text-xs text-neutral-400 leading-relaxed">
                             {evaluationResult.suggested_better_answer}

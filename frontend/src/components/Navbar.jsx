@@ -37,10 +37,10 @@ export default function Navbar() {
         {/* Desktop Links */}
         <ul className="hidden lg:flex items-center space-x-8 text-xs font-semibold uppercase tracking-wider text-[#FFF4E1]/70">
           {[
-            { label: "AI Interviewer", path: "#hero" },
-            { label: "Capabilities", path: "#features" },
-            { label: "ATS Analyzer", path: "#resume" },
-            { label: "Study Plan", path: "#calendar" },
+            { label: "Interviews", path: "#hero" },
+            { label: "Features", path: "#features" },
+            { label: "Resume", path: "#resume" },
+            { label: "Roadmap", path: "#calendar" },
             { label: "Security", path: "#security" },
           ].map((link) => (
             <li key={link.label}>
@@ -66,7 +66,7 @@ export default function Navbar() {
             onClick={() => navigate("/register")}
             className="group relative inline-flex items-center justify-center px-5 py-2 text-xs font-semibold uppercase tracking-wider text-[#1A312C] bg-[#89D7B7] rounded-full overflow-hidden shadow-[0_4px_20px_rgba(137,215,183,0.3)] hover:bg-[#a6e6ce] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 cursor-pointer font-bold"
           >
-            <span>Start Practice</span>
+            <span>Get Started</span>
             <FiArrowUpRight className="ml-1 w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-[#1A312C]" />
           </button>
         </div>
@@ -85,10 +85,10 @@ export default function Navbar() {
       {isOpen && (
         <div className="pointer-events-auto mt-3 backdrop-blur-2xl bg-[#1A312C]/95 border border-[#428475]/40 rounded-3xl p-6 shadow-2xl flex flex-col space-y-4 lg:hidden animate-in fade-in slide-in-from-top-4 duration-300">
           {[
-            { label: "AI Interviewer", path: "#hero" },
-            { label: "Capabilities", path: "#features" },
-            { label: "ATS Analyzer", path: "#resume" },
-            { label: "Study Plan", path: "#calendar" },
+            { label: "Interviews", path: "#hero" },
+            { label: "Features", path: "#features" },
+            { label: "Resume", path: "#resume" },
+            { label: "Roadmap", path: "#calendar" },
             { label: "Security", path: "#security" },
           ].map((link) => (
             <a
@@ -117,7 +117,7 @@ export default function Navbar() {
               }}
               className="w-full text-center py-2.5 text-xs font-semibold uppercase tracking-wider text-[#1A312C] bg-[#89D7B7] hover:bg-[#a6e6ce] rounded-full shadow-lg transition-colors font-bold"
             >
-              Start Free Practice
+              Get Started
             </button>
           </div>
         </div>

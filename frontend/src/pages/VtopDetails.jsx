@@ -36,6 +36,7 @@ import {
   EyeOff,
   Wifi,
   Sparkle,
+  Target,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
 
@@ -56,7 +57,7 @@ export default function VtopDetails() {
   const [showPassword, setShowPassword] = useState(false);
 
   // Live Login Form State
-  const [username, setUsername] = useState("24BLC1103");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [captchaText, setCaptchaText] = useState("");
   const [captchaImage, setCaptchaImage] = useState("");
@@ -386,10 +387,10 @@ export default function VtopDetails() {
               VTOP Student Portal Sync • vtopcc.vit.ac.in
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
-              VTOP Academic Details & Marksheet
+              VTOP Academic Records & Marksheet
             </h1>
             <p className="text-sm md:text-base text-zinc-400 max-w-3xl leading-relaxed">
-              Login to <strong>vtopcc.vit.ac.in</strong> with your registration credentials to harvest your official marksheets, CAT/FAT component weightages, attendance safety margins, and placement cutoffs.
+              Sync official marksheets, assessment weightages, attendance margins, and placement cutoffs directly from <strong>vtopcc.vit.ac.in</strong>.
             </p>
           </div>
 
@@ -406,7 +407,7 @@ export default function VtopDetails() {
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-zinc-300 hover:text-white hover:border-zinc-700 text-xs font-semibold transition-all duration-200 cursor-pointer"
             >
               <KeyRound className="w-3.5 h-3.5 text-purple-400" />
-              <span>Login Protocol Specs</span>
+              <span>Protocol Specs</span>
             </button>
 
             <button
@@ -415,7 +416,7 @@ export default function VtopDetails() {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-xs hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-blue-500/20 transition-all duration-300 active:scale-95 cursor-pointer"
             >
               <Lock className="w-3.5 h-3.5" />
-              <span>Login with VTOP Credentials</span>
+              <span>Sync VTOP Portal</span>
             </button>
           </div>
         </header>
@@ -429,18 +430,24 @@ export default function VtopDetails() {
             <div>
               <div className="flex items-center gap-2.5">
                 <h3 className="text-base font-bold text-white tracking-tight">
-                  {vtopData?.studentName || "Shivam Kumar"}
+                  {vtopData?.studentName || "Unconnected Student"}
                 </h3>
                 <span className="px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 text-xs font-mono font-medium">
-                  {vtopData?.regNo || "22BCE1042"}
+                  {vtopData?.regNo || "Not Connected"}
                 </span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Authenticated Session
-                </span>
+                {vtopData ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Authenticated Session
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-400 bg-zinc-800/60 px-2 py-0.5 rounded-full border border-zinc-700/60">
+                    Not Connected
+                  </span>
+                )}
               </div>
               <p className="text-xs text-zinc-400 mt-1">
-                {vtopData?.program} • {vtopData?.school}
+                {vtopData?.program || "Connect VTOP Portal"} {vtopData?.school ? `• ${vtopData.school}` : ""}
               </p>
             </div>
           </div>
@@ -448,11 +455,11 @@ export default function VtopDetails() {
           <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-zinc-400 border-t md:border-t-0 border-white/5 pt-3 md:pt-0 w-full md:w-auto justify-between md:justify-end">
             <div className="flex items-center gap-1.5">
               <User className="w-3.5 h-3.5 text-zinc-500" />
-              <span>Proctor: <span className="text-zinc-200 font-medium">{vtopData?.proctorName?.split("(")[0]}</span></span>
+              <span>Proctor: <span className="text-zinc-200 font-medium">{vtopData?.proctorName ? vtopData.proctorName.split("(")[0] : "Not Assigned"}</span></span>
             </div>
             <div className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-zinc-500" />
-              <span>Last Synced: <span className="text-zinc-200 font-medium">{vtopData?.lastSyncedAt ? new Date(vtopData.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}</span></span>
+              <span>Last Synced: <span className="text-zinc-200 font-medium">{vtopData?.lastSyncedAt ? new Date(vtopData.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Never"}</span></span>
             </div>
           </div>
         </section>
@@ -466,11 +473,11 @@ export default function VtopDetails() {
               <span className="text-blue-400 font-mono">Super Dream: 9.0+</span>
             </div>
             <div className="text-4xl font-extrabold text-white font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left">
-              {vtopData?.currentCgpa ?? 8.74}
+              {vtopData?.currentCgpa !== undefined && vtopData?.currentCgpa !== null ? vtopData.currentCgpa : "Unassessed"}
             </div>
             <div className="text-xs mt-3 flex items-center gap-1.5 font-medium text-emerald-400">
               <TrendingUp className="w-3.5 h-3.5" />
-              <span>Clears 100% Dream & 88% Super Dream cutoffs</span>
+              <span>Meets Dream & Super Dream cutoffs</span>
             </div>
           </div>
 
@@ -494,7 +501,7 @@ export default function VtopDetails() {
             </div>
             <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-emerald-300 font-medium">0 Arrears: Fully eligible for all Tier-1 drives</span>
+              <span className="text-emerald-300 font-medium">0 Active Arrears (Eligible for all drives)</span>
             </div>
           </div>
 
@@ -511,12 +518,12 @@ export default function VtopDetails() {
               {placementImpact?.debarredCount === 0 ? (
                 <>
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-emerald-300 font-medium">0 Debarred Courses (Safe from 'N' Grade)</span>
+                  <span className="text-emerald-300 font-medium">0 Debarred Courses</span>
                 </>
               ) : (
                 <>
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="text-amber-300 font-medium">{placementImpact?.debarredCount} Debarred Course Flag!</span>
+                  <span className="text-amber-300 font-medium">{placementImpact?.debarredCount} Debarred Course Flag</span>
                 </>
               )}
             </div>
@@ -546,11 +553,11 @@ export default function VtopDetails() {
               <div className="flex items-center gap-2">
                 <FileSpreadsheet className="w-5 h-5 text-blue-400" />
                 <h3 className="text-xl font-bold text-white tracking-tight">
-                  Course Marksheet & Internal Assessments
+                  Course Marksheets & Assessments
                 </h3>
               </div>
               <p className="text-xs text-zinc-400 mt-1">
-                Detailed CAT-1, CAT-2, Digital Assignments, and FAT weightages extracted via VTOP Marks API
+                CAT-1, CAT-2, Digital Assignments, and FAT weightages extracted via VTOP API
               </p>
             </div>
 
@@ -1019,8 +1026,9 @@ export default function VtopDetails() {
 
                   <div className="flex items-center justify-between text-[11px] text-zinc-400 font-mono">
                     {c.isDebarred ? (
-                      <span className="text-rose-400 font-medium">
-                        ⚠️ Must attend {c.requiredToRecover} consecutive classes to reach 75%
+                      <span className="text-rose-400 font-medium inline-flex items-center gap-1">
+                        <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                        Must attend {c.requiredToRecover} consecutive classes to reach 75%
                       </span>
                     ) : (
                       <span>
@@ -1361,18 +1369,6 @@ export default function VtopDetails() {
                     >
                       <Lock className="w-4 h-4" />
                       <span>Login to VTOP Portal & Fetch Details</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUsername("22BCE1042");
-                        setPassword("vit_demo_pass");
-                        // User solves the live dynamic captcha from VTOP
-                      }}
-                      className="w-full py-2 rounded-xl bg-zinc-950 hover:bg-zinc-800 border border-white/10 text-zinc-400 hover:text-zinc-200 font-mono text-xs transition-all cursor-pointer text-center"
-                    >
-                      ⚡ Autofill Sample Reg No & Password
                     </button>
                   </div>
                 </form>

@@ -8,9 +8,11 @@ import {
   connectLeetCodeInCoach,
   connectVtopInCoach,
   saveResumeAnalysisInCoach,
+  clearCoachChatHistory,
+  getQuickSuggestionsForContext,
 } from "../services/coachService.js";
 
-// @desc    Get current AI career coach onboarding session
+// @desc    Get current AI career coach session
 // @route   GET /api/coach/session
 // @access  Private
 export const getSession = asyncHandler(async (req, res) => {
@@ -19,7 +21,7 @@ export const getSession = asyncHandler(async (req, res) => {
   res.json(session);
 });
 
-// @desc    Send message to AI career coach
+// @desc    Send message to AI career coach (Autonomous Gemini Function Calling)
 // @route   POST /api/coach/message
 // @access  Private
 export const sendMessage = asyncHandler(async (req, res) => {
@@ -33,6 +35,23 @@ export const sendMessage = asyncHandler(async (req, res) => {
 
   const result = await processCoachMessage(req.user._id, message, user);
   res.json(result);
+});
+
+// @desc    Clear / Reset coach chat history
+// @route   POST /api/coach/clear-chat
+// @access  Private
+export const clearChat = asyncHandler(async (req, res) => {
+  const session = await clearCoachChatHistory(req.user._id);
+  res.json({ success: true, message: "Chat history cleared", session });
+});
+
+// @desc    Get context-aware quick suggestion chips for active surface
+// @route   GET /api/coach/quick-suggestions
+// @access  Private
+export const getQuickSuggestions = asyncHandler(async (req, res) => {
+  const contextPath = req.query.path || "";
+  const suggestions = await getQuickSuggestionsForContext(req.user._id, contextPath);
+  res.json({ suggestions });
 });
 
 // @desc    Apply onboarding extracted profile
@@ -86,7 +105,7 @@ export const connectVtop = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
-// @desc    Save AI Resume Analysis into onboarding coach session & user profile
+// @desc    Save AI Resume Analysis into coach session & user profile
 // @route   POST /api/coach/save-resume-analysis
 // @access  Private
 export const saveResumeAnalysis = asyncHandler(async (req, res) => {
@@ -99,4 +118,3 @@ export const saveResumeAnalysis = asyncHandler(async (req, res) => {
   });
   res.json(result);
 });
-

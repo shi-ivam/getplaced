@@ -72,31 +72,31 @@ const PrivacyProtection = () => {
             {/* Text & Specs */}
             <div className="lg:col-span-7 space-y-6">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#428475]/25 border border-[#89D7B7]/30 text-[#89D7B7] text-xs font-mono uppercase tracking-widest">
-                <Lock className="w-3.5 h-3.5 text-[#89D7B7]" /> Hardened Enterprise Security
+                <Lock className="w-3.5 h-3.5 text-[#89D7B7]" /> Data Security
               </div>
               
               <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-[#FFF4E1] leading-tight">
-                Zero-Knowledge Privacy & Encryption Standard
+                Encryption & Data Privacy Standards
               </h2>
 
               <p className="text-[#FFF4E1]/80 text-base md:text-lg leading-relaxed">
-                Your mock interview audio streams, candidate telemetry, and custom resume documents are encrypted in transit via {sessionSecurity.tlsVersion} ({sessionSecurity.cipherSuite}) and at rest with AES-256 GCM.
+                Interview audio, session telemetry, and resume files are encrypted in transit via {sessionSecurity.tlsVersion} ({sessionSecurity.cipherSuite}) and at rest with AES-256 GCM.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
                 <div className="p-4 rounded-xl bg-[#1A312C]/80 border border-[#428475]/35 flex items-start gap-3">
                   <Key className="w-5 h-5 text-[#89D7B7] shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-bold text-[#FFF4E1] mb-0.5">End-to-End Key Isolation</h4>
-                    <p className="text-xs text-[#FFF4E1]/70">Isolated candidate key pairs generated client-side via SHA-256.</p>
+                    <h4 className="text-sm font-bold text-[#FFF4E1] mb-0.5">Client Key Isolation</h4>
+                    <p className="text-xs text-[#FFF4E1]/70">Session key hashes generated client-side via SHA-256.</p>
                   </div>
                 </div>
 
                 <div className="p-4 rounded-xl bg-[#1A312C]/80 border border-[#428475]/35 flex items-start gap-3">
                   <EyeOff className="w-5 h-5 text-[#89D7B7] shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-bold text-[#FFF4E1] mb-0.5">No Unverified Data Training</h4>
-                    <p className="text-xs text-[#FFF4E1]/70">Your mock interview data is never stored for public AI model training.</p>
+                    <h4 className="text-sm font-bold text-[#FFF4E1] mb-0.5">No Third-Party Training</h4>
+                    <p className="text-xs text-[#FFF4E1]/70">Interview and resume data is never used for public model training.</p>
                   </div>
                 </div>
               </div>

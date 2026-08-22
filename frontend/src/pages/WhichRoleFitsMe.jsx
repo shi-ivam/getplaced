@@ -352,7 +352,7 @@ export default function WhichRoleFitsMe() {
                 <div className="flex flex-wrap items-center gap-2.5">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#C7F36B] text-zinc-950 font-bold text-xs shadow-sm">
                     <Sparkles className="w-3.5 h-3.5" />
-                    🥇 TOP CAREER FIT
+                    TOP CAREER FIT
                   </span>
                   <span className="px-2.5 py-0.5 rounded-md bg-white/[0.06] text-zinc-300 font-mono text-xs border border-white/[0.08]">
                     {topRole.category}
@@ -644,7 +644,10 @@ export default function WhichRoleFitsMe() {
                               </div>
                             ))
                           ) : (
-                            <span className="text-emerald-400 text-[11px]">All core benchmark skills verified ✓</span>
+                            <span className="text-emerald-400 text-[11px] font-mono flex items-center gap-1">
+                              <Check className="w-3 h-3 text-emerald-400" />
+                              All core benchmark skills verified
+                            </span>
                           )}
                         </td>
                       ))}
@@ -718,8 +721,9 @@ export default function WhichRoleFitsMe() {
                               <span>Make This Target</span>
                             </button>
                           ) : (
-                            <div className="text-[11px] font-mono text-[#C7F36B] text-center">
-                              Active Platform Target ✓
+                            <div className="text-[11px] font-mono text-[#C7F36B] text-center flex items-center justify-center gap-1">
+                              <Check className="w-3 h-3 text-[#C7F36B]" />
+                              Active Target
                             </div>
                           )}
                         </td>
@@ -771,15 +775,15 @@ export default function WhichRoleFitsMe() {
                         </span>
                         {isTop ? (
                           <span className="px-2 py-0.5 rounded-full bg-[#C7F36B] text-zinc-950 font-bold text-[10px]">
-                            🥇 TOP MATCH
+                            Top Match
                           </span>
                         ) : index === 1 ? (
                           <span className="px-2 py-0.5 rounded-full bg-zinc-700 text-zinc-200 font-semibold text-[10px]">
-                            🥈 2nd Match
+                            Rank 2
                           </span>
                         ) : index === 2 ? (
                           <span className="px-2 py-0.5 rounded-full bg-amber-700/60 text-amber-200 font-semibold text-[10px]">
-                            🥉 3rd Match
+                            Rank 3
                           </span>
                         ) : null}
 

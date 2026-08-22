@@ -4,6 +4,33 @@ import { PY_API_URL, NODE_API_URL } from "@/config/api";
 const API_BASE = `${PY_API_URL}/api/problems`;
 const PROFILE_API_BASE = `${NODE_API_URL}/api/leetcode`;
 
+// In-memory workspace cache for zero latency UI rendering with localStorage fallback
+const STORAGE_KEY_SOLVED = "getplaced_coding_solved_cache";
+const STORAGE_KEY_DRAFTS = "getplaced_coding_drafts_cache";
+const STORAGE_KEY_SUBMISSIONS = "getplaced_coding_submissions_cache";
+
+const loadLocalCache = (key) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
+const saveLocalCache = (key, data) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch {}
+};
+
+let workspaceCache = {
+  solvedProblems: loadLocalCache(STORAGE_KEY_SOLVED),
+  drafts: loadLocalCache(STORAGE_KEY_DRAFTS),
+  submissions: loadLocalCache(STORAGE_KEY_SUBMISSIONS),
+  loaded: false,
+};
+
 export const leetcodeService = {
   // --- LeetCode Connected Profile & Analytics (Node Backend) ---
   
@@ -129,30 +156,54 @@ export const leetcodeService = {
     return response.data;
   },
 
-  // --- Local Storage Progress Tracking ---
-  
-  getSolvedProblems() {
+  // --- Backend Database Workspace Storage Syncing ---
+
+  async fetchWorkspaceState() {
     try {
-      const stored = localStorage.getItem("getplaced_solved_problems");
-      return stored ? JSON.parse(stored) : {};
-    } catch {
-      return {};
+      const response = await axios.get(`${PROFILE_API_BASE}/workspace`, {
+        withCredentials: true,
+      });
+      if (response.data?.success) {
+        workspaceCache.solvedProblems = { ...workspaceCache.solvedProblems, ...(response.data.solvedProblems || {}) };
+        workspaceCache.drafts = { ...workspaceCache.drafts, ...(response.data.drafts || {}) };
+        workspaceCache.submissions = { ...workspaceCache.submissions, ...(response.data.submissions || {}) };
+        workspaceCache.loaded = true;
+        saveLocalCache(STORAGE_KEY_SOLVED, workspaceCache.solvedProblems);
+        saveLocalCache(STORAGE_KEY_DRAFTS, workspaceCache.drafts);
+        saveLocalCache(STORAGE_KEY_SUBMISSIONS, workspaceCache.submissions);
+      }
+    } catch (err) {
+      console.warn("Could not fetch workspace state from backend database:", err.message);
     }
+    return workspaceCache;
   },
 
-  markProblemSolved(slug, details = {}) {
+  getSolvedProblems() {
+    if (!workspaceCache.loaded) {
+      this.fetchWorkspaceState();
+    }
+    return workspaceCache.solvedProblems || {};
+  },
+
+  async markProblemSolved(slug, details = {}) {
+    const solvedData = {
+      solvedAt: new Date().toISOString(),
+      runtimeMs: details.runtime_ms,
+      beatsPct: details.beats_runtime_pct,
+      difficulty: details.difficulty,
+      title: details.title,
+    };
+    workspaceCache.solvedProblems[slug] = solvedData;
+    saveLocalCache(STORAGE_KEY_SOLVED, workspaceCache.solvedProblems);
+
     try {
-      const solved = this.getSolvedProblems();
-      solved[slug] = {
-        solvedAt: new Date().toISOString(),
-        runtimeMs: details.runtime_ms,
-        beatsPct: details.beats_runtime_pct,
-        difficulty: details.difficulty,
-        title: details.title,
-      };
-      localStorage.setItem("getplaced_solved_problems", JSON.stringify(solved));
+      await axios.post(
+        `${PROFILE_API_BASE}/solved`,
+        { slug, details },
+        { withCredentials: true }
+      );
     } catch (e) {
-      console.error("Failed to persist solved status:", e);
+      console.warn("Failed to persist solved status to backend DB:", e.message);
     }
   },
 
@@ -162,53 +213,59 @@ export const leetcodeService = {
   },
 
   getSavedCode(slug, defaultCode = "") {
-    try {
-      const drafts = JSON.parse(localStorage.getItem("getplaced_code_drafts") || "{}");
-      return drafts[slug] || defaultCode;
-    } catch {
-      return defaultCode;
+    if (!workspaceCache.loaded) {
+      this.fetchWorkspaceState();
     }
+    return workspaceCache.drafts[slug] || defaultCode;
   },
 
-  saveCode(slug, code) {
+  async saveCode(slug, code) {
+    workspaceCache.drafts[slug] = code;
+    saveLocalCache(STORAGE_KEY_DRAFTS, workspaceCache.drafts);
     try {
-      const drafts = JSON.parse(localStorage.getItem("getplaced_code_drafts") || "{}");
-      drafts[slug] = code;
-      localStorage.setItem("getplaced_code_drafts", JSON.stringify(drafts));
+      await axios.post(
+        `${PROFILE_API_BASE}/draft`,
+        { slug, code },
+        { withCredentials: true }
+      );
     } catch (e) {
-      console.error("Failed to save code draft:", e);
+      console.warn("Failed to save code draft to backend DB:", e.message);
     }
   },
 
   getSubmissions(slug) {
-    try {
-      const allSubs = JSON.parse(localStorage.getItem("getplaced_submissions") || "{}");
-      return allSubs[slug] || [];
-    } catch {
-      return [];
+    if (!workspaceCache.loaded) {
+      this.fetchWorkspaceState();
     }
+    return workspaceCache.submissions[slug] || [];
   },
 
-  recordSubmission(slug, subData) {
+  async recordSubmission(slug, subData) {
+    const newEntry = {
+      id: Date.now(),
+      timestamp: new Date().toISOString(),
+      status: subData.status,
+      runtime_ms: subData.runtime_ms,
+      memory_mb: subData.memory_mb,
+      beats_runtime_pct: subData.beats_runtime_pct,
+      passed_count: subData.passed_count,
+      total_count: subData.total_count,
+      error: subData.error,
+    };
+
+    const currentList = workspaceCache.submissions[slug] || [];
+    const updatedList = [newEntry, ...currentList].slice(0, 30);
+    workspaceCache.submissions[slug] = updatedList;
+    saveLocalCache(STORAGE_KEY_SUBMISSIONS, workspaceCache.submissions);
+
     try {
-      const allSubs = JSON.parse(localStorage.getItem("getplaced_submissions") || "{}");
-      const list = allSubs[slug] || [];
-      const newEntry = {
-        id: Date.now(),
-        timestamp: new Date().toISOString(),
-        status: subData.status,
-        runtime_ms: subData.runtime_ms,
-        memory_mb: subData.memory_mb,
-        beats_runtime_pct: subData.beats_runtime_pct,
-        passed_count: subData.passed_count,
-        total_count: subData.total_count,
-        error: subData.error,
-      };
-      list.unshift(newEntry);
-      allSubs[slug] = list.slice(0, 30); // Keep last 30 submissions per problem
-      localStorage.setItem("getplaced_submissions", JSON.stringify(allSubs));
+      await axios.post(
+        `${PROFILE_API_BASE}/submission`,
+        { slug, subData },
+        { withCredentials: true }
+      );
     } catch (e) {
-      console.error("Failed to save submission:", e);
+      console.warn("Failed to save submission to backend DB:", e.message);
     }
-  }
+  },
 };
