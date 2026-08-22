@@ -1,0 +1,299 @@
+{
+  "metadata": {
+    "generated_at": "2026-08-21T10:18:15.491440+00:00",
+    "platform": "takeUforward (Striver)",
+    "author": "Shivam",
+    "total_sheets_and_playlists": 28,
+    "total_problems_and_topics": 3150,
+    "breakdown": {
+      "dsa_sheets_count": 4,
+      "core_cs_sheets_count": 3,
+      "system_design_count": 1,
+      "cp_sheets_count": 1,
+      "dsa_playlists_count": 9,
+      "tuf_plus_courses_count": 10
+    }
+  },
+  "items": [
+    {
+      "id": "strivers-a2z-dsa-sheet",
+      "title": "Striver's A2Z Sheet - Learn DSA from A to Z",
+      "type": "sheet",
+      "category": "DSA Sheets",
+      "url": "https://takeuforward.org/dsa/strivers-a2z-sheet-learn-dsa-a-to-z",
+      "description": "This course is made for people who want to learn DSA from A to Z for free in a well-organised and structured manner.",
+      "total_sections": 18,
+      "total_problems": 474
+    },
+    {
+      "id": "blind-75-sheet",
+      "title": "Blind 75 LeetCode Problems - Detailed Video Solutions",
+      "type": "sheet",
+      "category": "DSA Sheets",
+      "url": "https://takeuforward.org/dsa/blind-75-leetcode-problems-detailed-video-solutions",
+      "description": "Blind 75 leetcode is a list of 75 most frequent asked leetcode questions which had helped many developers clear interviews of Google, Amazon, Microsoft, Facebook etc. Hence, it is a tried and tested list with 1000s of testimonials available on all public review platforms such as quora, teamblind etc.",
+      "total_sections": 10,
+      "total_problems": 75
+    },
+    {
+      "id": "strivers-sde-sheet",
+      "title": "Strivers SDE Sheet - Top Coding Interview Problems",
+      "type": "sheet",
+      "category": "DSA Sheets",
+      "url": "https://takeuforward.org/dsa/strivers-sde-sheet-top-coding-interview-problems",
+      "description": "SDE Sheet contains very handily crafted and picked top coding interview questions from different topics of Data Structures & Algorithms. These questions are one of the most asked coding interview questions in coding interviews of companies like Google, Amazon, Microsoft, Facebook, Swiggy, Flipkart, etc, and cover almost all of the concepts related to Data Structure & Algorithms",
+      "total_sections": 27,
+      "total_problems": 191
+    },
+    {
+      "id": "strivers-79-sheet",
+      "title": "Striver's 79 Sheet - Ace Interviews",
+      "type": "sheet",
+      "category": "DSA Sheets",
+      "url": "https://takeuforward.org/dsa/strivers-79-last-moment-dsa-sheet-ace-interviews",
+      "description": "The Striver's 79 Sheet contains very handily crafted and picked top coding interview questions from different topics of Data Structures & Algorithms. These questions are one of the most asked coding interview questions in coding interviews of companies like Google, Amazon, Microsoft, Facebook, Swiggy, Flipkart, etc, and cover almost all of the concepts related to Data Structure & Algorithms.",
+      "total_sections": 11,
+      "total_problems": 79
+    },
+    {
+      "id": "strivers-cp-sheet",
+      "title": "Striver's CP Sheet - Ace Interviews",
+      "type": "sheet",
+      "category": "Competitive Programming",
+      "url": "https://takeuforward.org/interview-experience/strivers-cp-sheet",
+      "description": "Striver’s CP Sheet (Solely for preparing for Coding Rounds of Top Product Based Companies and to do well in Coding Sites and Competitions).",
+      "total_sections": 19,
+      "total_problems": 297
+    },
+    {
+      "id": "computer-networks-sheet",
+      "title": "Most Asked Computer Networks Interview Questions",
+      "type": "sheet",
+      "category": "Core CS Subjects",
+      "url": "https://takeuforward.org/computer-network/most-asked-computer-networks-interview-questions",
+      "description": "If you are one of those who is scared by studying one of the most powerful yet lengthy books on Computer Networks – you are at the right place. We have carefully handpicked a set of interview questions on Computer Networks frequently asked in product-based companies.",
+      "total_sections": 12,
+      "total_problems": 54
+    },
+    {
+      "id": "dbms-sheet",
+      "title": "Most Asked DBMS Interview Questions",
+      "type": "sheet",
+      "category": "Core CS Subjects",
+      "url": "https://takeuforward.org/dbms/most-asked-dbms-interview-questions",
+      "description": "Explore essential DBMS interview questions curated to help you ace your next interview effortlessly. Gain valuable insights and boost your confidence with our carefully selected questions tailored for success in database management. Dive in now and excel in your DBMS journey.",
+      "total_sections": 8,
+      "total_problems": 29
+    },
+    {
+      "id": "operating-system-sheet",
+      "title": "Most Asked Operating System Interview Questions",
+      "type": "sheet",
+      "category": "Core CS Subjects",
+      "url": "https://takeuforward.org/operating-system/most-asked-operating-system-interview-questions",
+      "description": "Operating System (OS) is basically a software program that manages and handles all resources of a computer such as hardware and software. The first OS was introduced in the early 1950s known as GMOs. An OS is responsible for managing, handling, and coordinating overall activities and sharing of computer resources. It acts as an intermediary among users and computer hardware.",
+      "total_sections": 6,
+      "total_problems": 28
+    },
+    {
+      "id": "system-design-sheet",
+      "title": "Complete System Design Roadmap with Videos for SDEs",
+      "type": "sheet",
+      "category": "System Design",
+      "url": "https://takeuforward.org/system-design/complete-system-design-roadmap-with-videos-for-sdes",
+      "description": "This is a definitive roadmap of system design for software engineers with no prior experience on the subject. If you are preparing for interviews at top companies like Google, Facebook, Amazon, or Netflix, you are in the right place.",
+      "total_sections": 13,
+      "total_problems": 70
+    },
+    {
+      "id": "array-playlist",
+      "title": "Top Array Interview Questions - Structured Path with Video Solutions",
+      "type": "playlist",
+      "category": "DSA Playlists",
+      "url": "https://takeuforward.org/array/top-array-interview-questions-structured-path-with-video-solutions",
+      "description": "Given below is the best-structured path to learn Array with the best video tutorials, and at the same time practice problems which are asked in top tech giants like Google, Amazon, Facebook, etc, and startups like Swiggy, Zomato, Paytm, and others.",
+      "total_sections": 5,
+      "total_problems": 43
+    },
+    {
+      "id": "binary-search-playlist",
+      "title": "Top Binary Search Interview Questions - Structured Path with Video Solutions",
+      "type": "playlist",
+      "category": "DSA Playlists",
+      "url": "https://takeuforward.org/binary-search/top-binary-search-interview-questions-structured-path-with-video-solutions",
+      "description": "Given below is the best-structured path to learn Binary Search with the best video tutorials, and at the same time practice problems which are asked in top tech giants like Google, Amazon, Facebook, etc, and startups like Swiggy, Zomato, Paytm, and others.",
+      "total_sections": 5,
+      "total_problems": 32
+    },
+    {
+      "id": "dynamic-programming-playlist",
+      "title": "Striver DP Series - Dynamic Programming Problems",
+      "type": "playlist",
+      "category": "DSA Playlists",
+      "url": "https://takeuforward.org/dynamic-programming/striver-dp-series-dynamic-programming-problems",
+      "description": "Given below is the best-structured path to learn Dynamic Programming with the best video tutorials, and at the same time practice problems which are asked in top tech giants like Google, Amazon, Facebook, etc, and startups like Swiggy, Zomato, Paytm, and others.",
+      "total_sections": 9,
+      "total_problems": 55
+    },
+    {
+      "id": "graph-playlist",
+      "title": "Striver Graph Series - Top Graph Interview Questions",
+      "type": "playlist",
+      "category": "DSA Playlists",
+      "url": "https://takeuforward.org/graph/striver-graph-series-top-graph-interview-questions",
+      "description": "Given below is the best-structured path to learn Graph with the best video tutorials, and at the same time practice problems which are asked in top tech giants like Google, Amazon, Facebook, etc, and startups like Swiggy, Zomato, Paytm, and others.",
+      "total_sections": 6,
+      "total_problems": 53
+    },
+    {
+      "id": "linked-list-playlist",
+      "title": "Top LinkedList Interview Questions - Structured Path with Video Solutions",
+      "type": "playlist",
+      "category": "DSA Playlists",
+      "url": "https://takeuforward.org/linked-list/top-linkedlist-interview-questions-structured-path-with-video-solutions",
+      "description": "Given below is the best-structured path to learn LinkedList with the best video tutorials, and at the same time practice problems which are asked in top tech giants like Google, Amazon, Facebook, etc, and startups like Swiggy, Zomato, Paytm, and others.",
+      "total_sections": 6,
+      "total_problems": 27
+    },
+    {
+      "id": "recursion-playlist",
+      "title": "Top Recursion Interview Questions - Structured Path with Video Solutions",
+      "type": "playlist",
+      "category": "DSA Playlists",
+      "url": "https://takeuforward.org/recursion/top-recursion-interview-questions-structured-path-with-video-solutions",
+      "description": "Given below is the best-structured path to learn Recursion with the best video tutorials, and at the same time practice problems which are asked in top tech giants like Google, Amazon, Facebook, etc, and startups like Swiggy, Zomato, Paytm, and others.",
+      "total_sections": 4,
+      "total_problems": 25
+    },
+    {
+      "id": "stack-and-queue-playlist",
+      "title": "Top Stack and Queue Interview Questions - Structured Path with Video Solutions",
+      "type": "playlist",
+      "category": "DSA Playlists",
+      "url": "https://takeuforward.org/stack-and-queue/top-stack-and-queue-interview-questions-structured-path-with-video-solutions",
+      "description": "Given below is the best-structured path to learn Stack and Queue with the best video tutorials, and at the same time practice problems which are asked in top tech giants like Google, Amazon, Facebook, etc, and startups like Swiggy, Zomato, Paytm, and others.",
+      "total_sections": 5,
+      "total_problems": 30
+    },
+    {
+      "id": "string-playlist",
+      "title": "Top String Interview Questions - Structured Path with Video Solutions",
+      "type": "playlist",
+      "category": "DSA Playlists",
+      "url": "https://takeuforward.org/string/top-string-interview-questions-structured-path-with-video-solutions",
+      "description": "Given below is the best-structured path to learn String with the best video tutorials, and at the same time practice problems which are asked in top tech giants like Google, Amazon, Facebook, etc, and startups like Swiggy, Zomato, Paytm, and others.",
+      "total_sections": 4,
+      "total_problems": 24
+    },
+    {
+      "id": "tree-playlist",
+      "title": "Top Tree Interview Questions - Structured Path with Video Solutions",
+      "type": "playlist",
+      "category": "DSA Playlists",
+      "url": "https://takeuforward.org/tree-series/top-tree-interview-questions-structured-path-with-video-solutions",
+      "description": "Given below is the best-structured path to learn Tree with the best video tutorials, and at the same time practice problems which are asked in top tech giants like Google, Amazon, Facebook, etc, and startups like Swiggy, Zomato, Paytm, and others.",
+      "total_sections": 5,
+      "total_problems": 55
+    },
+    {
+      "id": "tuf-plus-dsa",
+      "title": "TUF+ DSA Comprehensive Course",
+      "type": "tuf_plus_course",
+      "category": "TUF+ Courses",
+      "url": "https://takeuforward.org/plus/dsa/problems/what-is-programming?subject=dsa&sidebar=open",
+      "description": "Complete End-to-End DSA Course on TUF+ with IDE integration and theory.",
+      "total_sections": 19,
+      "total_problems": 435
+    },
+    {
+      "id": "tuf-plus-lld",
+      "title": "TUF+ Low Level Design (LLD)",
+      "type": "tuf_plus_course",
+      "category": "TUF+ Courses",
+      "url": "https://takeuforward.org/plus/low-level-design/introduction-to-lld/introduction-to-low-level-design?subject=low-level-design&sidebar=open",
+      "description": "Learn Design Principles (SOLID), Design Patterns, and Real-World Machine Coding Systems.",
+      "total_sections": 13,
+      "total_problems": 71
+    },
+    {
+      "id": "tuf-plus-oops",
+      "title": "TUF+ Object Oriented Programming (OOPS)",
+      "type": "tuf_plus_course",
+      "category": "TUF+ Courses",
+      "url": "https://takeuforward.org/plus/oops/introduction-to-oops/java-basics?subject=oops&sidebar=open",
+      "description": "Complete Object Oriented Programming in C++/Java with practical implementations.",
+      "total_sections": 6,
+      "total_problems": 51
+    },
+    {
+      "id": "tuf-plus-sql",
+      "title": "TUF+ SQL (Data Engineering Foundations)",
+      "type": "tuf_plus_course",
+      "category": "TUF+ Courses",
+      "url": "https://takeuforward.org/plus/sql-data-engineering-foundations/getting-started/introduction-to-sql?subject=sql-data-engineering-foundations&sidebar=open",
+      "description": "From Basic Queries to Advanced Window Functions, CTEs, and Production Data Engineering.",
+      "total_sections": 21,
+      "total_problems": 258
+    },
+    {
+      "id": "tuf-plus-os-striver",
+      "title": "TUF+ Operating Systems by Striver",
+      "type": "tuf_plus_course",
+      "category": "TUF+ Courses",
+      "url": "https://takeuforward.org/plus/operating-system-by-striver/module-1-foundations-of-operating-systems/why-do-we-need-an-operating-system?subject=operating-system-by-striver&sidebar=open",
+      "description": "In-depth Operating Systems lectures and interview preparation by Striver.",
+      "total_sections": 7,
+      "total_problems": 66
+    },
+    {
+      "id": "tuf-plus-cn-striver",
+      "title": "TUF+ Computer Networks by Striver",
+      "type": "tuf_plus_course",
+      "category": "TUF+ Courses",
+      "url": "https://takeuforward.org/plus/computer-networks-by-striver/module-1-cn-foundations/why-networks-exists?subject=computer-networks-by-striver&sidebar=open",
+      "description": "In-depth Computer Networks concepts, protocols, and architecture by Striver.",
+      "total_sections": 15,
+      "total_problems": 184
+    },
+    {
+      "id": "tuf-plus-dbms",
+      "title": "TUF+ Database Management Systems (DBMS)",
+      "type": "tuf_plus_course",
+      "category": "TUF+ Courses",
+      "url": "https://takeuforward.org/plus/dbms/introduction-to-dbms/data-information-database?subject=dbms&sidebar=open",
+      "description": "Relational Models, Normalization, ACID Properties, Concurrency, and Indexing.",
+      "total_sections": 14,
+      "total_problems": 108
+    },
+    {
+      "id": "tuf-plus-os",
+      "title": "TUF+ Operating System (Core Concepts)",
+      "type": "tuf_plus_course",
+      "category": "TUF+ Courses",
+      "url": "https://takeuforward.org/plus/operating-system/basics-of-operating-systems/operating-system-introduction?subject=operating-system&sidebar=open",
+      "description": "Processes, Threads, CPU Scheduling, Synchronization, Memory Management, File Systems.",
+      "total_sections": 9,
+      "total_problems": 63
+    },
+    {
+      "id": "tuf-plus-dsa-concept-revision",
+      "title": "TUF+ DSA (Concept Revision)",
+      "type": "tuf_plus_course",
+      "category": "TUF+ Courses",
+      "url": "https://takeuforward.org/plus/dsa/problems/merge-sorting?subject=dsa-concept-revision&sidebar=open",
+      "description": "Quick topic-by-topic concept refresher before coding interviews.",
+      "total_sections": 40,
+      "total_problems": 194
+    },
+    {
+      "id": "tuf-plus-dsa-quick-revision",
+      "title": "TUF+ DSA (Quick Revision)",
+      "type": "tuf_plus_course",
+      "category": "TUF+ Courses",
+      "url": "https://takeuforward.org/plus/dsa/problems/3-sum?subject=dsa-quick-revision&sidebar=open",
+      "description": "High-yield DSA problem revision for fast review.",
+      "total_sections": 10,
+      "total_problems": 79
+    }
+  ]
+}

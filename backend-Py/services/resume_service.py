@@ -272,7 +272,7 @@ Provide your evaluation strictly as valid JSON matching this exact structure:
 }}
 """
 
-    system_instruction = "You are an authoritative ATS scoring algorithm and senior engineering hiring manager. Always respond in valid, unadorned JSON. Never invent metrics or fake companies."
+    system_instruction = "You are an authoritative ATS scoring algorithm and senior engineering hiring manager. Always respond in valid, unadorned JSON. Base all bullet rewrites, suggestions, and actions strictly on the candidate's actual input provided in the resume. NEVER invent metrics, fake numbers, fake achievements, or fake companies that are not present in or directly derived from the candidate's input."
 
     try:
         raw_output = query_gemini(prompt, system_instruction=system_instruction, json_mode=True)
@@ -282,9 +282,10 @@ Provide your evaluation strictly as valid JSON matching this exact structure:
             result["structured_actions"] = _ensure_structured_actions(result, resume_text)
             return result
     except Exception as e:
-        logger.warning(f"Gemini resume analysis failed or errored: {e}. Utilizing fallback ATS engine.")
+        logger.error(f"Gemini resume analysis failed or errored: {e}")
+        raise RuntimeError(f"Resume analysis failed: {e}")
 
-    return get_fallback_analysis(resume_text, job_description)
+    raise RuntimeError("Resume analysis returned invalid data from AI model.")
 
 def get_fallback_analysis(resume_text: str, job_description: Optional[str] = None) -> Dict[str, Any]:
     """
@@ -339,150 +340,27 @@ def get_fallback_analysis(resume_text: str, job_description: Optional[str] = Non
             "skills_alignment": skills_score,
             "experience_relevance": exp_score
         },
-        "matched_keywords": matched[:12] if matched else [{"keyword": "JavaScript", "category": "Languages"}, {"keyword": "Git", "category": "Tools"}],
-        "missing_keywords": missing[:8] if missing else [
-            {"keyword": "Docker", "importance": "High", "reason": "Standard industry containerization tool."},
-            {"keyword": "CI/CD", "importance": "Medium", "reason": "Automated deployment pipeline competency."},
-            {"keyword": "Unit Testing", "importance": "Medium", "reason": "Demonstrates code quality and reliability."}
-        ],
+        "matched_keywords": matched[:12],
+        "missing_keywords": missing[:8],
         "strengths": [
             "Good foundational skill presentation and project listings.",
-            f"Included {len(matched)} relevant technical keywords and tools.",
+            f"Included {len(matched)} relevant technical keywords and tools." if matched else "Clear layout structure.",
             "Clear chronological or section-based layout."
         ],
         "weaknesses": [
             "Several bullet points lack quantifiable metrics (e.g., % latency reduced, $ cost saved, user scale).",
-            "Could integrate more hard impact action verbs at the beginning of each bullet.",
-            "Missing key cloud or containerization keywords aligned with modern job descriptions."
+            "Could integrate more hard impact action verbs at the beginning of each bullet."
         ],
-        "bullet_improvements": [
-            {
-                "original": "Worked on backend APIs and improved performance.",
-                "improved_xyz": "Architected 12+ RESTful microservices using Node.js & Redis, reducing P99 API response latency by 42% under peak 10k RPM load.",
-                "metric_added": "42% latency reduction under 10k RPM",
-                "action_verb_used": "Architected",
-                "explanation": "Applies Google's XYZ formula with quantifiable performance benchmark and architectural specifics."
-            },
-            {
-                "original": "Responsible for building the user interface using React.",
-                "improved_xyz": "Engineered responsive frontend architecture with React & Tailwind CSS, boosting user engagement by 28% and cutting bundle size by 35%.",
-                "metric_added": "28% engagement increase, 35% bundle reduction",
-                "action_verb_used": "Engineered",
-                "explanation": "Replaces passive duty phrasing ('responsible for') with proactive engineering achievements."
-            }
-        ],
+        "bullet_improvements": [],
         "formatting_flags": [
-            {"issue": "Dense text paragraphs", "severity": "Recommendation", "fix": "Convert long descriptive paragraphs into crisp 1-2 line bullet points with bold keywords."},
-            {"issue": "Standard font consistency", "severity": "Warning", "fix": "Ensure single standard font family (e.g., Inter, Calibri, Helvetica) for seamless ATS OCR parsing."}
+            {"issue": "Dense text paragraphs", "severity": "Recommendation", "fix": "Convert long descriptive paragraphs into crisp 1-2 line bullet points with bold keywords."}
         ],
         "actionable_recommendations": [
             "Rewrite each experience bullet starting with a high-impact action verb (e.g., Spearheaded, Engineered, Automated).",
-            "Incorporate quantifiable business or technical metrics for every project (latency, users, throughput, accuracy).",
-            "Add missing high-demand keywords: Docker, CI/CD, TypeScript, and System Design."
+            "Incorporate quantifiable business or technical metrics for every project (latency, users, throughput, accuracy)."
         ],
-        "structured_actions": [
-            {
-                "id": "act_kw_docker",
-                "category": "Keywords",
-                "title": "Add Missing Containerization & DevOps Keywords (Docker, CI/CD)",
-                "description": "Target engineering roles require containerization familiarity. Inject Docker and CI/CD pipelines into your skills and project achievements.",
-                "severity": "HIGH",
-                "impact": "HIGH",
-                "status": "OPEN",
-                "targetSection": "skills",
-                "currentText": "Tools: Git, VS Code, Postman",
-                "suggestedText": "Tools & Cloud: Git, Docker, Kubernetes, CI/CD (GitHub Actions), Redis, Postman",
-                "reason": "Automated ATS screens filter out backend/fullstack resumes missing containerization terms.",
-                "what": "Add Docker and CI/CD competencies into technical skills.",
-                "why": "Missing core DevOps keywords expected for modern developer roles.",
-                "impactExplanation": "Boosts Keyword Relevance and Skills Alignment categories.",
-                "how": "Add Docker and CI/CD to Tools section and mention deployment workflows in project bullets.",
-                "estimatedImpact": {"min": 4, "max": 7},
-                "metricAdded": None,
-                "actionVerbUsed": None
-            },
-            {
-                "id": "act_impact_backend",
-                "category": "Measurable Impact",
-                "title": "Formulate Backend API Bullet with Google XYZ Benchmark",
-                "description": "Convert vague responsibility statement ('Worked on backend APIs') into quantifiable accomplishment with latency benchmarks.",
-                "severity": "HIGH",
-                "impact": "HIGH",
-                "status": "OPEN",
-                "targetSection": "experience",
-                "currentText": "Worked on backend APIs and improved performance.",
-                "suggestedText": "Architected 12+ RESTful microservices using Node.js & Redis, reducing P99 API response latency by 42% under peak 10k RPM load.",
-                "reason": "Recruiters look for evidence of scale, performance metrics, and ownership.",
-                "what": "Rewrite bullet point following Google XYZ formula.",
-                "why": "Current phrasing does not convey technical complexity or metric impact.",
-                "impactExplanation": "Significantly lifts Impact & Metrics category score.",
-                "how": "Specify microservices count, Redis caching layer, and percentage latency drop.",
-                "estimatedImpact": {"min": 4, "max": 8},
-                "metricAdded": "42% latency reduction under 10k RPM",
-                "actionVerbUsed": "Architected"
-            },
-            {
-                "id": "act_frontend_ui",
-                "category": "Projects",
-                "title": "Upgrade Frontend Project Description with Metrics & Frameworks",
-                "description": "Specify bundle optimization and user engagement metrics instead of passive duty descriptions.",
-                "severity": "MEDIUM",
-                "impact": "HIGH",
-                "status": "OPEN",
-                "targetSection": "projects",
-                "currentText": "Responsible for building the user interface using React.",
-                "suggestedText": "Engineered responsive frontend architecture with React & Tailwind CSS, boosting user engagement by 28% and cutting bundle size by 35%.",
-                "reason": "Replaces passive language with active engineering leadership and tangible outcome.",
-                "what": "Quantify UI engineering contribution with bundle reduction and engagement numbers.",
-                "why": "Phrasing 'responsible for' sounds like passive maintenance rather than proactive engineering.",
-                "impactExplanation": "Increases Project & Experience relevance.",
-                "how": "Include specific optimization techniques and UI performance metrics.",
-                "estimatedImpact": {"min": 3, "max": 6},
-                "metricAdded": "28% engagement increase, 35% bundle reduction",
-                "actionVerbUsed": "Engineered"
-            },
-            {
-                "id": "act_links_deploy",
-                "category": "Links",
-                "title": "Include Production Deployment & Live Demo URLs",
-                "description": "Add live deployment links and GitHub repository badges to your featured project items.",
-                "severity": "MEDIUM",
-                "impact": "MEDIUM",
-                "status": "OPEN",
-                "targetSection": "projects",
-                "currentText": "Project: Distributed Task Scheduler (Go, Redis)",
-                "suggestedText": "Project: Distributed Task Scheduler | Live Demo: demo.getplaced.dev | Code: github.com/user/scheduler",
-                "reason": "Recruiters and hiring managers spend 80% more time on candidate resumes that offer verifiable live demo URLs.",
-                "what": "Add live demo and GitHub repository hyperlinks.",
-                "why": "Projects without verifiable links carry lower trust in automated screening.",
-                "impactExplanation": "Increases project credibility and candidate trust score.",
-                "how": "Add clickable live preview and GitHub links next to each project header.",
-                "estimatedImpact": {"min": 2, "max": 4},
-                "metricAdded": None,
-                "actionVerbUsed": None
-            },
-            {
-                "id": "act_fmt_hierarchy",
-                "category": "Formatting",
-                "title": "Optimize Bullet Hierarchy & Action Verb Openers",
-                "description": "Ensure every single bullet starts with a strong past-tense action verb (Spearheaded, Architected, Optimized).",
-                "severity": "LOW",
-                "impact": "LOW",
-                "status": "OPEN",
-                "targetSection": "formatting",
-                "currentText": "Helped team with deployment and testing.",
-                "suggestedText": "Automated end-to-end regression testing suite with Jest & Playwright, achieving 94% code coverage.",
-                "reason": "Eliminates weak assisting verbs ('helped', 'assisted') in favor of direct ownership verbs.",
-                "what": "Replace helping verbs with direct action verbs.",
-                "why": "Action verbs project technical confidence and ownership.",
-                "impactExplanation": "Improves overall recruiter aesthetic score.",
-                "how": "Begin each line with a high-impact engineering verb.",
-                "estimatedImpact": {"min": 1, "max": 3},
-                "metricAdded": "94% code coverage",
-                "actionVerbUsed": "Automated"
-            }
-        ],
-        "summary_critique": f"Your resume demonstrates a solid technical foundation scoring {overall_ats}/100. By infusing measurable metrics (XYZ formula) and aligning closer with target keywords, your profile will easily break into the top 10% ATS recruiter filter."
+        "structured_actions": [],
+        "summary_critique": f"Your resume demonstrates a technical foundation scoring {overall_ats}/100 based on extracted content."
     }
     raw_data["structured_actions"] = _ensure_structured_actions(raw_data, resume_text)
     return raw_data
@@ -667,20 +545,10 @@ Return strictly valid JSON with this structure:
         if isinstance(res, dict) and "improved_xyz" in res:
             return res
     except Exception as e:
-        logger.warning(f"Gemini bullet improver fallback used: {e}")
+        logger.error(f"Gemini bullet improver failed: {e}")
+        raise RuntimeError(f"Bullet improvement failed: {e}")
 
-    # Fallback rewrite
-    return {
-        "original": bullet,
-        "improved_xyz": f"Engineered scalable solution for {bullet.strip()}, improving system throughput by 35% and reducing error rates by 22% using modern best practices.",
-        "alternative_versions": [
-            f"Spearheaded implementation of {bullet.strip()}, achieving 40% faster execution time and zero production downtime.",
-            f"Architected modular microservice addressing {bullet.strip()}, enabling 10k+ daily transactions with 99.9% uptime."
-        ],
-        "action_verbs": ["Engineered", "Spearheaded", "Architected", "Automated"],
-        "metrics_suggestions": ["Reduced response time by 35-45%", "Scaled system to handle 10,000+ daily requests", "Reduced deployment cycle time by 50%"],
-        "key_improvements": ["Replaced passive language with active engineering verbs", "Added measurable impact metrics (XYZ formula)", "Highlighted technical depth"]
-    }
+    raise RuntimeError("Failed to generate bullet point improvement from AI model.")
 
 def optimize_resume_section(section_type: str, content: str, target_role: Optional[str] = None, job_description: Optional[str] = None) -> Dict[str, Any]:
     """
@@ -713,15 +581,8 @@ Return strictly valid JSON:
         if isinstance(res, dict) and "optimized_content" in res:
             return res
     except Exception as e:
-        logger.warning(f"Section optimization fallback: {e}")
+        logger.error(f"Section optimization failed: {e}")
+        raise RuntimeError(f"Section optimization failed: {e}")
 
-    return {
-        "section_type": section_type,
-        "optimized_content": content.strip() + "\n\n• Engineered high-availability components maintaining 99.9% uptime.\n• Implemented automated CI/CD workflows reducing delivery turnaround by 40%.",
-        "suggestions": [
-            "Incorporate quantifiable outcomes into each achievement.",
-            "Ensure standard naming conventions for tools and frameworks."
-        ],
-        "keywords_injected": ["TypeScript", "CI/CD", "Docker", "RESTful APIs"]
-    }
+    raise RuntimeError("Failed to optimize resume section from AI model.")
 

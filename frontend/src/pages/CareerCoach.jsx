@@ -14,16 +14,20 @@ import {
   GraduationCap,
   RefreshCw,
   ShieldCheck,
+  FileText,
+  Upload,
+  Sparkles,
 } from "lucide-react";
-import { NODE_API_URL } from "@/config/api";
+import { NODE_API_URL, PY_API_URL } from "@/config/api";
 
 const STEPS_MAP = [
   { step: 1, label: "Target" },
   { step: 2, label: "Academics" },
-  { step: 3, label: "GitHub" },
-  { step: 4, label: "LeetCode" },
-  { step: 5, label: "Skills" },
-  { step: 6, label: "Roadmap" },
+  { step: 3, label: "Resume" },
+  { step: 4, label: "GitHub" },
+  { step: 5, label: "LeetCode" },
+  { step: 6, label: "Skills" },
+  { step: 7, label: "Roadmap" },
 ];
 
 export default function CareerCoach() {
@@ -67,6 +71,13 @@ export default function CareerCoach() {
   const [lcLoading, setLcLoading] = useState(false);
   const [lcError, setLcError] = useState("");
 
+  // Resume upload states
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeUploading, setResumeUploading] = useState(false);
+  const [resumeError, setResumeError] = useState("");
+  const [resumeSuccessData, setResumeSuccessData] = useState(null);
+
   // Edit Inferred Profile Modal State
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -79,6 +90,46 @@ export default function CareerCoach() {
   });
 
   const chatScrollRef = useRef(null);
+
+  const handleUploadResumeDirect = async (fileToUpload) => {
+    const file = fileToUpload || resumeFile;
+    if (!file || resumeUploading) return;
+    setResumeUploading(true);
+    setResumeError("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("job_description", extractedProfile?.targetJobRole || "");
+
+      const pyRes = await axios.post(`${PY_API_URL}/api/resume/analyze-upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const analysisResult = pyRes.data?.evaluation || pyRes.data?.data || pyRes.data;
+      const extractedText = pyRes.data?.extracted_text || analysisResult?.extracted_text || "";
+
+      const saveRes = await axios.post(
+        `${NODE_API_URL}/api/coach/save-resume-analysis`,
+        {
+          resumeScore: analysisResult.ats_score,
+          resumeText: extractedText,
+          resumeAnalysis: analysisResult,
+          filename: file.name,
+        },
+        { withCredentials: true }
+      );
+
+      if (saveRes.data) {
+        syncSessionData(saveRes.data);
+      }
+      setResumeSuccessData(analysisResult);
+    } catch (err) {
+      console.error("Failed to upload/analyze resume:", err);
+      setResumeError(err.response?.data?.detail || err.message || "Failed to analyze resume with Google GENAI");
+    } finally {
+      setResumeUploading(false);
+    }
+  };
 
   const scrollToBottom = () => {
     if (chatScrollRef.current) {
@@ -698,6 +749,33 @@ export default function CareerCoach() {
                   </button>
                 )}
               </div>
+
+              {/* AI Resume ATS & Google XYZ Audit */}
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-purple-950/20 border border-purple-800/40 text-xs">
+                <div className="flex items-center gap-2 min-w-0 pr-1">
+                  <FileText className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                  <div className="min-w-0">
+                    <span className="text-zinc-200 block truncate font-medium">AI Resume ATS</span>
+                    {connectedProfiles?.resume?.score || extractedProfile?.resumeScore ? (
+                      <span className="text-[10px] text-purple-300 font-mono block truncate">
+                        ATS: {connectedProfiles?.resume?.score || extractedProfile?.resumeScore}/100
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-zinc-500 font-mono block truncate">
+                        Not uploaded yet
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowResumeModal(true)}
+                  className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-semibold transition-colors shrink-0 cursor-pointer flex items-center gap-1"
+                >
+                  <Upload className="w-3 h-3" />
+                  <span>{connectedProfiles?.resume?.score || extractedProfile?.resumeScore ? "Re-audit" : "Upload"}</span>
+                </button>
+              </div>
             </div>
 
             {/* Initial Readiness Snapshot (if available) */}
@@ -1080,6 +1158,106 @@ export default function CareerCoach() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Resume Upload & AI Analysis Modal */}
+      {showResumeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <div className="w-full max-w-lg bg-[#121215] border border-zinc-800 rounded-2xl p-6 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-purple-400" />
+                <div>
+                  <h3 className="text-sm font-bold text-zinc-100">Upload Resume for AI Audit</h3>
+                  <p className="text-[11px] text-zinc-400 font-mono">Google GENAI ATS & XYZ Metrics Auditor</p>
+                </div>
+              </div>
+              <button type="button" onClick={() => setShowResumeModal(false)} className="text-zinc-400 hover:text-zinc-200">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-zinc-800 hover:border-purple-500/60 rounded-xl p-6 text-center space-y-3 bg-zinc-950/50 transition-colors">
+                <Upload className="w-8 h-8 text-purple-400 mx-auto animate-bounce" />
+                <div>
+                  <p className="text-xs font-semibold text-zinc-200">Select PDF / DOCX Resume File</p>
+                  <p className="text-[11px] text-zinc-500 font-mono mt-0.5">Parsed with Google GENAI for real ATS score & bullet metrics</p>
+                </div>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setResumeFile(file);
+                      handleUploadResumeDirect(file);
+                    }
+                  }}
+                  disabled={resumeUploading}
+                  className="block w-full text-xs text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-950 file:text-purple-300 hover:file:bg-purple-900 cursor-pointer"
+                />
+              </div>
+
+              {resumeUploading && (
+                <div className="p-4 rounded-xl bg-purple-950/40 border border-purple-800/60 flex items-center gap-3 font-mono text-xs text-purple-300">
+                  <Loader2 className="w-4 h-4 animate-spin text-purple-400 shrink-0" />
+                  <div>
+                    <span className="font-bold block">Analyzing with Google GENAI...</span>
+                    <span className="text-[10px] text-purple-400">Extracting technical keywords, formatting structure & Google XYZ metrics</span>
+                  </div>
+                </div>
+              )}
+
+              {resumeError && (
+                <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800/60 text-xs text-rose-300 font-mono">
+                  {resumeError}
+                </div>
+              )}
+
+              {resumeSuccessData && (
+                <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 space-y-3 font-mono text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400">Google GENAI ATS Score</span>
+                    <span className="text-base font-bold text-emerald-400">
+                      {resumeSuccessData.ats_score} / 100 ({resumeSuccessData.score_tier})
+                    </span>
+                  </div>
+                  {resumeSuccessData.matched_keywords?.length > 0 && (
+                    <div>
+                      <span className="text-[10px] text-zinc-500 uppercase block mb-1">Matched Stack Keywords</span>
+                      <div className="flex flex-wrap gap-1">
+                        {resumeSuccessData.matched_keywords.slice(0, 6).map((k, i) => (
+                          <span key={i} className="px-2 py-0.5 rounded bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300">
+                            {typeof k === "string" ? k : k.keyword}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {resumeSuccessData.bullet_improvements?.length > 0 && (
+                    <div className="pt-2 border-t border-zinc-800/80">
+                      <span className="text-[10px] text-purple-300 uppercase block">✓ Google XYZ Metrics Generated</span>
+                      <p className="text-[11px] text-zinc-400 mt-0.5">
+                        {resumeSuccessData.bullet_improvements[0]?.improved_xyz || "Bullet points converted to quantified Google XYZ format."}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-800">
+              <button
+                type="button"
+                onClick={() => setShowResumeModal(false)}
+                className="px-4 py-2 rounded-xl text-xs text-zinc-400 hover:text-zinc-200"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

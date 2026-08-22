@@ -69,21 +69,22 @@ def analyze_communication_skills(
     filler_density = round((total_fillers / max(word_count, 1)) * 100, 1)
 
     # 2. Pacing calculation (Words Per Minute)
-    # If audio duration is provided, use it; otherwise estimate standard speaking rate
+    # If audio duration is provided, use it; otherwise return None
     if audio_duration_seconds and audio_duration_seconds > 0:
         wpm = round((word_count / (audio_duration_seconds / 60)), 1)
+        if wpm < 110:
+            pacing_rating = "too_slow"
+            pacing_feedback = f"Pacing is slightly slow ({wpm} WPM). Aim for 130-150 WPM for engaging delivery."
+        elif wpm > 170:
+            pacing_rating = "too_fast"
+            pacing_feedback = f"Pacing is fast ({wpm} WPM). Consider pausing after key statements to allow points to resonate."
+        else:
+            pacing_rating = "optimal"
+            pacing_feedback = "Your speaking pace is natural, balanced, and easy to follow."
     else:
-        # Default typical presentation assumption
-        wpm = round(min(160, max(110, word_count * 1.5)), 1)
-
-    pacing_rating = "optimal"
-    pacing_feedback = "Your speaking pace is natural, balanced, and easy to follow."
-    if wpm < 110:
-        pacing_rating = "too_slow"
-        pacing_feedback = f"Pacing is slightly slow ({wpm} WPM). Aim for 130-150 WPM for engaging delivery."
-    elif wpm > 170:
-        pacing_rating = "too_fast"
-        pacing_feedback = f"Pacing is fast ({wpm} WPM). Consider pausing after key statements to allow points to resonate."
+        wpm = None
+        pacing_rating = "unknown"
+        pacing_feedback = "Audio duration was not provided; WPM calculation unavailable."
 
     # 3. Weak phrasing & power verbs analysis
     weak_found = []
@@ -143,12 +144,11 @@ Respond strictly in valid JSON format:
 """
         raw = query_gemini(prompt, json_mode=True)
         ai_evaluation = extract_json(raw)
+        if not ai_evaluation or not isinstance(ai_evaluation, dict):
+            raise RuntimeError("Invalid response from communication evaluation model.")
     except Exception as e:
-        logger.warning(f"Gemini communication evaluation fallback used: {e}")
-
-    # Merge AI evaluation with deterministic audio/word analytics
-    if not ai_evaluation or not isinstance(ai_evaluation, dict):
-        ai_evaluation = get_fallback_star_evaluation(clean_text, word_count)
+        logger.error(f"Gemini communication evaluation failed: {e}")
+        raise RuntimeError(f"Communication evaluation service failed: {e}")
 
     clarity_score = int(ai_evaluation.get("clarity_score", 75))
     confidence_score = int(ai_evaluation.get("confidence_score", 70))
@@ -258,7 +258,7 @@ def get_empty_communication_response() -> Dict[str, Any]:
     return {
         "overall_communication_score": 0,
         "word_count": 0,
-        "audio_duration_seconds": 0,
+        "audio_duration_seconds": None,
         "filler_words": {
             "total_count": 0,
             "density_percent": 0.0,
@@ -266,7 +266,7 @@ def get_empty_communication_response() -> Dict[str, Any]:
             "status": "No audio/text provided"
         },
         "pacing": {
-            "wpm": 0,
+            "wpm": None,
             "rating": "none",
             "feedback": "Please speak or enter an answer to evaluate communication skills."
         },

@@ -474,8 +474,22 @@ export default function MockInterview() {
         {/* PHASE 1: LOBBY & SETUP */}
         {phase === "lobby" && (
           <div className="space-y-8 max-w-5xl mx-auto">
-            {/* Interview Pillar Navigation Tabs */}
-            <nav className="flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs border-b border-neutral-800 pb-4">
+            {/* Attention / Cinematic Wide Hero */}
+            <div className="text-center space-y-4 gsap-fade-in">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/90 text-xs font-mono text-neutral-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Adaptive Technical & Behavioral Evaluation Chamber
+              </div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight max-w-5xl mx-auto leading-tight">
+                Simulated Technical & Culture Interview Environment
+              </h1>
+              <p className="text-sm md:text-base text-neutral-400 max-w-3xl mx-auto leading-relaxed">
+                Full-fidelity AI interviewer with voice synthesis, camera posture tracking, real-time STAR evaluation metrics, and dynamic probe questioning.
+              </p>
+            </div>
+
+            {/* Interview Pillar Navigation Tabs Below Title */}
+            <nav className="flex items-center justify-center gap-2 overflow-x-auto pb-1 font-mono text-xs border-b border-neutral-800 pb-4">
               <Link
                 to="/app/interview"
                 className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-white text-black font-semibold shadow-sm"
@@ -505,20 +519,6 @@ export default function MockInterview() {
                 <span>Company Intelligence</span>
               </Link>
             </nav>
-
-            {/* Attention / Cinematic Wide Hero */}
-            <div className="text-center space-y-4 gsap-fade-in">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/90 text-xs font-mono text-neutral-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Adaptive Technical & Behavioral Evaluation Chamber
-              </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight max-w-5xl mx-auto leading-tight">
-                Simulated Technical & Culture Interview Environment
-              </h1>
-              <p className="text-sm md:text-base text-neutral-400 max-w-3xl mx-auto leading-relaxed">
-                Full-fidelity AI interviewer with voice synthesis, camera posture tracking, real-time STAR evaluation metrics, and dynamic probe questioning.
-              </p>
-            </div>
 
             {/* Interest / Dense Gapless Bento Configuration */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 grid-flow-dense gsap-fade-in">

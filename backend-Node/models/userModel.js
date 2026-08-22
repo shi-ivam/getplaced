@@ -80,6 +80,18 @@ const userSchema = mongoose.Schema(
         trim: true,
       },
     ],
+    resumeScore: {
+      type: Number,
+      default: null,
+    },
+    resumeText: {
+      type: String,
+      default: "",
+    },
+    resumeAnalysis: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
   },
   {
     timestamps: true,

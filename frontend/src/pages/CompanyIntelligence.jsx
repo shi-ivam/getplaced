@@ -94,7 +94,39 @@ export default function CompanyIntelligence() {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 space-y-8">
-        {/* Interview Pillar Navigation Tabs */}
+        {/* Header Navigation Bar */}
+        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-zinc-900">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-violet-950/60 border border-violet-700/40 flex items-center justify-center text-violet-400">
+              <Building2 className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-widest font-mono text-zinc-400">Enterprise Intelligence</div>
+              <div className="text-sm font-semibold text-zinc-200">Engineering Hiring Dossiers</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate("/app/interview")}
+              className="px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition-all flex items-center gap-2"
+            >
+              <Brain className="w-3.5 h-3.5 text-violet-400" />
+              <span>Launch Mock Interview</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/app/coding")}
+              className="px-4 py-2 rounded-xl text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-950/50 transition-all flex items-center gap-2"
+            >
+              <Code2 className="w-3.5 h-3.5" />
+              Problem Arena
+            </button>
+          </div>
+        </header>
+
+        {/* Interview Pillar Navigation Tabs Below Title */}
         <nav className="flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs border-b border-zinc-900 pb-4">
           <Link
             to="/app/interview"
@@ -125,38 +157,6 @@ export default function CompanyIntelligence() {
             <span>Company Intelligence</span>
           </Link>
         </nav>
-
-        {/* Navigation Bar */}
-        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-zinc-900">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-violet-950/60 border border-violet-700/40 flex items-center justify-center text-violet-400">
-              <Building2 className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-widest font-mono text-zinc-400">Enterprise Intelligence</div>
-              <div className="text-sm font-semibold text-zinc-200">Engineering Hiring Dossiers</div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => navigate("/app/interview")}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition-all flex items-center gap-2"
-            >
-              <Brain className="w-3.5 h-3.5 text-violet-400" />
-              Mock Interview
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate("/app/coding")}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-950/50 transition-all flex items-center gap-2"
-            >
-              <Code2 className="w-3.5 h-3.5" />
-              Problem Arena
-            </button>
-          </div>
-        </header>
 
         {/* Hero Section */}
         <section className="space-y-6">

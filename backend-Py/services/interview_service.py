@@ -112,15 +112,10 @@ Respond strictly in valid JSON matching this schema:
         if isinstance(res, dict) and "questions" in res and len(res["questions"]) > 0:
             return res["questions"]
     except Exception as e:
-        logger.warning(f"AI question generation fallback used: {e}")
+        logger.error(f"AI question generation failed: {e}")
+        raise RuntimeError(f"Interview question generation failed: {e}")
 
-    # Fallback to curated question set
-    questions = []
-    for i, q in enumerate(CURATED_HR_QUESTIONS[:count]):
-        q_copy = dict(q)
-        q_copy["id"] = i + 1
-        questions.append(q_copy)
-    return questions
+    raise RuntimeError("Failed to generate interview questions from AI model.")
 
 def evaluate_interview_answer(
     question: str,
@@ -200,20 +195,11 @@ Respond strictly in valid JSON:
 """
         raw = query_gemini(prompt, json_mode=True)
         ai_eval = extract_json(raw)
+        if not ai_eval or not isinstance(ai_eval, dict):
+            raise RuntimeError("Invalid response structure from AI answer evaluation.")
     except Exception as e:
-        logger.warning(f"AI answer evaluation fallback used: {e}")
-
-    if not ai_eval or not isinstance(ai_eval, dict):
-        ai_eval = {
-            "score": min(95, max(45, int(0.5 * comm_analysis["overall_communication_score"] + 0.5 * comm_analysis["star_compliance"]["score"]))),
-            "technical_depth_score": 75,
-            "overall_verdict": "Passable",
-            "star_feedback": comm_analysis["star_compliance"]["star_feedback"],
-            "strengths": ["Clear explanation of personal contribution", "Addressed the core question logically"],
-            "areas_for_improvement": ["Include more quantifiable metrics in the result", "Reduce verbal pauses to improve delivery"],
-            "suggested_better_answer": comm_analysis["polished_version"],
-            "follow_up_question": "Can you elaborate on the specific metrics or monitoring you used to verify the success of that solution?"
-        }
+        logger.error(f"AI answer evaluation failed: {e}")
+        raise RuntimeError(f"Interview answer evaluation failed: {e}")
 
     final_score = int(ai_eval.get("score", 75))
     final_score = max(20, min(100, final_score))
@@ -224,10 +210,10 @@ Respond strictly in valid JSON:
         "overall_verdict": ai_eval.get("overall_verdict", "Passable"),
         "communication": comm_analysis,
         "star_compliance": comm_analysis["star_compliance"],
-        "strengths": ai_eval.get("strengths", ["Solid logical structure."]),
-        "areas_for_improvement": ai_eval.get("areas_for_improvement", ["Incorporate more quantifiable metrics."]),
-        "suggested_better_answer": ai_eval.get("suggested_better_answer", comm_analysis["polished_version"]),
-        "follow_up_question": ai_eval.get("follow_up_question", "What would you do differently if you faced the same problem today?")
+        "strengths": ai_eval.get("strengths", []),
+        "areas_for_improvement": ai_eval.get("areas_for_improvement", []),
+        "suggested_better_answer": ai_eval.get("suggested_better_answer", comm_analysis.get("polished_version", "")),
+        "follow_up_question": ai_eval.get("follow_up_question")
     }
 
 def generate_session_report(
@@ -319,32 +305,7 @@ Generate an executive interview report card strictly in valid JSON:
             res["total_filler_words"] = total_fillers
             return res
     except Exception as e:
-        logger.warning(f"Session report AI fallback used: {e}")
+        logger.error(f"Session report AI evaluation failed: {e}")
+        raise RuntimeError(f"Session report generation failed: {e}")
 
-    return {
-        "overall_score": avg_score,
-        "recommendation": recommendation,
-        "hiring_verdict_summary": f"The candidate demonstrated solid capability with an overall score of {avg_score}/100. With targeted polish on quantifiable metrics and speech pacing, they will be well-positioned for {company}.",
-        "radar_scores": {
-            "Communication": avg_comm,
-            "STAR Structure": avg_star,
-            "Technical Depth": avg_tech,
-            "Problem Solving": avg_score,
-            "Culture Fit": min(100, int((avg_comm + avg_score) / 2))
-        },
-        "total_filler_words": total_fillers,
-        "strengths": [
-            "Consistent articulation and logical structuring across questions.",
-            "Demonstrated relevant technical background and problem-solving intuition.",
-            "Polite and professional interview presence."
-        ],
-        "key_growth_areas": [
-            "Incorporate more quantifiable metrics (% improvements, latency, user numbers) in the 'Result' phase of STAR.",
-            "Minimize verbal filler words to project higher executive authority."
-        ],
-        "next_prep_steps": [
-            f"Practice 2-3 more mock sessions targeting {company} culture principles.",
-            "Time answers to stay within the optimal 90-120 second window per question.",
-            "Review company-specific system design and behavioral patterns in Company Intelligence."
-        ]
-    }
+    raise RuntimeError("Failed to generate session report from AI model.")

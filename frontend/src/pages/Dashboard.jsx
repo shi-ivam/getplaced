@@ -43,8 +43,9 @@ import {
   Flame,
   Check,
   RefreshCw,
+  Upload,
 } from "lucide-react";
-import { NODE_API_URL } from "@/config/api";
+import { NODE_API_URL, PY_API_URL } from "@/config/api";
 import LevelComparisonTable from "@/components/ui/LevelComparisonTable";
 import DsaTopicAnalysis from "@/components/dsa/DsaTopicAnalysis";
 import DsaRequirementComparison from "@/components/dsa/DsaRequirementComparison";
@@ -71,46 +72,87 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showExplainModal, setShowExplainModal] = useState(false);
 
-  // Onboarding Profile Audit Modal State
+  // Multi-Pillar Placement Audit Modal State
   const [showAuditModal, setShowAuditModal] = useState(isOnboardingAudit);
-  const [auditStep, setAuditStep] = useState(isOnboardingAudit ? 1 : 5);
-  const [auditCompleted, setAuditCompleted] = useState(!isOnboardingAudit);
+  const [auditStep, setAuditStep] = useState(1);
+  const [auditCompleted, setAuditCompleted] = useState(false);
+  const [auditResumeUploading, setAuditResumeUploading] = useState(false);
+  const [auditResumeError, setAuditResumeError] = useState("");
+  const auditIntervalRef = useRef(null);
+  const hasAutoStartedRef = useRef(false);
 
   const containerRef = useRef(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [profileRes, readinessRes, gapRes, githubRes] = await Promise.allSettled([
-          axios.get(`${NODE_API_URL}/api/users/profile`, { withCredentials: true }),
-          axios.get(`${NODE_API_URL}/api/readiness`, { withCredentials: true }),
-          axios.get(`${NODE_API_URL}/api/gap-analysis`, { withCredentials: true }),
-          axios.get(`${NODE_API_URL}/api/github/profile`, { withCredentials: true }),
-        ]);
+  const handleAuditResumeUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAuditResumeUploading(true);
+    setAuditResumeError("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("job_description", userProfile?.targetJobRole || "");
 
-        if (profileRes.status === "fulfilled" && profileRes.value?.data) {
-          setUserProfile(profileRes.value.data);
-        }
+      const pyRes = await axios.post(`${PY_API_URL}/api/resume/analyze-upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-        if (readinessRes.status === "fulfilled" && readinessRes.value?.data) {
-          setReadiness(readinessRes.value.data);
-        }
+      const analysisResult = pyRes.data?.evaluation || pyRes.data?.data || pyRes.data;
+      const extractedText = pyRes.data?.extracted_text || analysisResult?.extracted_text || "";
 
-        if (gapRes.status === "fulfilled" && gapRes.value?.data) {
-          setGapData(gapRes.value.data);
-        }
+      await axios.post(
+        `${NODE_API_URL}/api/coach/save-resume-analysis`,
+        {
+          resumeScore: analysisResult.ats_score,
+          resumeText: extractedText,
+          resumeAnalysis: analysisResult,
+          filename: file.name,
+        },
+        { withCredentials: true }
+      );
 
-        if (githubRes.status === "fulfilled" && githubRes.value?.data?.connected && githubRes.value.data.profile) {
-          setGithubProfile(githubRes.value.data.profile);
-        }
-      } catch (err) {
-        console.error("Could not fetch dashboard data:", err);
-      } finally {
-        setLoading(false);
+      fetchData(true);
+    } catch (err) {
+      console.error("Failed to upload/analyze resume during audit:", err);
+      setAuditResumeError(err.response?.data?.detail || "Failed to analyze resume with Google GENAI");
+    } finally {
+      setAuditResumeUploading(false);
+    }
+  };
+
+  const fetchData = async (silent = false) => {
+    if (!silent) setLoading(true);
+    try {
+      const [profileRes, readinessRes, gapRes, githubRes] = await Promise.allSettled([
+        axios.get(`${NODE_API_URL}/api/users/profile`, { withCredentials: true }),
+        axios.get(`${NODE_API_URL}/api/readiness`, { withCredentials: true }),
+        axios.get(`${NODE_API_URL}/api/gap-analysis`, { withCredentials: true }),
+        axios.get(`${NODE_API_URL}/api/github/profile`, { withCredentials: true }),
+      ]);
+
+      if (profileRes.status === "fulfilled" && profileRes.value?.data) {
+        setUserProfile(profileRes.value.data);
       }
-    };
 
+      if (readinessRes.status === "fulfilled" && readinessRes.value?.data) {
+        setReadiness(readinessRes.value.data);
+      }
+
+      if (gapRes.status === "fulfilled" && gapRes.value?.data) {
+        setGapData(gapRes.value.data);
+      }
+
+      if (githubRes.status === "fulfilled" && githubRes.value?.data?.connected && githubRes.value.data.profile) {
+        setGithubProfile(githubRes.value.data.profile);
+      }
+    } catch (err) {
+      console.error("Could not fetch dashboard data:", err);
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -125,16 +167,27 @@ export default function Dashboard() {
     }
   }, [loading]);
 
-  // Onboarding Step Animation Handler
+  const clearAuditInterval = () => {
+    if (auditIntervalRef.current) {
+      clearInterval(auditIntervalRef.current);
+      auditIntervalRef.current = null;
+    }
+  };
+
+  // Run the 5-step Multi-Pillar Placement Audit sequence
   const handleStartAuditModal = () => {
+    clearAuditInterval();
     setShowAuditModal(true);
     setAuditStep(1);
     setAuditCompleted(false);
 
-    const interval = setInterval(() => {
+    // Refresh data in background while audit is running
+    fetchData(true);
+
+    auditIntervalRef.current = setInterval(() => {
       setAuditStep((prev) => {
         if (prev >= 5) {
-          clearInterval(interval);
+          clearAuditInterval();
           setAuditCompleted(true);
           return 5;
         }
@@ -142,6 +195,51 @@ export default function Dashboard() {
       });
     }, 700);
   };
+
+  // Fast-forward / Skip audit animation
+  const handleSkipAudit = () => {
+    clearAuditInterval();
+    setAuditStep(5);
+    setAuditCompleted(true);
+  };
+
+  // Close audit modal and clean up search params
+  const handleCloseAuditModal = () => {
+    clearAuditInterval();
+    setShowAuditModal(false);
+    if (searchParams.get("onboarding") || searchParams.get("audit")) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("onboarding");
+      newParams.delete("audit");
+      setSearchParams(newParams, { replace: true });
+    }
+  };
+
+  // Auto-start audit when landing with onboarding=complete or audit=start
+  useEffect(() => {
+    if (isOnboardingAudit && !auditCompleted && !auditIntervalRef.current) {
+      hasAutoStartedRef.current = true;
+      handleStartAuditModal();
+    }
+  }, [isOnboardingAudit, auditCompleted]);
+
+  // Clean up interval on component unmount
+  useEffect(() => {
+    return () => {
+      clearAuditInterval();
+    };
+  }, []);
+
+  // Keyboard accessibility: Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && showAuditModal) {
+        handleCloseAuditModal();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showAuditModal]);
 
   const hasTarget = Boolean(userProfile?.targetCompany || userProfile?.targetJobRole);
   const isFullTarget = Boolean(userProfile?.targetCompany && userProfile?.targetJobRole);
@@ -184,23 +282,21 @@ export default function Dashboard() {
   // Pillar 1: Coding Stats
   const codingScore = readiness?.dimensions?.dsa?.score !== null && readiness?.dimensions?.dsa?.score !== undefined
     ? readiness.dimensions.dsa.score
-    : 82;
+    : null;
   const codingTarget = readiness?.dimensions?.dsa?.requiredScore || 85;
 
   // Pillar 2: Development Stats
-  const devScore = githubProfile?.projectScore || (readiness?.dimensions?.projects?.score !== null && readiness?.dimensions?.projects?.score !== undefined ? readiness.dimensions.projects.score : 75);
+  const devScore = githubProfile?.projectScore ?? (readiness?.dimensions?.projects?.score !== null && readiness?.dimensions?.projects?.score !== undefined ? readiness.dimensions.projects.score : null);
   const devTarget = readiness?.dimensions?.projects?.requiredScore || 80;
 
   // Pillar 3: Resume Stats
-  const resumeScore = readiness?.dimensions?.resume?.score !== null && readiness?.dimensions?.resume?.score !== undefined
-    ? readiness.dimensions.resume.score
-    : 74;
+  const resumeScore = userProfile?.resumeScore ?? (readiness?.dimensions?.resume?.score !== null && readiness?.dimensions?.resume?.score !== undefined ? readiness.dimensions.resume.score : null);
   const resumeTarget = readiness?.dimensions?.resume?.requiredScore || 85;
 
   // Pillar 4: Interview Stats
   const interviewScore = readiness?.dimensions?.communication?.score !== null && readiness?.dimensions?.communication?.score !== undefined
     ? readiness.dimensions.communication.score
-    : 78;
+    : null;
   const interviewTarget = readiness?.dimensions?.communication?.requiredScore || 80;
 
   return (
@@ -589,83 +685,294 @@ export default function Dashboard() {
       </div>
 
       {/* ========================================================================= */}
-      {/* ONBOARDING PROFILE ANALYSIS TRANSITION MODAL */}
+      {/* ONBOARDING / MULTI-PILLAR PLACEMENT AUDIT TRANSITION MODAL */}
       {/* ========================================================================= */}
       {showAuditModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-[#121215] border border-zinc-800 rounded-2xl max-w-lg w-full p-6 md:p-8 space-y-6 shadow-2xl">
-            <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mx-auto">
-                <Sparkles className="w-6 h-6 animate-pulse" />
+        <div
+          onClick={handleCloseAuditModal}
+          className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-all"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#121215] border border-zinc-800 rounded-2xl max-w-lg w-full p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden"
+          >
+            {/* Ambient Background Glow */}
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Modal Header */}
+            <div className="flex items-start justify-between relative">
+              <div className="space-y-1.5 pr-6">
+                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-purple-950/60 border border-purple-800/40 text-[10px] font-mono text-purple-300">
+                  <Sparkles className="w-3 h-3 text-purple-400 animate-pulse" />
+                  <span>Real-time Placement Engine</span>
+                </div>
+                <h3 className="text-lg font-bold text-white tracking-tight">
+                  Multi-Pillar Placement Audit
+                </h3>
+                <p className="text-xs text-zinc-400">
+                  Calibrating readiness against{" "}
+                  <span className="text-zinc-200 font-medium">
+                    {userProfile?.targetCompany || "Enterprise Tier-1"}
+                    {userProfile?.targetJobRole ? ` (${userProfile.targetJobRole})` : ""}
+                  </span>{" "}
+                  standards.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-white">
-                Multi-Pillar Placement Audit
-              </h3>
-              <p className="text-xs text-zinc-400">
-                Calibrating placement readiness model against {userProfile?.targetCompany || "Enterprise"} standards.
-              </p>
+
+              <button
+                type="button"
+                onClick={handleCloseAuditModal}
+                className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/80 transition-colors cursor-pointer"
+                title="Close modal (Esc)"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            {/* Timed Step Sequence */}
-            <div className="space-y-3 font-mono text-xs">
+            {/* Progress Bar */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500">
+                <span>
+                  {auditCompleted
+                    ? "Audit Completed (100%)"
+                    : `Analyzing Pillar ${auditStep} of 5 (${Math.round((auditStep / 5) * 100)}%)`}
+                </span>
+                <span className={auditCompleted ? "text-emerald-400" : "text-purple-400"}>
+                  {auditCompleted ? "100%" : `${Math.round((auditStep / 5) * 100)}%`}
+                </span>
+              </div>
+              <div className="relative w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    auditCompleted ? "bg-emerald-400" : "bg-purple-500"
+                  }`}
+                  style={{ width: `${auditCompleted ? 100 : (auditStep / 5) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Timed Step Sequence (5 Core Pillars) */}
+            <div className="space-y-2.5 font-mono text-xs">
               {[
-                { step: 1, label: "Syncing Academics & CGPA eligibility cutoffs" },
-                { step: 2, label: "Evaluating GitHub codebases & engineering depth" },
-                { step: 3, label: "Scanning LeetCode problem-solving benchmarks" },
-                { step: 4, label: "Auditing Resume ATS format, keywords & Google XYZ metrics" },
-                { step: 5, label: "Synthesizing multi-dimensional readiness score" },
-              ].map(({ step, label }) => {
+                {
+                  step: 1,
+                  title: "Academics & CGPA Cutoffs",
+                  label: "Syncing Academics & CGPA eligibility cutoffs",
+                  icon: GraduationCap,
+                  detail: userProfile?.cgpa
+                    ? `CGPA: ${userProfile.cgpa} • VTOP Sync Active`
+                    : "Evaluating university grade benchmarks",
+                },
+                {
+                  step: 2,
+                  title: "GitHub & Code Quality",
+                  label: "Evaluating GitHub codebases & engineering depth",
+                  icon: FolderGit2,
+                  detail: githubProfile
+                    ? `${githubProfile.originalReposCount || 0} Repos • ${githubProfile.totalStars || 0} Stars ⭐`
+                    : "Analyzing commit frequency & architecture",
+                },
+                {
+                  step: 3,
+                  title: "DSA & Problem-Solving Benchmarks",
+                  label: "Scanning LeetCode problem-solving benchmarks",
+                  icon: Code2,
+                  detail: "DSA patterns, dynamic programming & topic readiness",
+                },
+                {
+                  step: 4,
+                  title: "Resume ATS & Google XYZ Metrics",
+                  label: "Auditing Resume ATS format, keywords & Google XYZ metrics",
+                  icon: FileText,
+                  detail: userProfile?.resumeScore !== null && userProfile?.resumeScore !== undefined
+                    ? `Google GENAI ATS Score: ${userProfile.resumeScore}/100 • ${userProfile?.resumeAnalysis?.bullet_improvements?.length || 0} XYZ Bullets Verified`
+                    : "Upload PDF to calculate real ATS score & Google XYZ metrics",
+                },
+                {
+                  step: 5,
+                  title: "Multi-Dimensional Readiness Synthesis",
+                  label: `Synthesizing ${userProfile?.targetCompany || "Tier-1"} placement readiness score`,
+                  icon: BrainCog,
+                  detail: "Dynamically re-normalized weighted composite model",
+                },
+              ].map(({ step, label, detail }) => {
                 const isPassed = auditStep > step || auditCompleted;
                 const isCurrent = auditStep === step && !auditCompleted;
 
                 return (
-                  <div
-                    key={step}
-                    className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
-                      isPassed
-                        ? "bg-emerald-950/30 border-emerald-800/50 text-emerald-300"
-                        : isCurrent
-                        ? "bg-purple-950/40 border-purple-800/60 text-purple-200"
-                        : "bg-zinc-900/40 border-zinc-800/60 text-zinc-500"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      {isPassed ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                      ) : isCurrent ? (
-                        <RefreshCw className="w-4 h-4 text-purple-400 animate-spin shrink-0" />
-                      ) : (
-                        <Circle className="w-4 h-4 text-zinc-600 shrink-0" />
-                      )}
-                      <span className="font-sans text-xs">{label}</span>
+                  <div key={step} className="space-y-1.5">
+                    <div
+                      className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                        isPassed
+                          ? "bg-emerald-950/30 border-emerald-800/50 text-emerald-300"
+                          : isCurrent
+                          ? "bg-purple-950/40 border-purple-800/60 text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.1)]"
+                          : "bg-zinc-900/40 border-zinc-800/60 text-zinc-500"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0 pr-2">
+                        {isPassed ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        ) : isCurrent ? (
+                          <RefreshCw className="w-4 h-4 text-purple-400 animate-spin shrink-0" />
+                        ) : (
+                          <Circle className="w-4 h-4 text-zinc-600 shrink-0" />
+                        )}
+                        <div className="min-w-0">
+                          <div className="font-sans text-xs font-medium truncate">{label}</div>
+                          <div className="text-[10px] text-zinc-500 font-mono truncate">{detail}</div>
+                        </div>
+                      </div>
+                      <span
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded shrink-0 ${
+                          isPassed
+                            ? "bg-emerald-900/40 text-emerald-300 border border-emerald-800/40"
+                            : isCurrent
+                            ? "bg-purple-900/40 text-purple-300 border border-purple-800/40"
+                            : "bg-zinc-800/40 text-zinc-600 border border-zinc-800/40"
+                        }`}
+                      >
+                        {isPassed ? "DONE" : isCurrent ? "SCANNING..." : "QUEUED"}
+                      </span>
                     </div>
-                    <span className="text-[10px] opacity-75 font-mono">
-                      {isPassed ? "DONE" : isCurrent ? "SCANNING..." : "QUEUED"}
-                    </span>
+
+                    {step === 4 && (isCurrent || isPassed) && (
+                      <div className="p-3 rounded-xl bg-purple-950/20 border border-purple-800/40 space-y-2 font-mono text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-purple-300 font-semibold flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                            Google GENAI Resume Audit
+                          </span>
+                          {userProfile?.resumeScore !== null && userProfile?.resumeScore !== undefined ? (
+                            <span className="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800/60 text-emerald-300 text-[10px] font-bold">
+                              ATS: {userProfile.resumeScore}/100
+                            </span>
+                          ) : (
+                            <label className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold cursor-pointer transition-colors flex items-center gap-1 shrink-0">
+                              <Upload className="w-3 h-3" />
+                              <span>{auditResumeUploading ? "Analyzing..." : "Upload Resume PDF"}</span>
+                              <input
+                                type="file"
+                                accept=".pdf,.doc,.docx,.txt"
+                                onChange={handleAuditResumeUpload}
+                                disabled={auditResumeUploading}
+                                className="hidden"
+                              />
+                            </label>
+                          )}
+                        </div>
+
+                        {userProfile?.resumeAnalysis && (
+                          <div className="space-y-1 text-[11px] text-zinc-300">
+                            {userProfile.resumeAnalysis.matched_keywords?.length > 0 && (
+                              <div className="flex flex-wrap items-center gap-1">
+                                <span className="text-zinc-500">Keywords:</span>
+                                {userProfile.resumeAnalysis.matched_keywords.slice(0, 5).map((k, i) => (
+                                  <span key={i} className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-300">
+                                    {typeof k === "string" ? k : k.keyword}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            {userProfile.resumeAnalysis.bullet_improvements?.length > 0 && (
+                              <p className="text-[10px] text-purple-300">
+                                ✓ Google XYZ Metrics: {userProfile.resumeAnalysis.bullet_improvements.length} bullet points quantified
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {auditResumeError && <p className="text-[10px] text-rose-400">{auditResumeError}</p>}
+                      </div>
+                    )}
                   </div>
                 );
               })}
             </div>
 
-            {auditCompleted && (
-              <div className="space-y-4 pt-2 border-t border-zinc-800">
-                <div className="flex items-center justify-between p-4 bg-zinc-900 rounded-xl border border-zinc-800 font-mono">
-                  <span className="text-xs text-zinc-400">Calculated Readiness:</span>
-                  <span className="text-xl font-bold text-emerald-400">
-                    {readiness?.overallScore || 82} / 100 ({readiness?.overallStatus?.label || "Competitive"})
-                  </span>
-                </div>
-
+            {/* Quick Skip option during active scan */}
+            {!auditCompleted && (
+              <div className="flex items-center justify-between pt-1 border-t border-zinc-800/60">
+                <span className="text-[11px] text-zinc-500 font-mono">
+                  Calibrating model weights...
+                </span>
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowAuditModal(false);
-                    setSearchParams({}, { replace: true });
-                  }}
-                  className="w-full py-3 bg-white hover:bg-neutral-200 text-neutral-950 font-bold rounded-xl text-xs shadow-lg transition-all cursor-pointer font-sans"
+                  onClick={handleSkipAudit}
+                  className="text-xs text-purple-400 hover:text-purple-300 font-mono font-medium underline transition-colors cursor-pointer"
                 >
-                  Enter Career Hub Command Center
+                  Skip to Results &rarr;
                 </button>
+              </div>
+            )}
+
+            {/* Completed Results Summary Card */}
+            {auditCompleted && (
+              <div className="space-y-4 pt-2 border-t border-zinc-800">
+                <div className="bg-zinc-900/90 rounded-xl border border-zinc-800 p-4 space-y-3 font-mono">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] uppercase tracking-wider text-zinc-500 block">
+                        Composite Readiness
+                      </span>
+                      <span className="text-xl font-bold text-emerald-400">
+                        {readiness?.overallScore !== null && readiness?.overallScore !== undefined
+                          ? readiness.overallScore
+                          : "Pending Sync"}{" "}
+                        {readiness?.overallScore !== null && readiness?.overallScore !== undefined && (
+                          <span className="text-xs text-zinc-500 font-normal">/ 100</span>
+                        )}
+                      </span>
+                    </div>
+                    <span
+                      className={`text-[10px] px-2.5 py-1 rounded-full font-medium border ${getStatusBadge(
+                        readiness?.overallStatus?.key
+                      )}`}
+                    >
+                      {readiness?.overallStatus?.label || "Competitive Candidate"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-2 pt-2 border-t border-zinc-800/80 text-[10px] text-center">
+                    <div className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
+                      <span className="text-zinc-500 block">DSA</span>
+                      <span className="font-bold text-zinc-200">{codingScore !== null ? `${codingScore}%` : "Not Linked"}</span>
+                    </div>
+                    <div className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
+                      <span className="text-zinc-500 block">Projects</span>
+                      <span className="font-bold text-zinc-200">{devScore !== null ? `${devScore}%` : "Not Linked"}</span>
+                    </div>
+                    <div className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
+                      <span className="text-zinc-500 block">Resume</span>
+                      <span className="font-bold text-purple-300">{resumeScore !== null ? `${resumeScore}%` : "Not Uploaded"}</span>
+                    </div>
+                    <div className="bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/60">
+                      <span className="text-zinc-500 block">Target Bar</span>
+                      <span className="font-bold text-purple-400">
+                        {readiness?.targetScore ? `${readiness.targetScore}%` : "85%"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleCloseAuditModal}
+                    className="flex-1 py-3 bg-white hover:bg-neutral-200 text-neutral-950 font-bold rounded-xl text-xs shadow-lg transition-all cursor-pointer font-sans"
+                  >
+                    Enter Career Hub Command Center
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleStartAuditModal}
+                    className="p-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 rounded-xl transition-colors cursor-pointer"
+                    title="Re-run Audit"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             )}
           </div>

@@ -27,6 +27,12 @@ from services.leetcode_service import (
 )
 from services.code_runner import run_sample_tests, submit_solution
 from services.ai_assistant import get_ai_code_assistance
+from services.sheets_service import (
+    get_all_sheets_overview,
+    get_sheet_details,
+    get_article_content,
+    search_all_problems,
+)
 
 # Import Group-B Intelligence Services
 from services.resume_service import (
@@ -187,6 +193,7 @@ Top Recommendations:
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 @app.post("/api/resume/analyze-upload")
+@app.post("/api/resume/analyze-upload/")
 async def analyze_resume_upload_api(
     file: UploadFile = File(...),
     job_description: str = Form(""),
@@ -569,6 +576,58 @@ def ai_assist_endpoint(slug_or_id: str, req: AIAssistRequest):
         return {"response": feedback, "query_type": req.query_type}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI Assistance failed: {str(e)}")
+
+
+# ==========================================
+# 6. Striver & Placement Curricula Sheets API
+# ==========================================
+
+@app.get("/api/sheets")
+def list_sheets_api():
+    """Returns overview of all 28 DSA Sheets, Playlists, and TUF+ Courses."""
+    try:
+        return get_all_sheets_overview()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch sheets overview: {str(e)}")
+
+@app.get("/api/sheets/search")
+def search_sheets_problems_api(
+    q: str = Query("", description="Search query"),
+    category: Optional[str] = None,
+    difficulty: Optional[str] = None,
+    sheet_id: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(25, ge=1, le=100)
+):
+    """Searches across all 3,150 problems in Striver & TUF sheets."""
+    try:
+        return search_all_problems(
+            query=q,
+            category=category,
+            difficulty=difficulty,
+            sheet_id=sheet_id,
+            page=page,
+            page_size=page_size
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+
+@app.get("/api/sheets/articles/{slug_or_id}")
+def get_sheet_article_api(slug_or_id: str):
+    """Returns full offline Markdown article tutorial, code snippets, and problem statements."""
+    article = get_article_content(slug_or_id)
+    if not article:
+        raise HTTPException(status_code=404, detail=f"Article '{slug_or_id}' not found.")
+    return article
+
+@app.get("/api/sheets/{sheet_id}")
+def get_sheet_api(sheet_id: str):
+    """Returns complete hierarchical tree of sections, subcategories, problems, and links for a specific sheet."""
+    sheet = get_sheet_details(sheet_id)
+    if not sheet:
+        raise HTTPException(status_code=404, detail=f"Sheet '{sheet_id}' not found.")
+    return sheet
+
 
 if __name__ == "__main__":
     import uvicorn

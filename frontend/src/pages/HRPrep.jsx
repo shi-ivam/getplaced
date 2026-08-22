@@ -185,8 +185,22 @@ export default function HRPrep() {
       className="overflow-x-hidden w-full max-w-full bg-[#08090c] text-neutral-100 min-h-screen font-sans selection:bg-neutral-800 selection:text-neutral-100"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8">
-        {/* Interview Pillar Navigation Tabs */}
-        <nav className="flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs border-b border-neutral-800 pb-4">
+        {/* Attention / Wide Cinematic Hero */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/90 text-xs font-mono text-neutral-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Executive Leadership & Behavioral Mastery Suite
+          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight max-w-5xl mx-auto leading-tight">
+            Behavioral Strategy & Enterprise Culture Principles
+          </h1>
+          <p className="text-sm md:text-base text-neutral-400 max-w-3xl mx-auto leading-relaxed">
+            Deconstruct company-specific leadership frameworks, master calibrated STAR responses, and validate narrative impact with instant AI evaluation.
+          </p>
+        </div>
+
+        {/* Interview Pillar Navigation Tabs Below Title */}
+        <nav className="flex items-center justify-center gap-2 overflow-x-auto pb-1 font-mono text-xs border-b border-neutral-800 pb-4">
           <Link
             to="/app/interview"
             className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
@@ -216,20 +230,6 @@ export default function HRPrep() {
             <span>Company Intelligence</span>
           </Link>
         </nav>
-
-        {/* Attention / Wide Cinematic Hero */}
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/90 text-xs font-mono text-neutral-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Executive Leadership & Behavioral Mastery Suite
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight max-w-5xl mx-auto leading-tight">
-            Behavioral Strategy & Enterprise Culture Principles
-          </h1>
-          <p className="text-sm md:text-base text-neutral-400 max-w-3xl mx-auto leading-relaxed">
-            Deconstruct company-specific leadership frameworks, master calibrated STAR responses, and validate narrative impact with instant AI evaluation.
-          </p>
-        </div>
 
         {/* Interest / Dense Bento Architecture (STAR Formula Card + Control Bar) */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 grid-flow-dense">

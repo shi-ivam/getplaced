@@ -42,6 +42,7 @@ function Routings() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/coding" element={<CodingArena />} />
+          <Route path="/sheets" element={<DSAContent defaultTab="sheets" />} />
           <Route path="/development" element={<Development />} />
           <Route path="/job" element={<JobRecommendations />} />
           <Route path="/jobs" element={<JobRecommendations />} />
@@ -52,6 +53,8 @@ function Routings() {
           <Route path="/app" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="dsa" element={<DSAContent />} />
+            <Route path="sheets" element={<DSAContent defaultTab="sheets" />} />
+            <Route path="sheets/:sheetId" element={<DSAContent defaultTab="sheets" />} />
             <Route path="coding" element={<CodingArena />} />
             <Route path="coding/:slug" element={<CodingWorkspace />} />
             <Route path="problems" element={<CodingArena />} />

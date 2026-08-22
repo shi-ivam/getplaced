@@ -7,6 +7,7 @@ import {
   connectGitHubInCoach,
   connectLeetCodeInCoach,
   connectVtopInCoach,
+  saveResumeAnalysisInCoach,
 } from "../services/coachService.js";
 
 // @desc    Get current AI career coach onboarding session
@@ -81,6 +82,20 @@ export const connectVtop = asyncHandler(async (req, res) => {
     sessionId,
     semesterId,
     regNo,
+  });
+  res.json(result);
+});
+
+// @desc    Save AI Resume Analysis into onboarding coach session & user profile
+// @route   POST /api/coach/save-resume-analysis
+// @access  Private
+export const saveResumeAnalysis = asyncHandler(async (req, res) => {
+  const { resumeScore, resumeText, resumeAnalysis, filename } = req.body;
+  const result = await saveResumeAnalysisInCoach(req.user._id, {
+    resumeScore,
+    resumeText,
+    resumeAnalysis,
+    filename,
   });
   res.json(result);
 });

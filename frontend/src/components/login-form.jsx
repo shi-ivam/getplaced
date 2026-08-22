@@ -39,7 +39,7 @@ export function LoginForm(props) {
         { withCredentials: true }
       );
       if (res.data && res.data.onboardingCompleted === false) {
-        navigate("/app/coach");
+        navigate("/onboarding");
       } else {
         navigate("/app");
       }

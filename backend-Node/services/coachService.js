@@ -565,6 +565,11 @@ export async function applyOnboardingToProfile(userId, extracted) {
   if (extracted.cgpa) userUpdate.cgpa = extracted.cgpa;
   if (extracted.tenthPercentage) userUpdate.tenthPercentage = extracted.tenthPercentage;
   if (extracted.twelfthPercentage) userUpdate.twelfthPercentage = extracted.twelfthPercentage;
+  if (extracted.resumeScore !== undefined && extracted.resumeScore !== null) {
+    userUpdate.resumeScore = extracted.resumeScore;
+  }
+  if (extracted.resumeText) userUpdate.resumeText = extracted.resumeText;
+  if (extracted.resumeAnalysis) userUpdate.resumeAnalysis = extracted.resumeAnalysis;
 
   await User.findByIdAndUpdate(userId, userUpdate);
 
@@ -865,3 +870,43 @@ export async function connectVtopInCoach(userId, { username, password, captchaSt
   };
 }
 
+export async function saveResumeAnalysisInCoach(userId, { resumeScore, resumeText, resumeAnalysis, filename }) {
+  let session = await CoachConversation.findOne({ userId });
+  const score = resumeScore !== undefined && resumeScore !== null ? Number(resumeScore) : (resumeAnalysis?.ats_score ?? null);
+
+  await User.findByIdAndUpdate(userId, {
+    resumeScore: score,
+    resumeText: resumeText || resumeAnalysis?.extracted_text || "",
+    resumeAnalysis: resumeAnalysis || null,
+  });
+
+  if (session) {
+    if (!session.connectedProfiles) session.connectedProfiles = {};
+    const matchedSkills = (resumeAnalysis?.matched_keywords || []).map((k) => (typeof k === "string" ? k : k.keyword || ""));
+
+    session.connectedProfiles.resume = {
+      provided: true,
+      filename: filename || "resume.pdf",
+      score: score,
+      extractedSkills: matchedSkills,
+      analysis: resumeAnalysis || null,
+    };
+
+    if (!session.extractedProfile) session.extractedProfile = {};
+    session.extractedProfile.resumeScore = score;
+    session.extractedProfile.resumeText = resumeText || "";
+    session.extractedProfile.resumeAnalysis = resumeAnalysis || null;
+
+    session.messages.push({
+      sender: "coach",
+      text: `📄 Resume Uploaded & Audited with Google GENAI!\n\n• ATS Format & Keywords Score: **${score ?? "N/A"}/100**\n• Top Matched Keywords: ${matchedSkills.slice(0, 6).join(", ") || "Technical stack parsed"}\n• Google XYZ Metrics: ${resumeAnalysis?.bullet_improvements?.length || 0} bullet optimizations generated.\n\nYour resume data is now linked to your multi-pillar placement audit.`,
+      timestamp: new Date(),
+    });
+
+    session.profileCompletion = Math.min(100, Math.max(session.profileCompletion || 0, 75));
+    await session.save();
+  }
+
+  const user = await User.findById(userId);
+  return await getOrCreateCoachSession(userId, user);
+}

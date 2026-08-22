@@ -539,11 +539,15 @@ def get_company_intelligence(company_name: str) -> Dict[str, Any]:
 
 def generate_dynamic_company_intelligence(company_name: str) -> Dict[str, Any]:
     """
-    Dynamically generates comprehensive interview and technical profile for any tech company.
+    Dynamically generates comprehensive interview and technical profile for any tech company via live web-grounded AI search.
     """
     prompt = f"""
-You are an authoritative engineering director and tech industry analyst.
-Generate an exhaustive technical intelligence report and interview preparation breakdown for '{company_name}'.
+You are an authoritative tech industry analyst and engineering hiring researcher.
+Research and generate an accurate, web-grounded technical intelligence report and interview preparation breakdown specifically tailored to real factual data about '{company_name}'.
+
+Instructions:
+- Ground your analysis in real, authentic facts about '{company_name}', their actual engineering culture, values, tech stack, and interview process.
+- Do NOT output generic boilerplate templates.
 
 Respond strictly in valid JSON matching this schema:
 {{
@@ -621,90 +625,18 @@ Respond strictly in valid JSON matching this schema:
   ]
 }}
 """
+    system_instruction = f"You are a principal tech intelligence analyst providing accurate, web-grounded engineering profiles for real tech companies. Do not output generic fallback templates for {company_name}."
+
     try:
-        raw = query_gemini(prompt, json_mode=True)
+        raw = query_gemini(prompt, system_instruction=system_instruction, json_mode=True)
         res = extract_json(raw)
         if isinstance(res, dict) and "name" in res:
             return res
     except Exception as e:
-        logger.warning(f"Dynamic company generation fallback used for '{company_name}': {e}")
+        logger.error(f"Dynamic company intelligence generation failed for '{company_name}': {e}")
+        raise RuntimeError(f"Company intelligence lookup failed for '{company_name}': {e}")
 
-    # Fallback generic tech company profile
-    return {
-        "name": company_name.title(),
-        "slug": company_name.lower().replace(" ", "-"),
-        "industry": "Software Engineering & Technology",
-        "headquarters": "Global / Remote",
-        "founded": "N/A",
-        "tier": "Competitive Tech",
-        "culture_summary": "Fast-paced, engineering ownership, collaborative problem solving, customer focus.",
-        "core_values": [
-            "Ownership: Drive projects from concept to production with high quality.",
-            "Technical Excellence: Strive for clean architecture, low latency, and modular design.",
-            "Customer Empathy: Build solutions that directly resolve end-user pain points."
-        ],
-        "tech_stack": {
-            "frontend": ["React", "TypeScript", "Next.js", "Tailwind CSS"],
-            "backend": ["Node.js", "Python / FastAPI", "Java", "Go", "REST / GraphQL"],
-            "databases": ["PostgreSQL", "MongoDB", "Redis"],
-            "cloud_infra": ["AWS", "Docker", "Kubernetes", "GitHub Actions"],
-            "ai_ml": ["OpenAI / Gemini APIs", "Vector Search"]
-        },
-        "recent_highlights": [
-            "Modernizing microservices to event-driven architectures with high test coverage.",
-            "Integrating LLM-powered automation into core business workflows."
-        ],
-        "interview_rounds": [
-            {
-                "round": 1,
-                "title": "Online Coding Screen",
-                "duration": "60 mins",
-                "format": "HackerRank / CodeSignal",
-                "focus": "Data Structures & Algorithms (Arrays, Strings, Hash Maps, Recursion).",
-                "passing_criteria": "Optimal time & space complexity, all test cases passing."
-            },
-            {
-                "round": 2,
-                "title": "Technical Interview: DSA & Live Coding",
-                "duration": "45-60 mins",
-                "format": "Live Coding with Senior Engineer",
-                "focus": "Trees, Graphs, Sliding Window, Dynamic Programming.",
-                "passing_criteria": "Active communication, clean modular code, edge case testing."
-            },
-            {
-                "round": 3,
-                "title": "System Architecture / Engineering Depth",
-                "duration": "45-60 mins",
-                "format": "Whiteboarding / Technical Discussion",
-                "focus": "REST API design, database modeling, caching, scalability bottlenecks.",
-                "passing_criteria": "Structured thought process, understanding CAP theorem and trade-offs."
-            },
-            {
-                "round": 4,
-                "title": "Managerial & Culture Fit",
-                "duration": "45 mins",
-                "format": "1-on-1 with Engineering Manager",
-                "focus": "Behavioral STAR questions, past projects, conflict resolution, career goals.",
-                "passing_criteria": "High alignment with company values, ownership mindset."
-            }
-        ],
-        "dsa_patterns": [
-            {"pattern": "Arrays, Two Pointers & Sliding Window", "frequency": "Very High", "sample_problems": ["Two Sum", "3Sum", "Minimum Window Substring"]},
-            {"pattern": "Trees & Graph BFS/DFS", "frequency": "High", "sample_problems": ["Number of Islands", "Binary Tree Level Order Traversal", "Clone Graph"]},
-            {"pattern": "Dynamic Programming & Memoization", "frequency": "Medium-High", "sample_problems": ["Coin Change", "Longest Common Subsequence"]}
-        ],
-        "behavioral_questions": [
-            {
-                "question": "Tell me about a complex project you engineered and the major technical trade-offs you made.",
-                "strategy": "Use the STAR method, highlighting the business context, technical choices, and quantifiable outcomes."
-            }
-        ],
-        "preparation_roadmap": [
-            "Practice medium-difficulty LeetCode problems focusing on arrays, trees, and graphs.",
-            "Review system design basics: caching (Redis), indexing, sharding, and message queues.",
-            "Prepare 3-4 structured STAR stories covering leadership, technical conflicts, and problem-solving."
-        ]
-    }
+    raise RuntimeError(f"Company intelligence lookup for '{company_name}' returned invalid response.")
 
 def list_featured_companies() -> List[Dict[str, Any]]:
     """Returns list of curated top-tier companies with summaries."""

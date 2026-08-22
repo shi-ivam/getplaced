@@ -299,11 +299,17 @@ export default function StudyLibrary() {
 
         {/* Video Player & Note Taking Modal */}
         {selectedVideo && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
-            <div className="bg-zinc-900 border border-white/15 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 sm:p-8 space-y-6">
-              <div className="flex items-center justify-between gap-4 pb-4 border-b border-white/10">
+          <div
+            onClick={() => setSelectedVideo(null)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-hidden animate-in fade-in duration-200"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-zinc-900 border border-white/15 rounded-3xl max-w-3xl w-full max-h-[88vh] overflow-y-auto shadow-2xl p-5 sm:p-7 space-y-5"
+            >
+              <div className="flex items-center justify-between gap-4 pb-3 border-b border-white/10">
                 <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+                  <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
                     {selectedVideo.title}
                   </h3>
                   <span className="text-xs text-zinc-400 font-mono mt-0.5 block">
@@ -314,14 +320,14 @@ export default function StudyLibrary() {
                 <button
                   type="button"
                   onClick={() => setSelectedVideo(null)}
-                  className="p-2 text-zinc-400 hover:text-white rounded-xl bg-zinc-800 transition-colors"
+                  className="p-2 text-zinc-400 hover:text-white rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Embedded Player */}
-              <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black border border-white/10">
+              {/* Embedded Player constrained to max-h to prevent vertical page blowout */}
+              <div className="aspect-video w-full max-h-[48vh] rounded-2xl overflow-hidden bg-black border border-white/10">
                 <iframe
                   src={`https://www.youtube.com/embed/${
                     selectedVideo.videoUrl.split("v=")[1] || ""

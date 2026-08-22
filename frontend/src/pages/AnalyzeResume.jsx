@@ -468,7 +468,7 @@ export default function AnalyzeResume() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 space-y-8">
         
         {/* Header Strip & Navigation Pill */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/[0.07] pb-6">
+        <header className="flex flex-col gap-4 border-b border-white/[0.07] pb-6">
           <div className="space-y-1.5 max-w-2xl">
             <div className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -484,8 +484,8 @@ export default function AnalyzeResume() {
             </p>
           </div>
 
-          {/* Segmented Navigation Tab Pill */}
-          <nav className="inline-flex p-1 bg-white/[0.03] border border-white/[0.08] rounded-xl backdrop-blur-md shadow-2xl overflow-x-auto max-w-full">
+          {/* Segmented Navigation Tab Pill Below Title */}
+          <nav className="inline-flex p-1 bg-white/[0.03] border border-white/[0.08] rounded-xl backdrop-blur-md shadow-2xl overflow-x-auto self-start max-w-full">
             <button
               onClick={() => setActiveTab("actions")}
               className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap ${

@@ -73,6 +73,12 @@ const navigationGroups = [
         icon: Terminal,
       },
       {
+        title: "Striver & Top Sheets",
+        url: "/app/sheets",
+        icon: Layers,
+        badge: "28 Lists",
+      },
+      {
         title: "DSA Analytics",
         url: "/app/dsa",
         icon: Code2,

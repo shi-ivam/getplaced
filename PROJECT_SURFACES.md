@@ -94,8 +94,7 @@ The **getPlaced** platform is a polyglot microservice/monorepo application organ
 | **Candidate Dashboard**| `/app` | `pages/Dashboard.jsx` | `backend-Node`<br>`GET /api/readiness`<br>`GET /api/users/profile` | **Fully Functional** (Dynamic 7-dimension readiness engine, target gap analysis, re-normalized weighting) |
 | **Resume Analyzer** | `/resume`<br>`/app/resume` | `pages/AnalyzeResume.jsx` | `backend-Py`<br>`POST /analyze-resume/`<br>Google Gemini 1.5 Flash + OCR | **Fully Functional** (PDF upload, OCR fallback, AI prompt, PDF export) |
 | **Job Recommendations**| `/app/job` | `pages/JobRecommendations.jsx` | `backend-Node`<br>`GET /job-recommendations`<br>RapidAPI JSearch | **Fully Functional** (Real-time RapidAPI fetch + client-side search) |
-| **LeetCode Practice Arena & IDE** | `/app/coding`<br>`/app/coding/:slug`<br>`/coding` | `pages/CodingArena.jsx`<br>`pages/CodingWorkspace.jsx`<br>`services/leetcodeService.js` | `backend-Py`<br>`GET /api/problems`<br>`POST /api/problems/:slug/run`<br>`POST /api/problems/:slug/submit`<br>`POST /api/problems/:slug/ai-assist`<br>SQLite 2,869 Problem Dataset + Gemini AI | **Fully Functional & Production Ready** (Monaco IDE, live sandbox test runner, AI mentor, submission tracking) |
-| **DSA Learning Hub** | *Dormant (Not in Router)* | `pages/DSAcontent.jsx`<br>`components/dsa_content/*`<br>`data/dsaContent.js` | None (Comprehensive client-side dataset) | **Fully Implemented UI & Data, Disconnected Route** |
+| **DSA & Striver Placement Curricula** | `/app/dsa`<br>`/app/sheets`<br>`/sheets` | `pages/DSAcontent.jsx`<br>`components/sheets/*`<br>`services/sheetsService.js` | `backend-Py`<br>`GET /api/sheets`<br>`GET /api/sheets/:id`<br>`GET /api/sheets/articles/:slug`<br>`GET /api/sheets/search`<br>SQLite 2,088 Articles DB + 28 Master Sheets | **Fully Functional & Production Ready** (Interactive problem tree, offline tutorial reader with C++/Java/Python snippets, live Monaco sandbox launcher, 3,150 problems) |
 | **AI Mock Interview** | `/app/interview` *(Sidebar link)* | `Hero.jsx` (Mockup)<br>`Meeting.jsx` (Calendar) | Planned (MediaPipe / WebRTC / Gemini) | **Visual Prototype / Planned Surface** |
 
 ---
@@ -208,33 +207,36 @@ The **getPlaced** platform is a polyglot microservice/monorepo application organ
 
 ---
 
-### Surface 7: DSA Learning Hub (`DSAcontent.jsx`)
+### Surface 7: DSA Analytics & Striver Placement Curricula Hub (`/app/dsa`, `/app/sheets`)
 * **Files:**
-  * Page: `frontend/src/pages/DSAcontent.jsx`
-  * Components: `frontend/src/components/dsa_content/TopicCard.jsx`, `VideoPlayer.jsx`, `AssignmentList.jsx`
-  * Dataset: `frontend/src/data/dsaContent.js`
-* **Current Status:** Fully coded and interactive, but **not included in `PageRouting/Routings.jsx`**.
-* **Dataset Scope (`dsaContent.js`):** Contains 15 comprehensive curriculum modules:
-  1. Arrays (2 Video Lectures, 10 LeetCode Problems)
-  2. Strings (3 Video Lectures, 10 LeetCode Problems)
-  3. Binary Search (2 Video Lectures, 6 LeetCode Problems)
-  4. Recursion (2 Video Lectures, 9 LeetCode Problems)
-  5. Bit Manipulation (2 Video Lectures, 9 LeetCode Problems)
-  6. Sliding Window (2 Video Lectures, 8 LeetCode Problems)
-  7. Greedy Algorithms (2 Video Lectures, 9 LeetCode Problems)
-  8. Linked Lists (1 Video Lecture, 10 LeetCode Problems)
-  9. Stacks & Queues (1 Video Lecture, 6 LeetCode Problems)
-  10. Heaps (3 Video Lectures, 8 LeetCode Problems)
-  11. Binary Trees (3 Video Lectures, 9 LeetCode Problems)
-  12. Binary Search Trees (BST) (3 Video Lectures, 8 LeetCode Problems)
-  13. Backtracking (3 Video Lectures, 10 LeetCode Problems)
-  14. Graphs (4 Video Lectures, 8 LeetCode Problems)
-  15. Dynamic Programming (3 Video Lectures, 10 LeetCode Problems)
-* **Interactive Features:**
-  * **Module Grid:** Shows completion counters (`X/Y lectures`, `X/Y assignments`).
-  * **Tab Navigation:** Toggle between *Lectures* and *Assignments*.
-  * **Embedded Player (`VideoPlayer.jsx`):** Wraps `react-player` for YouTube URLs, custom play/pause button, animated progress bar, auto-triggers `onComplete` when playback finishes.
-  * **Assignment Checklist (`AssignmentList.jsx`):** Lists problem name, platform badge (`LeetCode` / `GeeksForGeeks`), colored difficulty pill (`Easy` green, `Medium` yellow, `Hard` red), external problem link icon, and toggleable completion checkmark.
+  * Page: `frontend/src/pages/DSAcontent.jsx`, `frontend/src/pages/CodingArena.jsx`
+  * Components: `frontend/src/components/sheets/SheetsHub.jsx`, `SheetViewer.jsx`, `SheetArticleModal.jsx`, `SheetVideoModal.jsx`, `components/dsa_content/*`
+  * Datasets & DBs: `backend-Py/data/articles.db` (2,088 offline tutorials), `backend-Py/data/takeuforward_sheets_and_playlists.json` (28 lists, 3,150 problems)
+  * Service: `frontend/src/services/sheetsService.js`, `backend-Py/services/sheets_service.py`
+* **Current Status:** **Fully Functional & Production Ready**.
+* **Comprehensive Striver & Placement Lists Catalog (28 Curricula):**
+  1. **DSA Sheets (4 Master Sheets, 819 Problems):**
+     - Striver's A2Z DSA Sheet (18 sections, 474 problems)
+     - Striver's SDE Sheet (27 sections, 191 problems)
+     - Blind 75 LeetCode Sheet (10 sections, 75 problems)
+     - Striver's 79 Last Moment Sheet (11 sections, 79 problems)
+  2. **Core CS Subjects (3 Comprehensive Sheets, 111 Problems):**
+     - Computer Networks (CN) Sheet (12 sections, 54 problems)
+     - DBMS Sheet (8 sections, 29 problems)
+     - Operating Systems (OS) Sheet (6 sections, 28 problems)
+  3. **System Design (1 Roadmap, 70 Topics):**
+     - Complete System Design Roadmap with Videos for SDEs (13 sections, 70 topics)
+  4. **Competitive Programming (1 Sheet, 297 Problems):**
+     - Striver's CP Sheet (19 sections, 297 problems)
+  5. **DSA Topic Playlists (9 Focused Pathways, 344 Problems):**
+     - Array, Binary Search, Dynamic Programming, Graphs, Linked Lists, Recursion, Stack & Queue, Strings, Trees & BST
+  6. **TUF+ Comprehensive Mastery Courses (10 Courses, 1,509 Topics/Problems):**
+     - TUF+ DSA Comprehensive, Low Level Design (LLD), OOPS, SQL (Data Engineering), OS by Striver, CN by Striver, DBMS, OS Core, DSA Concept Revision, DSA Quick Revision
+* **Integrated Interactive Capabilities:**
+  * **Interactive Problem Hierarchy & Checklist:** Expandable sections and subcategories with interactive checkmarks and local storage persistence.
+  * **In-App Tutorial Reader (`SheetArticleModal.jsx`):** Renders complete offline formatted Markdown tutorials, formulas, and multi-language code snippets (C++, Java, Python, JavaScript) directly from `articles.db`.
+  * **Live IDE Sandbox Execution:** 669+ LeetCode-matched problems launch directly into getPlaced's live Monaco IDE & Sandbox runner (`/app/coding/:slug`).
+  * **Video Solutions:** Embedded player modals for official YouTube lectures with synchronized progress.
 
 ---
 

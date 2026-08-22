@@ -37,6 +37,7 @@ import { AssignmentList } from "@/components/dsa_content/AssignmentList";
 import DsaTopicAnalysis from "@/components/dsa/DsaTopicAnalysis";
 import DsaRequirementComparison from "@/components/dsa/DsaRequirementComparison";
 import LeetCodeSubmissionAnalysis from "@/components/leetcode/LeetCodeSubmissionAnalysis";
+import SheetsHub from "@/components/sheets/SheetsHub";
 
 const CURATED_LISTS = [
   { id: "all", label: "All Problems", icon: Layers },
@@ -248,6 +249,7 @@ export default function CodingArena() {
         <nav className="gsap-reveal flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs">
           {[
             { id: "overview", label: "Overview", icon: Layers },
+            { id: "sheets", label: "Striver Sheets (28)", icon: Sparkles },
             { id: "practice", label: "Problem Catalog", icon: Terminal },
             { id: "topics", label: "Topic Proficiency", icon: BarChart3 },
             { id: "submissions", label: "Submission Activity", icon: Activity },
@@ -462,7 +464,14 @@ export default function CodingArena() {
           </div>
         )}
 
-        {/* TAB 2: PROBLEM CATALOG (PRACTICE) */}
+        {/* TAB 2: STRIVER & PLACEMENT SHEETS (28 LISTS) */}
+        {workspaceTab === "sheets" && (
+          <div className="gsap-reveal space-y-6">
+            <SheetsHub />
+          </div>
+        )}
+
+        {/* TAB 3: PROBLEM CATALOG (PRACTICE) */}
         {workspaceTab === "practice" && (
           <div className="space-y-6">
             {/* Curated Track Tabs */}

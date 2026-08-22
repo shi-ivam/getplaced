@@ -192,8 +192,56 @@ export default function CommunicationLab() {
       className="overflow-x-hidden w-full max-w-full bg-[#08090c] text-neutral-100 min-h-screen font-sans selection:bg-neutral-800 selection:text-neutral-100"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8">
-        {/* Interview Pillar Navigation Tabs */}
-        <nav className="flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs border-b border-neutral-800 pb-4">
+        {/* Attention / Wide Cinematic Hero */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/90 text-xs font-mono text-neutral-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Speech Acoustics & Executive Articulation Engine
+          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight max-w-5xl mx-auto leading-tight">
+            Verbal Precision & Executive Presence Diagnostics
+          </h1>
+          <p className="text-sm md:text-base text-neutral-400 max-w-3xl mx-auto leading-relaxed">
+            Eliminate speech crutches, regulate words-per-minute pacing, verify STAR narrative density, and hone executive presence under pressure.
+          </p>
+
+          {/* Quick Benchmark Selectors */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <button
+              onClick={() => setSelectedScenario("fast")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono border transition ${
+                selectedScenario === "fast"
+                  ? "bg-white text-black border-white font-bold"
+                  : "bg-neutral-900/80 text-neutral-400 border-neutral-800 hover:text-white"
+              }`}
+            >
+              Rapid-Fire Technical (165+ WPM Bar)
+            </button>
+            <button
+              onClick={() => setSelectedScenario("star")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono border transition ${
+                selectedScenario === "star"
+                  ? "bg-white text-black border-white font-bold"
+                  : "bg-neutral-900/80 text-neutral-400 border-neutral-800 hover:text-white"
+              }`}
+            >
+              Leadership Pitch (High STAR Density)
+            </button>
+            <button
+              onClick={() => setSelectedScenario("pause")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono border transition ${
+                selectedScenario === "pause"
+                  ? "bg-white text-black border-white font-bold"
+                  : "bg-neutral-900/80 text-neutral-400 border-neutral-800 hover:text-white"
+              }`}
+            >
+              Executive Q&A (Strategic Pauses)
+            </button>
+          </div>
+        </div>
+
+        {/* Interview Pillar Navigation Tabs Below Title */}
+        <nav className="flex items-center justify-center gap-2 overflow-x-auto pb-1 font-mono text-xs border-b border-neutral-800 pb-4">
           <Link
             to="/app/interview"
             className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
@@ -223,36 +271,6 @@ export default function CommunicationLab() {
             <span>Company Intelligence</span>
           </Link>
         </nav>
-
-        {/* Attention / Wide Cinematic Hero */}
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-800 bg-neutral-900/90 text-xs font-mono text-neutral-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Speech Acoustics & Executive Articulation Engine
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight max-w-5xl mx-auto leading-tight">
-            Verbal Precision & Executive Presence Diagnostics
-          </h1>
-          <p className="text-sm md:text-base text-neutral-400 max-w-3xl mx-auto leading-relaxed">
-            Eliminate speech crutches, regulate words-per-minute pacing, verify STAR narrative density, and hone executive presence under pressure.
-          </p>
-
-          {/* Quick Benchmark Selectors */}
-          <div className="flex flex-wrap justify-center gap-2 pt-2">
-            {SAMPLE_RESPONSES.map((sample, idx) => (
-              <button
-                key={idx}
-                onClick={() => {
-                  setInputText(sample.text);
-                  handleAnalyze(sample.text, 35);
-                }}
-                className="px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono border border-neutral-800 transition"
-              >
-                Benchmark: {sample.title}
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Interest / Dense Gapless Bento Architecture */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 grid-flow-dense">
