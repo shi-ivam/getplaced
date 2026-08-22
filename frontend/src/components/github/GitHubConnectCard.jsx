@@ -29,11 +29,10 @@ import {
   BookOpen,
   X,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { NODE_API_URL } from "@/config/api";
+import CaideBadge from "@/components/caide/CaideBadge";
+import CaideButton, { CaideArrow } from "@/components/caide/CaideButton";
+import CaideCard from "@/components/caide/CaideCard";
 
 const LANGUAGE_COLORS = {
   JavaScript: "#f1e05a",
@@ -301,587 +300,530 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
 
   if (loading) {
     return (
-      <Card className="bg-[#141414] border-gray-800/80">
-        <CardHeader className="pb-4 border-b border-gray-800/60">
-          <div className="flex items-center gap-2">
-            <Skeleton className="w-5 h-5 rounded bg-gray-800" />
-            <Skeleton className="h-5 w-48 bg-gray-800" />
-          </div>
-          <Skeleton className="h-4 w-72 bg-gray-800/60 mt-1" />
-        </CardHeader>
-        <CardContent className="pt-6 space-y-4">
-          <Skeleton className="h-28 w-full bg-gray-800/40 rounded-xl" />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Skeleton className="h-24 bg-gray-800/30 rounded-lg" />
-            <Skeleton className="h-24 bg-gray-800/30 rounded-lg" />
-            <Skeleton className="h-24 bg-gray-800/30 rounded-lg" />
-            <Skeleton className="h-24 bg-gray-800/30 rounded-lg" />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 shadow-[6px_6px_0_0_#0D0431] space-y-4">
+        <div className="h-6 w-48 bg-[#FEF9CF] rounded-xl animate-pulse border border-[#0D0431]" />
+        <div className="h-28 w-full bg-[#FAF7EE] rounded-2xl animate-pulse border border-[#0D0431]" />
+      </div>
     );
   }
 
   const projectScore = profile?.projectScore || 0;
-  const getScoreBadgeClass = (score) => {
-    if (score >= 85) return "bg-emerald-950/80 text-emerald-300 border-emerald-700/60";
-    if (score >= 70) return "bg-sky-950/80 text-sky-300 border-sky-700/60";
-    if (score >= 50) return "bg-amber-950/80 text-amber-300 border-amber-700/60";
-    return "bg-rose-950/80 text-rose-300 border-rose-700/60";
+  const getScoreBadgeTheme = (score) => {
+    if (score >= 85) return "mint";
+    if (score >= 70) return "light-purple";
+    if (score >= 50) return "yellow";
+    return "coral";
   };
 
   return (
-    <Card className="bg-[#0d0e15] border-zinc-800 shadow-none">
-      <CardHeader className="pb-4 border-b border-zinc-800/80">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
-              <FolderGit2 className="w-4 h-4" />
+    <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 sm:p-8 shadow-[6px_6px_0_0_#0D0431] space-y-6 text-[#0D0431]">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#0D0431] pb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-[#E4CDFB] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center text-[#0D0431]">
+            <FolderGit2 className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-heading font-black text-xl text-[#0D0431]">GitHub Portfolio</h3>
+              {connected && (
+                <CaideBadge theme="mint">
+                  Connected
+                </CaideBadge>
+              )}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-base font-semibold text-white">GitHub Portfolio</CardTitle>
-                {connected && (
-                  <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Connected
-                  </span>
-                )}
+            {!connected && (
+              <p className="text-xs text-[#0D0431]/80 mt-0.5 font-medium">
+                Import public repositories, language distribution, and project statistics.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {connected && (
+          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={handleSync}
+              disabled={syncing || disconnecting}
+              className="btn_secondary_wrap px-4 py-2 text-xs font-bold font-mono cursor-pointer flex items-center gap-1.5"
+              title="Fetch latest repositories from GitHub"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />
+              <span>{syncing ? "Syncing..." : "Refresh Data"}</span>
+            </button>
+
+            {showConfirmDisconnect ? (
+              <div className="flex items-center gap-1.5 bg-[#FFC5B7] border-2 border-[#0D0431] px-3 py-1 rounded-xl shadow-[2px_2px_0_0_#0D0431]">
+                <span className="text-xs font-bold text-[#0D0431]">Disconnect?</span>
+                <button
+                  type="button"
+                  onClick={handleDisconnect}
+                  disabled={disconnecting}
+                  className="text-xs bg-[#0D0431] hover:bg-[#896EE2] text-white font-bold px-2.5 py-1 rounded-lg transition cursor-pointer"
+                >
+                  {disconnecting ? "..." : "Yes"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmDisconnect(false)}
+                  className="text-xs bg-white hover:bg-zinc-100 text-[#0D0431] font-bold px-2 py-1 rounded-lg border border-[#0D0431] transition cursor-pointer"
+                >
+                  Cancel
+                </button>
               </div>
-              {!connected && (
-                <CardDescription className="text-zinc-400 text-xs mt-0.5">
-                  Import public repositories, language distribution, and project statistics.
-                </CardDescription>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowConfirmDisconnect(true)}
+                disabled={syncing || disconnecting}
+                className="p-2 rounded-xl border-2 border-[#0D0431] bg-white hover:bg-[#FFC5B7] text-[#0D0431] transition-all shadow-[2px_2px_0_0_#0D0431] text-xs font-bold font-mono cursor-pointer flex items-center gap-1"
+                title="Disconnect GitHub account"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">Disconnect</span>
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Alerts */}
+      {successMsg && (
+        <div className="flex items-center gap-2 bg-[#D4FDF7] border-2 border-[#0D0431] text-[#0D0431] px-4 py-3 rounded-2xl text-xs font-bold font-mono shadow-[3px_3px_0_0_#0D0431]">
+          <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+          <span>{successMsg}</span>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="flex items-center gap-2 bg-[#FFC5B7] border-2 border-[#0D0431] text-[#0D0431] px-4 py-3 rounded-2xl text-xs font-bold font-mono shadow-[3px_3px_0_0_#0D0431]">
+          <AlertCircle className="w-4 h-4 text-[#0D0431] shrink-0" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
+      {/* Graceful sync failure alert */}
+      {profile?.syncStatus === "failed" && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#FEF9CF] border-2 border-[#0D0431] p-4 rounded-2xl text-xs font-mono font-bold shadow-[3px_3px_0_0_#0D0431]">
+          <div className="flex items-start sm:items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 text-[#0D0431] shrink-0 mt-0.5 sm:mt-0" />
+            <div>
+              <span>Unable to refresh GitHub repositories. Showing cached snapshot.</span>
+              {profile.syncError && (
+                <div className="text-[11px] text-[#0D0431]/70 mt-0.5 font-normal">
+                  Reason: {profile.syncError}
+                </div>
               )}
             </div>
           </div>
+          <button
+            type="button"
+            onClick={handleSync}
+            disabled={syncing}
+            className="btn_secondary_wrap px-3 py-1.5 text-xs font-bold font-mono shrink-0 self-start sm:self-auto cursor-pointer"
+          >
+            {syncing ? "Retrying..." : "Retry Sync"}
+          </button>
+        </div>
+      )}
 
-          {connected && (
-            <div className="flex items-center gap-2 self-start sm:self-auto">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleSync}
-                disabled={syncing || disconnecting}
-                className="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border-zinc-800 text-xs h-8 px-3 flex items-center gap-1.5 cursor-pointer"
-                title="Fetch latest repositories from GitHub"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin text-zinc-200" : "text-zinc-400"}`} />
-                <span>{syncing ? "Syncing..." : "Refresh Data"}</span>
-              </Button>
+      {/* DISCONNECTED STATE */}
+      {!connected && (
+        <div className="bg-[#FEF9CF] border-2 border-[#0D0431] rounded-2xl p-6 space-y-4 shadow-[4px_4px_0_0_#0D0431]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#896EE2]" />
+                <h3 className="font-heading font-black text-base text-[#0D0431]">
+                  Connect GitHub Account
+                </h3>
+              </div>
+              <p className="text-xs text-[#0D0431]/80 font-medium">
+                Import public repositories to evaluate projects and language breakdown.
+              </p>
+            </div>
 
-              {showConfirmDisconnect ? (
-                <div className="flex items-center gap-1.5 bg-rose-950/80 border border-rose-800/80 px-2 py-1 rounded-md">
-                  <span className="text-[11px] text-rose-200 font-medium">Disconnect?</span>
-                  <button
-                    type="button"
-                    onClick={handleDisconnect}
-                    disabled={disconnecting}
-                    className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white font-bold px-2 py-0.5 rounded transition cursor-pointer"
-                  >
-                    {disconnecting ? "..." : "Yes"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmDisconnect(false)}
-                    className="text-[11px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2 py-0.5 rounded transition cursor-pointer"
-                  >
-                    Cancel
-                  </button>
+            <CaideBadge theme="mint">
+              <ShieldCheck className="w-3.5 h-3.5 mr-1" />
+              Public Read-Only
+            </CaideBadge>
+          </div>
+
+          <form onSubmit={handleConnect} className="flex flex-col sm:flex-row items-stretch gap-3 pt-1">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={inputUsername}
+                onChange={(e) => setInputUsername(e.target.value)}
+                placeholder="e.g. torvalds, @username, or https://github.com/username"
+                className="w-full bg-white text-[#0D0431] placeholder-[#0D0431]/40 border-2 border-[#0D0431] rounded-xl px-4 py-2.5 text-xs font-mono font-bold shadow-[3px_3px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF]"
+                disabled={connecting}
+              />
+              {inputUsername && (
+                <button
+                  type="button"
+                  onClick={() => setInputUsername("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#0D0431] hover:text-[#896EE2] p-1"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            <CaideButton
+              type="submit"
+              disabled={connecting || !inputUsername.trim()}
+              variant="stacked"
+              size="md"
+            >
+              {connecting ? "Connecting..." : "Connect GitHub"}
+            </CaideButton>
+          </form>
+        </div>
+      )}
+
+      {/* CONNECTED STATE DASHBOARD */}
+      {connected && profile && (
+        <div className="space-y-6">
+          {/* 1. Header Hero Card */}
+          <div className="bg-[#FEF9CF] border-2 border-[#0D0431] p-5 rounded-2xl shadow-[4px_4px_0_0_#0D0431]">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <img
+                  src={profile.avatarUrl || `https://github.com/${profile.username}.png`}
+                  alt={profile.username}
+                  className="w-14 h-14 rounded-2xl border-2 border-[#0D0431] object-cover bg-white shadow-[2px_2px_0_0_#0D0431] shrink-0"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png";
+                  }}
+                />
+                <div>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <h3 className="font-heading font-black text-lg text-[#0D0431]">
+                      {profile.name || profile.username}
+                    </h3>
+                    <a
+                      href={profile.profileUrl || `https://github.com/${profile.username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-mono font-bold text-[#0D0431] hover:underline inline-flex items-center gap-1 bg-white px-2.5 py-0.5 rounded-full border border-[#0D0431]"
+                    >
+                      <span>@{profile.username}</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                  {profile.bio && (
+                    <p className="text-xs text-[#0D0431]/80 mt-1 max-w-xl font-medium line-clamp-2">
+                      {profile.bio}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Projects Score Badge */}
+              <div className="bg-white border-2 border-[#0D0431] px-4 py-3 rounded-2xl shadow-[3px_3px_0_0_#0D0431] flex items-center gap-3.5 shrink-0 self-start md:self-auto">
+                <div>
+                  <div className="text-[10px] text-[#0D0431]/70 font-mono font-bold uppercase">Projects Score</div>
+                  <div className="text-2xl font-heading font-black text-[#0D0431]">
+                    {projectScore}/100
+                  </div>
+                </div>
+                <CaideBadge theme={getScoreBadgeTheme(projectScore)}>
+                  {profile.scoreTier || "Strong"}
+                </CaideBadge>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Portfolio Quick Metrics (4 Cards) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+            <div className="bg-[#FAF7EE] border-2 border-[#0D0431] rounded-2xl p-4 space-y-1 shadow-[3px_3px_0_0_#0D0431]">
+              <div className="flex items-center justify-between text-[#0D0431]/70">
+                <span className="text-[10px] uppercase font-mono font-bold">Total Repos</span>
+                <BookOpen className="w-4 h-4 text-[#0D0431]" />
+              </div>
+              <div className="text-2xl font-heading font-black text-[#0D0431]">
+                {profile.publicReposCount || (profile.repositories ? profile.repositories.length : 0)}
+              </div>
+            </div>
+
+            <div className="bg-[#FAF7EE] border-2 border-[#0D0431] rounded-2xl p-4 space-y-1 shadow-[3px_3px_0_0_#0D0431]">
+              <div className="flex items-center justify-between text-[#0D0431]/70">
+                <span className="text-[10px] uppercase font-mono font-bold">Original Projects</span>
+                <FolderGit2 className="w-4 h-4 text-[#0D0431]" />
+              </div>
+              <div className="text-2xl font-heading font-black text-[#0D0431]">
+                {profile.originalReposCount || 0}
+              </div>
+            </div>
+
+            <div className="bg-[#FAF7EE] border-2 border-[#0D0431] rounded-2xl p-4 space-y-1 shadow-[3px_3px_0_0_#0D0431]">
+              <div className="flex items-center justify-between text-[#0D0431]/70">
+                <span className="text-[10px] uppercase font-mono font-bold">Total Stars</span>
+                <Star className="w-4 h-4 text-[#0D0431]" />
+              </div>
+              <div className="text-2xl font-heading font-black text-[#0D0431]">
+                {profile.totalStars || 0}
+              </div>
+            </div>
+
+            <div className="bg-[#FAF7EE] border-2 border-[#0D0431] rounded-2xl p-4 space-y-1 shadow-[3px_3px_0_0_#0D0431]">
+              <div className="flex items-center justify-between text-[#0D0431]/70">
+                <span className="text-[10px] uppercase font-mono font-bold">Total Forks</span>
+                <GitFork className="w-4 h-4 text-[#0D0431]" />
+              </div>
+              <div className="text-2xl font-heading font-black text-[#0D0431]">
+                {profile.totalForks || 0}
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Top Languages Breakdown */}
+          {languagesList.length > 0 && (
+            <div className="bg-white border-2 border-[#0D0431] rounded-2xl p-5 space-y-3.5 shadow-[4px_4px_0_0_#0D0431]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Code2 className="w-4 h-4 text-[#0D0431]" />
+                  <h4 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
+                    Language Distribution
+                  </h4>
+                </div>
+              </div>
+
+              {/* Multi-segment Colored Bar */}
+              <div className="w-full h-3.5 bg-[#FEF9CF] rounded-full overflow-hidden flex border-2 border-[#0D0431]">
+                {languagesList.slice(0, 7).map((lang, idx) => {
+                  const color = LANGUAGE_COLORS[lang.languageName] || "#896EE2";
+                  return (
+                    <div
+                      key={idx}
+                      style={{ width: `${lang.percentage}%`, backgroundColor: color }}
+                      className="h-full transition-all duration-500 border-r border-[#0D0431]"
+                      title={`${lang.languageName}: ${lang.percentage}% (${lang.repoCount} repos)`}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Language Pill Badges */}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {languagesList.map((lang, idx) => {
+                  const color = LANGUAGE_COLORS[lang.languageName] || "#896EE2";
+                  return (
+                    <div
+                      key={idx}
+                      className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF7EE] border-2 border-[#0D0431] text-xs font-mono font-bold text-[#0D0431] shadow-[1px_1px_0_0_#0D0431]"
+                    >
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0 border border-[#0D0431]"
+                        style={{ backgroundColor: color }}
+                      />
+                      <span>{lang.languageName}</span>
+                      <span className="text-[#0D0431]/70 text-[11px]">
+                        {lang.percentage}% ({lang.repoCount})
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* 4. Tab Switcher */}
+          <div className="flex items-center gap-2.5 border-b-2 border-[#0D0431] pb-3">
+            <button
+              type="button"
+              onClick={() => setActiveTab("featured")}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold font-mono border-2 border-[#0D0431] transition-all cursor-pointer ${
+                activeTab === "featured"
+                  ? "bg-[#FEDF6A] text-[#0D0431] shadow-[3px_3px_0_0_#0D0431]"
+                  : "bg-white text-[#0D0431] hover:bg-[#FEF9CF] shadow-[2px_2px_0_0_#0D0431]"
+              }`}
+            >
+              <Star className="w-3.5 h-3.5 text-[#0D0431]" />
+              <span>Featured Repositories ({topReposList.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("all")}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold font-mono border-2 border-[#0D0431] transition-all cursor-pointer ${
+                activeTab === "all"
+                  ? "bg-[#FEDF6A] text-[#0D0431] shadow-[3px_3px_0_0_#0D0431]"
+                  : "bg-white text-[#0D0431] hover:bg-[#FEF9CF] shadow-[2px_2px_0_0_#0D0431]"
+              }`}
+            >
+              <FolderGit2 className="w-3.5 h-3.5 text-[#0D0431]" />
+              <span>All Repositories ({repositories.length})</span>
+            </button>
+          </div>
+
+          {/* Tab 1: Featured Repositories Grid */}
+          {activeTab === "featured" && (
+            <div className="space-y-4">
+              {topReposList.length === 0 ? (
+                <div className="text-center py-10 bg-[#FEF9CF] rounded-2xl border-2 border-[#0D0431] text-[#0D0431] text-xs font-mono font-bold">
+                  No public repositories found for this account.
                 </div>
               ) : (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowConfirmDisconnect(true)}
-                  disabled={syncing || disconnecting}
-                  className="text-zinc-400 hover:text-rose-400 hover:bg-rose-950/30 text-xs h-8 px-2.5 cursor-pointer"
-                  title="Disconnect GitHub account"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline ml-1">Disconnect</span>
-                </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {topReposList.map((repo, idx) => (
+                    <RepositoryCard
+                      key={repo.githubId || idx}
+                      repo={repo}
+                      onSelectRepo={setSelectedRepoModal}
+                    />
+                  ))}
+                </div>
               )}
             </div>
           )}
-        </div>
-      </CardHeader>
 
-      <CardContent className="pt-6 space-y-6">
-        {/* Alerts & Messages */}
-        {successMsg && (
-          <div className="flex items-center gap-2 bg-emerald-950/70 border border-emerald-600/60 text-emerald-200 px-3.5 py-2.5 rounded-lg text-xs font-medium">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>{successMsg}</span>
-          </div>
-        )}
-
-        {errorMsg && (
-          <div className="flex items-center gap-2 bg-rose-950/70 border border-rose-600/60 text-rose-200 px-3.5 py-2.5 rounded-lg text-xs font-medium">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-            <span>{errorMsg}</span>
-          </div>
-        )}
-
-        {/* Graceful sync failure alert */}
-        {profile?.syncStatus === "failed" && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-950/40 border border-amber-600/50 text-amber-200 p-3.5 rounded-xl text-xs">
-            <div className="flex items-start sm:items-center gap-2.5">
-              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
-              <div>
-                <span className="font-semibold text-amber-300">
-                  Unable to refresh GitHub repositories.
-                </span>{" "}
-                <span>Showing cached repository snapshot.</span>
-                {profile.syncError && (
-                  <div className="text-[11px] text-amber-400/80 font-mono mt-0.5">
-                    Reason: {profile.syncError}
-                  </div>
-                )}
-              </div>
-            </div>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={handleSync}
-              disabled={syncing}
-              className="bg-amber-900/40 hover:bg-amber-900/70 border-amber-600 text-amber-100 text-xs h-7 px-3 shrink-0 self-start sm:self-auto cursor-pointer"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 mr-1 ${syncing ? "animate-spin" : ""}`} />
-              {syncing ? "Retrying..." : "Retry Sync"}
-            </Button>
-          </div>
-        )}
-
-        {/* ------------------------------------------------------------- */}
-        {/* DISCONNECTED STATE */}
-        {/* ------------------------------------------------------------- */}
-        {!connected && (
-          <div className="space-y-6">
-            <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-5 md:p-6 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-zinc-400" />
-                    <h3 className="text-sm font-semibold text-white">
-                      Connect GitHub Account
-                    </h3>
-                  </div>
-                  <p className="text-xs text-zinc-400 max-w-xl">
-                    Import public repositories to evaluate projects and language breakdown.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full shrink-0 self-start sm:self-auto font-mono">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Public Read-Only</span>
-                </div>
-              </div>
-
-              {/* Input Form */}
-              <form onSubmit={handleConnect} className="flex flex-col sm:flex-row items-stretch gap-3">
-                <div className="relative flex-1">
-                  <Input
-                    type="text"
-                    value={inputUsername}
-                    onChange={(e) => setInputUsername(e.target.value)}
-                    placeholder="e.g. torvalds, @username, or https://github.com/username"
-                    className="bg-[#0f1017] border-zinc-700 text-white placeholder:text-zinc-500 focus:border-zinc-500 text-sm h-10 pr-10 font-mono"
-                    disabled={connecting}
-                  />
-                  {inputUsername && (
-                    <button
-                      type="button"
-                      onClick={() => setInputUsername("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-white p-1"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={connecting || !inputUsername.trim()}
-                  className="bg-white hover:bg-zinc-200 text-zinc-950 font-medium px-5 h-10 rounded-lg flex items-center justify-center gap-2 shrink-0 cursor-pointer text-xs"
-                >
-                  {connecting ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      Connecting...
-                    </>
-                  ) : (
-                    <>
-                      <FolderGit2 className="w-3.5 h-3.5" />
-                      Connect GitHub
-                    </>
-                  )}
-                </Button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* ------------------------------------------------------------- */}
-        {/* CONNECTED STATE DASHBOARD */}
-        {/* ------------------------------------------------------------- */}
-        {connected && profile && (
-          <div className="space-y-6">
-            {/* 1. Header Hero Card with Profile Metadata */}
-            <div className="bg-[#14141c] border border-zinc-800 p-4 md:p-5 rounded-xl">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                {/* Avatar + Identity */}
-                <div className="flex items-center gap-4">
-                  <img
-                    src={profile.avatarUrl || `https://github.com/${profile.username}.png`}
-                    alt={profile.username}
-                    className="w-12 h-12 rounded-xl border border-zinc-800 object-cover bg-zinc-900 shrink-0"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png";
-                    }}
-                  />
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-bold text-white text-base">
-                        {profile.name || profile.username}
-                      </h3>
-                      <a
-                        href={profile.profileUrl || `https://github.com/${profile.username}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-mono text-zinc-400 hover:text-white inline-flex items-center gap-1 transition-colors"
-                      >
-                        <span>@{profile.username}</span>
-                        <ExternalLink className="w-3 h-3 text-zinc-400" />
-                      </a>
-                    </div>
-                    {profile.bio && (
-                      <p className="text-xs text-zinc-300 mt-1 max-w-xl line-clamp-2">
-                        {profile.bio}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Readiness Project Score Badge */}
-                <div className="bg-[#0f1017] border border-zinc-800/80 px-3.5 py-2.5 rounded-lg flex items-center gap-3 shrink-0 self-start md:self-auto">
-                  <div>
-                    <div className="text-[10px] text-zinc-400 font-mono uppercase">Projects Score</div>
-                    <div className="text-lg font-bold font-mono text-white">
-                      {projectScore}/100
-                    </div>
-                  </div>
-                  <span
-                    className={`px-2 py-0.5 rounded text-[11px] font-mono font-semibold border ${getScoreBadgeClass(
-                      projectScore
-                    )}`}
-                  >
-                    {profile.scoreTier || "Strong"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* 2. Portfolio Quick Metrics (4 Cards) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-              <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-1">
-                <div className="flex items-center justify-between text-zinc-400">
-                  <span className="text-[10px] uppercase font-mono tracking-wider">Total Repos</span>
-                  <BookOpen className="w-4 h-4 text-zinc-400" />
-                </div>
-                <div className="text-2xl font-bold font-mono text-white">
-                  {profile.publicReposCount || (profile.repositories ? profile.repositories.length : 0)}
-                </div>
-              </div>
-
-              <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-1">
-                <div className="flex items-center justify-between text-zinc-400">
-                  <span className="text-[10px] uppercase font-mono tracking-wider">Original Projects</span>
-                  <FolderGit2 className="w-4 h-4 text-zinc-400" />
-                </div>
-                <div className="text-2xl font-bold font-mono text-zinc-200">
-                  {profile.originalReposCount || 0}
-                </div>
-              </div>
-
-              <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-1">
-                <div className="flex items-center justify-between text-zinc-400">
-                  <span className="text-[10px] uppercase font-mono tracking-wider">Total Stars</span>
-                  <Star className="w-4 h-4 text-zinc-400" />
-                </div>
-                <div className="text-2xl font-bold font-mono text-zinc-200">
-                  {profile.totalStars || 0}
-                </div>
-              </div>
-
-              <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-1">
-                <div className="flex items-center justify-between text-zinc-400">
-                  <span className="text-[10px] uppercase font-mono tracking-wider">Total Forks</span>
-                  <GitFork className="w-4 h-4 text-zinc-400" />
-                </div>
-                <div className="text-2xl font-bold font-mono text-zinc-200">
-                  {profile.totalForks || 0}
-                </div>
-              </div>
-            </div>
-
-            {/* 3. Top Languages Breakdown */}
-            {languagesList.length > 0 && (
-              <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 md:p-5 space-y-3.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Code2 className="w-4 h-4 text-zinc-400" />
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
-                      Language Distribution
-                    </h4>
-                  </div>
-                </div>
-
-                {/* Multi-segment Colored Bar */}
-                <div className="w-full h-3 bg-zinc-900 rounded-full overflow-hidden flex shadow-inner">
-                  {languagesList.slice(0, 7).map((lang, idx) => {
-                    const color = LANGUAGE_COLORS[lang.languageName] || "#a1a1aa";
-                    return (
-                      <div
-                        key={idx}
-                        style={{ width: `${lang.percentage}%`, backgroundColor: color }}
-                        className="h-full transition-all duration-500"
-                        title={`${lang.languageName}: ${lang.percentage}% (${lang.repoCount} repos)`}
-                      />
-                    );
-                  })}
-                </div>
-
-                {/* Language Pill Badges */}
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  {languagesList.map((lang, idx) => {
-                    const color = LANGUAGE_COLORS[lang.languageName] || "#a1a1aa";
-                    return (
-                      <div
-                        key={idx}
-                        className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#0f1017] border border-zinc-800 text-xs font-mono text-zinc-300"
-                      >
-                        <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
-                          style={{ backgroundColor: color }}
-                        />
-                        <span className="font-medium text-white">{lang.languageName}</span>
-                        <span className="text-zinc-500 text-[11px]">
-                          {lang.percentage}% ({lang.repoCount})
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* 4. Tab Switcher (Featured Repos vs All Repos Explorer) */}
-            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("featured")}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
-                    activeTab === "featured"
-                      ? "bg-zinc-200 text-zinc-950 font-medium"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
-                  }`}
-                >
-                  <Star className="w-3.5 h-3.5" />
-                  <span>Featured Repositories ({topReposList.length})</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("all")}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
-                    activeTab === "all"
-                      ? "bg-zinc-200 text-zinc-950 font-medium"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
-                  }`}
-                >
-                  <FolderGit2 className="w-3.5 h-3.5" />
-                  <span>All Repositories ({repositories.length})</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Tab 1: Featured Repositories Grid */}
-            {activeTab === "featured" && (
-              <div className="space-y-4">
-                {topReposList.length === 0 ? (
-                  <div className="text-center py-10 bg-zinc-900/40 rounded-xl border border-zinc-800 text-zinc-400 text-xs font-mono">
-                    No public repositories found for this account.
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {topReposList.map((repo, idx) => (
-                      <RepositoryCard
-                        key={repo.githubId || idx}
-                        repo={repo}
-                        onSelectRepo={setSelectedRepoModal}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Tab 2: All Repositories Explorer with Live Filters & Search */}
-            {activeTab === "all" && (
-              <div className="space-y-4">
-                {/* Filter Controls Bar */}
-                <div className="bg-[#14141c] border border-zinc-800 p-3.5 rounded-xl space-y-3">
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    {/* Search Input */}
-                    <div className="relative flex-1">
-                      <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <Input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search repositories..."
-                        className="pl-9 bg-[#0f1017] border-zinc-700 text-white placeholder:text-zinc-600 text-xs h-9"
-                      />
-                      {searchQuery && (
-                        <button
-                          type="button"
-                          onClick={() => setSearchQuery("")}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-white p-1"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Language Filter */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <select
-                        value={selectedLanguage}
-                        onChange={(e) => setSelectedLanguage(e.target.value)}
-                        className="bg-[#0f1017] border border-zinc-700 rounded-md text-xs text-zinc-200 px-2.5 py-1.5 focus:outline-none focus:border-zinc-500 font-mono cursor-pointer h-9"
-                      >
-                        <option value="all">All Languages</option>
-                        {languagesList.map((lang) => (
-                          <option key={lang.languageName} value={lang.languageName}>
-                            {lang.languageName} ({lang.repoCount})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Type Filter */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <select
-                        value={selectedType}
-                        onChange={(e) => setSelectedType(e.target.value)}
-                        className="bg-[#0f1017] border border-zinc-700 rounded-md text-xs text-zinc-200 px-2.5 py-1.5 focus:outline-none focus:border-zinc-500 font-mono cursor-pointer h-9"
-                      >
-                        <option value="all">All Types</option>
-                        <option value="original">Original Only</option>
-                        <option value="fork">Forks Only</option>
-                      </select>
-                    </div>
-
-                    {/* Sort Filter */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        className="bg-[#0f1017] border border-zinc-700 rounded-md text-xs text-zinc-200 px-2.5 py-1.5 focus:outline-none focus:border-zinc-500 font-mono cursor-pointer h-9"
-                      >
-                        <option value="stars">Sort: Most Stars</option>
-                        <option value="updated">Sort: Recently Updated</option>
-                        <option value="pushed">Sort: Recently Pushed</option>
-                        <option value="name">Sort: Name (A-Z)</option>
-                        <option value="size">Sort: Codebase Size</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between text-[11px] text-zinc-500 font-mono pt-1 border-t border-zinc-800/80">
-                    <span>
-                      Showing {filteredRepositories.length} of {repositories.length} repositories
-                    </span>
-                    {(searchQuery || selectedLanguage !== "all" || selectedType !== "all") && (
+          {/* Tab 2: All Repositories Explorer with Live Filters & Search */}
+          {activeTab === "all" && (
+            <div className="space-y-4">
+              {/* Filter Controls Bar */}
+              <div className="bg-[#FEF9CF] border-2 border-[#0D0431] p-4 rounded-2xl space-y-3 shadow-[3px_3px_0_0_#0D0431]">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  {/* Search Input */}
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 text-[#0D0431]/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search repositories..."
+                      className="w-full pl-10 pr-4 py-2 bg-white text-[#0D0431] placeholder-[#0D0431]/40 border-2 border-[#0D0431] rounded-xl text-xs font-mono font-bold shadow-[2px_2px_0_0_#0D0431] focus:outline-none"
+                    />
+                    {searchQuery && (
                       <button
                         type="button"
-                        onClick={() => {
-                          setSearchQuery("");
-                          setSelectedLanguage("all");
-                          setSelectedType("all");
-                          setSortBy("stars");
-                        }}
-                        className="text-zinc-300 hover:text-white underline cursor-pointer"
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#0D0431] hover:text-[#896EE2] p-1"
                       >
-                        Reset filters
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     )}
                   </div>
+
+                  {/* Language Filter */}
+                  <select
+                    value={selectedLanguage}
+                    onChange={(e) => setSelectedLanguage(e.target.value)}
+                    className="bg-white border-2 border-[#0D0431] rounded-xl text-xs font-mono font-bold text-[#0D0431] px-3 py-2 shadow-[2px_2px_0_0_#0D0431] focus:outline-none cursor-pointer"
+                  >
+                    <option value="all">All Languages</option>
+                    {languagesList.map((lang) => (
+                      <option key={lang.languageName} value={lang.languageName}>
+                        {lang.languageName} ({lang.repoCount})
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Type Filter */}
+                  <select
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
+                    className="bg-white border-2 border-[#0D0431] rounded-xl text-xs font-mono font-bold text-[#0D0431] px-3 py-2 shadow-[2px_2px_0_0_#0D0431] focus:outline-none cursor-pointer"
+                  >
+                    <option value="all">All Types</option>
+                    <option value="original">Original Only</option>
+                    <option value="fork">Forks Only</option>
+                  </select>
+
+                  {/* Sort Filter */}
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="bg-white border-2 border-[#0D0431] rounded-xl text-xs font-mono font-bold text-[#0D0431] px-3 py-2 shadow-[2px_2px_0_0_#0D0431] focus:outline-none cursor-pointer"
+                  >
+                    <option value="stars">Sort: Most Stars</option>
+                    <option value="updated">Sort: Recently Updated</option>
+                    <option value="pushed">Sort: Recently Pushed</option>
+                    <option value="name">Sort: Name (A-Z)</option>
+                    <option value="size">Sort: Codebase Size</option>
+                  </select>
                 </div>
 
-                {/* Filtered Repos Grid */}
-                {filteredRepositories.length === 0 ? (
-                  <div className="text-center py-12 bg-zinc-900/40 rounded-xl border border-zinc-800 text-zinc-400 text-xs font-mono space-y-2">
-                    <p>No repositories matched your filters.</p>
+                <div className="flex items-center justify-between text-[11px] text-[#0D0431]/70 font-mono font-bold pt-1 border-t border-[#0D0431]/20">
+                  <span>
+                    Showing {filteredRepositories.length} of {repositories.length} repositories
+                  </span>
+                  {(searchQuery || selectedLanguage !== "all" || selectedType !== "all") && (
                     <button
                       type="button"
                       onClick={() => {
                         setSearchQuery("");
                         setSelectedLanguage("all");
                         setSelectedType("all");
+                        setSortBy("stars");
                       }}
-                      className="text-zinc-300 hover:underline cursor-pointer"
+                      className="text-[#0D0431] underline cursor-pointer"
                     >
-                      Clear search & filters
+                      Reset filters
                     </button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {filteredRepositories.map((repo, idx) => (
-                      <RepositoryCard
-                        key={repo.githubId || idx}
-                        repo={repo}
-                        onSelectRepo={setSelectedRepoModal}
-                      />
-                    ))}
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-        )}
-      </CardContent>
+
+              {/* Filtered Repos Grid */}
+              {filteredRepositories.length === 0 ? (
+                <div className="text-center py-12 bg-[#FAF7EE] rounded-2xl border-2 border-[#0D0431] text-[#0D0431] text-xs font-mono font-bold space-y-2">
+                  <p>No repositories matched your filters.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedLanguage("all");
+                      setSelectedType("all");
+                    }}
+                    className="text-[#0D0431] underline cursor-pointer font-bold"
+                  >
+                    Clear search & filters
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredRepositories.map((repo, idx) => (
+                    <RepositoryCard
+                      key={repo.githubId || idx}
+                      repo={repo}
+                      onSelectRepo={setSelectedRepoModal}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Progressive Project Detail Modal */}
       {selectedRepoModal && (
         <div
           onClick={() => setSelectedRepoModal(null)}
-          className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-[#0D0431]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#121215] border border-zinc-800 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl relative"
+            className="bg-[#FEF9CF] border-2 border-[#0D0431] rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-[8px_8px_0_0_#0D0431] relative"
           >
-            <div className="flex items-start justify-between border-b border-zinc-800 pb-3">
+            <div className="flex items-start justify-between border-b-2 border-[#0D0431] pb-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <FolderGit2 className="w-4 h-4 text-emerald-400" />
-                  <h3 className="text-sm font-bold text-white font-mono">
+                  <FolderGit2 className="w-5 h-5 text-[#0D0431]" />
+                  <h3 className="text-base font-heading font-black text-[#0D0431]">
                     {selectedRepoModal.name}
                   </h3>
                   {selectedRepoModal.isFork && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 font-mono">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-white text-[#0D0431] border border-[#0D0431] font-mono font-bold">
                       Fork
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-zinc-400 font-sans">
+                <p className="text-xs text-[#0D0431]/80 font-medium">
                   {selectedRepoModal.description || "Production repository codebase."}
                 </p>
               </div>
@@ -889,34 +831,34 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
               <button
                 type="button"
                 onClick={() => setSelectedRepoModal(null)}
-                className="text-zinc-500 hover:text-white p-1 rounded-lg hover:bg-zinc-800"
+                className="w-8 h-8 rounded-xl border-2 border-[#0D0431] bg-white hover:bg-[#FEDF6A] flex items-center justify-center text-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Metrics Matrix */}
-            <div className="grid grid-cols-3 gap-2.5 text-center text-xs font-mono">
-              <div className="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800">
-                <span className="text-[10px] text-zinc-500 block">Language</span>
-                <span className="font-bold text-zinc-200">{selectedRepoModal.language || "TypeScript"}</span>
+            <div className="grid grid-cols-3 gap-3 text-center text-xs font-mono font-bold">
+              <div className="p-3 bg-white rounded-2xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                <span className="text-[10px] text-[#0D0431]/60 uppercase block">Language</span>
+                <span className="font-bold text-[#0D0431]">{selectedRepoModal.language || "TypeScript"}</span>
               </div>
-              <div className="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800">
-                <span className="text-[10px] text-zinc-500 block">Stars</span>
-                <span className="font-bold text-amber-400">{selectedRepoModal.stars || 0}</span>
+              <div className="p-3 bg-white rounded-2xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                <span className="text-[10px] text-[#0D0431]/60 uppercase block">Stars</span>
+                <span className="font-bold text-[#0D0431]">{selectedRepoModal.stars || 0}</span>
               </div>
-              <div className="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800">
-                <span className="text-[10px] text-zinc-500 block">Forks</span>
-                <span className="font-bold text-sky-400">{selectedRepoModal.forks || 0}</span>
+              <div className="p-3 bg-white rounded-2xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                <span className="text-[10px] text-[#0D0431]/60 uppercase block">Forks</span>
+                <span className="font-bold text-[#0D0431]">{selectedRepoModal.forks || 0}</span>
               </div>
             </div>
 
             {/* Architecture Verdict */}
-            <div className="p-3.5 bg-zinc-900/60 border border-zinc-800/80 rounded-xl space-y-1 text-xs">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-semibold block">
+            <div className="p-4 bg-white border-2 border-[#0D0431] rounded-2xl space-y-1 text-xs shadow-[2px_2px_0_0_#0D0431]">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#896EE2] font-black block">
                 Repository Assessment
               </span>
-              <p className="text-zinc-300 font-sans leading-relaxed text-xs">
+              <p className="text-[#0D0431] font-medium leading-relaxed text-xs">
                 {selectedRepoModal.isFork
                   ? "Open-source contribution and upstream repository fork."
                   : (selectedRepoModal.stars > 5 || selectedRepoModal.hasLiveDemo)
@@ -928,10 +870,10 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
             {/* Topics */}
             {selectedRepoModal.topics && selectedRepoModal.topics.length > 0 && (
               <div className="space-y-1.5">
-                <span className="text-[10px] font-mono uppercase text-zinc-500 block">Topics</span>
+                <span className="text-[10px] font-mono uppercase font-bold text-[#0D0431]/70 block">Topics</span>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedRepoModal.topics.map((t, i) => (
-                    <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-300 border border-zinc-800 font-mono">
+                    <span key={i} className="text-[10px] px-2.5 py-0.5 rounded-full bg-white text-[#0D0431] border border-[#0D0431] font-mono font-bold">
                       #{t}
                     </span>
                   ))}
@@ -940,13 +882,13 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
             )}
 
             {/* Modal Actions */}
-            <div className="pt-2 border-t border-zinc-800 flex items-center justify-between gap-3">
+            <div className="pt-3 border-t-2 border-[#0D0431] flex items-center justify-between gap-3">
               {selectedRepoModal.hasLiveDemo && selectedRepoModal.liveDemoUrl && (
                 <a
                   href={selectedRepoModal.liveDemoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold text-center flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 rounded-xl bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-xs font-bold font-mono text-center flex items-center justify-center gap-1.5"
                 >
                   <Globe className="w-3.5 h-3.5" />
                   <span>Open Live Demo</span>
@@ -956,49 +898,49 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                 href={selectedRepoModal.htmlUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium text-center flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 rounded-xl bg-white hover:bg-[#E4CDFB] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-[#0D0431] text-xs font-bold font-mono text-center flex items-center justify-center gap-1.5"
               >
                 <FolderGit2 className="w-3.5 h-3.5" />
                 <span>View on GitHub</span>
-                <ExternalLink className="w-3 h-3 text-zinc-500" />
+                <ExternalLink className="w-3 h-3" />
               </a>
             </div>
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 }
 
 function RepositoryCard({ repo, onSelectRepo }) {
-  const langColor = LANGUAGE_COLORS[repo.language] || "#a1a1aa";
+  const langColor = LANGUAGE_COLORS[repo.language] || "#896EE2";
 
   return (
-    <div className="bg-[#14141c] hover:bg-[#181924] border border-zinc-800 hover:border-zinc-700 rounded-xl p-4 flex flex-col justify-between space-y-3 transition-all group">
+    <div className="bg-[#FAF7EE] hover:bg-white border-2 border-[#0D0431] rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3 transition-all shadow-[3px_3px_0_0_#0D0431] hover:shadow-[5px_5px_0_0_#0D0431] group">
       <div className="space-y-2">
         {/* Title & Badges Header */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 truncate">
-            <FolderGit2 className="w-4 h-4 text-zinc-400 shrink-0" />
+            <FolderGit2 className="w-4 h-4 text-[#0D0431] shrink-0" />
             <a
               href={repo.htmlUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-semibold text-white hover:text-zinc-200 truncate font-mono flex items-center gap-1 group-hover:underline"
+              className="text-sm font-bold text-[#0D0431] hover:text-[#896EE2] truncate font-heading flex items-center gap-1 group-hover:underline"
             >
               <span>{repo.name}</span>
-              <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-400" />
+              <ExternalLink className="w-3 h-3 text-[#0D0431]/60" />
             </a>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0 font-mono text-[10px]">
+          <div className="flex items-center gap-1.5 shrink-0 font-mono text-[10px] font-bold">
             {repo.isFork && (
-              <span className="px-1.5 py-0.2 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+              <span className="px-2 py-0.5 rounded-full bg-white text-[#0D0431] border border-[#0D0431]">
                 Fork
               </span>
             )}
             {repo.isArchived && (
-              <span className="px-1.5 py-0.2 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+              <span className="px-2 py-0.5 rounded-full bg-white text-[#0D0431] border border-[#0D0431]">
                 Archived
               </span>
             )}
@@ -1006,8 +948,8 @@ function RepositoryCard({ repo, onSelectRepo }) {
         </div>
 
         {/* Description */}
-        <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
-          {repo.description || <span className="text-zinc-600 italic">No description provided.</span>}
+        <p className="text-xs text-[#0D0431]/80 line-clamp-2 leading-relaxed font-medium">
+          {repo.description || <span className="italic opacity-60">No description provided.</span>}
         </p>
 
         {/* Topics Pills */}
@@ -1016,13 +958,13 @@ function RepositoryCard({ repo, onSelectRepo }) {
             {repo.topics.slice(0, 4).map((topic, i) => (
               <span
                 key={i}
-                className="text-[10px] px-2 py-0.5 rounded-full bg-[#0f1017] text-zinc-300 border border-zinc-800 font-mono"
+                className="text-[10px] px-2 py-0.5 rounded-full bg-white text-[#0D0431] border border-[#0D0431] font-mono font-bold"
               >
                 #{topic}
               </span>
             ))}
             {repo.topics.length > 4 && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-900 text-zinc-500 font-mono">
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#E4CDFB] text-[#0D0431] border border-[#0D0431] font-mono font-bold">
                 +{repo.topics.length - 4}
               </span>
             )}
@@ -1031,26 +973,26 @@ function RepositoryCard({ repo, onSelectRepo }) {
       </div>
 
       {/* Footer Metrics & Actions */}
-      <div className="pt-2.5 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
-        <div className="flex items-center gap-3 text-zinc-400">
+      <div className="pt-3 border-t-2 border-[#0D0431]/20 flex items-center justify-between text-xs font-mono font-bold">
+        <div className="flex items-center gap-3 text-[#0D0431]">
           {repo.language && (
             <span className="flex items-center gap-1.5">
               <span
-                className="w-2 h-2 rounded-full"
+                className="w-2.5 h-2.5 rounded-full border border-[#0D0431]"
                 style={{ backgroundColor: langColor }}
               />
-              <span className="text-zinc-300">{repo.language}</span>
+              <span>{repo.language}</span>
             </span>
           )}
 
-          <span className="flex items-center gap-1 text-zinc-300" title={`${repo.stars} stars`}>
-            <Star className="w-3.5 h-3.5 text-zinc-400 fill-zinc-400/20" />
+          <span className="flex items-center gap-1" title={`${repo.stars} stars`}>
+            <Star className="w-3.5 h-3.5 text-[#0D0431] fill-[#FEDF6A]" />
             <span>{repo.stars || 0}</span>
           </span>
 
           {repo.forks > 0 && (
-            <span className="flex items-center gap-1 text-zinc-400" title={`${repo.forks} forks`}>
-              <GitFork className="w-3.5 h-3.5 text-zinc-500" />
+            <span className="flex items-center gap-1" title={`${repo.forks} forks`}>
+              <GitFork className="w-3.5 h-3.5 text-[#0D0431]" />
               <span>{repo.forks}</span>
             </span>
           )}
@@ -1062,9 +1004,9 @@ function RepositoryCard({ repo, onSelectRepo }) {
             <button
               type="button"
               onClick={() => onSelectRepo(repo)}
-              className="text-zinc-400 hover:text-emerald-400 text-[11px] font-mono px-2 py-0.5 rounded hover:bg-zinc-800 transition-colors cursor-pointer"
+              className="text-[#0D0431] hover:bg-[#FEDF6A] text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg border border-[#0D0431] bg-white transition-all shadow-[1px_1px_0_0_#0D0431] cursor-pointer"
             >
-              [ Details ]
+              Details
             </button>
           )}
 
@@ -1073,10 +1015,10 @@ function RepositoryCard({ repo, onSelectRepo }) {
               href={repo.liveDemoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 text-[11px] font-medium transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#D4FDF7] hover:bg-white text-[#0D0431] border border-[#0D0431] text-[11px] font-bold transition-all shadow-[1px_1px_0_0_#0D0431] cursor-pointer"
             >
-              <Globe className="w-3 h-3 text-zinc-400" />
-              <span>Live Demo</span>
+              <Globe className="w-3 h-3" />
+              <span>Demo</span>
             </a>
           )}
 
@@ -1084,10 +1026,10 @@ function RepositoryCard({ repo, onSelectRepo }) {
             href={repo.htmlUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 text-[11px] transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-[#E4CDFB] text-[#0D0431] border border-[#0D0431] text-[11px] font-bold transition-all shadow-[1px_1px_0_0_#0D0431] cursor-pointer"
           >
-            <span>GitHub</span>
-            <ExternalLink className="w-2.5 h-2.5 text-zinc-500" />
+            <span>Code</span>
+            <ExternalLink className="w-2.5 h-2.5" />
           </a>
         </div>
       </div>

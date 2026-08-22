@@ -11,7 +11,10 @@ import {
   AlertTriangle,
   CheckCircle2,
   DollarSign,
+  Briefcase,
+  ArrowRight,
 } from "lucide-react";
+import CaideBadge from "@/components/caide/CaideBadge";
 
 export default function JobCard({
   job,
@@ -24,7 +27,6 @@ export default function JobCard({
   const initial = employerName.charAt(0).toUpperCase();
   const isRemote =
     job.workMode === "Remote" || (job.city || "").toLowerCase().includes("remote");
-  const isDemo = job.sourceType === "DEMO";
 
   const postedDate = job.postedDate
     ? new Date(job.postedDate).toLocaleDateString("en-US", {
@@ -35,35 +37,27 @@ export default function JobCard({
 
   const matchScore = job.matchScore != null ? job.matchScore : null;
 
-  // Match score styling
-  const getScoreColor = (score) => {
-    if (score == null) return "text-[#A8A59C] border-[#3A3831] bg-[#1A1916]";
-    if (score >= 80) return "text-[#C7F36B] border-[#C7F36B]/40 bg-[#C7F36B]/10";
-    if (score >= 65) return "text-sky-400 border-sky-500/30 bg-sky-500/10";
-    return "text-amber-400 border-amber-500/30 bg-amber-500/10";
+  const getScoreBadgeTheme = (score) => {
+    if (score == null) return "yellow";
+    if (score >= 80) return "mint";
+    if (score >= 65) return "blue";
+    return "yellow";
   };
 
-  const getScoreBarGradient = (score) => {
-    if (score == null) return "from-zinc-600 to-zinc-700";
-    if (score >= 80) return "from-[#C7F36B] to-emerald-400";
-    if (score >= 65) return "from-sky-400 to-teal-400";
-    return "from-amber-400 to-orange-400";
-  };
-
+  // LIST VIEW
   if (viewMode === "list") {
     return (
       <div
         onClick={() => onSelect(job)}
-        className="group relative rounded-2xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 p-5 shadow-lg hover:shadow-2xl hover:shadow-[#C7F36B]/5 transition-all duration-200 cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between gap-4 backdrop-blur-md"
+        className="group relative rounded-2xl bg-white border border-[#E2DEEC] hover:border-[#C8C3D8] shadow-sm hover:shadow-md hover:-translate-y-0.5 p-4 transition-all cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
       >
-        <div className="flex items-start gap-4 flex-1 min-w-0">
-          {/* Company Avatar */}
-          <div className="w-12 h-12 rounded-xl bg-[#11110F] border border-[#3A3831] flex items-center justify-center text-[#FAF8F2] font-bold text-base overflow-hidden shrink-0 group-hover:border-[#C7F36B]/40 transition-colors">
+        <div className="flex items-start gap-3.5 flex-1 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-[#F8F8F5] border border-[#E2DEEC] flex items-center justify-center font-bold text-sm text-[#17103D] shrink-0">
             {job.companyLogo ? (
               <img
                 src={job.companyLogo}
                 alt={employerName}
-                className="w-full h-full object-contain p-1.5"
+                className="w-full h-full object-contain p-1 rounded-xl"
                 onError={(e) => {
                   e.target.style.display = "none";
                 }}
@@ -73,115 +67,69 @@ export default function JobCard({
             )}
           </div>
 
-          <div className="space-y-1 min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-mono font-bold text-[#A8A59C] tracking-wide uppercase">
-                {employerName}
-              </span>
-              {isDemo && (
-                <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-[#1A1916] text-[#A8A59C] border border-[#3A3831]">
-                  Demo Listing
-                </span>
-              )}
-              {job.fitStatus && (
-                <span
-                  className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded border ${
-                    job.fitBadgeClass || "bg-[#1A1916] text-[#FAF8F2] border-[#3A3831]"
-                  }`}
-                >
-                  {job.fitStatus}
-                </span>
+          <div className="space-y-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-sm font-bold text-[#17103D] group-hover:text-[#6E44FF] transition-colors truncate">
+                {job.title}
+              </h3>
+              {matchScore != null && (
+                <CaideBadge theme={getScoreBadgeTheme(matchScore)} size="sm">
+                  {matchScore}% Match
+                </CaideBadge>
               )}
             </div>
 
-            <h3 className="text-base font-bold text-[#FAF8F2] group-hover:text-[#C7F36B] transition-colors truncate">
-              {job.title}
-            </h3>
-
-            <div className="flex flex-wrap items-center gap-3 text-xs text-[#A8A59C] pt-0.5">
+            <div className="flex items-center gap-2 text-xs text-[#6F6A80] flex-wrap">
+              <span className="font-semibold text-[#17103D]">{employerName}</span>
+              <span>•</span>
               <span className="flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-[#8C8980]" />
-                {isRemote ? "Remote" : `${job.city || "Bengaluru"}, India`}
+                <MapPin className="w-3 h-3" />
+                {job.city || "Bangalore"}
               </span>
-              <span className="text-[#3A3831]">•</span>
-              <span>{job.workMode || "Hybrid"}</span>
-              <span className="text-[#3A3831]">•</span>
-              <span>{job.experience || "0-2 years"}</span>
-              {job.salary && (
-                <>
-                  <span className="text-[#3A3831]">•</span>
-                  <span className="text-[#C7F36B] font-mono font-semibold">
-                    {job.salary}
-                  </span>
-                </>
-              )}
+              <span>•</span>
+              <span className="font-mono">{job.salary || "Competitive CTC"}</span>
             </div>
           </div>
         </div>
 
-        {/* Match Score & Actions */}
-        <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-[#3A3831]">
-          <div className="text-right">
-            <div className="text-[10px] font-mono uppercase text-[#8C8980] font-semibold">
-              Profile Fit
-            </div>
-            <div
-              className={`text-sm font-mono font-extrabold px-2.5 py-0.5 rounded-lg border inline-flex items-center gap-1 mt-0.5 ${getScoreColor(
-                matchScore
-              )}`}
-            >
-              <Sparkles className="w-3 h-3" />
-              {matchScore != null ? `${matchScore}% Match` : "Unassessed Fit"}
-            </div>
-          </div>
+        <div className="flex items-center gap-2 self-end md:self-center shrink-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSave(job);
+            }}
+            className="p-2 rounded-xl border border-[#E2DEEC] hover:bg-[#F8F8F5] text-[#6F6A80] hover:text-[#17103D] transition-colors"
+          >
+            <Bookmark className={`w-3.5 h-3.5 ${job.isSaved ? "fill-[#6E44FF] text-[#6E44FF]" : ""}`} />
+          </button>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleSave(job);
-              }}
-              aria-label={job.isSaved ? "Unsave Job" : "Save Job"}
-              className={`p-2.5 rounded-xl border transition-all ${
-                job.isSaved
-                  ? "bg-[#C7F36B] text-[#11110F] border-[#C7F36B] shadow-md shadow-[#C7F36B]/20 font-bold"
-                  : "bg-[#11110F] hover:bg-[#1A1916] text-[#A8A59C] hover:text-[#FAF8F2] border-[#3A3831]"
-              }`}
-            >
-              <Bookmark className={`w-4 h-4 ${job.isSaved ? "fill-current" : ""}`} />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onSelect(job)}
-              className="px-3.5 py-2 rounded-xl bg-[#C7F36B] hover:bg-[#bbf055] text-[#11110F] text-xs font-bold transition-all shadow-md shadow-[#C7F36B]/20 flex items-center gap-1"
-            >
-              <span>Details</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <button
+            onClick={() => onSelect(job)}
+            className="px-3.5 py-1.5 rounded-xl bg-[#17103D] hover:bg-[#24195A] text-white text-xs font-semibold flex items-center gap-1 transition-all"
+          >
+            <span>View Details</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
     );
   }
 
-  // Grid / Bento Card Layout (Standard)
+  // GRID VIEW
   return (
     <div
       onClick={() => onSelect(job)}
-      className="job-card group relative rounded-3xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 p-6 shadow-xl hover:shadow-2xl hover:shadow-[#C7F36B]/5 flex flex-col justify-between space-y-5 transition-all duration-300 backdrop-blur-md cursor-pointer"
+      className="group relative rounded-2xl bg-white border border-[#E2DEEC] hover:border-[#C8C3D8] shadow-sm hover:shadow-md hover:-translate-y-0.5 p-5 transition-all cursor-pointer flex flex-col justify-between space-y-4"
     >
-      <div className="space-y-4">
-        {/* Top Header: Company Info + Save Button */}
+      <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 rounded-2xl bg-[#11110F] border border-[#3A3831] flex items-center justify-center text-[#FAF8F2] font-bold text-base overflow-hidden shrink-0 group-hover:border-[#C7F36B]/40 transition-colors">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#F8F8F5] border border-[#E2DEEC] flex items-center justify-center font-bold text-sm text-[#17103D] shrink-0">
               {job.companyLogo ? (
                 <img
                   src={job.companyLogo}
                   alt={employerName}
-                  className="w-full h-full object-contain p-1.5"
+                  className="w-full h-full object-contain p-1 rounded-xl"
                   onError={(e) => {
                     e.target.style.display = "none";
                   }}
@@ -192,166 +140,73 @@ export default function JobCard({
             </div>
 
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <h3 className="text-xs font-mono font-bold text-[#A8A59C] tracking-wide uppercase truncate">
-                  {employerName}
-                </h3>
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-[#8C8980] mt-0.5">
-                <MapPin className="w-3 h-3 text-[#8C8980] shrink-0" />
-                <span className="truncate">
-                  {isRemote
-                    ? "Remote"
-                    : `${job.city || "Bengaluru"}, ${job.country || "India"}`}
-                </span>
+              <div className="text-xs font-bold text-[#17103D] truncate">{employerName}</div>
+              <div className="text-[11px] text-[#6F6A80] flex items-center gap-1">
+                <MapPin className="w-3 h-3" />
+                <span>{job.city || "Bangalore"}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            {isDemo && (
-              <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-[#11110F] text-[#A8A59C] border border-[#3A3831]">
-                Demo
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleSave(job);
-              }}
-              title={job.isSaved ? "Saved to your list" : "Save Job"}
-              aria-label={job.isSaved ? "Saved to your list" : "Save Job"}
-              className={`p-2 rounded-xl border transition-all ${
-                job.isSaved
-                  ? "bg-[#C7F36B] text-[#11110F] border-[#C7F36B] shadow-md shadow-[#C7F36B]/20 font-bold"
-                  : "bg-[#11110F] hover:bg-[#1A1916] text-[#A8A59C] hover:text-[#FAF8F2] border-[#3A3831]"
-              }`}
-            >
-              <Bookmark className={`w-3.5 h-3.5 ${job.isSaved ? "fill-current" : ""}`} />
-            </button>
-          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSave(job);
+            }}
+            className="p-1.5 rounded-lg border border-[#E2DEEC] hover:bg-[#F8F8F5] text-[#6F6A80] hover:text-[#17103D] transition-colors"
+          >
+            <Bookmark className={`w-3.5 h-3.5 ${job.isSaved ? "fill-[#6E44FF] text-[#6E44FF]" : ""}`} />
+          </button>
         </div>
 
-        {/* Job Title & Badges */}
-        <div className="space-y-2">
-          <h2 className="text-base font-bold text-[#FAF8F2] group-hover:text-[#C7F36B] transition-colors leading-snug line-clamp-2">
+        <div className="space-y-1">
+          <h3 className="text-sm font-bold text-[#17103D] group-hover:text-[#6E44FF] transition-colors line-clamp-1">
             {job.title}
-          </h2>
-
-          <div className="flex flex-wrap gap-1.5 text-[11px] font-medium text-[#A8A59C]">
-            <span className="px-2 py-0.5 rounded-md bg-[#11110F] border border-[#3A3831] text-[#FAF8F2]">
-              {job.employmentType || "Full-time"}
-            </span>
-            <span className="px-2 py-0.5 rounded-md bg-[#11110F] border border-[#3A3831] text-[#FAF8F2]">
-              {job.workMode || "Hybrid"}
-            </span>
-            <span className="px-2 py-0.5 rounded-md bg-[#11110F] border border-[#3A3831] text-[#FAF8F2]">
-              {job.experienceLevel || job.experience || "Entry Level"}
-            </span>
-          </div>
+          </h3>
+          <p className="text-xs text-[#6F6A80] line-clamp-2 leading-relaxed">
+            {job.description || "Exciting opportunity to build scalable systems with modern technologies."}
+          </p>
         </div>
 
-        {/* Match Score Meter */}
-        <div className="p-3.5 rounded-2xl bg-[#11110F] border border-[#3A3831] space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1.5 font-mono text-[10px] text-[#A8A59C] uppercase font-semibold">
-              <Sparkles className="w-3 h-3 text-[#C7F36B]" />
-              <span>Your Match</span>
-            </div>
-            <div
-              className={`text-xs font-mono font-bold px-2 py-0.2 rounded ${getScoreColor(
-                matchScore
-              )}`}
-            >
-              {matchScore != null ? `${matchScore}%` : "Unassessed"}
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="w-full h-1.5 bg-[#1A1916] rounded-full overflow-hidden border border-[#3A3831]/50">
-            <div
-              className={`h-full rounded-full bg-gradient-to-r ${getScoreBarGradient(
-                matchScore
-              )} transition-all duration-500`}
-              style={{ width: `${matchScore != null ? Math.min(matchScore, 100) : 0}%` }}
-            />
-          </div>
-
-          {/* Missing Skills Warning */}
-          {job.missingSkills && job.missingSkills.length > 0 && (
-            <div className="flex items-center gap-1.5 text-[11px] text-amber-400 pt-0.5 truncate">
-              <AlertTriangle className="w-3 h-3 shrink-0 text-amber-400" />
-              <span className="truncate">
-                Gap: {job.missingSkills.slice(0, 2).join(", ")}
-                {job.missingSkills.length > 2 ? ` +${job.missingSkills.length - 2}` : ""}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Tech Stack Pills */}
+        {/* Skills Tag Pills */}
         {job.skills && job.skills.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {job.skills.slice(0, 4).map((skill, sIdx) => {
-              const isMissing = job.missingSkills?.includes(skill);
-              return (
-                <span
-                  key={sIdx}
-                  className={`text-[10px] font-mono px-2 py-0.5 rounded border transition-colors ${
-                    isMissing
-                      ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
-                      : "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
-                  }`}
-                >
-                  {skill}
-                </span>
-              );
-            })}
-            {job.skills.length > 4 && (
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#11110F] border border-[#3A3831] text-[#8C8980]">
-                +{job.skills.length - 4}
+            {job.skills.slice(0, 3).map((skill, i) => (
+              <span
+                key={i}
+                className="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-[#F8F8F5] border border-[#E2DEEC] text-[#6F6A80]"
+              >
+                {skill}
+              </span>
+            ))}
+            {job.skills.length > 3 && (
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-lg text-[#6F6A80]">
+                +{job.skills.length - 3}
               </span>
             )}
           </div>
         )}
       </div>
 
-      {/* Footer Meta & Actions */}
-      <div className="pt-4 border-t border-[#3A3831] space-y-3">
-        <div className="flex items-center justify-between text-[11px] font-mono text-[#8C8980]">
-          <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3 text-[#8C8980]" />
-            {postedDate}
+      {/* Footer Meta & Score */}
+      <div className="pt-3 border-t border-[#E2DEEC] flex items-center justify-between text-xs">
+        <div>
+          <span className="font-mono font-bold text-[#17103D] block text-xs">
+            {job.salary || "Competitive CTC"}
           </span>
-          {job.salary && (
-            <span className="text-[#C7F36B] font-semibold truncate max-w-[170px] text-right">
-              {job.salary}
-            </span>
-          )}
+          <span className="text-[10px] text-[#6F6A80]">{job.employmentType || "Full-time"}</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => onSelect(job)}
-            className="py-2.5 px-3 rounded-xl bg-[#C7F36B] hover:bg-[#bbf055] text-[#11110F] text-xs font-bold text-center tracking-wide uppercase shadow-md shadow-[#C7F36B]/20 transition-all flex items-center justify-center gap-1.5"
-          >
-            <span>View Job</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </button>
-
-          <a
-            href={job.applicationUrl || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="py-2.5 px-3 rounded-xl bg-[#11110F] hover:bg-[#1A1916] text-[#FAF8F2] border border-[#3A3831] hover:border-[#4A473F] text-xs font-semibold text-center transition-all flex items-center justify-center gap-1"
-          >
-            <span>Apply</span>
-            <ExternalLink className="w-3 h-3 text-[#8C8980]" />
-          </a>
-        </div>
+        {matchScore != null ? (
+          <CaideBadge theme={getScoreBadgeTheme(matchScore)} size="sm">
+            {matchScore}% Match
+          </CaideBadge>
+        ) : (
+          <span className="text-xs font-semibold text-[#6E44FF] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+            <span>Details</span>
+            <ArrowRight className="w-3 h-3" />
+          </span>
+        )}
       </div>
     </div>
   );

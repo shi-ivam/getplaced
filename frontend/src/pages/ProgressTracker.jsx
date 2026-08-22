@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -19,6 +20,8 @@ import {
   Award,
   Target,
   X,
+  GraduationCap,
+  Briefcase,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -34,13 +37,16 @@ import {
 } from "recharts";
 import { NODE_API_URL } from "@/config/api";
 import { getProgressTrackerMentorCopy } from "@/utils/dynamicCopy";
+import CaideButton from "@/components/caide/CaideButton";
+import CaideBadge from "@/components/caide/CaideBadge";
+import CaideCard from "@/components/caide/CaideCard";
 
 const DIMENSIONS = [
-  { key: "overallScore", label: "Overall Readiness", color: "#a855f7" },
-  { key: "dsaScore", label: "DSA Proficiency", color: "#3b82f6" },
-  { key: "projectScore", label: "Projects & GitHub", color: "#10b981" },
-  { key: "resumeScore", label: "ATS Resume", color: "#f59e0b" },
-  { key: "interviewScore", label: "Mock Interviews", color: "#ec4899" },
+  { key: "overallScore", label: "Overall Readiness", color: "#896EE2" },
+  { key: "dsaScore", label: "DSA Proficiency", color: "#63A0F8" },
+  { key: "projectScore", label: "Projects & GitHub", color: "#96E6C4" },
+  { key: "resumeScore", label: "ATS Resume", color: "#FEDF6A" },
+  { key: "interviewScore", label: "Mock Interviews", color: "#F85B52" },
 ];
 
 export default function ProgressTracker() {
@@ -77,15 +83,15 @@ export default function ProgressTracker() {
 
   useGSAP(
     () => {
-      if (!loading) {
+      if (!loading && containerRef.current) {
         gsap.fromTo(
-          ".gsap-fade-item",
-          { opacity: 0, y: 24 },
+          containerRef.current.querySelectorAll(".gsap-fade-item"),
+          { opacity: 0, y: 20 },
           {
             opacity: 1,
             y: 0,
-            duration: 0.6,
-            stagger: 0.08,
+            duration: 0.5,
+            stagger: 0.07,
             ease: "power3.out",
           }
         );
@@ -132,131 +138,198 @@ export default function ProgressTracker() {
   });
 
   return (
-    <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-white">
-      <div ref={containerRef} className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">
-        {/* Editorial Wide Header */}
-        <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
-          <div className="space-y-3 max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono uppercase tracking-widest">
-              <Activity className="w-3.5 h-3.5" />
+    <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#FEF9CF] u-background-grid-yellow text-[#0D0431] font-sans selection:bg-[#FEDF6A] selection:text-[#0D0431]">
+      <div ref={containerRef} className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto space-y-8">
+        
+        {/* ── Editorial Header ── */}
+        <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b-2 border-[#0D0431]">
+          <div className="space-y-3 max-w-3xl">
+            <CaideBadge theme="light-purple">
+              <Activity className="w-3.5 h-3.5 mr-1" />
               Velocity & Trajectory Analytics
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            </CaideBadge>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black tracking-tight text-[#0D0431] leading-tight">
               {trackerMentor.heading}
             </h1>
-            <p className="text-sm md:text-base text-zinc-400 max-w-3xl leading-relaxed">
+            <p className="text-sm md:text-base text-[#0D0431]/80 max-w-3xl leading-relaxed">
               {trackerMentor.subtitle} {trackerMentor.velocityInsight}
             </p>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <button
-              type="button"
+            <CaideButton
+              variant="stacked-yellow"
+              size="md"
+              icon={false}
               onClick={() => setShowLogModal(true)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold text-xs hover:bg-zinc-200 shadow-lg hover:shadow-purple-500/10 transition-all duration-300 active:scale-95 cursor-pointer"
             >
-              <Plus className="w-4 h-4 text-zinc-900" /> Log Practice Sprint
-            </button>
+              <span className="flex items-center gap-1.5 font-bold text-[#0D0431]">
+                <Plus className="w-4 h-4" /> Log Practice Sprint
+              </span>
+            </CaideButton>
           </div>
         </header>
 
-        {/* Gapless Bento Metrics Grid */}
-        <section className="gsap-fade-item grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 grid-flow-dense gap-4">
+        {/* ── Sub-nav Quick Links ── */}
+        <nav className="gsap-fade-item flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+          {[
+            { to: "/app/progress", label: "Progress Velocity", icon: TrendingUp, active: true },
+            { to: "/app/milestones", label: "Milestones & Badges", icon: Award, active: false },
+            { to: "/app/roadmap", label: "Placement Roadmap", icon: Target, active: false },
+            { to: "/app/academics", label: "Academics Transcript", icon: GraduationCap, active: false },
+            { to: "/app/can-i-apply", label: "Eligibility Checker", icon: Shield, active: false },
+          ].map(({ to, label, icon: Icon, active }) => (
+            <Link
+              key={to}
+              to={to}
+              className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold font-sans transition-all flex items-center gap-2 border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] ${
+                active
+                  ? "bg-[#0D0431] text-white"
+                  : "bg-white text-[#0D0431] hover:bg-[#FEDF6A] hover:-translate-y-0.5"
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span>{label}</span>
+            </Link>
+          ))}
+        </nav>
+
+        {/* ── Gapless Bento Metrics Grid ── */}
+        <section className="gsap-fade-item grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
           {/* Weekly Velocity Bento Card */}
-          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-emerald-500/40 transition-all duration-500">
-            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
-              <span>Readiness Velocity</span>
-              <span className="text-emerald-400 font-mono">7-Day Trajectory</span>
+          <CaideCard
+            theme="pale-lime"
+            shadow="default"
+            hoverEffect={true}
+            className="p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-[#0D0431]/80 mb-3">
+                <span className="uppercase tracking-wider">Readiness Velocity</span>
+                <span className="font-mono text-[11px] px-2 py-0.5 rounded-full bg-white border border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]">
+                  7-Day Trajectory
+                </span>
+              </div>
+              <div className="text-4xl sm:text-5xl font-heading font-black text-[#0D0431] tracking-tight">
+                {progressData?.weeklyVelocityPct !== undefined && progressData?.weeklyVelocityPct !== null
+                  ? `+${progressData.weeklyVelocityPct}%`
+                  : "0%"}
+              </div>
             </div>
-            <div className="text-4xl font-extrabold text-emerald-400 font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left">
-              {progressData?.weeklyVelocityPct !== undefined && progressData?.weeklyVelocityPct !== null
-                ? `+${progressData.weeklyVelocityPct}%`
-                : "0%"}
-            </div>
-            <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-purple-400" />
+            <div className="text-xs text-[#0D0431] mt-4 pt-3 border-t-2 border-[#0D0431]/20 flex items-center gap-1.5 font-bold font-sans">
+              <Zap className="w-4 h-4 text-[#0D0431]" />
               <span>
                 {progressData?.projectedWeeksToPlacementReady
                   ? `Target reached in ~${progressData.projectedWeeksToPlacementReady} weeks`
-                  : "Target projection pending"}
+                  : "Target projection active"}
               </span>
             </div>
-          </div>
+          </CaideCard>
 
           {/* Daily Streak Bento Card */}
-          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-amber-500/40 transition-all duration-500">
-            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
-              <span>Practice Consistency</span>
-              <span className="text-amber-400 font-mono">
-                Best: {progressData?.longestStreak || 0}d
-              </span>
+          <CaideCard
+            theme="light-yellow"
+            shadow="default"
+            hoverEffect={true}
+            className="p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-[#0D0431]/80 mb-3">
+                <span className="uppercase tracking-wider">Practice Consistency</span>
+                <span className="font-mono text-[11px] px-2 py-0.5 rounded-full bg-white border border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]">
+                  Best: {progressData?.longestStreak || 0}d
+                </span>
+              </div>
+              <div className="text-4xl sm:text-5xl font-heading font-black text-[#0D0431] tracking-tight flex items-center gap-2">
+                <Flame className="w-8 h-8 text-[#F85B52] shrink-0" />
+                <span>{progressData?.dailyStreak || 0} Days</span>
+              </div>
             </div>
-            <div className="text-4xl font-extrabold text-amber-400 font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left flex items-center gap-2">
-              <Flame className="w-7 h-7 text-amber-400 shrink-0" />
-              <span>{progressData?.dailyStreak || 0} Days</span>
-            </div>
-            <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="text-xs text-[#0D0431] mt-4 pt-3 border-t-2 border-[#0D0431]/20 flex items-center gap-1.5 font-bold font-sans">
+              <CheckCircle2 className="w-4 h-4 text-[#0D0431]" />
               <span>Consistency multiplier active</span>
             </div>
-          </div>
+          </CaideCard>
 
           {/* Solved Problems Bento Card */}
-          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-purple-500/40 transition-all duration-500">
-            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
-              <span>Solved Problem Volume</span>
-              <span className="text-purple-400 font-mono">LeetCode & Arena</span>
+          <CaideCard
+            theme="light-purple"
+            shadow="default"
+            hoverEffect={true}
+            className="p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-[#0D0431]/80 mb-3">
+                <span className="uppercase tracking-wider">Solved Problems</span>
+                <span className="font-mono text-[11px] px-2 py-0.5 rounded-full bg-white border border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]">
+                  LeetCode & Arena
+                </span>
+              </div>
+              <div className="text-4xl sm:text-5xl font-heading font-black text-[#0D0431] tracking-tight flex items-center gap-2">
+                <Code2 className="w-8 h-8 text-[#0D0431] shrink-0" />
+                <span>{progressData?.totalProblemsSolved || 0}</span>
+              </div>
             </div>
-            <div className="text-4xl font-extrabold text-purple-300 font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left flex items-center gap-2">
-              <Code2 className="w-7 h-7 text-purple-400 shrink-0" />
-              <span>{progressData?.totalProblemsSolved || 0}</span>
-            </div>
-            <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
-              <Target className="w-3.5 h-3.5 text-purple-400" />
+            <div className="text-xs text-[#0D0431] mt-4 pt-3 border-t-2 border-[#0D0431]/20 flex items-center gap-1.5 font-bold font-sans">
+              <Target className="w-4 h-4 text-[#0D0431]" />
               <span>Balanced across Arrays, Trees, DP</span>
             </div>
-          </div>
+          </CaideCard>
 
-          {/* Study Hours Bento Card */}
-          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-blue-500/40 transition-all duration-500">
-            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
-              <span>Dedicated Study Time</span>
-              <span className="text-blue-400 font-mono">Sessions & Labs</span>
+          {/* Dedicated Study Time Bento Card */}
+          <CaideCard
+            theme="light-blue"
+            shadow="default"
+            hoverEffect={true}
+            className="p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-[#0D0431]/80 mb-3">
+                <span className="uppercase tracking-wider">Dedicated Study Time</span>
+                <span className="font-mono text-[11px] px-2 py-0.5 rounded-full bg-white border border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]">
+                  Sessions & Labs
+                </span>
+              </div>
+              <div className="text-4xl sm:text-5xl font-heading font-black text-[#0D0431] tracking-tight flex items-center gap-2">
+                <Clock className="w-8 h-8 text-[#0D0431] shrink-0" />
+                <span>{progressData?.totalStudyHours || 0}h</span>
+              </div>
             </div>
-            <div className="text-4xl font-extrabold text-blue-400 font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left flex items-center gap-2">
-              <Clock className="w-7 h-7 text-blue-400 shrink-0" />
-              <span>{progressData?.totalStudyHours || 0}h</span>
-            </div>
-            <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-blue-400" />
+            <div className="text-xs text-[#0D0431] mt-4 pt-3 border-t-2 border-[#0D0431]/20 flex items-center gap-1.5 font-bold font-sans">
+              <Award className="w-4 h-4 text-[#0D0431]" />
               <span>{progressData?.totalTasksCompleted || 0} tasks mastered</span>
             </div>
-          </div>
+          </CaideCard>
         </section>
 
-        {/* Historical Multi-Dimensional Trend Graphs */}
-        <section className="gsap-fade-item rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-xl font-bold text-white tracking-tight">
+        {/* ── Historical Multi-Dimensional Trend Graphs ── */}
+        <CaideCard
+          theme="white"
+          shadow="default"
+          className="gsap-fade-item p-6 md:p-8 space-y-6"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b-2 border-[#0D0431]">
+            <div className="space-y-1">
+              <h3 className="text-xl sm:text-2xl font-heading font-black text-[#0D0431] tracking-tight">
                 Readiness Trajectory Timeline
               </h3>
-              <p className="text-xs text-zinc-400 mt-1">
+              <p className="text-xs text-[#0D0431]/75 font-sans">
                 Progression metrics over time across Algorithmic DSA, Projects, ATS Resume, and Interviews
               </p>
             </div>
 
             {/* Time Range Tabs */}
-            <div className="flex items-center gap-1 bg-zinc-950/80 p-1.5 rounded-xl border border-white/10 self-start sm:self-auto">
+            <div className="flex items-center gap-1 bg-[#FEF9CF] p-1.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] self-start sm:self-auto">
               {["7d", "30d", "90d", "all"].map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setTimeRange(t)}
-                  className={`px-3 py-1 text-xs font-mono font-semibold rounded-lg uppercase transition-all duration-200 cursor-pointer ${
+                  className={`px-3 py-1 text-xs font-mono font-bold rounded-lg uppercase transition-all cursor-pointer ${
                     timeRange === t
-                      ? "bg-white text-zinc-950 shadow-sm"
-                      : "text-zinc-400 hover:text-white"
+                      ? "bg-[#0D0431] text-white shadow-sm"
+                      : "text-[#0D0431] hover:bg-white/60"
                   }`}
                 >
                   {t}
@@ -266,22 +339,22 @@ export default function ProgressTracker() {
           </div>
 
           {/* Dimension Toggles */}
-          <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+          <div className="flex flex-wrap gap-2 pt-2">
             {DIMENSIONS.map((dim) => (
               <button
                 key={dim.key}
                 type="button"
                 onClick={() => setActiveDimension(dim.key)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-medium border transition-all duration-200 cursor-pointer ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold border-2 border-[#0D0431] transition-all cursor-pointer shadow-[2px_2px_0_0_#0D0431] ${
                   activeDimension === dim.key
-                    ? "bg-white text-zinc-950 font-semibold border-white shadow-md"
-                    : "bg-zinc-950/80 text-zinc-400 border-white/10 hover:text-white hover:border-white/20"
+                    ? "bg-[#FEDF6A] text-[#0D0431] scale-[1.02]"
+                    : "bg-white text-[#0D0431] hover:bg-[#FEF9CF]"
                 }`}
               >
                 <span
-                  className="inline-block w-2 h-2 rounded-full mr-2"
+                  className="inline-block w-2.5 h-2.5 rounded-full mr-2 border border-[#0D0431]"
                   style={{
-                    backgroundColor: activeDimension === dim.key ? "#09090b" : dim.color,
+                    backgroundColor: dim.color,
                   }}
                 />
                 {dim.label}
@@ -290,81 +363,89 @@ export default function ProgressTracker() {
           </div>
 
           {/* Recharts Area Chart */}
-          <div className="h-80 w-full pt-4">
+          <div className="h-80 w-full pt-4 rounded-2xl bg-[#FEF9CF]/30 border-2 border-[#0D0431] p-4 shadow-[3px_3px_0_0_#0D0431]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={snapshots} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={snapshots} margin={{ top: 10, right: 15, left: -15, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorActiveDim" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={selectedDim.color} stopOpacity={0.35} />
-                    <stop offset="95%" stopColor={selectedDim.color} stopOpacity={0.0} />
+                    <stop offset="5%" stopColor={selectedDim.color} stopOpacity={0.65} />
+                    <stop offset="95%" stopColor={selectedDim.color} stopOpacity={0.05} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" opacity={0.6} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#0D0431" opacity={0.15} />
                 <XAxis
                   dataKey="date"
-                  stroke="#71717a"
+                  stroke="#0D0431"
                   fontSize={11}
                   tickLine={false}
                   fontFamily="monospace"
+                  fontWeight="bold"
                 />
                 <YAxis
-                  stroke="#71717a"
+                  stroke="#0D0431"
                   fontSize={11}
                   domain={[30, 100]}
                   tickLine={false}
                   fontFamily="monospace"
+                  fontWeight="bold"
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#121215",
-                    borderColor: "rgba(255,255,255,0.15)",
+                    backgroundColor: "#FFFFFF",
+                    borderColor: "#0D0431",
+                    borderWidth: "2px",
                     borderRadius: "1rem",
                     fontSize: "12px",
-                    color: "#fff",
-                    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)",
+                    color: "#0D0431",
+                    fontWeight: "bold",
+                    boxShadow: "4px 4px 0 0 #0D0431",
                   }}
                 />
                 <Area
                   type="monotone"
                   dataKey={activeDimension}
-                  stroke={selectedDim.color}
-                  strokeWidth={2.5}
+                  stroke="#0D0431"
+                  strokeWidth={3}
                   fillOpacity={1}
                   fill="url(#colorActiveDim)"
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </section>
+        </CaideCard>
 
-        {/* Activity Telemetry Feed */}
-        <section className="gsap-fade-item rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-4">
-          <div className="flex items-center justify-between">
+        {/* ── Activity Telemetry Feed ── */}
+        <CaideCard
+          theme="white"
+          shadow="default"
+          className="gsap-fade-item p-6 md:p-8 space-y-4"
+        >
+          <div className="flex items-center justify-between pb-3 border-b-2 border-[#0D0431]">
             <div>
-              <h3 className="text-xl font-bold text-white tracking-tight">
+              <h3 className="text-xl font-heading font-black text-[#0D0431] tracking-tight">
                 Practice Session Telemetry
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-[#0D0431]/75 mt-0.5 font-sans">
                 Verified training log and XP attribution history
               </p>
             </div>
           </div>
 
-          <div className="space-y-2.5 pt-2">
+          <div className="space-y-3 pt-2">
             {(progressData?.activityLog || []).map((act, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between p-4 rounded-2xl bg-zinc-950/80 border border-white/5 hover:border-white/15 transition-all duration-200"
+                className="flex items-center justify-between p-4 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] hover:bg-[#FEDF6A] transition-all"
               >
                 <div className="flex items-center gap-3.5">
-                  <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center text-[#0D0431] shrink-0">
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-semibold text-white tracking-tight">
+                    <div className="text-xs font-heading font-black text-[#0D0431] tracking-tight">
                       {act.title}
                     </div>
-                    <div className="text-[11px] text-zinc-500 font-mono mt-0.5">
+                    <div className="text-[11px] text-[#0D0431]/70 font-mono font-bold mt-0.5">
                       {new Date(act.timestamp).toLocaleDateString(undefined, {
                         month: "short",
                         day: "numeric",
@@ -375,40 +456,40 @@ export default function ProgressTracker() {
                   </div>
                 </div>
 
-                <span className="text-xs font-bold font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                <span className="text-xs font-heading font-black text-[#0D0431] bg-[#E4FFDA] px-3.5 py-1.5 rounded-full border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                   +{act.xp} XP
                 </span>
               </div>
             ))}
           </div>
-        </section>
+        </CaideCard>
 
-        {/* Log Activity Modal */}
+        {/* ── Log Activity Modal ── */}
         {showLogModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-            <div className="bg-zinc-900 border border-white/15 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <h3 className="text-lg font-bold text-white tracking-tight">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0D0431]/80 backdrop-blur-sm p-4 animate-in fade-in">
+            <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-[8px_8px_0_0_#0D0431] space-y-5 text-[#0D0431]">
+              <div className="flex items-center justify-between pb-3 border-b-2 border-[#0D0431]">
+                <h3 className="text-lg font-heading font-black text-[#0D0431] tracking-tight">
                   Log Learning Practice Sprint
                 </h3>
                 <button
                   type="button"
                   onClick={() => setShowLogModal(false)}
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                  className="p-1.5 rounded-xl border-2 border-[#0D0431] bg-[#FEF9CF] hover:bg-[#FEDF6A] text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
               <form onSubmit={handleLogActivitySubmit} className="space-y-4">
                 <div>
-                  <label className="text-xs text-zinc-400 font-mono block mb-1.5">
+                  <label className="text-xs font-heading font-black uppercase text-[#0D0431] block mb-1.5">
                     Activity Type
                   </label>
                   <select
                     value={activityType}
                     onChange={(e) => setActivityType(e.target.value)}
-                    className="w-full bg-zinc-950 text-white text-xs rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-purple-400"
+                    className="w-full bg-white text-[#0D0431] font-bold text-xs rounded-xl px-3.5 py-2.5 border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF]"
                   >
                     <option value="dsa_solved">DSA Coding Problem</option>
                     <option value="study_session">Video Lecture / Core CS Review</option>
@@ -418,7 +499,7 @@ export default function ProgressTracker() {
                 </div>
 
                 <div>
-                  <label className="text-xs text-zinc-400 font-mono block mb-1.5">
+                  <label className="text-xs font-heading font-black uppercase text-[#0D0431] block mb-1.5">
                     Activity Title / Description
                   </label>
                   <input
@@ -427,13 +508,13 @@ export default function ProgressTracker() {
                     value={activityTitle}
                     onChange={(e) => setActivityTitle(e.target.value)}
                     required
-                    className="w-full bg-zinc-950 text-white text-xs rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-purple-400"
+                    className="w-full bg-white text-[#0D0431] font-bold text-xs rounded-xl px-3.5 py-2.5 border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF]"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-zinc-400 font-mono block mb-1.5">
+                    <label className="text-xs font-heading font-black uppercase text-[#0D0431] block mb-1.5">
                       Minutes Studied
                     </label>
                     <input
@@ -442,12 +523,12 @@ export default function ProgressTracker() {
                       max="300"
                       value={activityMinutes}
                       onChange={(e) => setActivityMinutes(e.target.value)}
-                      className="w-full bg-zinc-950 text-white text-xs rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-purple-400 font-mono"
+                      className="w-full bg-white text-[#0D0431] font-mono font-bold text-xs rounded-xl px-3.5 py-2.5 border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs text-zinc-400 font-mono block mb-1.5">
+                    <label className="text-xs font-heading font-black uppercase text-[#0D0431] block mb-1.5">
                       XP Reward
                     </label>
                     <input
@@ -456,26 +537,30 @@ export default function ProgressTracker() {
                       max="100"
                       value={activityXp}
                       onChange={(e) => setActivityXp(e.target.value)}
-                      className="w-full bg-zinc-950 text-white text-xs rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-purple-400 font-mono"
+                      className="w-full bg-white text-[#0D0431] font-mono font-bold text-xs rounded-xl px-3.5 py-2.5 border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF]"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+                <div className="flex items-center justify-end gap-3 pt-3 border-t-2 border-[#0D0431]/20">
                   <button
                     type="button"
                     onClick={() => setShowLogModal(false)}
-                    className="px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white"
+                    className="px-4 py-2 text-xs font-bold text-[#0D0431] hover:underline"
                   >
                     Cancel
                   </button>
-                  <button
+                  <CaideButton
                     type="submit"
+                    variant="stacked-yellow"
+                    size="md"
                     disabled={loggingInProgress}
-                    className="px-5 py-2.5 rounded-xl bg-white text-zinc-950 text-xs font-semibold hover:bg-zinc-200 transition-all cursor-pointer"
+                    icon={false}
                   >
-                    {loggingInProgress ? "Logging..." : "Record Activity"}
-                  </button>
+                    <span className="font-bold text-[#0D0431]">
+                      {loggingInProgress ? "Logging..." : "Record Activity"}
+                    </span>
+                  </CaideButton>
                 </div>
               </form>
             </div>

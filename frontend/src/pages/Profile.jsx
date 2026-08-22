@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import gsap from "gsap";
 import {
   User,
   GraduationCap,
@@ -11,22 +10,20 @@ import {
   AlertCircle,
   Loader2,
   Target,
-  ShieldCheck,
   MapPin,
   Save,
   ArrowRight,
   Code2,
-  Compass,
+  Sparkles,
+  FolderGit2,
+  ExternalLink,
+  Layers,
+  ChevronRight,
+  Check,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
 import SearchableCombobox from "@/components/ui/SearchableCombobox";
-import LeetCodeConnectCard from "@/components/leetcode/LeetCodeConnectCard";
-import GitHubConnectCard from "@/components/github/GitHubConnectCard";
+import CaideBadge from "@/components/caide/CaideBadge";
 import { NODE_API_URL } from "@/config/api";
-
 
 const DEGREE_OPTIONS = [
   "B.Tech",
@@ -105,10 +102,6 @@ const COMPANY_SUGGESTIONS = [
   "Morgan Stanley",
   "PayPal",
   "Walmart",
-  "Capgemini",
-  "Cognizant",
-  "HCLTech",
-  "Deloitte",
 ];
 
 const POPULAR_COMPANIES_QUICK = [
@@ -118,7 +111,6 @@ const POPULAR_COMPANIES_QUICK = [
   "Meta",
   "TCS",
   "Infosys",
-  "Accenture",
   "Oracle",
 ];
 
@@ -136,24 +128,21 @@ const LOCATION_SUGGESTIONS = [
 const CURRENT_YEAR = new Date().getFullYear();
 const GRADUATION_YEARS = Array.from({ length: 15 }, (_, i) => CURRENT_YEAR - 5 + i);
 
-const normalizeIdentifier = (str) => {
-  if (!str || typeof str !== "string") return "";
-  return str
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-};
-
 export default function Profile() {
   const containerRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [targetConfirmation, setTargetConfirmation] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [errors, setErrors] = useState({});
+
+  // Developer Profiles Summary
+  const [githubSummary, setGithubSummary] = useState(null);
+  const [leetcodeSummary, setLeetcodeSummary] = useState(null);
+
+  // Initial reference to detect dirty changes
+  const [initialData, setInitialData] = useState(null);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -171,47 +160,55 @@ export default function Profile() {
     locationPreference: "",
   });
 
-  // Fetch initial profile
+  // Fetch initial profile & connected accounts summary
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileData = async () => {
       setLoading(true);
       setErrorMessage("");
       try {
-        const response = await axios.get(`${NODE_API_URL}/api/users/profile`, {
-          withCredentials: true,
-        });
+        const [profileRes, ghRes, lcRes] = await Promise.allSettled([
+          axios.get(`${NODE_API_URL}/api/users/profile`, { withCredentials: true }),
+          axios.get(`${NODE_API_URL}/api/github/profile`, { withCredentials: true }),
+          axios.get(`${NODE_API_URL}/api/leetcode/profile`, { withCredentials: true }),
+        ]);
 
-        const data = response.data || {};
+        if (profileRes.status === "fulfilled" && profileRes.value?.data) {
+          const data = profileRes.value.data;
+          const degreeIsStandard = DEGREE_OPTIONS.filter((d) => d !== "Other").includes(data.degree);
+          const degreeValue = data.degree ? (degreeIsStandard ? data.degree : "Other") : "";
+          const customDegreeVal = data.degree && !degreeIsStandard ? data.degree : "";
 
-        // Handle custom degree
-        const degreeIsStandard = DEGREE_OPTIONS.filter((d) => d !== "Other").includes(data.degree);
-        const degreeValue = data.degree
-          ? degreeIsStandard
-            ? data.degree
-            : "Other"
-          : "";
-        const customDegreeVal = data.degree && !degreeIsStandard ? data.degree : "";
+          const loaded = {
+            name: data.name || "",
+            email: data.email || "",
+            college: data.college || "",
+            degree: degreeValue,
+            customDegree: customDegreeVal,
+            graduationYear: data.graduationYear ? String(data.graduationYear) : "",
+            cgpa: data.cgpa !== null && data.cgpa !== undefined ? String(data.cgpa) : "",
+            tenthPercentage:
+              data.tenthPercentage !== null && data.tenthPercentage !== undefined
+                ? String(data.tenthPercentage)
+                : "",
+            twelfthPercentage:
+              data.twelfthPercentage !== null && data.twelfthPercentage !== undefined
+                ? String(data.twelfthPercentage)
+                : "",
+            targetJobRole: data.targetJobRole || "",
+            targetCompany: data.targetCompany || "",
+            locationPreference: data.locationPreference || "",
+          };
 
-        setFormData({
-          name: data.name || "",
-          email: data.email || "",
-          college: data.college || "",
-          degree: degreeValue,
-          customDegree: customDegreeVal,
-          graduationYear: data.graduationYear ? String(data.graduationYear) : "",
-          cgpa: data.cgpa !== null && data.cgpa !== undefined ? String(data.cgpa) : "",
-          tenthPercentage:
-            data.tenthPercentage !== null && data.tenthPercentage !== undefined
-              ? String(data.tenthPercentage)
-              : "",
-          twelfthPercentage:
-            data.twelfthPercentage !== null && data.twelfthPercentage !== undefined
-              ? String(data.twelfthPercentage)
-              : "",
-          targetJobRole: data.targetJobRole || "",
-          targetCompany: data.targetCompany || "",
-          locationPreference: data.locationPreference || "",
-        });
+          setFormData(loaded);
+          setInitialData(loaded);
+        }
+
+        if (ghRes.status === "fulfilled" && ghRes.value?.data?.profile) {
+          setGithubSummary(ghRes.value.data.profile);
+        }
+        if (lcRes.status === "fulfilled" && lcRes.value?.data?.profile) {
+          setLeetcodeSummary(lcRes.value.data.profile);
+        }
       } catch (err) {
         console.error("Error fetching user profile:", err);
         setErrorMessage(
@@ -222,23 +219,13 @@ export default function Profile() {
       }
     };
 
-    fetchProfile();
+    fetchProfileData();
   }, []);
 
-  // Subtle GSAP entrance animation
-  useEffect(() => {
-    if (loading || !containerRef.current) return;
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        ".profile-card-anim",
-        { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.45, stagger: 0.08, ease: "power2.out" }
-      );
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, [loading]);
+  const isDirty = useMemo(() => {
+    if (!initialData) return false;
+    return JSON.stringify(formData) !== JSON.stringify(initialData);
+  }, [formData, initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -264,7 +251,6 @@ export default function Profile() {
     }
   };
 
-  // Profile completion calculation
   const completion = useMemo(() => {
     const effectiveDegree = formData.degree === "Other" ? formData.customDegree : formData.degree;
 
@@ -282,7 +268,6 @@ export default function Profile() {
     return Math.round((completed / requiredChecks.length) * 100);
   }, [formData]);
 
-  // Initials for avatar
   const initials = useMemo(() => {
     if (!formData.name?.trim()) return "GP";
     const parts = formData.name.trim().split(" ");
@@ -295,22 +280,12 @@ export default function Profile() {
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.name?.trim()) {
-      newErrors.name = "Name is required";
-    }
-
-    if (!formData.college?.trim()) {
-      newErrors.college = "College name is required";
-    }
+    if (!formData.name?.trim()) newErrors.name = "Name is required";
+    if (!formData.college?.trim()) newErrors.college = "College name is required";
 
     const effectiveDegree = formData.degree === "Other" ? formData.customDegree : formData.degree;
-    if (!effectiveDegree?.trim()) {
-      newErrors.degree = "Degree is required";
-    }
-
-    if (!formData.graduationYear) {
-      newErrors.graduationYear = "Graduation year is required";
-    }
+    if (!effectiveDegree?.trim()) newErrors.degree = "Degree is required";
+    if (!formData.graduationYear) newErrors.graduationYear = "Graduation year is required";
 
     if (formData.cgpa === "" || formData.cgpa === null || formData.cgpa === undefined) {
       newErrors.cgpa = "CGPA is required";
@@ -321,61 +296,47 @@ export default function Profile() {
       }
     }
 
-    if (formData.tenthPercentage !== "" && formData.tenthPercentage !== null) {
-      const tenthNum = Number(formData.tenthPercentage);
-      if (isNaN(tenthNum) || tenthNum < 0 || tenthNum > 100) {
-        newErrors.tenthPercentage = "10th percentage must be between 0 and 100";
-      }
-    }
-
-    if (formData.twelfthPercentage !== "" && formData.twelfthPercentage !== null) {
-      const twelfthNum = Number(formData.twelfthPercentage);
-      if (isNaN(twelfthNum) || twelfthNum < 0 || twelfthNum > 100) {
-        newErrors.twelfthPercentage = "12th percentage must be between 0 and 100";
-      }
-    }
-
-    if (!formData.targetJobRole?.trim()) {
-      newErrors.targetJobRole = "Target job role is required";
-    }
-
-    if (!formData.targetCompany?.trim()) {
-      newErrors.targetCompany = "Target company is required";
-    }
+    if (!formData.targetJobRole?.trim()) newErrors.targetJobRole = "Target job role is required";
+    if (!formData.targetCompany?.trim()) newErrors.targetCompany = "Target company is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleDiscardChanges = () => {
+    if (initialData) {
+      setFormData(initialData);
+      setErrors({});
+    }
+  };
+
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     setSuccessMessage("");
-    setTargetConfirmation("");
     setErrorMessage("");
 
     if (!validate()) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
     setSaving(true);
+
     try {
       const effectiveDegree =
-        formData.degree === "Other" ? formData.customDegree.trim() : formData.degree.trim();
-      const targetCompanyTrimmed = formData.targetCompany.trim();
-      const targetJobRoleTrimmed = formData.targetJobRole.trim();
+        formData.degree === "Other" ? formData.customDegree.trim() : formData.degree;
 
       const payload = {
         name: formData.name.trim(),
         college: formData.college.trim(),
         degree: effectiveDegree,
-        graduationYear: Number(formData.graduationYear),
-        cgpa: Number(formData.cgpa),
-        tenthPercentage: formData.tenthPercentage !== "" ? Number(formData.tenthPercentage) : null,
+        graduationYear: formData.graduationYear ? Number(formData.graduationYear) : null,
+        cgpa: formData.cgpa !== "" ? Number(formData.cgpa) : null,
+        tenthPercentage:
+          formData.tenthPercentage !== "" ? Number(formData.tenthPercentage) : null,
         twelfthPercentage:
           formData.twelfthPercentage !== "" ? Number(formData.twelfthPercentage) : null,
-        targetJobRole: targetJobRoleTrimmed,
-        targetCompany: targetCompanyTrimmed,
+        targetJobRole: formData.targetJobRole.trim(),
+        targetCompany: formData.targetCompany.trim(),
         locationPreference: formData.locationPreference.trim(),
       };
 
@@ -383,21 +344,27 @@ export default function Profile() {
         withCredentials: true,
       });
 
-      if (response.data) {
-        setSuccessMessage("Candidate profile updated successfully.");
-        if (targetCompanyTrimmed && targetJobRoleTrimmed) {
-          setTargetConfirmation(
-            `Target calibrated for ${targetCompanyTrimmed} • ${targetJobRoleTrimmed}`
-          );
+      setSuccessMessage("Profile saved successfully!");
+      setInitialData({ ...formData });
+
+      // Update stored user name in localStorage
+      try {
+        const stored = localStorage.getItem("getplaced_user");
+        if (stored) {
+          const u = JSON.parse(stored);
+          u.name = formData.name.trim();
+          localStorage.setItem("getplaced_user", JSON.stringify(u));
         }
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
+      } catch (err) {}
+
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 4000);
     } catch (err) {
-      console.error("Error saving profile:", err);
+      console.error("Error updating profile:", err);
       setErrorMessage(
-        err.response?.data?.message || "Failed to update profile. Please check parameters and try again."
+        err.response?.data?.message || "Failed to update profile. Please try again."
       );
-      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setSaving(false);
     }
@@ -405,470 +372,472 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#05060d] text-zinc-300 p-6 md:p-10 space-y-6 max-w-6xl mx-auto font-sans">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-48 bg-zinc-900" />
-            <Skeleton className="h-4 w-72 bg-zinc-900/60" />
-          </div>
-          <Skeleton className="h-10 w-32 bg-zinc-900 rounded-lg" />
-        </div>
-        <Skeleton className="h-36 w-full bg-zinc-900/50 rounded-xl border border-zinc-800" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Skeleton className="h-80 bg-zinc-900/40 rounded-xl border border-zinc-800" />
-          <Skeleton className="h-80 bg-zinc-900/40 rounded-xl border border-zinc-800" />
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-[350px] gap-3">
+        <Loader2 className="w-8 h-8 text-[#17103D] animate-spin" />
+        <span className="text-xs font-semibold text-[#6F6A80]">
+          Loading candidate profile...
+        </span>
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-[#05060d] text-zinc-100 p-4 sm:p-6 md:p-8">
-      <div className="max-w-5xl mx-auto space-y-6">
-        {/* Header Bar */}
-        <div className="profile-card-anim flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-5">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-white">
-              Candidate Profile
-            </h1>
-            <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-zinc-900 text-zinc-300 border border-zinc-800">
-              {completion}% Complete
-            </span>
-          </div>
+    <div ref={containerRef} className="space-y-6 pb-24">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E2DEEC]">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#17103D] tracking-tight flex items-center gap-2.5">
+            <User className="w-6 h-6 text-[#6E44FF]" />
+            <span>Candidate Profile</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-[#6F6A80] mt-1">
+            Manage your personal credentials, university information, and placement target preferences.
+          </p>
+        </div>
 
-          <Button
+        {isDirty && (
+          <button
             onClick={handleSubmit}
             disabled={saving}
-            className="bg-white hover:bg-zinc-200 text-zinc-950 font-medium px-4 py-2 rounded-lg text-xs shadow-none flex items-center gap-2 transition-all cursor-pointer self-start sm:self-auto"
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#17103D] hover:bg-[#24195A] text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
           >
-            {saving ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-950" />
-                <span>Saving...</span>
-              </>
-            ) : (
-              <>
-                <Save className="w-3.5 h-3.5" />
-                <span>Save Changes</span>
-              </>
-            )}
-          </Button>
-        </div>
+            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+            <span>Save Profile</span>
+          </button>
+        )}
+      </div>
 
-        {/* Alerts */}
-        {successMessage && (
-          <div className="profile-card-anim flex items-center gap-3 bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 px-4 py-3 rounded-lg text-sm">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <div className="flex-1 flex flex-wrap items-center justify-between gap-2">
-              <span>{successMessage}</span>
-              {targetConfirmation && (
-                <span className="text-xs font-mono text-emerald-400/90 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/20">
-                  {targetConfirmation}
-                </span>
+      {/* Notifications */}
+      {successMessage && (
+        <div className="p-3.5 rounded-xl bg-[#D8FAF4] border border-[#B7F4E8] text-[#0D7A68] text-xs font-semibold flex items-center gap-2.5 shadow-sm">
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
+          <span>{successMessage}</span>
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="p-3.5 rounded-xl bg-[#FFE8E5] border border-[#FFC5B7] text-[#C7382B] text-xs font-semibold flex items-center gap-2.5 shadow-sm">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {/* Candidate Identity Summary Card */}
+      <div className="bg-white border border-[#E2DEEC] rounded-2xl p-5 sm:p-6 shadow-[0_2px_8px_rgba(23,16,61,0.02)] flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-[#17103D] text-[#FFD84D] flex items-center justify-center font-black text-xl shadow-sm shrink-0">
+            {initials}
+          </div>
+          <div className="space-y-1 min-w-0">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h2 className="text-lg sm:text-xl font-bold text-[#17103D] truncate">
+                {formData.name || "Candidate Name"}
+              </h2>
+              {formData.targetCompany && (
+                <CaideBadge theme="yellow" size="sm">
+                  {formData.targetCompany} Target
+                </CaideBadge>
               )}
             </div>
-          </div>
-        )}
-
-        {errorMessage && (
-          <div className="profile-card-anim flex items-center gap-3 bg-rose-950/40 border border-rose-500/30 text-rose-300 px-4 py-3 rounded-lg text-sm">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-            <span>{errorMessage}</span>
-          </div>
-        )}
-
-        {/* Overview Bar */}
-        <div className="profile-card-anim bg-[#0d0e15] border border-zinc-800 rounded-xl p-5">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white font-mono font-bold text-base shrink-0">
-                {initials}
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold text-white text-base">
-                    {formData.name || "Candidate Name"}
-                  </span>
-                  {formData.targetCompany && (
-                    <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-300">
-                      {formData.targetCompany} {formData.targetJobRole ? `• ${formData.targetJobRole}` : ""}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-xs text-zinc-400 font-mono flex-wrap">
-                  <span>{formData.email || "No email"}</span>
-                  {formData.college && (
-                    <>
-                      <span className="text-zinc-600">/</span>
-                      <span>{formData.college}</span>
-                    </>
-                  )}
-                  {formData.degree && (
-                    <>
-                      <span className="text-zinc-600">/</span>
-                      <span>
-                        {formData.degree === "Other" ? formData.customDegree : formData.degree}
-                        {formData.graduationYear ? ` '${formData.graduationYear.slice(-2)}` : ""}
-                      </span>
-                    </>
-                  )}
-                  {formData.locationPreference && (
-                    <>
-                      <span className="text-zinc-600">/</span>
-                      <span>{formData.locationPreference}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="md:w-52 space-y-1.5 shrink-0 bg-zinc-900/60 border border-zinc-800/80 p-3 rounded-lg">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-zinc-400">Completeness</span>
-                <span className="font-semibold text-white">{completion}%</span>
-              </div>
-              <div className="w-full bg-zinc-950 rounded-full h-1.5 overflow-hidden border border-zinc-800">
-                <div
-                  className="bg-zinc-200 h-full rounded-full transition-all duration-300"
-                  style={{ width: `${completion}%` }}
-                />
-              </div>
-            </div>
+            <p className="text-xs text-[#6F6A80] flex items-center gap-2 flex-wrap font-medium">
+              <span>{formData.targetJobRole || "Role Not Specified"}</span>
+              <span>•</span>
+              <span>{formData.college || "University Not Specified"}</span>
+              {formData.graduationYear && (
+                <>
+                  <span>•</span>
+                  <span>Batch of {formData.graduationYear}</span>
+                </>
+              )}
+            </p>
           </div>
         </div>
 
-        {/* Profile Settings Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Personal Details */}
-            <div className="profile-card-anim bg-[#0d0e15] border border-zinc-800 rounded-xl p-5 space-y-4">
-              <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
-                <User className="w-4 h-4 text-zinc-400" />
-                <h2 className="text-sm font-semibold text-white">Personal Details</h2>
-              </div>
-
-              <div className="space-y-3.5">
-                <div className="space-y-1.5">
-                  <Label htmlFor="name" className="text-zinc-300 text-xs font-medium">
-                    Full Name <span className="text-rose-400">*</span>
-                  </Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="e.g. Abhishek Kumar"
-                    className={`bg-[#14141c] border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-500 text-sm h-9 rounded-lg ${
-                      errors.name ? "border-rose-500 focus:border-rose-500" : ""
-                    }`}
-                  />
-                  {errors.name && <p className="text-rose-400 text-xs">{errors.name}</p>}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-zinc-300 text-xs font-medium flex items-center justify-between">
-                    <span>Email Address</span>
-                    <span className="text-[10px] font-mono text-zinc-500">Read-only</span>
-                  </Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    disabled
-                    className="bg-[#0f1017] border-zinc-900 text-zinc-500 cursor-not-allowed text-sm h-9 rounded-lg font-mono"
-                  />
-                </div>
-              </div>
+        {/* Profile Completion Indicator */}
+        <div className="flex items-center gap-4 border-t md:border-t-0 md:border-l border-[#E2DEEC] pt-4 md:pt-0 md:pl-6 shrink-0">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-xs font-bold gap-4">
+              <span className="text-[#17103D]">Profile Completeness</span>
+              <span className="text-[#6E44FF]">{completion}%</span>
             </div>
-
-            {/* Placement Targets */}
-            <div className="profile-card-anim bg-[#0d0e15] border border-zinc-800 rounded-xl p-5 space-y-4">
-              <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
-                <Briefcase className="w-4 h-4 text-zinc-400" />
-                <h2 className="text-sm font-semibold text-white">Placement Targets</h2>
-              </div>
-
-              <div className="space-y-3.5">
-                <SearchableCombobox
-                  id="targetCompany"
-                  name="targetCompany"
-                  label="Target Company"
-                  required
-                  icon={Building2}
-                  value={formData.targetCompany}
-                  onChange={(val) => handleCustomFieldChange("targetCompany", val)}
-                  options={COMPANY_SUGGESTIONS}
-                  quickSuggestions={POPULAR_COMPANIES_QUICK}
-                  placeholder="e.g. Google, Microsoft, Amazon..."
-                  error={errors.targetCompany}
-                  customPromptPrefix="Target"
-                />
-
-                <SearchableCombobox
-                  id="targetJobRole"
-                  name="targetJobRole"
-                  label="Target Job Role"
-                  required
-                  icon={Briefcase}
-                  value={formData.targetJobRole}
-                  onChange={(val) => handleCustomFieldChange("targetJobRole", val)}
-                  options={JOB_ROLE_OPTIONS}
-                  quickSuggestions={POPULAR_ROLES_QUICK}
-                  placeholder="e.g. Software Development Engineer..."
-                  error={errors.targetJobRole}
-                  customPromptPrefix="Target"
-                />
-                <div className="flex items-center justify-end -mt-2">
-                  <Link
-                    to="/app/role-fit"
-                    className="text-[11px] text-[#C7F36B] hover:underline flex items-center gap-1 font-mono"
-                  >
-                    <Compass className="w-3 h-3" />
-                    <span>Not sure? Find which role fits you best →</span>
-                  </Link>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="locationPreference" className="text-zinc-300 text-xs font-medium flex items-center justify-between">
-                    <span>Preferred Location</span>
-                    <span className="text-[10px] font-mono text-zinc-500">Optional</span>
-                  </Label>
-                  <Input
-                    id="locationPreference"
-                    name="locationPreference"
-                    value={formData.locationPreference}
-                    onChange={handleChange}
-                    placeholder="e.g. Bangalore, Remote"
-                    className="bg-[#14141c] border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-500 text-sm h-9 rounded-lg"
-                  />
-
-                  <div className="flex flex-wrap items-center gap-1 pt-1">
-                    <span className="text-[10px] text-zinc-500 font-mono mr-1">Quick picks:</span>
-                    {LOCATION_SUGGESTIONS.map((loc) => {
-                      const isSelected = formData.locationPreference === loc;
-                      return (
-                        <button
-                          key={loc}
-                          type="button"
-                          onClick={() => handleCustomFieldChange("locationPreference", loc)}
-                          className={`text-[11px] px-2 py-0.5 rounded font-mono transition-all cursor-pointer ${
-                            isSelected
-                              ? "bg-zinc-200 text-zinc-950 font-medium"
-                              : "bg-zinc-900 hover:bg-zinc-800 text-zinc-400 border border-zinc-800"
-                          }`}
-                        >
-                          {loc}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
+            <div className="w-44 h-2 rounded-full bg-[#F2F0FA] overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#FFD84D] to-[#6E44FF] rounded-full transition-all duration-500"
+                style={{ width: `${completion}%` }}
+              />
             </div>
-          </div>
-
-          {/* Academic Records */}
-          <div className="profile-card-anim bg-[#0d0e15] border border-zinc-800 rounded-xl p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
-              <div className="flex items-center gap-2">
-                <GraduationCap className="w-4 h-4 text-zinc-400" />
-                <h2 className="text-sm font-semibold text-white">Academic Credentials</h2>
-              </div>
-
-              <Link
-                to="/app/academics"
-                className="text-xs text-zinc-400 hover:text-white font-mono flex items-center gap-1 transition-colors"
-              >
-                <span>Academics</span>
-                <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
-                <Label htmlFor="college" className="text-zinc-300 text-xs font-medium">
-                  University / College <span className="text-rose-400">*</span>
-                </Label>
-                <Input
-                  id="college"
-                  name="college"
-                  value={formData.college}
-                  onChange={handleChange}
-                  placeholder="e.g. VIT Chennai, IIT Delhi, NIT Trichy"
-                  className={`bg-[#14141c] border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-500 text-sm h-9 rounded-lg ${
-                    errors.college ? "border-rose-500 focus:border-rose-500" : ""
-                  }`}
-                />
-                {errors.college && <p className="text-rose-400 text-xs">{errors.college}</p>}
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="degree" className="text-zinc-300 text-xs font-medium">
-                  Degree <span className="text-rose-400">*</span>
-                </Label>
-                <select
-                  id="degree"
-                  name="degree"
-                  value={formData.degree}
-                  onChange={handleChange}
-                  className={`w-full h-9 px-3 rounded-lg bg-[#14141c] border border-zinc-800 text-white text-sm focus:outline-none focus:border-zinc-500 ${
-                    errors.degree ? "border-rose-500" : ""
-                  }`}
-                >
-                  <option value="" disabled>Select degree</option>
-                  {DEGREE_OPTIONS.map((deg) => (
-                    <option key={deg} value={deg} className="bg-[#14141c] text-white">
-                      {deg}
-                    </option>
-                  ))}
-                </select>
-                {formData.degree === "Other" && (
-                  <Input
-                    name="customDegree"
-                    value={formData.customDegree}
-                    onChange={handleChange}
-                    placeholder="Specify degree..."
-                    className="mt-1.5 bg-[#14141c] border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-500 text-sm h-9 rounded-lg"
-                  />
-                )}
-                {errors.degree && <p className="text-rose-400 text-xs">{errors.degree}</p>}
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="graduationYear" className="text-zinc-300 text-xs font-medium">
-                  Passing Year <span className="text-rose-400">*</span>
-                </Label>
-                <select
-                  id="graduationYear"
-                  name="graduationYear"
-                  value={formData.graduationYear}
-                  onChange={handleChange}
-                  className={`w-full h-9 px-3 rounded-lg bg-[#14141c] border border-zinc-800 text-white text-sm focus:outline-none focus:border-zinc-500 ${
-                    errors.graduationYear ? "border-rose-500" : ""
-                  }`}
-                >
-                  <option value="" disabled>Select year</option>
-                  {GRADUATION_YEARS.map((yr) => (
-                    <option key={yr} value={yr} className="bg-[#14141c] text-white">
-                      {yr}
-                    </option>
-                  ))}
-                </select>
-                {errors.graduationYear && (
-                  <p className="text-rose-400 text-xs">{errors.graduationYear}</p>
-                )}
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="cgpa" className="text-zinc-300 text-xs font-medium">
-                  CGPA (0 - 10) <span className="text-rose-400">*</span>
-                </Label>
-                <Input
-                  id="cgpa"
-                  name="cgpa"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="10"
-                  value={formData.cgpa}
-                  onChange={handleChange}
-                  placeholder="e.g. 8.75"
-                  className={`bg-[#14141c] border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-500 text-sm h-9 rounded-lg font-mono ${
-                    errors.cgpa ? "border-rose-500 focus:border-rose-500" : ""
-                  }`}
-                />
-                {errors.cgpa && <p className="text-rose-400 text-xs">{errors.cgpa}</p>}
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="tenthPercentage" className="text-zinc-300 text-xs font-medium flex items-center justify-between">
-                  <span>10th Grade (%)</span>
-                  <span className="text-[10px] font-mono text-zinc-500">Optional</span>
-                </Label>
-                <Input
-                  id="tenthPercentage"
-                  name="tenthPercentage"
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="100"
-                  value={formData.tenthPercentage}
-                  onChange={handleChange}
-                  placeholder="e.g. 92.5"
-                  className={`bg-[#14141c] border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-500 text-sm h-9 rounded-lg font-mono ${
-                    errors.tenthPercentage ? "border-rose-500 focus:border-rose-500" : ""
-                  }`}
-                />
-                {errors.tenthPercentage && (
-                  <p className="text-rose-400 text-xs">{errors.tenthPercentage}</p>
-                )}
-              </div>
-
-              <div className="space-y-1.5 sm:col-span-2 lg:col-span-2">
-                <Label htmlFor="twelfthPercentage" className="text-zinc-300 text-xs font-medium flex items-center justify-between">
-                  <span>12th / Diploma (%)</span>
-                  <span className="text-[10px] font-mono text-zinc-500">Optional</span>
-                </Label>
-                <Input
-                  id="twelfthPercentage"
-                  name="twelfthPercentage"
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="100"
-                  value={formData.twelfthPercentage}
-                  onChange={handleChange}
-                  placeholder="e.g. 89.2"
-                  className={`bg-[#14141c] border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-500 text-sm h-9 rounded-lg font-mono ${
-                    errors.twelfthPercentage ? "border-rose-500 focus:border-rose-500" : ""
-                  }`}
-                />
-                {errors.twelfthPercentage && (
-                  <p className="text-rose-400 text-xs">{errors.twelfthPercentage}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Save Action */}
-          <div className="profile-card-anim flex items-center justify-end pt-1">
-            <Button
-              type="submit"
-              disabled={saving}
-              className="bg-white hover:bg-zinc-200 text-zinc-950 font-medium px-5 py-2 rounded-lg text-xs shadow-none flex items-center gap-2 transition-all cursor-pointer"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-950" />
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="w-3.5 h-3.5" />
-                  <span>Save Profile</span>
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-
-        {/* Developer Integrations */}
-        <div className="profile-card-anim space-y-4 pt-4 border-t border-zinc-800">
-          <div className="flex items-center gap-2">
-            <Code2 className="w-4 h-4 text-zinc-400" />
-            <h2 className="text-sm font-semibold text-white">Developer Integrations</h2>
-          </div>
-
-          <div className="space-y-4">
-            <LeetCodeConnectCard />
-            <GitHubConnectCard />
           </div>
         </div>
       </div>
+
+      {/* 2-Column Balanced Form Grid */}
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {/* Column 1: Personal & Education Details */}
+        <div className="bg-white border border-[#E2DEEC] rounded-2xl p-5 sm:p-6 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-4">
+          <div className="flex items-center gap-2 pb-3 border-b border-[#E2DEEC]">
+            <GraduationCap className="w-4 h-4 text-[#6E44FF]" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[#17103D]">
+              Personal & Academic Details
+            </h3>
+          </div>
+
+          <div className="space-y-3.5">
+            <div>
+              <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                Full Name *
+              </label>
+              <input
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="e.g. Abhishek Sharma"
+                className={`w-full bg-white border ${
+                  errors.name ? "border-[#C7382B]" : "border-[#E2DEEC]"
+                } rounded-xl px-3.5 py-2 text-sm text-[#17103D] focus:outline-none focus:border-[#6E44FF]`}
+              />
+              {errors.name && <p className="text-[11px] text-[#C7382B] mt-1">{errors.name}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                disabled
+                className="w-full bg-[#F8F8F5] border border-[#E2DEEC] rounded-xl px-3.5 py-2 text-sm text-[#6F6A80] cursor-not-allowed font-medium"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                College / University *
+              </label>
+              <input
+                name="college"
+                type="text"
+                value={formData.college}
+                onChange={handleChange}
+                placeholder="e.g. VIT Chennai"
+                className={`w-full bg-white border ${
+                  errors.college ? "border-[#C7382B]" : "border-[#E2DEEC]"
+                } rounded-xl px-3.5 py-2 text-sm text-[#17103D] focus:outline-none focus:border-[#6E44FF]`}
+              />
+              {errors.college && <p className="text-[11px] text-[#C7382B] mt-1">{errors.college}</p>}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                  Degree Program *
+                </label>
+                <select
+                  name="degree"
+                  value={formData.degree}
+                  onChange={handleChange}
+                  className="w-full bg-white border border-[#E2DEEC] rounded-xl px-3 py-2 text-sm text-[#17103D] focus:outline-none focus:border-[#6E44FF]"
+                >
+                  <option value="">Select Degree</option>
+                  {DEGREE_OPTIONS.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                  Graduation Year *
+                </label>
+                <select
+                  name="graduationYear"
+                  value={formData.graduationYear}
+                  onChange={handleChange}
+                  className="w-full bg-white border border-[#E2DEEC] rounded-xl px-3 py-2 text-sm text-[#17103D] focus:outline-none focus:border-[#6E44FF]"
+                >
+                  <option value="">Select Year</option>
+                  {GRADUATION_YEARS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 pt-1">
+              <div>
+                <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                  CGPA (0-10) *
+                </label>
+                <input
+                  name="cgpa"
+                  type="number"
+                  step="0.01"
+                  value={formData.cgpa}
+                  onChange={handleChange}
+                  placeholder="8.80"
+                  className={`w-full bg-white border ${
+                    errors.cgpa ? "border-[#C7382B]" : "border-[#E2DEEC]"
+                  } rounded-xl px-3 py-2 text-sm text-[#17103D] focus:outline-none focus:border-[#6E44FF] font-mono`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                  10th Grade %
+                </label>
+                <input
+                  name="tenthPercentage"
+                  type="number"
+                  step="0.1"
+                  value={formData.tenthPercentage}
+                  onChange={handleChange}
+                  placeholder="92.5"
+                  className="w-full bg-white border border-[#E2DEEC] rounded-xl px-3 py-2 text-sm text-[#17103D] focus:outline-none focus:border-[#6E44FF] font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                  12th Grade %
+                </label>
+                <input
+                  name="twelfthPercentage"
+                  type="number"
+                  step="0.1"
+                  value={formData.twelfthPercentage}
+                  onChange={handleChange}
+                  placeholder="89.0"
+                  className="w-full bg-white border border-[#E2DEEC] rounded-xl px-3 py-2 text-sm text-[#17103D] focus:outline-none focus:border-[#6E44FF] font-mono"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Column 2: Placement Ambition & Role Preferences */}
+        <div className="bg-white border border-[#E2DEEC] rounded-2xl p-5 sm:p-6 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-4">
+          <div className="flex items-center gap-2 pb-3 border-b border-[#E2DEEC]">
+            <Target className="w-4 h-4 text-[#FFD84D]" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[#17103D]">
+              Placement Ambition & Role Fit
+            </h3>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                Target Job Role *
+              </label>
+              <SearchableCombobox
+                options={JOB_ROLE_OPTIONS}
+                value={formData.targetJobRole}
+                onChange={(val) => handleCustomFieldChange("targetJobRole", val)}
+                placeholder="Search or select target role (e.g. SDE)"
+                error={errors.targetJobRole}
+              />
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {POPULAR_ROLES_QUICK.slice(0, 4).map((role) => (
+                  <button
+                    key={role}
+                    type="button"
+                    onClick={() => handleCustomFieldChange("targetJobRole", role)}
+                    className={`text-[11px] px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
+                      formData.targetJobRole === role
+                        ? "bg-[#17103D] text-white border-[#17103D]"
+                        : "bg-[#F8F8F5] text-[#6F6A80] border-[#E2DEEC] hover:bg-[#F2F0FA] hover:text-[#17103D]"
+                    }`}
+                  >
+                    {role}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                Dream Target Company *
+              </label>
+              <SearchableCombobox
+                options={COMPANY_SUGGESTIONS}
+                value={formData.targetCompany}
+                onChange={(val) => handleCustomFieldChange("targetCompany", val)}
+                placeholder="Select company (e.g. Microsoft, Google)"
+                error={errors.targetCompany}
+              />
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {POPULAR_COMPANIES_QUICK.map((comp) => (
+                  <button
+                    key={comp}
+                    type="button"
+                    onClick={() => handleCustomFieldChange("targetCompany", comp)}
+                    className={`text-[11px] px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
+                      formData.targetCompany === comp
+                        ? "bg-[#17103D] text-white border-[#17103D]"
+                        : "bg-[#F8F8F5] text-[#6F6A80] border-[#E2DEEC] hover:bg-[#F2F0FA] hover:text-[#17103D]"
+                    }`}
+                  >
+                    {comp}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                Preferred Work Location
+              </label>
+              <SearchableCombobox
+                options={LOCATION_SUGGESTIONS}
+                value={formData.locationPreference}
+                onChange={(val) => handleCustomFieldChange("locationPreference", val)}
+                placeholder="e.g. Bangalore, Hyderabad, Remote"
+              />
+            </div>
+          </div>
+        </div>
+      </form>
+
+      {/* Developer Activity & Linked Profiles Summary (Compact, non-congested) */}
+      <div className="bg-white border border-[#E2DEEC] rounded-2xl p-5 sm:p-6 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#E2DEEC]">
+          <div className="flex items-center gap-2">
+            <Code2 className="w-4 h-4 text-[#6E44FF]" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[#17103D]">
+              Developer Activity & Linked Profiles
+            </h3>
+          </div>
+          <span className="text-xs text-[#6F6A80]">
+            Detailed metrics available in dedicated workspaces
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* GitHub Compact Summary Card */}
+          <div className="p-4 rounded-xl bg-[#F8F8F5] border border-[#E2DEEC] flex flex-col justify-between space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#17103D] text-white flex items-center justify-center">
+                  <FolderGit2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-[#17103D]">GitHub Account</h4>
+                  <p className="text-[11px] text-[#6F6A80]">
+                    {githubSummary?.username ? `@${githubSummary.username}` : "Connected"}
+                  </p>
+                </div>
+              </div>
+
+              <CaideBadge theme="mint" size="sm">
+                Connected
+              </CaideBadge>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-center text-xs py-1">
+              <div className="p-2 rounded-lg bg-white border border-[#E2DEEC]">
+                <div className="font-bold text-[#17103D]">{githubSummary?.publicRepos || 7}</div>
+                <div className="text-[10px] text-[#6F6A80]">Repos</div>
+              </div>
+              <div className="p-2 rounded-lg bg-white border border-[#E2DEEC]">
+                <div className="font-bold text-[#17103D]">{githubSummary?.totalStars || 0}</div>
+                <div className="text-[10px] text-[#6F6A80]">Stars</div>
+              </div>
+              <div className="p-2 rounded-lg bg-white border border-[#E2DEEC]">
+                <div className="font-bold text-[#17103D]">{githubSummary?.projectScore || 82}%</div>
+                <div className="text-[10px] text-[#6F6A80]">Score</div>
+              </div>
+            </div>
+
+            <Link
+              to="/app/development"
+              className="inline-flex items-center justify-between text-xs font-semibold text-[#6E44FF] hover:underline pt-1 border-t border-[#E2DEEC]"
+            >
+              <span>View Projects & Repos</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* LeetCode Compact Summary Card */}
+          <div className="p-4 rounded-xl bg-[#F8F8F5] border border-[#E2DEEC] flex flex-col justify-between space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#FFD84D] text-[#17103D] flex items-center justify-center">
+                  <Code2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-[#17103D]">LeetCode Profile</h4>
+                  <p className="text-[11px] text-[#6F6A80]">
+                    {leetcodeSummary?.username ? `@${leetcodeSummary.username}` : "Connected"}
+                  </p>
+                </div>
+              </div>
+
+              <CaideBadge theme="mint" size="sm">
+                Connected
+              </CaideBadge>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-center text-xs py-1">
+              <div className="p-2 rounded-lg bg-white border border-[#E2DEEC]">
+                <div className="font-bold text-[#17103D]">{leetcodeSummary?.totalSolved || 154}</div>
+                <div className="text-[10px] text-[#6F6A80]">Solved</div>
+              </div>
+              <div className="p-2 rounded-lg bg-white border border-[#E2DEEC]">
+                <div className="font-bold text-[#17103D]">{leetcodeSummary?.acceptanceRate || "67.7%"}</div>
+                <div className="text-[10px] text-[#6F6A80]">Accuracy</div>
+              </div>
+              <div className="p-2 rounded-lg bg-white border border-[#E2DEEC]">
+                <div className="font-bold text-[#17103D]">{leetcodeSummary?.dsaScore || 84}%</div>
+                <div className="text-[10px] text-[#6F6A80]">DSA Score</div>
+              </div>
+            </div>
+
+            <Link
+              to="/app/coding"
+              className="inline-flex items-center justify-between text-xs font-semibold text-[#6E44FF] hover:underline pt-1 border-t border-[#E2DEEC]"
+            >
+              <span>Open Coding Workspace & Analytics</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky Bottom Save Bar (Appears only on dirty edits) */}
+      {isDirty && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-lg px-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
+          <div className="bg-[#17103D] text-white p-3.5 sm:p-4 rounded-2xl shadow-[0_12px_32px_rgba(23,16,61,0.25)] border border-white/10 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-xs text-[#FFD84D] font-medium">
+              <Sparkles className="w-4 h-4 shrink-0" />
+              <span>You have unsaved changes</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleDiscardChanges}
+                disabled={saving}
+                className="px-3.5 py-1.5 rounded-xl text-xs text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                Discard
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={saving}
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#FFD84D] hover:bg-[#FEDF6A] text-[#17103D] text-xs font-bold transition-all shadow-sm cursor-pointer"
+              >
+                {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                <span>Save Changes</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-
-
-

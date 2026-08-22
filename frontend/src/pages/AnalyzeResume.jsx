@@ -19,181 +19,55 @@ import {
   ShieldCheck,
   Check,
   ExternalLink,
-  Bot
+  Bot,
+  SlidersHorizontal,
 } from "lucide-react";
 import { PY_API_URL, NODE_API_URL } from "@/config/api";
+import CaideBadge from "@/components/caide/CaideBadge";
 import ResumeActionCenter from "@/components/resume/ResumeActionCenter";
 import ResumeReportOverview from "@/components/resume/ResumeReportOverview";
 import ResumeVersionHistory from "@/components/resume/ResumeVersionHistory";
 import ResumeBuilderEditor from "@/components/resume/ResumeBuilderEditor";
-import { getResumeMentorCopy } from "@/utils/dynamicCopy";
 
 const STORAGE_KEY = "getplaced_resume_versions";
 
-const INITIAL_BUILDER_DATA = {
-  personalInfo: {
-    fullName: "Alex Rivera",
-    email: "alex.rivera@example.com",
-    phone: "+1 (555) 234-5678",
-    location: "San Francisco, CA",
-    linkedin: "linkedin.com/in/alexrivera-dev",
-    github: "github.com/alexrivera"
-  },
-  summary: "Software Engineer with 2+ years designing resilient web platforms and microservices. Focused on low-latency APIs and cloud deployment workflows.",
-  experience: [
-    {
-      id: "exp-1",
-      role: "Software Engineering Intern",
-      company: "Acme Cloud Technologies",
-      location: "San Francisco, CA",
-      startDate: "Jun 2024",
-      endDate: "Present",
-      bullets: [
-        "Engineered 12 RESTful microservices with Node.js & Redis, reducing P99 latency by 42% at 10k RPM peak.",
-        "Built dynamic onboarding dashboards using React and Tailwind CSS, increasing onboarding completion by 28%."
-      ]
-    },
-    {
-      id: "exp-2",
-      role: "Full Stack Developer",
-      company: "Campus Tech Labs",
-      location: "Boston, MA",
-      startDate: "Jan 2023",
-      endDate: "May 2024",
-      bullets: [
-        "Created automated Docker CI/CD pipelines with GitHub Actions, reducing release cycle time by 50%.",
-        "Optimized MongoDB aggregations and indexing to process 500k+ daily operational events."
-      ]
-    }
-  ],
-  projects: [
-    {
-      id: "proj-1",
-      name: "Distributed Task Scheduler",
-      techStack: "Go, Redis, Docker, gRPC",
-      bullets: [
-        "Constructed job queue handling 25k concurrent tasks with automated exponential backoff retries.",
-        "Implemented Redis Raft leader election ensuring zero single-point failure."
-      ]
-    }
-  ],
-  skills: {
-    languages: ["JavaScript", "TypeScript", "Python", "Go", "SQL"],
-    frameworks: ["React", "Node.js", "Express", "FastAPI", "Tailwind CSS"],
-    toolsDatabases: ["PostgreSQL", "MongoDB", "Redis", "Docker", "Git", "AWS"]
-  },
-  education: [
-    {
-      id: "edu-1",
-      degree: "B.S. Computer Science",
-      institution: "Northeastern University",
-      gradYear: "2025",
-      gpa: "3.85 / 4.0"
-    }
-  ]
-};
-
 const DEMO_STRUCTURED_ACTIONS = [
   {
-    id: "act_kw_docker",
-    category: "Keywords",
-    title: "Inject Missing Container & Cloud Keywords (Docker, CI/CD, AWS)",
-    description: "Target engineering screeners discard profiles missing containerization keywords. Add Docker and CI/CD pipelines into technical competencies.",
-    severity: "HIGH",
-    impact: "HIGH",
-    status: "OPEN",
-    targetSection: "skills",
-    currentText: "Tools: Git, VS Code, Postman",
-    suggestedText: "Tools & Cloud: Git, Docker, Kubernetes, CI/CD (GitHub Actions), AWS Lambda, Redis, Postman",
-    reason: "Increases Keyword Match coefficient from 68% to 88%+ for backend & full-stack roles.",
-    what: "Add Docker, Kubernetes, and CI/CD competencies into technical skills.",
-    why: "Missing core DevOps keywords expected for modern developer roles.",
-    impactExplanation: "Boosts Keyword Relevance and Skills Alignment score categories.",
-    how: "Add Docker and CI/CD to Tools section and reference deployment workflows in project bullets.",
-    estimatedImpact: { min: 4, max: 7 },
-    metricAdded: null,
-    actionVerbUsed: null
-  },
-  {
-    id: "act_impact_backend",
-    category: "Measurable Impact",
-    title: "Quantify Backend Microservices Bullet with Google XYZ Latency Metrics",
-    description: "Transform passive description into quantifiable achievement following Google XYZ formula (Accomplished [X], measured by [Y], by doing [Z]).",
-    severity: "HIGH",
-    impact: "HIGH",
-    status: "OPEN",
-    targetSection: "experience",
+    id: "act-1",
+    section: "experience",
+    targetItemIndex: 0,
+    bulletIndex: 0,
+    impact: "high",
     currentText: "Worked on backend APIs and improved performance.",
-    suggestedText: "Architected 12+ RESTful microservices using Node.js & Redis, reducing P99 API response latency by 42% under peak 10k RPM load.",
-    reason: "Hiring managers look for evidence of scale, performance metrics, and technical ownership.",
-    what: "Rewrite bullet point following Google XYZ formula.",
-    why: "Current phrasing does not convey technical complexity or metric impact.",
-    impactExplanation: "Significantly lifts Impact & Metrics category score.",
-    how: "Specify microservices count, Redis caching layer, and percentage latency drop.",
-    estimatedImpact: { min: 4, max: 8 },
-    metricAdded: "42% latency reduction under 10k RPM",
-    actionVerbUsed: "Architected"
+    proposedText: "Engineered 8 RESTful microservices with Node.js & Redis, reducing P99 latency by 42% at 10k RPM peak.",
+    reason: "Quantifies technical scope using the XYZ formula (Accomplished [X], measured by [Y], by doing [Z]).",
+    pointsGain: 6,
+    status: "pending",
   },
   {
-    id: "act_frontend_ui",
-    category: "Projects",
-    title: "Upgrade Frontend Project Description with Bundle & Engagement Metrics",
-    description: "Specify bundle size reduction and conversion metrics instead of passive duty descriptions.",
-    severity: "MEDIUM",
-    impact: "HIGH",
-    status: "OPEN",
-    targetSection: "projects",
+    id: "act-2",
+    section: "skills",
+    targetItemIndex: 0,
+    bulletIndex: null,
+    impact: "high",
+    currentText: "JavaScript, Python, HTML, CSS",
+    proposedText: "Languages: TypeScript, JavaScript, Python, SQL • Frameworks: React, Node.js, Express, FastAPI • Cloud/DevOps: Docker, Redis, Git, CI/CD",
+    reason: "Injects critical high-demand ATS keywords required for modern Software Engineer listings.",
+    pointsGain: 5,
+    status: "pending",
+  },
+  {
+    id: "act-3",
+    section: "experience",
+    targetItemIndex: 0,
+    bulletIndex: 1,
+    impact: "medium",
     currentText: "Responsible for building the user interface using React.",
-    suggestedText: "Engineered responsive frontend architecture with React & Tailwind CSS, boosting user engagement by 28% and cutting bundle size by 35%.",
-    reason: "Replaces passive language with active engineering leadership and tangible outcome.",
-    what: "Quantify UI engineering contribution with bundle reduction and engagement numbers.",
-    why: "Phrasing 'responsible for' sounds like passive maintenance rather than proactive engineering.",
-    impactExplanation: "Increases Project & Experience relevance.",
-    how: "Include specific optimization techniques and UI performance metrics.",
-    estimatedImpact: { min: 3, max: 6 },
-    metricAdded: "28% engagement increase, 35% bundle reduction",
-    actionVerbUsed: "Engineered"
+    proposedText: "Spearheaded modular frontend architecture using React 19 and Tailwind CSS, increasing user onboarding conversion by 28%.",
+    reason: "Replaces passive duty description with active leadership verbs and measurable business impact.",
+    pointsGain: 4,
+    status: "pending",
   },
-  {
-    id: "act_links_deploy",
-    category: "Links",
-    title: "Include Production Live Demo & Repository Hyperlinks",
-    description: "Add live deployment links and GitHub repository badges to your featured project items.",
-    severity: "MEDIUM",
-    impact: "MEDIUM",
-    status: "OPEN",
-    targetSection: "projects",
-    currentText: "Project: Distributed Task Scheduler (Go, Redis)",
-    suggestedText: "Project: Distributed Task Scheduler | Live Demo: demo.getplaced.dev | Code: github.com/user/scheduler",
-    reason: "Recruiters spend 80% more time on candidate resumes that offer verifiable live demo URLs.",
-    what: "Add live demo and GitHub repository hyperlinks.",
-    why: "Projects without verifiable links carry lower trust in automated screening.",
-    impactExplanation: "Increases project credibility and candidate trust score.",
-    how: "Add clickable live preview and GitHub links next to each project header.",
-    estimatedImpact: { min: 2, max: 4 },
-    metricAdded: null,
-    actionVerbUsed: null
-  },
-  {
-    id: "act_fmt_hierarchy",
-    category: "Formatting",
-    title: "Optimize Action Verb Openers Across Experience Bullets",
-    description: "Ensure every single bullet starts with a strong past-tense action verb (Spearheaded, Architected, Automated).",
-    severity: "LOW",
-    impact: "LOW",
-    status: "OPEN",
-    targetSection: "formatting",
-    currentText: "Helped team with deployment and testing.",
-    suggestedText: "Automated end-to-end regression testing suite with Jest & Playwright, achieving 94% code coverage.",
-    reason: "Eliminates weak assisting verbs ('helped', 'assisted') in favor of direct ownership verbs.",
-    what: "Replace helping verbs with direct action verbs.",
-    why: "Action verbs project technical confidence and ownership.",
-    impactExplanation: "Improves overall recruiter aesthetic score.",
-    how: "Begin each line with a high-impact engineering verb.",
-    estimatedImpact: { min: 1, max: 3 },
-    metricAdded: "94% code coverage",
-    actionVerbUsed: "Automated"
-  }
 ];
 
 export default function AnalyzeResume() {
@@ -203,7 +77,7 @@ export default function AnalyzeResume() {
   const companyFromUrl = searchParams.get("company") || "";
   const jdFromUrl = searchParams.get("jd") || searchParams.get("jobDescription") || "";
 
-  const [activeTab, setActiveTab] = useState("actions"); // 'actions' | 'overview' | 'history' | 'builder'
+  const [activeTab, setActiveTab] = useState("actions"); // 'actions' | 'overview' | 'builder' | 'history'
 
   // Input state
   const [file, setFile] = useState(null);
@@ -224,23 +98,8 @@ export default function AnalyzeResume() {
 
   // Version History State
   const [versions, setVersions] = useState([]);
-
   const [isProfileLinked, setIsProfileLinked] = useState(false);
-  const [profileLoading, setProfileLoading] = useState(true);
 
-  // Builder State
-  const [builderData, setBuilderData] = useState(INITIAL_BUILDER_DATA);
-
-  // GSAP Smooth Tab Transition
-  useGSAP(() => {
-    gsap.fromTo(
-      ".tab-content-panel",
-      { opacity: 0, y: 10 },
-      { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }
-    );
-  }, { dependencies: [activeTab], scope: containerRef });
-
-  // Load versions & fetch real resume analysis from authenticated User Profile & Coach Session
   useEffect(() => {
     const initResumeIntelligence = async () => {
       let initialVersions = [];
@@ -250,11 +109,10 @@ export default function AnalyzeResume() {
           initialVersions = JSON.parse(saved);
         }
       } catch (e) {
-        console.warn("Could not read resume history from local storage:", e);
+        console.warn("Could not read resume history:", e);
       }
 
       try {
-        // Fetch authenticated user profile & coach session to link real data
         const [profileRes, coachRes] = await Promise.allSettled([
           axios.get(`${NODE_API_URL}/api/users/profile`, { withCredentials: true }),
           axios.get(`${NODE_API_URL}/api/coach/session`, { withCredentials: true }),
@@ -268,7 +126,6 @@ export default function AnalyzeResume() {
           coachData?.connectedProfiles?.resume?.analysis ||
           coachData?.extractedProfile?.resumeAnalysis;
         const liveText = profileData?.resumeText || coachData?.extractedProfile?.resumeText;
-        const liveScore = profileData?.resumeScore ?? coachData?.connectedProfiles?.resume?.score;
         const userTargetRole = profileData?.targetJobRole || coachData?.extractedProfile?.targetJobRole;
 
         if (userTargetRole) {
@@ -280,157 +137,40 @@ export default function AnalyzeResume() {
           setActions(liveAnalysis.structured_actions || DEMO_STRUCTURED_ACTIONS);
           if (liveText) setRawText(liveText);
           setIsProfileLinked(true);
-
-          const syncedVersion = {
-            id: "ver-onboarding-live",
-            name: "Candidate Profile Benchmark (Live)",
-            timestamp: new Date().toISOString(),
-            targetRole: userTargetRole || "Software Engineer",
-            targetCompany: profileData?.targetCompany || "Target Placement",
-            atsScore: liveAnalysis.ats_score || liveScore || 75,
-            tier: liveAnalysis.score_tier || "Strong",
-            categoryScores: liveAnalysis.category_scores || {},
-            matchedCount: liveAnalysis.matched_keywords?.length || 0,
-            missingCount: liveAnalysis.missing_keywords?.length || 0,
-            summaryCritique: liveAnalysis.summary_critique || "",
-            fullEvaluation: liveAnalysis,
+        } else {
+          // Default initial benchmark evaluation
+          const defaultEval = {
+            ats_score: 74,
+            score_tier: "Competitive (Tier 2)",
+            category_scores: {
+              impact_quantification: 62,
+              skills_match: 78,
+              action_verbs: 82,
+              formatting_readability: 90,
+            },
+            matched_keywords: ["JavaScript", "Python", "React", "Git", "REST APIs"],
+            missing_keywords: ["TypeScript", "Docker", "CI/CD", "Redis", "System Design"],
+            bullet_improvements: [
+              {
+                original: "Worked on backend APIs and improved performance.",
+                improved: "Engineered 8 RESTful microservices with Node.js & Redis, reducing P99 latency by 42% at 10k RPM peak.",
+                reason: "Quantifies technical scope using XYZ format.",
+              },
+            ],
+            structured_actions: DEMO_STRUCTURED_ACTIONS,
+            summary_critique: "Your resume scores 74/100. Applying the recommended XYZ impact rewrites and injecting missing keywords will elevate your score into top ATS tiers.",
           };
 
-          const mergedVersions = [
-            syncedVersion,
-            ...initialVersions.filter((v) => v.id !== "ver-onboarding-live"),
-          ];
-          setVersions(mergedVersions);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedVersions));
-          setProfileLoading(false);
-          return;
+          setEvaluation(defaultEval);
+          setActions(defaultEval.structured_actions || DEMO_STRUCTURED_ACTIONS);
         }
       } catch (err) {
-        console.warn("Could not load user profile resume link:", err.message);
+        console.warn("Could not sync profile resume:", err);
       }
-
-      if (initialVersions.length > 0) {
-        setVersions(initialVersions);
-      } else {
-        const demoVersion = {
-          id: "ver-baseline-1",
-          name: "V1 Candidate Benchmark",
-          timestamp: new Date(Date.now() - 86400000 * 2).toISOString(),
-          targetRole: "Software Engineer",
-          targetCompany: "Top Tech Tier",
-          atsScore: 74,
-          tier: "Competitive",
-          categoryScores: {
-            formatting_structure: 78,
-            keyword_relevance: 68,
-            impact_metrics: 64,
-            skills_alignment: 80,
-            experience_relevance: 72
-          },
-          matchedCount: 8,
-          missingCount: 4,
-          summaryCritique: "Solid technical fundamentals. Requires stronger Google XYZ impact quantification and cloud containerization keywords."
-        };
-        initialVersions = [demoVersion];
-        setVersions([demoVersion]);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([demoVersion]));
-      }
-
-      // Default benchmark evaluation fallback
-      const defaultEval = {
-        ats_score: 74,
-        score_tier: "Competitive",
-        category_scores: {
-          formatting_structure: 78,
-          keyword_relevance: 68,
-          impact_metrics: 64,
-          skills_alignment: 80,
-          experience_relevance: 72
-        },
-        matched_keywords: [
-          { keyword: "JavaScript", category: "Languages" },
-          { keyword: "Python", category: "Languages" },
-          { keyword: "React", category: "Frameworks" },
-          { keyword: "Node.js", category: "Frameworks" },
-          { keyword: "Git", category: "Tools" },
-          { keyword: "REST APIs", category: "Architecture" },
-          { keyword: "SQL", category: "Databases" },
-          { keyword: "Redis", category: "Databases" }
-        ],
-        missing_keywords: [
-          { keyword: "Docker", importance: "High", reason: "Standard industry containerization tool." },
-          { keyword: "CI/CD", importance: "High", reason: "Automated deployment pipeline competency." },
-          { keyword: "AWS Lambda", importance: "Medium", reason: "Cloud serverless architecture experience." },
-          { keyword: "Unit Testing", importance: "Medium", reason: "Demonstrates code quality and reliability." }
-        ],
-        strengths: [
-          "Good technical core skill presentation and project listings.",
-          "Clear chronological structure and relevant tech stacks."
-        ],
-        weaknesses: [
-          "Several bullet points lack quantifiable Google XYZ metrics (e.g. % latency reduction, throughput).",
-          "Missing key cloud containerization and CI/CD pipeline keywords."
-        ],
-        bullet_improvements: [
-          {
-            original: "Worked on backend APIs and improved performance.",
-            improved_xyz: "Architected 12+ RESTful microservices using Node.js & Redis, reducing P99 API response latency by 42% under peak 10k RPM load.",
-            metric_added: "42% latency reduction under 10k RPM",
-            action_verb_used: "Architected",
-            explanation: "Applies Google's XYZ formula with quantifiable performance benchmark and architectural specifics."
-          },
-          {
-            original: "Responsible for building the user interface using React.",
-            improved_xyz: "Engineered responsive frontend architecture with React & Tailwind CSS, boosting user engagement by 28% and cutting bundle size by 35%.",
-            metric_added: "28% engagement increase, 35% bundle reduction",
-            action_verb_used: "Engineered",
-            explanation: "Replaces passive duty phrasing ('responsible for') with proactive engineering achievements."
-          }
-        ],
-        formatting_flags: [
-          { issue: "Dense text blocks", severity: "Recommendation", fix: "Convert descriptive paragraphs into crisp 1-2 line bullet points with bold keywords." },
-          { issue: "Action verb consistency", severity: "Warning", fix: "Start every bullet with past-tense action verbs." }
-        ],
-        actionable_recommendations: [
-          "Rewrite each experience bullet starting with a high-impact action verb (e.g., Spearheaded, Engineered, Automated).",
-          "Incorporate quantifiable business or technical metrics for every project (latency, users, throughput, accuracy).",
-          "Add missing high-demand keywords: Docker, CI/CD, TypeScript, and System Design."
-        ],
-        structured_actions: DEMO_STRUCTURED_ACTIONS,
-        summary_critique: "Your resume demonstrates a solid technical foundation scoring 74/100. By infusing measurable metrics (XYZ formula) and aligning closer with target keywords, your profile will break into top ATS tiers."
-      };
-
-      setEvaluation(defaultEval);
-      setActions(defaultEval.structured_actions || DEMO_STRUCTURED_ACTIONS);
-      setProfileLoading(false);
     };
 
     initResumeIntelligence();
   }, []);
-
-  const saveEvaluationToHistory = (evalData, customName = null) => {
-    try {
-      const newVersion = {
-        id: `ver-${Date.now()}`,
-        name: customName || `Version ${versions.length + 1} (${targetRole || "Tech Resume"})`,
-        timestamp: new Date().toISOString(),
-        targetRole: targetRole || "Software Engineer",
-        targetCompany: jobDescription ? "Target Job Spec" : "Top Tech Placement",
-        atsScore: evalData.ats_score || 75,
-        tier: evalData.score_tier || "Strong",
-        categoryScores: evalData.category_scores || {},
-        matchedCount: evalData.matched_keywords?.length || 0,
-        missingCount: evalData.missing_keywords?.length || 0,
-        summaryCritique: evalData.summary_critique || "",
-        fullEvaluation: evalData
-      };
-      const updated = [newVersion, ...versions];
-      setVersions(updated);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch (e) {
-      console.error("Failed to save version to history:", e);
-    }
-  };
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -459,7 +199,7 @@ export default function AnalyzeResume() {
         formData.append("target_role", targetRole);
 
         const res = await axios.post(`${PY_API_URL}/api/resume/analyze-upload`, formData, {
-          headers: { "Content-Type": "multipart/form-data" }
+          headers: { "Content-Type": "multipart/form-data" },
         });
         evalData = res.data.evaluation;
         if (res.data.extracted_text) {
@@ -470,7 +210,7 @@ export default function AnalyzeResume() {
         const res = await axios.post(`${PY_API_URL}/api/resume/analyze-text`, {
           resume_text: rawText,
           job_description: jobDescription,
-          target_role: targetRole
+          target_role: targetRole,
         });
         evalData = res.data.evaluation;
       }
@@ -479,10 +219,9 @@ export default function AnalyzeResume() {
       setEvaluation(evalData);
       const actionItems = evalData.structured_actions || DEMO_STRUCTURED_ACTIONS;
       setActions(actionItems);
-      saveEvaluationToHistory(evalData, file ? `${file.name.replace(".pdf", "")}` : null);
       setActiveTab("actions");
 
-      // Sync with Node User Profile & Coach Session
+      // Save to history & backend profile
       try {
         await axios.post(
           `${NODE_API_URL}/api/coach/save-resume-analysis`,
@@ -494,374 +233,294 @@ export default function AnalyzeResume() {
           },
           { withCredentials: true }
         );
-        setIsProfileLinked(true);
-      } catch (syncErr) {
-        console.warn("Could not sync with Node candidate profile:", syncErr.message);
+      } catch (saveErr) {
+        console.warn("Could not persist analysis to user profile:", saveErr);
       }
     } catch (err) {
-      console.warn("API call failed, running fallback evaluation:", err);
-      try {
-        const legacyRes = await axios.post(`${PY_API_URL}/analyze-resume/`, {
-          file: file
-        });
-        if (legacyRes.data?.data) {
-          setPreviousEvaluation(evaluation);
-          setEvaluation(legacyRes.data.data);
-          const actionItems = legacyRes.data.data.structured_actions || DEMO_STRUCTURED_ACTIONS;
-          setActions(actionItems);
-          saveEvaluationToHistory(legacyRes.data.data);
-          setActiveTab("actions");
-        } else {
-          setError("Resume evaluation completed with local benchmark engine.");
-        }
-      } catch (fallbackErr) {
-        setError("Network connectivity issue. Local benchmark data loaded for interactive editing.");
-      }
+      console.error("Resume analysis error:", err);
+      setError(
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Could not analyze resume. Please try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // Callback when fixes are applied and ATS score is recalculated
-  const handleEvaluationUpdated = (newEval, updatedText, applyResult) => {
-    setPreviousEvaluation(evaluation);
-    setEvaluation(newEval);
-    if (updatedText) {
-      setRawText(updatedText);
-    }
-    saveEvaluationToHistory(newEval, `Optimized (${newEval.ats_score} ATS)`);
-
-    // Sync updated ATS score to Node candidate profile & coach session
-    try {
-      axios.post(
-        `${NODE_API_URL}/api/coach/save-resume-analysis`,
-        {
-          resumeScore: newEval.ats_score,
-          resumeText: updatedText || rawText,
-          resumeAnalysis: newEval,
-          filename: file ? file.name : "resume_optimized.pdf",
-        },
-        { withCredentials: true }
-      ).catch(() => {});
-    } catch (e) {
-      console.warn("Could not sync updated evaluation:", e);
+  const handleApplySingleAction = (actionId) => {
+    setActions((prev) =>
+      prev.map((act) => (act.id === actionId ? { ...act, status: "applied" } : act))
+    );
+    if (evaluation) {
+      const act = actions.find((a) => a.id === actionId);
+      const gain = act?.pointsGain || 4;
+      setEvaluation((prev) => ({
+        ...prev,
+        ats_score: Math.min(100, (prev?.ats_score || 74) + gain),
+      }));
     }
   };
 
-  // Revert back to previous evaluation
-  const handleRevertEvaluation = () => {
-    if (previousEvaluation) {
-      setEvaluation(previousEvaluation);
-      setActions(previousEvaluation.structured_actions || DEMO_STRUCTURED_ACTIONS);
+  const handleApplyAllActions = () => {
+    const totalGain = actions
+      .filter((a) => a.status === "pending")
+      .reduce((acc, a) => acc + (a.pointsGain || 4), 0);
+
+    setActions((prev) => prev.map((act) => ({ ...act, status: "applied" })));
+
+    if (evaluation) {
+      setEvaluation((prev) => ({
+        ...prev,
+        ats_score: Math.min(100, (prev?.ats_score || 74) + totalGain),
+      }));
     }
   };
-
-  // Restore a prior version from history
-  const handleRevertToVersion = (ver) => {
-    if (ver && ver.fullEvaluation) {
-      setPreviousEvaluation(evaluation);
-      setEvaluation(ver.fullEvaluation);
-      setActions(ver.fullEvaluation.structured_actions || DEMO_STRUCTURED_ACTIONS);
-      setActiveTab("actions");
-    }
-  };
-
-  const openActionsCount = actions.filter((a) => a.status === "OPEN").length;
 
   return (
-    <main ref={containerRef} className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#07080c] text-neutral-200">
-      
-      {/* Ambient Backdrop Lighting */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-violet-600/10 via-emerald-500/5 to-transparent blur-[130px] rounded-full" />
+    <div ref={containerRef} className="space-y-6 pb-20">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E2DEEC]">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#17103D] tracking-tight flex items-center gap-2.5">
+            <FileText className="w-6 h-6 text-[#6E44FF]" />
+            <span>AI Resume ATS Optimizer</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-[#6F6A80] mt-1">
+            Audit your resume against applicant tracking systems, identify missing keywords, and apply 1-click XYZ impact rewrites.
+          </p>
+        </div>
+
+        {evaluation && (
+          <div className="flex items-center gap-2 self-start sm:self-center">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#E2DEEC] shadow-sm">
+              <span className="text-xs text-[#6F6A80]">Current ATS:</span>
+              <span className="text-sm font-black text-[#17103D]">
+                {evaluation.ats_score} / 100
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 space-y-8">
-        
-        {/* Header Strip & Navigation Pill */}
-        <header className="flex flex-col gap-4 border-b border-white/[0.07] pb-6">
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-            <div className="space-y-1.5 max-w-2xl">
-              <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
-                  ATS Evaluation Matrix
-                </span>
-                {isProfileLinked && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                    <ShieldCheck className="w-3 h-3" /> Profile Linked
-                  </span>
-                )}
-              </div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
-                Resume Intelligence & ATS Analysis
-              </h1>
-              <p className="text-xs sm:text-sm text-neutral-400 font-normal">
-                Select recommendations, review proposed edits, and recalculate ATS scores.
-              </p>
-            </div>
+      {error && (
+        <div className="p-3.5 rounded-xl bg-[#FFE8E5] border border-[#FFC5B7] text-[#C7382B] text-xs font-semibold flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
-            <div className="flex items-center gap-2.5 shrink-0 self-start">
-              <Link
-                to="/app/coach"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 hover:border-zinc-600 text-xs font-mono text-zinc-200 transition-colors"
-              >
-                <Bot className="w-3.5 h-3.5 text-purple-400" />
-                <span>Career Coach</span>
-                <ChevronRight className="w-3 h-3 text-zinc-500" />
-              </Link>
-            </div>
-          </div>
+      {/* Guided 3-Step Upload & Configuration Workflow */}
+      <div className="bg-white border border-[#E2DEEC] rounded-2xl p-5 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-[#E2DEEC]">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#17103D]">
+            Resume Analysis Setup
+          </span>
 
-          {/* Segmented Navigation Tab Pill Below Title */}
-          <nav className="inline-flex p-1 bg-white/[0.03] border border-white/[0.08] rounded-xl backdrop-blur-md shadow-2xl overflow-x-auto self-start max-w-full">
+          <div className="inline-flex items-center p-0.5 bg-[#F8F8F5] border border-[#E2DEEC] rounded-xl text-[11px] font-semibold">
             <button
-              onClick={() => setActiveTab("actions")}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap ${
-                activeTab === "actions"
-                  ? "bg-white text-black font-semibold shadow-sm"
-                  : "text-neutral-400 hover:text-white"
+              onClick={() => setInputMode("pdf")}
+              className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                inputMode === "pdf" ? "bg-white text-[#17103D] shadow-sm font-bold" : "text-[#6F6A80]"
               }`}
             >
-              <Zap className="w-3.5 h-3.5 text-emerald-500" />
-              Action Center
-              {openActionsCount > 0 && (
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
-                  activeTab === "actions" ? "bg-black text-white" : "bg-emerald-500/20 text-emerald-300"
-                }`}>
-                  {openActionsCount}
-                </span>
-              )}
+              Upload PDF
             </button>
-
             <button
-              onClick={() => setActiveTab("overview")}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap ${
-                activeTab === "overview"
-                  ? "bg-white text-black font-semibold shadow-sm"
-                  : "text-neutral-400 hover:text-white"
+              onClick={() => setInputMode("text")}
+              className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                inputMode === "text" ? "bg-white text-[#17103D] shadow-sm font-bold" : "text-[#6F6A80]"
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              ATS Report
-            </button>
-
-            <button
-              onClick={() => setActiveTab("history")}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap ${
-                activeTab === "history"
-                  ? "bg-white text-black font-semibold shadow-sm"
-                  : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              <History className="w-3.5 h-3.5" />
-              Version History ({versions.length})
-            </button>
-
-            <button
-              onClick={() => setActiveTab("builder")}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap ${
-                activeTab === "builder"
-                  ? "bg-white text-black font-semibold shadow-sm"
-                  : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              Builder
-            </button>
-          </nav>
-        </header>
-
-        {/* Input Payload & Control Bar (Collapsible / Top Deck) */}
-        <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-5 sm:p-6 backdrop-blur-xl space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0">
-              {/* Target Role Input */}
-              <div className="flex items-center gap-2 bg-black/40 border border-white/[0.09] px-3 py-1.5 rounded-xl">
-                <span className="text-[11px] font-mono uppercase text-neutral-400">Role:</span>
-                <input
-                  type="text"
-                  value={targetRole}
-                  onChange={(e) => setTargetRole(e.target.value)}
-                  placeholder="e.g. Software Engineer"
-                  className="bg-transparent text-xs text-white placeholder-neutral-500 focus:outline-none w-36 sm:w-48 font-medium"
-                />
-              </div>
-
-              {/* Mode Toggle: PDF vs Text */}
-              <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/[0.06]">
-                <button
-                  onClick={() => setInputMode("pdf")}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
-                    inputMode === "pdf" ? "bg-white/10 text-white" : "text-neutral-400 hover:text-neutral-200"
-                  }`}
-                >
-                  PDF Upload
-                </button>
-                <button
-                  onClick={() => setInputMode("text")}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
-                    inputMode === "text" ? "bg-white/10 text-white" : "text-neutral-400 hover:text-neutral-200"
-                  }`}
-                >
-                  Plaintext / Markdown
-                </button>
-              </div>
-
-              {/* Collapsible JD Toggle */}
-              <button
-                type="button"
-                onClick={() => setShowJdInput(!showJdInput)}
-                className="text-xs text-neutral-400 hover:text-white underline font-mono ml-1"
-              >
-                {showJdInput ? "Hide Job Spec" : "+ Target Job Spec"}
-              </button>
-            </div>
-
-            {/* Run Analysis Action Button */}
-            <button
-              onClick={handleAnalyze}
-              disabled={loading}
-              className={`px-5 py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all duration-200 shrink-0 ${
-                loading
-                  ? "bg-white/10 text-neutral-400 cursor-not-allowed"
-                  : "bg-white text-black hover:bg-neutral-200 active:scale-[0.99] shadow-lg shadow-white/5"
-              }`}
-            >
-              {loading ? (
-                <>
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  Analyzing Resume...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Analyze Resume
-                </>
-              )}
+              Paste Text
             </button>
           </div>
+        </div>
 
-          {/* Conditional PDF Dropzone or Text Area */}
-          {inputMode === "pdf" ? (
-            <div className="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/[0.05]">
-              <label className="flex-1 flex items-center gap-3 p-3 bg-black/30 border border-dashed border-white/[0.12] hover:border-white/30 rounded-xl cursor-pointer transition">
-                <UploadCloud className="w-5 h-5 text-neutral-400 shrink-0" />
-                <span className="text-xs text-neutral-300 truncate">
-                  {file ? file.name : "Select or drag PDF resume"}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Step 1: File / Text */}
+          <div className="md:col-span-2 space-y-2">
+            {inputMode === "pdf" ? (
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-[#E2DEEC] hover:border-[#6E44FF] rounded-2xl p-6 bg-[#F8F8F5]/50 hover:bg-[#F2F0FA]/40 transition-all cursor-pointer text-center group">
+                <UploadCloud className="w-8 h-8 text-[#6F6A80] group-hover:text-[#6E44FF] transition-colors mb-2" />
+                <span className="text-xs font-bold text-[#17103D]">
+                  {file ? file.name : "Choose PDF resume or drag & drop"}
+                </span>
+                <span className="text-[11px] text-[#6F6A80] mt-0.5">
+                  Standard 1-2 page PDF format supported
                 </span>
                 <input
                   type="file"
-                  accept="application/pdf"
+                  accept=".pdf"
                   onChange={handleFileChange}
                   className="hidden"
                 />
               </label>
-              {file && (
-                <button
-                  onClick={() => setFile(null)}
-                  className="text-xs text-neutral-400 hover:text-rose-400 px-2"
-                >
-                  Remove
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="pt-2 border-t border-white/[0.05]">
+            ) : (
               <textarea
-                rows={3}
                 value={rawText}
                 onChange={(e) => setRawText(e.target.value)}
-                placeholder="Paste resume text or markdown..."
-                className="w-full px-3.5 py-2 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-neutral-200 focus:outline-none focus:border-white/30 resize-none font-mono"
+                placeholder="Paste your plaintext resume here..."
+                rows={4}
+                className="w-full bg-[#F8F8F5] border border-[#E2DEEC] rounded-xl p-3 text-xs text-[#17103D] focus:outline-none focus:border-[#6E44FF]"
+              />
+            )}
+          </div>
+
+          {/* Step 2: Role & JD */}
+          <div className="space-y-3 flex flex-col justify-between">
+            <div>
+              <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                Target Role
+              </label>
+              <input
+                type="text"
+                value={targetRole}
+                onChange={(e) => setTargetRole(e.target.value)}
+                placeholder="e.g. SDE, Frontend, Data Scientist"
+                className="w-full bg-[#F8F8F5] border border-[#E2DEEC] rounded-xl px-3 py-1.5 text-xs text-[#17103D] focus:outline-none focus:border-[#6E44FF]"
               />
             </div>
-          )}
 
-          {/* Target Job Description if expanded */}
-          {showJdInput && (
-            <div className="pt-2 border-t border-white/[0.05]">
-              <textarea
-                rows={2}
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                placeholder="Paste target job description to match keywords..."
-                className="w-full px-3.5 py-2 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-neutral-200 focus:outline-none focus:border-white/30 resize-none font-sans"
-              />
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowJdInput(!showJdInput)}
+                className="text-[11px] text-[#6E44FF] hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+              >
+                <span>{showJdInput ? "- Hide Job Description" : "+ Add Job Description"}</span>
+              </button>
+              {showJdInput && (
+                <textarea
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  placeholder="Paste target job spec..."
+                  rows={2}
+                  className="w-full mt-1 bg-[#F8F8F5] border border-[#E2DEEC] rounded-xl p-2 text-xs text-[#17103D] focus:outline-none focus:border-[#6E44FF]"
+                />
+              )}
             </div>
-          )}
 
-          {error && (
-            <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-300 flex items-start gap-2.5">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
-              <span>{error}</span>
-            </div>
-          )}
+            {/* Step 3: Action Button */}
+            <button
+              onClick={handleAnalyze}
+              disabled={loading}
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#17103D] hover:bg-[#24195A] text-white text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <span>Auditing Resume...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 text-[#FFD84D]" />
+                  <span>Run ATS Audit</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* Tab 1: Action Center */}
-        {activeTab === "actions" && (
-          <div className="tab-content-panel">
+      {/* Analysis Workspace & Sub-Tabs */}
+      {evaluation && (
+        <div className="space-y-4">
+          {/* Sub-Tab Navigation */}
+          <div className="inline-flex items-center p-1 bg-white border border-[#E2DEEC] rounded-xl shadow-sm text-xs font-semibold">
+            <button
+              onClick={() => setActiveTab("actions")}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                activeTab === "actions"
+                  ? "bg-[#17103D] text-white shadow-sm"
+                  : "text-[#6F6A80] hover:text-[#17103D]"
+              }`}
+            >
+              <Zap className="w-3.5 h-3.5 text-[#FFD84D]" />
+              <span>Action Center ({actions.filter((a) => a.status === "pending").length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("overview")}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                activeTab === "overview"
+                  ? "bg-[#17103D] text-white shadow-sm"
+                  : "text-[#6F6A80] hover:text-[#17103D]"
+              }`}
+            >
+              <Award className="w-3.5 h-3.5" />
+              <span>ATS Breakdown</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("builder")}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                activeTab === "builder"
+                  ? "bg-[#17103D] text-white shadow-sm"
+                  : "text-[#6F6A80] hover:text-[#17103D]"
+              }`}
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>Interactive Editor</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("history")}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                activeTab === "history"
+                  ? "bg-[#17103D] text-white shadow-sm"
+                  : "text-[#6F6A80] hover:text-[#17103D]"
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>Version History</span>
+            </button>
+          </div>
+
+          {/* Tab 1: Action Center */}
+          {activeTab === "actions" && (
             <ResumeActionCenter
               actions={actions}
-              onUpdateActions={setActions}
-              rawResumeText={rawText}
-              targetRole={targetRole}
-              jobDescription={jobDescription}
-              currentEvaluation={evaluation}
-              onEvaluationUpdated={handleEvaluationUpdated}
-              onRevertEvaluation={handleRevertEvaluation}
-              previousEvaluation={previousEvaluation}
+              onApplyAction={handleApplySingleAction}
+              onApplyAll={handleApplyAllActions}
+              currentScore={evaluation.ats_score || 74}
+              targetScore={92}
             />
-          </div>
-        )}
+          )}
 
-        {/* Tab 2: ATS Report Overview */}
-        {activeTab === "overview" && (
-          <div className="tab-content-panel">
+          {/* Tab 2: Overview Report */}
+          {activeTab === "overview" && (
             <ResumeReportOverview
               evaluation={evaluation}
               targetRole={targetRole}
               jobDescription={jobDescription}
               onNavigateToActionCenter={() => setActiveTab("actions")}
             />
-          </div>
-        )}
+          )}
 
-        {/* Tab 3: Version History */}
-        {activeTab === "history" && (
-          <div className="tab-content-panel">
+          {/* Tab 3: Interactive Editor */}
+          {activeTab === "builder" && (
+            <ResumeBuilderEditor
+              rawResumeText={rawText}
+              targetRole={targetRole}
+              onUpdateResumeText={(newTxt) => setRawText(newTxt)}
+            />
+          )}
+
+          {/* Tab 4: Version History */}
+          {activeTab === "history" && (
             <ResumeVersionHistory
               versions={versions}
-              onSelectVersion={(evalObj) => {
-                setEvaluation(evalObj);
-                setActions(evalObj.structured_actions || DEMO_STRUCTURED_ACTIONS);
-                setActiveTab("overview");
+              onRestoreVersion={(ver) => {
+                if (ver.fullEvaluation) {
+                  setEvaluation(ver.fullEvaluation);
+                  setActiveTab("overview");
+                }
               }}
-              onRevertVersion={handleRevertToVersion}
-              currentEvaluation={evaluation}
             />
-          </div>
-        )}
-
-        {/* Tab 4: Interactive Resume Builder */}
-        {activeTab === "builder" && (
-          <div className="tab-content-panel">
-            <ResumeBuilderEditor
-              builderData={builderData}
-              setBuilderData={setBuilderData}
-              onEvaluateATS={(compiled) => {
-                setRawText(compiled);
-                setInputMode("text");
-                handleAnalyze();
-              }}
-              targetRole={targetRole}
-              jobDescription={jobDescription}
-            />
-          </div>
-        )}
-
-      </div>
-    </main>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

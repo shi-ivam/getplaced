@@ -41,6 +41,7 @@ import {
   ListFilter,
   CheckSquare,
   Square,
+  Flame,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
 import {
@@ -48,6 +49,9 @@ import {
   evaluateRoleFit,
   adoptTargetRole,
 } from "@/services/roleFitService";
+import CaideCard from "@/components/caide/CaideCard";
+import CaideBadge from "@/components/caide/CaideBadge";
+import CaideButton from "@/components/caide/CaideButton";
 
 export default function WhichRoleFitsMe() {
   const navigate = useNavigate();
@@ -152,7 +156,9 @@ export default function WhichRoleFitsMe() {
   useEffect(() => {
     if (initialInspectSlug && evaluation.evaluatedRoles.length > 0) {
       const match = evaluation.evaluatedRoles.find(
-        (r) => r.id === initialInspectSlug || r.title.toLowerCase().includes(initialInspectSlug.toLowerCase())
+        (r) =>
+          r.id === initialInspectSlug ||
+          r.title.toLowerCase().includes(initialInspectSlug.toLowerCase())
       );
       if (match) setInspectedRole(match);
     }
@@ -181,14 +187,19 @@ export default function WhichRoleFitsMe() {
         targetJobRole: updated.targetJobRole,
         targetRole: updated.targetJobRole,
       }));
-      setAdoptSuccessMessage(`Successfully set "${confirmAdoptRole.title}" as your platform target career role!`);
+      setAdoptSuccessMessage(
+        `Successfully set "${confirmAdoptRole.title}" as your platform target career role!`
+      );
       setTimeout(() => {
         setConfirmAdoptRole(null);
         setAdoptSuccessMessage("");
       }, 1500);
     } catch (err) {
       console.error("Failed to update target role:", err);
-      alert(err.response?.data?.message || "Failed to update target role. Please try again.");
+      alert(
+        err.response?.data?.message ||
+          "Failed to update target role. Please try again."
+      );
     } finally {
       setIsAdopting(false);
     }
@@ -220,7 +231,9 @@ export default function WhichRoleFitsMe() {
         !searchQuery ||
         role.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         role.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        role.coreRequiredSkills.some((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        role.coreRequiredSkills.some((s) =>
+          s.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
 
       return matchesCategory && matchesSearch;
     });
@@ -244,147 +257,161 @@ export default function WhichRoleFitsMe() {
   return (
     <div
       ref={containerRef}
-      className="min-h-screen bg-[#11110F] text-[#F5F5F0] font-sans pb-24 selection:bg-[#C7F36B]/20 selection:text-[#C7F36B]"
+      className="space-y-6 pb-20 font-sans text-[#17103D]"
     >
       {/* ========================================================================= */}
       {/* 1. TOP HEADER & TELEMETRY SUMMARY */}
       {/* ========================================================================= */}
-      <div className="border-b border-[#2E2C26] bg-[#161513]/90 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#C7F36B]/15 border border-[#C7F36B]/30 flex items-center justify-center text-[#C7F36B] shadow-[0_0_15px_rgba(199,243,107,0.15)]">
-                <Compass className="w-5 h-5" />
+      <div className="pb-4 border-b border-[#E2DEEC]">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#17103D] text-[#FFD84D] flex items-center justify-center shrink-0 shadow-sm">
+              <Compass className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-heading font-black text-[#17103D] tracking-tight flex items-center gap-2">
+                  Which Role Fits Me?
+                </h1>
+                <CaideBadge theme="light-purple" size="sm">
+                  Multi-Evidence AI
+                </CaideBadge>
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                    Which Role Fits Me?
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30">
-                      Multi-Evidence AI
-                    </span>
-                  </h1>
-                </div>
-                <p className="text-xs text-[#A8A69E]">
-                  Transparent role discovery aligning your GitHub repos, LeetCode patterns, verified skills & resume keywords.
-                </p>
-              </div>
+              <p className="text-xs text-[#6F6A80] font-medium font-sans">
+                Transparent role discovery aligning your GitHub repos, LeetCode patterns, verified skills & resume keywords.
+              </p>
+            </div>
+          </div>
+
+          {/* Candidate Evidence Telemetry Pills */}
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <div className="px-3 py-1.5 rounded-xl bg-white border border-[#E2DEEC] shadow-sm flex items-center gap-2">
+              <Code2 className="w-3.5 h-3.5 text-[#6E44FF]" />
+              <span className="text-[#6F6A80] text-[11px] font-medium">LeetCode:</span>
+              <span className="font-bold text-[#17103D]">
+                {evaluation.candidateSummary.leetcodeSolved} Solved
+              </span>
             </div>
 
-            {/* Candidate Evidence Telemetry Pills */}
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              <div className="px-3 py-1.5 rounded-lg bg-[#24231F] border border-[#3A3831] flex items-center gap-2">
-                <Code2 className="w-3.5 h-3.5 text-[#C7F36B]" />
-                <span className="text-zinc-400 font-mono text-[11px]">LeetCode:</span>
-                <span className="font-semibold text-white">
-                  {evaluation.candidateSummary.leetcodeSolved} Solved
-                </span>
-              </div>
+            <div className="px-3 py-1.5 rounded-xl bg-white border border-[#E2DEEC] shadow-sm flex items-center gap-2">
+              <FolderGit2 className="w-3.5 h-3.5 text-[#1D58B5]" />
+              <span className="text-[#6F6A80] text-[11px] font-medium">GitHub:</span>
+              <span className="font-bold text-[#17103D]">
+                {evaluation.candidateSummary.githubReposCount} Repos
+              </span>
+            </div>
 
-              <div className="px-3 py-1.5 rounded-lg bg-[#24231F] border border-[#3A3831] flex items-center gap-2">
-                <FolderGit2 className="w-3.5 h-3.5 text-blue-400" />
-                <span className="text-zinc-400 font-mono text-[11px]">GitHub:</span>
-                <span className="font-semibold text-white">
-                  {evaluation.candidateSummary.githubReposCount} Repos
-                </span>
-              </div>
+            <div className="px-3 py-1.5 rounded-xl bg-white border border-[#E2DEEC] shadow-sm flex items-center gap-2">
+              <Layers className="w-3.5 h-3.5 text-[#0D7A68]" />
+              <span className="text-[#6F6A80] text-[11px] font-medium">Skills:</span>
+              <span className="font-bold text-[#17103D]">
+                {evaluation.candidateSummary.totalSkillsCount} Verified
+              </span>
+            </div>
 
-              <div className="px-3 py-1.5 rounded-lg bg-[#24231F] border border-[#3A3831] flex items-center gap-2">
-                <Layers className="w-3.5 h-3.5 text-purple-400" />
-                <span className="text-zinc-400 font-mono text-[11px]">Skills:</span>
-                <span className="font-semibold text-white">
-                  {evaluation.candidateSummary.totalSkillsCount} Verified
-                </span>
-              </div>
-
-              <div className="px-3 py-1.5 rounded-lg bg-[#24231F] border border-[#3A3831] flex items-center gap-2">
-                <FileText className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-zinc-400 font-mono text-[11px]">Resume ATS:</span>
-                <span className="font-semibold text-white">
-                  {evaluation.candidateSummary.resumeScore}%
-                </span>
-              </div>
+            <div className="px-3 py-1.5 rounded-xl bg-white border border-[#E2DEEC] shadow-sm flex items-center gap-2">
+              <FileText className="w-3.5 h-3.5 text-[#6E44FF]" />
+              <span className="text-[#6F6A80] text-[11px] font-medium">Resume ATS:</span>
+              <span className="font-bold text-[#17103D]">
+                {evaluation.candidateSummary.resumeScore}%
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+      <div className="space-y-6">
         {/* ========================================================================= */}
         {/* 2. LOW-DATA WARNING / COMPLETION CALLOUT */}
         {/* ========================================================================= */}
         {evaluation.hasLowData && (
-          <div className="gsap-fade-in p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <CaideCard
+            theme="light-yellow"
+            shadow="default"
+            className="gsap-fade-in p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+          >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
-                <AlertTriangle className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-[#0D0431] flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-[#0D0431]" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-amber-200">
+                <h4 className="text-sm font-heading font-black text-[#0D0431]">
                   Sparse Profile Data Detected
                 </h4>
-                <p className="text-xs text-amber-200/80">
+                <p className="text-xs text-[#0D0431]/80 font-medium">
                   Connect your GitHub repositories, LeetCode profile, and add self-assessed skills to get 100% accurate evidence matching without estimated fallbacks.
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <Link
+              <CaideButton
                 to="/app/profile"
-                className="px-3.5 py-1.5 rounded-lg bg-amber-400 text-zinc-950 font-semibold text-xs hover:bg-amber-300 transition-colors"
+                variant="stacked-yellow"
+                size="sm"
+                icon={true}
               >
                 Complete Profile
-              </Link>
+              </CaideButton>
             </div>
-          </div>
+          </CaideCard>
         )}
 
         {/* ========================================================================= */}
         {/* 3. HERO: TOP MATCH SPOTLIGHT CARD */}
         {/* ========================================================================= */}
         {topRole && (
-          <section className="gsap-fade-in relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C1B17] via-[#24231F] to-[#161513] border border-[#C7F36B]/30 p-6 sm:p-8 shadow-[0_0_30px_rgba(199,243,107,0.06)]">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-[#C7F36B]/5 rounded-full blur-3xl pointer-events-none" />
-
+          <CaideCard
+            theme="light-purple"
+            shadow="lg"
+            className="gsap-fade-in p-6 sm:p-8 rounded-3xl relative overflow-hidden"
+          >
             <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               {/* Left Details */}
               <div className="space-y-4 max-w-2xl">
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#C7F36B] text-zinc-950 font-bold text-xs shadow-sm">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    TOP CAREER FIT
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-md bg-white/[0.06] text-zinc-300 font-mono text-xs border border-white/[0.08]">
+                  <CaideBadge theme="yellow" size="md">
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      TOP CAREER FIT
+                    </span>
+                  </CaideBadge>
+
+                  <span className="px-3 py-0.5 rounded-full bg-white text-[#0D0431] font-mono text-xs font-bold border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                     {topRole.category}
                   </span>
+
                   {topRole.isCurrentTarget && (
-                    <span className="px-2.5 py-0.5 rounded-md bg-purple-500/15 text-purple-300 font-mono text-xs border border-purple-500/30 flex items-center gap-1">
-                      <Check className="w-3 h-3" /> Current Platform Target
-                    </span>
+                    <CaideBadge theme="mint" size="md">
+                      <span className="flex items-center gap-1">
+                        <Check className="w-3.5 h-3.5" /> Current Platform Target
+                      </span>
+                    </CaideBadge>
                   )}
                 </div>
 
                 <div>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  <h2 className="text-2xl sm:text-4xl font-heading font-black text-[#0D0431] tracking-tight">
                     {topRole.title}
                   </h2>
-                  <p className="text-sm text-zinc-300 mt-1.5 leading-relaxed">
+                  <p className="text-sm text-[#0D0431]/85 font-medium mt-1.5 leading-relaxed">
                     {topRole.summary}
                   </p>
                 </div>
 
                 {/* Evidence highlights */}
                 <div className="space-y-2 pt-1">
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-semibold">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-[#0D0431]/70 font-bold">
                     Strongest Evidence Signals
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {topRole.strongMatchingEvidence.slice(0, 4).map((item, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center gap-2 text-xs text-zinc-200 bg-[#161513]/70 px-3 py-1.5 rounded-lg border border-white/[0.04]"
+                        className="flex items-center gap-2 text-xs font-bold text-[#0D0431] bg-white px-3 py-2 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#C7F36B] shrink-0" />
+                        <div className="w-4 h-4 rounded-md bg-[#D4FDF7] border border-[#0D0431] flex items-center justify-center shrink-0">
+                          <Check className="w-3 h-3 text-[#0D0431]" />
+                        </div>
                         <span className="truncate">{item}</span>
                       </div>
                     ))}
@@ -392,18 +419,18 @@ export default function WhichRoleFitsMe() {
                 </div>
 
                 {/* Compensation & Industry Info */}
-                <div className="flex flex-wrap items-center gap-4 text-xs pt-2">
-                  <div className="flex items-center gap-1.5 text-zinc-300">
-                    <Briefcase className="w-4 h-4 text-zinc-400" />
-                    <span>Average Package:</span>
-                    <span className="font-semibold text-[#C7F36B] font-mono">
+                <div className="flex flex-wrap items-center gap-3 text-xs pt-2">
+                  <div className="flex items-center gap-1.5 bg-[#FEF9CF] px-3 py-1.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-[#0D0431]">
+                    <Briefcase className="w-3.5 h-3.5 text-[#0D0431]" />
+                    <span className="font-medium">Avg Package:</span>
+                    <span className="font-heading font-black text-[#0D0431]">
                       {topRole.avgCompensation.inrRange}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-zinc-300">
-                    <Building2 className="w-4 h-4 text-zinc-400" />
-                    <span>Hiring:</span>
-                    <span className="text-zinc-200 font-medium">
+                  <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-[#0D0431]">
+                    <Building2 className="w-3.5 h-3.5 text-[#0D0431]" />
+                    <span className="font-medium">Hiring:</span>
+                    <span className="font-bold text-[#0D0431]">
                       {topRole.topHiringCompanies.slice(0, 4).join(", ")}
                     </span>
                   </div>
@@ -411,122 +438,138 @@ export default function WhichRoleFitsMe() {
               </div>
 
               {/* Right: Big Score Gauge & Action CTAs */}
-              <div className="flex flex-col sm:flex-row lg:flex-col items-center justify-center gap-4 bg-[#161513]/90 border border-[#3A3831] p-6 rounded-2xl shrink-0 min-w-[260px] text-center">
+              <div className="flex flex-col sm:flex-row lg:flex-col items-center justify-center gap-4 bg-white border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] p-6 rounded-3xl shrink-0 min-w-[260px] text-center">
                 <div className="relative flex items-center justify-center">
-                  <div className="w-24 h-24 rounded-full border-4 border-[#C7F36B] flex flex-col items-center justify-center shadow-[0_0_20px_rgba(199,243,107,0.2)] bg-[#11110F]">
-                    <span className="text-3xl font-black text-white font-mono leading-none">
+                  <div className="w-24 h-24 rounded-full border-4 border-[#0D0431] bg-[#FEDF6A] shadow-[3px_3px_0_0_#0D0431] flex flex-col items-center justify-center">
+                    <span className="text-3xl font-heading font-black text-[#0D0431] leading-none">
                       {topRole.matchScore}%
                     </span>
-                    <span className="text-[10px] font-mono font-bold text-[#C7F36B] uppercase tracking-wider mt-1">
+                    <span className="text-[10px] font-mono font-bold text-[#0D0431] uppercase tracking-wider mt-1">
                       Match
                     </span>
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-xs font-semibold text-white">
+                  <div className="text-xs font-bold text-[#0D0431] bg-[#FEF9CF] px-3 py-1 rounded-full border-2 border-[#0D0431]">
                     {topRole.matchGrade}
                   </div>
-                  <p className="text-[11px] text-zinc-400">
+                  <p className="text-[11px] text-[#0D0431]/70 font-medium">
                     Calculated from 5 verified evidence tiers
                   </p>
                 </div>
 
-                <div className="flex flex-col w-full gap-2 pt-2">
-                  <button
+                <div className="flex flex-col w-full gap-2.5 pt-1">
+                  <CaideButton
                     onClick={() => setInspectedRole(topRole)}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#C7F36B] text-zinc-950 font-bold text-xs hover:bg-[#b5e357] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                    variant="stacked-yellow"
+                    size="sm"
+                    fullWidth
+                    icon={true}
                   >
-                    <span>Inspect Deep Evidence</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                    Inspect Deep Evidence
+                  </CaideButton>
 
                   {!topRole.isCurrentTarget ? (
-                    <button
+                    <CaideButton
                       onClick={() => setConfirmAdoptRole(topRole)}
-                      className="w-full py-2 px-3 rounded-xl bg-[#24231F] text-zinc-300 hover:text-white hover:bg-[#2E2C26] border border-[#3A3831] font-medium text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                      variant="secondary"
+                      size="sm"
+                      fullWidth
+                      icon={false}
                     >
-                      <Target className="w-3.5 h-3.5 text-[#C7F36B]" />
-                      <span>Make This My Target</span>
-                    </button>
+                      <span className="flex items-center justify-center gap-1.5">
+                        <Target className="w-3.5 h-3.5 text-[#0D0431]" />
+                        <span>Make This My Target</span>
+                      </span>
+                    </CaideButton>
                   ) : (
-                    <div className="text-[11px] font-mono text-[#C7F36B] flex items-center justify-center gap-1 py-1.5">
+                    <div className="text-[11px] font-mono font-bold text-[#0D0431] bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] rounded-xl flex items-center justify-center gap-1 py-1.5">
                       <Check className="w-3.5 h-3.5" /> Active Platform Target
                     </div>
                   )}
                 </div>
               </div>
             </div>
-          </section>
+          </CaideCard>
         )}
 
         {/* ========================================================================= */}
         {/* 4. CONTROLS, SEARCH, AND MODE SELECTORS */}
         {/* ========================================================================= */}
-        <section className="gsap-fade-in flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl bg-[#181714] border border-[#2E2C26]">
+        <CaideCard
+          theme="white"
+          shadow="default"
+          className="gsap-fade-in flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl"
+        >
           {/* Category Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategoryFilter(cat.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
-                  activeCategoryFilter === cat.id
-                    ? "bg-[#C7F36B] text-zinc-950 font-semibold shadow-sm"
-                    : "text-zinc-400 hover:text-white hover:bg-[#24231F]"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+            {categories.map((cat) => {
+              const isActive = activeCategoryFilter === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategoryFilter(cat.id)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] cursor-pointer ${
+                    isActive
+                      ? "bg-[#0D0431] text-[#FEF9CF]"
+                      : "bg-[#FEF9CF] text-[#0D0431] hover:bg-[#FEDF6A] hover:-translate-y-0.5"
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Right Actions: Search & Compare Mode Trigger */}
           <div className="flex items-center gap-3">
             <div className="relative flex-1 sm:w-60">
-              <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[#0D0431]/60 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search roles or skills..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#11110F] border border-[#3A3831] rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#C7F36B]/50 transition-colors"
+                className="w-full bg-white border-2 border-[#0D0431] rounded-xl pl-9 pr-3 py-1.5 text-xs text-[#0D0431] font-bold placeholder-[#0D0431]/40 shadow-[2px_2px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] transition-colors"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#0D0431]/60 hover:text-[#0D0431]"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
 
-            <button
+            <CaideButton
               onClick={() => {
                 if (compareList.length < 2 && !isCompareMode) {
                   // Pre-select top 2 roles if none selected
-                  const defaultSelected = evaluation.evaluatedRoles.slice(0, 2).map((r) => r.id);
+                  const defaultSelected = evaluation.evaluatedRoles
+                    .slice(0, 2)
+                    .map((r) => r.id);
                   setCompareList(defaultSelected);
                 }
                 setIsCompareMode(!isCompareMode);
               }}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-2 cursor-pointer ${
-                isCompareMode
-                  ? "bg-[#C7F36B]/15 text-[#C7F36B] border-[#C7F36B]/40"
-                  : "bg-[#24231F] text-zinc-300 border-[#3A3831] hover:text-white hover:bg-[#2E2C26]"
-              }`}
+              variant={isCompareMode ? "stacked-yellow" : "secondary"}
+              size="sm"
+              icon={false}
             >
-              <Columns className="w-3.5 h-3.5" />
-              <span>{isCompareMode ? "Exit Comparison" : "Compare Roles"}</span>
-              {compareList.length > 0 && (
-                <span className="w-4 h-4 rounded-full bg-[#C7F36B] text-zinc-950 text-[10px] flex items-center justify-center font-bold font-mono">
-                  {compareList.length}
-                </span>
-              )}
-            </button>
+              <span className="flex items-center gap-1.5 font-bold">
+                <Columns className="w-3.5 h-3.5" />
+                <span>{isCompareMode ? "Exit Compare" : "Compare Roles"}</span>
+                {compareList.length > 0 && (
+                  <span className="w-4 h-4 rounded-full bg-[#0D0431] text-[#FEF9CF] text-[10px] flex items-center justify-center font-bold font-mono">
+                    {compareList.length}
+                  </span>
+                )}
+              </span>
+            </CaideButton>
           </div>
-        </section>
+        </CaideCard>
 
         {/* ========================================================================= */}
         {/* 5. INTERACTIVE ROLE COMPARISON MODE (SIDE-BY-SIDE MATRIX) */}
@@ -535,49 +578,60 @@ export default function WhichRoleFitsMe() {
           <section className="gsap-fade-in space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Columns className="w-5 h-5 text-[#C7F36B]" />
+                <h3 className="text-xl font-heading font-black text-[#0D0431] flex items-center gap-2">
+                  <Columns className="w-5 h-5 text-[#0D0431]" />
                   Side-by-Side Role Alignment Matrix
                 </h3>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-[#0D0431]/80 font-medium">
                   Comparing {comparedRoles.length} target career tracks across hiring bars, skill gaps, compensation & readiness.
                 </p>
               </div>
-              <div className="text-xs text-zinc-400 font-mono">
+              <div className="text-xs text-[#0D0431] font-mono font-bold bg-[#FEDF6A] px-3 py-1 rounded-full border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                 Select 2 or 3 roles to compare
               </div>
             </div>
 
             {comparedRoles.length === 0 ? (
-              <div className="p-8 rounded-2xl bg-[#181714] border border-[#2E2C26] text-center text-zinc-400 text-xs">
+              <CaideCard
+                theme="white"
+                shadow="default"
+                className="p-8 rounded-2xl text-center text-[#0D0431]/70 font-bold text-xs"
+              >
                 No roles selected for comparison. Pick 2-3 roles from the grid below.
-              </div>
+              </CaideCard>
             ) : (
-              <div className="overflow-x-auto rounded-2xl border border-[#2E2C26] bg-[#161513]">
+              <CaideCard
+                theme="white"
+                shadow="lg"
+                className="overflow-x-auto rounded-3xl p-0"
+              >
                 <table className="w-full text-left border-collapse min-w-[700px]">
                   <thead>
-                    <tr className="border-b border-[#2E2C26] bg-[#1C1B17]">
-                      <th className="p-4 text-xs font-mono font-semibold text-zinc-400 w-1/4">
-                        DIMENSION / CRITERIA
+                    <tr className="border-b-2 border-[#0D0431] bg-[#FEF9CF]">
+                      <th className="p-4 text-xs font-heading font-black text-[#0D0431] w-1/4 uppercase tracking-wider">
+                        Dimension / Criteria
                       </th>
                       {comparedRoles.map((role) => (
-                        <th key={role.id} className="p-4 text-xs text-white font-bold w-1/3 border-l border-[#2E2C26]">
+                        <th
+                          key={role.id}
+                          className="p-4 text-xs text-[#0D0431] font-bold w-1/3 border-l-2 border-[#0D0431] bg-[#FEDF6A]/40"
+                        >
                           <div className="flex items-center justify-between">
-                            <span className="text-sm">{role.title}</span>
+                            <span className="text-sm font-heading font-black">{role.title}</span>
                             <button
                               onClick={() => toggleRoleCompare(role.id)}
-                              className="text-zinc-500 hover:text-rose-400 p-1 cursor-pointer"
+                              className="w-6 h-6 rounded-full bg-white border-2 border-[#0D0431] text-[#0D0431] hover:bg-[#FFC5B7] flex items-center justify-center cursor-pointer shadow-[1px_1px_0_0_#0D0431]"
                               title="Remove from comparison"
                             >
                               <X className="w-3.5 h-3.5" />
                             </button>
                           </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#C7F36B]/10 text-[#C7F36B] border border-[#C7F36B]/20">
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <span className="text-[11px] font-heading font-black px-2.5 py-0.5 rounded-full bg-[#FEDF6A] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                               {role.matchScore}% Match
                             </span>
                             {role.isCurrentTarget && (
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">
+                              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#E4CDFB] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                                 Current Target
                               </span>
                             )}
@@ -586,40 +640,48 @@ export default function WhichRoleFitsMe() {
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#2E2C26] text-xs">
+                  <tbody className="divide-y-2 divide-[#0D0431] text-xs">
                     {/* Overall Match Score */}
-                    <tr className="hover:bg-white/[0.01]">
-                      <td className="p-4 font-medium text-zinc-400 font-mono">
+                    <tr className="hover:bg-[#FEF9CF]/40">
+                      <td className="p-4 font-bold text-[#0D0431] font-heading">
                         Composite Match Score
                       </td>
                       {comparedRoles.map((role) => (
-                        <td key={role.id} className="p-4 border-l border-[#2E2C26]">
+                        <td key={role.id} className="p-4 border-l-2 border-[#0D0431]">
                           <div className="flex items-center gap-3">
-                            <div className="flex-1 bg-zinc-900 rounded-full h-2 overflow-hidden border border-zinc-800">
+                            <div className="flex-1 bg-white rounded-full h-3 overflow-hidden border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]">
                               <div
-                                className="bg-[#C7F36B] h-full rounded-full transition-all"
+                                className="bg-[#FEDF6A] h-full rounded-full transition-all"
                                 style={{ width: `${role.matchScore}%` }}
                               />
                             </div>
-                            <span className="font-mono font-bold text-white text-sm">
+                            <span className="font-heading font-black text-[#0D0431] text-base">
                               {role.matchScore}%
                             </span>
                           </div>
-                          <span className="text-[10px] text-zinc-500">{role.matchGrade}</span>
+                          <span className="text-[11px] text-[#0D0431]/70 font-bold mt-1 inline-block">
+                            {role.matchGrade}
+                          </span>
                         </td>
                       ))}
                     </tr>
 
                     {/* Verified Strengths / Evidence */}
-                    <tr className="hover:bg-white/[0.01]">
-                      <td className="p-4 font-medium text-zinc-400 font-mono">
+                    <tr className="hover:bg-[#FEF9CF]/40">
+                      <td className="p-4 font-bold text-[#0D0431] font-heading">
                         Strongest Matching Signals
                       </td>
                       {comparedRoles.map((role) => (
-                        <td key={role.id} className="p-4 border-l border-[#2E2C26] space-y-1.5">
+                        <td
+                          key={role.id}
+                          className="p-4 border-l-2 border-[#0D0431] space-y-1.5"
+                        >
                           {role.strongMatchingEvidence.map((ev, i) => (
-                            <div key={i} className="flex items-start gap-1.5 text-zinc-300">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-[#C7F36B] shrink-0 mt-0.5" />
+                            <div
+                              key={i}
+                              className="flex items-start gap-1.5 text-[#0D0431] font-medium bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] p-1.5 rounded-xl text-xs"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 text-[#0D0431] shrink-0 mt-0.5" />
                               <span className="leading-tight">{ev}</span>
                             </div>
                           ))}
@@ -628,24 +690,30 @@ export default function WhichRoleFitsMe() {
                     </tr>
 
                     {/* Skill Gaps */}
-                    <tr className="hover:bg-white/[0.01]">
-                      <td className="p-4 font-medium text-zinc-400 font-mono">
+                    <tr className="hover:bg-[#FEF9CF]/40">
+                      <td className="p-4 font-bold text-[#0D0431] font-heading">
                         Critical Skill Gaps
                       </td>
                       {comparedRoles.map((role) => (
-                        <td key={role.id} className="p-4 border-l border-[#2E2C26] space-y-1.5">
+                        <td
+                          key={role.id}
+                          className="p-4 border-l-2 border-[#0D0431] space-y-1.5"
+                        >
                           {role.missingSkills.length > 0 ? (
                             role.missingSkills.map((gap, i) => (
-                              <div key={i} className="flex items-center justify-between text-zinc-300 bg-[#24231F] px-2.5 py-1 rounded-md border border-white/[0.04]">
+                              <div
+                                key={i}
+                                className="flex items-center justify-between text-[#0D0431] bg-[#FFC5B7] px-2.5 py-1 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] font-bold"
+                              >
                                 <span>{gap.skill}</span>
-                                <span className="text-[10px] font-mono text-amber-400 font-bold">
+                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white text-[#0D0431] border border-[#0D0431]">
                                   {gap.priority}
                                 </span>
                               </div>
                             ))
                           ) : (
-                            <span className="text-emerald-400 text-[11px] font-mono flex items-center gap-1">
-                              <Check className="w-3 h-3 text-emerald-400" />
+                            <span className="text-[#0D0431] text-[11px] font-bold bg-[#D4FDF7] px-3 py-1.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1.5">
+                              <Check className="w-3.5 h-3.5" />
                               All core benchmark skills verified
                             </span>
                           )}
@@ -654,16 +722,16 @@ export default function WhichRoleFitsMe() {
                     </tr>
 
                     {/* LeetCode & Problem Solving Bar */}
-                    <tr className="hover:bg-white/[0.01]">
-                      <td className="p-4 font-medium text-zinc-400 font-mono">
+                    <tr className="hover:bg-[#FEF9CF]/40">
+                      <td className="p-4 font-bold text-[#0D0431] font-heading">
                         DSA & Algorithmic Bar
                       </td>
                       {comparedRoles.map((role) => (
-                        <td key={role.id} className="p-4 border-l border-[#2E2C26]">
-                          <div className="font-semibold text-white">
+                        <td key={role.id} className="p-4 border-l-2 border-[#0D0431]">
+                          <div className="font-heading font-black text-[#0D0431] text-sm">
                             {role.targetDsaSolvedCount}+ Target Solved
                           </div>
-                          <div className="text-[11px] text-zinc-400 mt-0.5">
+                          <div className="text-[11px] text-[#0D0431]/80 mt-0.5 font-medium">
                             Focus: {role.idealCoursework[0] || "Advanced Algorithms"}
                           </div>
                         </td>
@@ -671,16 +739,16 @@ export default function WhichRoleFitsMe() {
                     </tr>
 
                     {/* Average Compensation */}
-                    <tr className="hover:bg-white/[0.01]">
-                      <td className="p-4 font-medium text-zinc-400 font-mono">
+                    <tr className="hover:bg-[#FEF9CF]/40">
+                      <td className="p-4 font-bold text-[#0D0431] font-heading">
                         Compensation Benchmark
                       </td>
                       {comparedRoles.map((role) => (
-                        <td key={role.id} className="p-4 border-l border-[#2E2C26]">
-                          <div className="font-mono font-bold text-[#C7F36B] text-sm">
+                        <td key={role.id} className="p-4 border-l-2 border-[#0D0431]">
+                          <div className="font-heading font-black text-[#0D0431] text-base">
                             {role.avgCompensation.inrRange}
                           </div>
-                          <div className="text-[10px] text-zinc-400">
+                          <div className="text-[10px] text-[#0D0431]/70 font-medium">
                             Entry: {role.avgCompensation.entryLevel} • Senior: {role.avgCompensation.seniorLevel}
                           </div>
                         </td>
@@ -688,12 +756,12 @@ export default function WhichRoleFitsMe() {
                     </tr>
 
                     {/* Top Hiring Companies */}
-                    <tr className="hover:bg-white/[0.01]">
-                      <td className="p-4 font-medium text-zinc-400 font-mono">
+                    <tr className="hover:bg-[#FEF9CF]/40">
+                      <td className="p-4 font-bold text-[#0D0431] font-heading">
                         Top Hiring Employers
                       </td>
                       {comparedRoles.map((role) => (
-                        <td key={role.id} className="p-4 border-l border-[#2E2C26] text-zinc-300">
+                        <td key={role.id} className="p-4 border-l-2 border-[#0D0431] text-[#0D0431] font-bold">
                           {role.topHiringCompanies.slice(0, 5).join(" • ")}
                         </td>
                       ))}
@@ -701,28 +769,39 @@ export default function WhichRoleFitsMe() {
 
                     {/* Actions */}
                     <tr>
-                      <td className="p-4 font-medium text-zinc-400 font-mono">
+                      <td className="p-4 font-bold text-[#0D0431] font-heading">
                         Target Adoption & Actions
                       </td>
                       {comparedRoles.map((role) => (
-                        <td key={role.id} className="p-4 border-l border-[#2E2C26] space-y-2">
-                          <button
+                        <td
+                          key={role.id}
+                          className="p-4 border-l-2 border-[#0D0431] space-y-2"
+                        >
+                          <CaideButton
                             onClick={() => setInspectedRole(role)}
-                            className="w-full py-1.5 px-3 rounded-lg bg-[#24231F] text-zinc-200 hover:text-white border border-[#3A3831] font-medium text-xs transition-colors cursor-pointer"
+                            variant="secondary"
+                            size="sm"
+                            fullWidth
+                            icon={false}
                           >
                             Inspect Full Evidence
-                          </button>
+                          </CaideButton>
                           {!role.isCurrentTarget ? (
-                            <button
+                            <CaideButton
                               onClick={() => setConfirmAdoptRole(role)}
-                              className="w-full py-1.5 px-3 rounded-lg bg-[#C7F36B] text-zinc-950 font-bold text-xs hover:bg-[#b5e357] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                              variant="stacked-yellow"
+                              size="sm"
+                              fullWidth
+                              icon={false}
                             >
-                              <Target className="w-3.5 h-3.5" />
-                              <span>Make This Target</span>
-                            </button>
+                              <span className="flex items-center justify-center gap-1.5">
+                                <Target className="w-3.5 h-3.5" />
+                                <span>Make This Target</span>
+                              </span>
+                            </CaideButton>
                           ) : (
-                            <div className="text-[11px] font-mono text-[#C7F36B] text-center flex items-center justify-center gap-1">
-                              <Check className="w-3 h-3 text-[#C7F36B]" />
+                            <div className="text-[11px] font-mono font-bold text-[#0D0431] bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] rounded-xl text-center flex items-center justify-center gap-1 py-1.5">
+                              <Check className="w-3.5 h-3.5" />
                               Active Target
                             </div>
                           )}
@@ -731,7 +810,7 @@ export default function WhichRoleFitsMe() {
                     </tr>
                   </tbody>
                 </table>
-              </div>
+              </CaideCard>
             )}
           </section>
         ) : null}
@@ -742,52 +821,60 @@ export default function WhichRoleFitsMe() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Award className="w-5 h-5 text-[#C7F36B]" />
-              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+              <Award className="w-5 h-5 text-[#0D0431]" />
+              <h3 className="text-lg sm:text-xl font-heading font-black text-[#0D0431] tracking-tight">
                 Ranked Best Role Matches ({filteredRoles.length})
               </h3>
             </div>
-            <span className="text-xs text-zinc-400 font-mono">
-              Sorted by Multi-Evidence Percentage
-            </span>
+            <CaideBadge theme="light-purple" size="sm">
+              Sorted by Multi-Evidence %
+            </CaideBadge>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredRoles.map((role, index) => {
-              const isTop = index === 0 && activeCategoryFilter === "all" && !searchQuery;
+              const isTop =
+                index === 0 && activeCategoryFilter === "all" && !searchQuery;
               const isCheckedForCompare = compareList.includes(role.id);
 
+              const cardTheme = isTop
+                ? "light-yellow"
+                : index === 1
+                ? "light-purple"
+                : index === 2
+                ? "light-green"
+                : "white";
+
               return (
-                <div
+                <CaideCard
                   key={role.id}
-                  className={`gsap-fade-in group relative rounded-2xl p-5 transition-all duration-200 flex flex-col justify-between border ${
-                    isTop
-                      ? "bg-gradient-to-b from-[#1F1E1A] to-[#161513] border-[#C7F36B]/40 shadow-[0_4px_20px_rgba(199,243,107,0.06)]"
-                      : "bg-[#181714] border-[#2E2C26] hover:border-[#3A3831] hover:bg-[#1C1B17]"
-                  }`}
+                  theme={cardTheme}
+                  shadow="default"
+                  hoverEffect
+                  className="gsap-fade-in p-5 rounded-3xl flex flex-col justify-between"
                 >
                   {/* Card Header */}
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs font-bold text-zinc-500">
+                        <span className="font-heading font-black text-xs text-[#0D0431] bg-white px-2 py-0.5 rounded-md border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]">
                           #{index + 1}
                         </span>
                         {isTop ? (
-                          <span className="px-2 py-0.5 rounded-full bg-[#C7F36B] text-zinc-950 font-bold text-[10px]">
+                          <CaideBadge theme="yellow" size="sm">
                             Top Match
-                          </span>
+                          </CaideBadge>
                         ) : index === 1 ? (
-                          <span className="px-2 py-0.5 rounded-full bg-zinc-700 text-zinc-200 font-semibold text-[10px]">
+                          <CaideBadge theme="light-purple" size="sm">
                             Rank 2
-                          </span>
+                          </CaideBadge>
                         ) : index === 2 ? (
-                          <span className="px-2 py-0.5 rounded-full bg-amber-700/60 text-amber-200 font-semibold text-[10px]">
+                          <CaideBadge theme="mint" size="sm">
                             Rank 3
-                          </span>
+                          </CaideBadge>
                         ) : null}
 
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-zinc-400 border border-white/[0.06]">
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-white text-[#0D0431] border-2 border-[#0D0431]">
                           {role.category}
                         </span>
                       </div>
@@ -798,46 +885,48 @@ export default function WhichRoleFitsMe() {
                           e.stopPropagation();
                           toggleRoleCompare(role.id);
                         }}
-                        className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                        className={`p-1.5 rounded-xl border-2 border-[#0D0431] transition-all cursor-pointer shadow-[2px_2px_0_0_#0D0431] ${
                           isCheckedForCompare
-                            ? "bg-[#C7F36B] text-zinc-950 border-[#C7F36B]"
-                            : "bg-[#24231F] text-zinc-400 border-[#3A3831] hover:text-white"
+                            ? "bg-[#0D0431] text-[#FEF9CF]"
+                            : "bg-white text-[#0D0431] hover:bg-[#FEDF6A]"
                         }`}
-                        title={isCheckedForCompare ? "Remove from comparison" : "Add to comparison"}
+                        title={
+                          isCheckedForCompare
+                            ? "Remove from comparison"
+                            : "Add to comparison"
+                        }
                       >
                         {isCheckedForCompare ? (
-                          <CheckSquare className="w-3.5 h-3.5" />
+                          <CheckSquare className="w-4 h-4" />
                         ) : (
-                          <Square className="w-3.5 h-3.5" />
+                          <Square className="w-4 h-4" />
                         )}
                       </button>
                     </div>
 
                     <div>
                       <div className="flex items-center justify-between">
-                        <h4 className="text-base font-bold text-white group-hover:text-[#C7F36B] transition-colors">
+                        <h4 className="text-lg font-heading font-black text-[#0D0431]">
                           {role.title}
                         </h4>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-xl font-mono font-black text-white">
-                            {role.matchScore}%
-                          </span>
-                        </div>
+                        <span className="text-2xl font-heading font-black text-[#0D0431]">
+                          {role.matchScore}%
+                        </span>
                       </div>
-                      <p className="text-xs text-zinc-400 mt-1 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-[#0D0431]/80 font-medium mt-1 line-clamp-2 leading-relaxed">
                         {role.summary}
                       </p>
                     </div>
 
                     {/* Match Score Progress Bar */}
                     <div className="space-y-1">
-                      <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-zinc-500">Alignment Bar</span>
-                        <span className="text-[#C7F36B] font-semibold">{role.matchGrade}</span>
+                      <div className="flex items-center justify-between text-[11px] font-mono font-bold">
+                        <span className="text-[#0D0431]/70">Alignment Bar</span>
+                        <span className="text-[#0D0431] font-heading">{role.matchGrade}</span>
                       </div>
-                      <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden border border-zinc-800">
+                      <div className="w-full bg-white h-2 rounded-full overflow-hidden border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]">
                         <div
-                          className="bg-[#C7F36B] h-full rounded-full transition-all duration-500"
+                          className="bg-[#FEDF6A] h-full rounded-full transition-all duration-500"
                           style={{ width: `${role.matchScore}%` }}
                         />
                       </div>
@@ -845,16 +934,18 @@ export default function WhichRoleFitsMe() {
 
                     {/* Key Matching Evidence */}
                     <div className="space-y-1.5 pt-1">
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-[#0D0431]/70 font-bold">
                         Key Alignment Signals
                       </span>
                       <div className="space-y-1">
                         {role.strongMatchingEvidence.slice(0, 2).map((ev, i) => (
                           <div
                             key={i}
-                            className="flex items-center gap-1.5 text-xs text-zinc-300 truncate"
+                            className="flex items-center gap-1.5 text-xs font-bold text-[#0D0431] bg-white px-2.5 py-1.5 rounded-xl border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] truncate"
                           >
-                            <CheckCircle2 className="w-3 h-3 text-[#C7F36B] shrink-0" />
+                            <div className="w-3.5 h-3.5 rounded-md bg-[#D4FDF7] border border-[#0D0431] flex items-center justify-center shrink-0">
+                              <Check className="w-2.5 h-2.5 text-[#0D0431]" />
+                            </div>
                             <span className="truncate">{ev}</span>
                           </div>
                         ))}
@@ -864,14 +955,14 @@ export default function WhichRoleFitsMe() {
                     {/* Gaps Preview */}
                     {role.missingSkills.length > 0 && (
                       <div className="pt-1">
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-[#0D0431]/70 font-bold">
                           Priority Gaps ({role.missingSkills.length})
                         </span>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {role.missingSkills.slice(0, 3).map((gap, i) => (
                             <span
                               key={i}
-                              className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20"
+                              className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-[#FFC5B7] text-[#0D0431] border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]"
                             >
                               {gap.skill}
                             </span>
@@ -881,42 +972,47 @@ export default function WhichRoleFitsMe() {
                     )}
 
                     {/* Package and hiring companies */}
-                    <div className="pt-2 border-t border-[#2E2C26] flex items-center justify-between text-xs">
-                      <span className="text-zinc-400 font-mono text-[11px]">
-                        Avg: <span className="text-[#C7F36B] font-semibold">{role.avgCompensation.inrRange}</span>
+                    <div className="pt-2 border-t-2 border-[#0D0431] flex items-center justify-between text-xs">
+                      <span className="text-[#0D0431] font-mono text-[11px] font-bold">
+                        Avg: <span className="font-heading font-black">{role.avgCompensation.inrRange}</span>
                       </span>
-                      <span className="text-zinc-500 text-[11px] truncate max-w-[140px]">
+                      <span className="text-[#0D0431]/80 font-bold text-[11px] truncate max-w-[140px]">
                         {role.topHiringCompanies.slice(0, 2).join(", ")}
                       </span>
                     </div>
                   </div>
 
                   {/* Card Actions Footer */}
-                  <div className="pt-4 mt-3 border-t border-[#2E2C26] flex items-center gap-2">
-                    <button
+                  <div className="pt-4 mt-3 border-t-2 border-[#0D0431] flex items-center gap-2">
+                    <CaideButton
                       onClick={() => setInspectedRole(role)}
-                      className="flex-1 py-2 px-3 rounded-xl bg-[#24231F] text-zinc-200 hover:text-white hover:bg-[#2E2C26] border border-[#3A3831] font-medium text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                      variant="secondary"
+                      size="sm"
+                      fullWidth
+                      icon={true}
                     >
-                      <span>Inspect Details</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
+                      Inspect Details
+                    </CaideButton>
 
                     {!role.isCurrentTarget ? (
-                      <button
+                      <CaideButton
                         onClick={() => setConfirmAdoptRole(role)}
-                        className="py-2 px-3 rounded-xl bg-[#C7F36B] text-zinc-950 font-bold text-xs hover:bg-[#b5e357] transition-all flex items-center justify-center gap-1 cursor-pointer shadow-sm"
-                        title="Make this your platform target role"
+                        variant="stacked-yellow"
+                        size="sm"
+                        icon={false}
                       >
-                        <Target className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Set Target</span>
-                      </button>
+                        <span className="flex items-center gap-1 font-bold">
+                          <Target className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Target</span>
+                        </span>
+                      </CaideButton>
                     ) : (
-                      <div className="px-2.5 py-1.5 rounded-xl bg-purple-500/15 text-purple-300 text-[11px] font-mono border border-purple-500/30 flex items-center gap-1">
+                      <div className="px-3 py-1.5 rounded-xl bg-[#D4FDF7] text-[#0D0431] text-[11px] font-mono font-bold border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1 shrink-0">
                         <Check className="w-3 h-3" /> Target
                       </div>
                     )}
                   </div>
-                </div>
+                </CaideCard>
               );
             })}
           </div>
@@ -927,107 +1023,110 @@ export default function WhichRoleFitsMe() {
       {/* 7. DEEP ROLE INSPECTION MODAL / DRAWER */}
       {/* ========================================================================= */}
       {inspectedRole && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-          <div className="relative w-full max-w-4xl rounded-3xl bg-[#161513] border border-[#3A3831] shadow-2xl overflow-hidden my-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0D0431]/80 backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-4xl rounded-3xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[8px_8px_0_0_#0D0431] overflow-hidden my-8 flex flex-col">
             {/* Modal Header */}
-            <div className="p-6 border-b border-[#2E2C26] bg-[#1C1B17] flex items-start justify-between gap-4">
-              <div className="space-y-1">
+            <div className="p-6 border-b-2 border-[#0D0431] bg-[#FEDF6A] flex items-start justify-between gap-4">
+              <div className="space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#C7F36B] text-zinc-950 font-bold text-xs">
+                  <CaideBadge theme="dark" size="sm">
                     {inspectedRole.matchScore}% Match
-                  </span>
-                  <span className="px-2 py-0.5 rounded bg-white/[0.06] text-zinc-400 font-mono text-xs">
+                  </CaideBadge>
+                  <span className="px-3 py-0.5 rounded-full bg-white text-[#0D0431] font-mono text-xs font-bold border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]">
                     {inspectedRole.category}
                   </span>
                   {inspectedRole.isCurrentTarget && (
-                    <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-xs font-mono">
+                    <CaideBadge theme="mint" size="sm">
                       Current Target
-                    </span>
+                    </CaideBadge>
                   )}
                 </div>
-                <h2 className="text-2xl font-extrabold text-white">
+                <h2 className="text-2xl sm:text-3xl font-heading font-black text-[#0D0431]">
                   {inspectedRole.title}
                 </h2>
-                <p className="text-xs text-zinc-400 max-w-2xl">
+                <p className="text-xs text-[#0D0431]/85 font-medium max-w-2xl">
                   {inspectedRole.summary}
                 </p>
               </div>
 
               <button
                 onClick={() => setInspectedRole(null)}
-                className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full border-2 border-[#0D0431] bg-white hover:bg-[#FFC5B7] text-[#0D0431] flex items-center justify-center shadow-[2px_2px_0_0_#0D0431] transition-colors cursor-pointer shrink-0"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Modal Navigation Tabs */}
-            <div className="flex items-center gap-2 px-6 pt-3 border-b border-[#2E2C26] bg-[#161513]">
-              <button
-                onClick={() => setInspectedTab("evidence")}
-                className={`pb-3 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
-                  inspectedTab === "evidence"
-                    ? "border-[#C7F36B] text-[#C7F36B]"
-                    : "border-transparent text-zinc-400 hover:text-white"
-                }`}
-              >
-                Evidence & Alignment
-              </button>
-              <button
-                onClick={() => setInspectedTab("bridge")}
-                className={`pb-3 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
-                  inspectedTab === "bridge"
-                    ? "border-[#C7F36B] text-[#C7F36B]"
-                    : "border-transparent text-zinc-400 hover:text-white"
-                }`}
-              >
-                Actionable Skill Bridge
-              </button>
-              <button
-                onClick={() => setInspectedTab("jobs")}
-                className={`pb-3 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
-                  inspectedTab === "jobs"
-                    ? "border-[#C7F36B] text-[#C7F36B]"
-                    : "border-transparent text-zinc-400 hover:text-white"
-                }`}
-              >
-                Hiring Loops & Open Positions ({inspectedRole.matchedJobs.length})
-              </button>
+            <div className="flex items-center gap-2 px-6 pt-3 border-b-2 border-[#0D0431] bg-[#FEF9CF]">
+              {[
+                { id: "evidence", label: "Evidence & Alignment" },
+                { id: "bridge", label: "Actionable Skill Bridge" },
+                {
+                  id: "jobs",
+                  label: `Hiring Loops & Open Positions (${inspectedRole.matchedJobs.length})`,
+                },
+              ].map((tab) => {
+                const isActive = inspectedTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setInspectedTab(tab.id)}
+                    className={`pb-3 px-3.5 text-xs font-heading font-bold border-b-4 transition-all cursor-pointer ${
+                      isActive
+                        ? "border-[#0D0431] text-[#0D0431]"
+                        : "border-transparent text-[#0D0431]/60 hover:text-[#0D0431]"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Modal Body Content */}
-            <div className="p-6 space-y-6 max-h-[65vh] overflow-y-auto">
+            <div className="p-6 space-y-6 max-h-[65vh] overflow-y-auto bg-[#FEF9CF]">
               {inspectedTab === "evidence" && (
                 <div className="space-y-6">
                   {/* Dimension score gauges */}
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                    <div className="p-3 rounded-xl bg-[#24231F] border border-[#3A3831] text-center">
-                      <span className="text-[10px] font-mono text-zinc-400 uppercase">Skills (28%)</span>
-                      <div className="text-lg font-bold text-white font-mono mt-0.5">
+                    <div className="p-3 rounded-2xl bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-center">
+                      <span className="text-[10px] font-mono text-[#0D0431] uppercase font-bold">
+                        Skills (28%)
+                      </span>
+                      <div className="text-xl font-heading font-black text-[#0D0431] mt-0.5">
                         {inspectedRole.dimensionScores.skills}%
                       </div>
                     </div>
-                    <div className="p-3 rounded-xl bg-[#24231F] border border-[#3A3831] text-center">
-                      <span className="text-[10px] font-mono text-zinc-400 uppercase">GitHub (24%)</span>
-                      <div className="text-lg font-bold text-white font-mono mt-0.5">
+                    <div className="p-3 rounded-2xl bg-[#CDE1FF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-center">
+                      <span className="text-[10px] font-mono text-[#0D0431] uppercase font-bold">
+                        GitHub (24%)
+                      </span>
+                      <div className="text-xl font-heading font-black text-[#0D0431] mt-0.5">
                         {inspectedRole.dimensionScores.github}%
                       </div>
                     </div>
-                    <div className="p-3 rounded-xl bg-[#24231F] border border-[#3A3831] text-center">
-                      <span className="text-[10px] font-mono text-zinc-400 uppercase">LeetCode (20%)</span>
-                      <div className="text-lg font-bold text-white font-mono mt-0.5">
+                    <div className="p-3 rounded-2xl bg-[#E4CDFB] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-center">
+                      <span className="text-[10px] font-mono text-[#0D0431] uppercase font-bold">
+                        LeetCode (20%)
+                      </span>
+                      <div className="text-xl font-heading font-black text-[#0D0431] mt-0.5">
                         {inspectedRole.dimensionScores.dsa}%
                       </div>
                     </div>
-                    <div className="p-3 rounded-xl bg-[#24231F] border border-[#3A3831] text-center">
-                      <span className="text-[10px] font-mono text-zinc-400 uppercase">Resume ATS (16%)</span>
-                      <div className="text-lg font-bold text-white font-mono mt-0.5">
+                    <div className="p-3 rounded-2xl bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-center">
+                      <span className="text-[10px] font-mono text-[#0D0431] uppercase font-bold">
+                        Resume ATS (16%)
+                      </span>
+                      <div className="text-xl font-heading font-black text-[#0D0431] mt-0.5">
                         {inspectedRole.dimensionScores.resume}%
                       </div>
                     </div>
-                    <div className="p-3 rounded-xl bg-[#24231F] border border-[#3A3831] text-center">
-                      <span className="text-[10px] font-mono text-zinc-400 uppercase">Academics (12%)</span>
-                      <div className="text-lg font-bold text-white font-mono mt-0.5">
+                    <div className="p-3 rounded-2xl bg-[#FFC5B7] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-center">
+                      <span className="text-[10px] font-mono text-[#0D0431] uppercase font-bold">
+                        Academics (12%)
+                      </span>
+                      <div className="text-xl font-heading font-black text-[#0D0431] mt-0.5">
                         {inspectedRole.dimensionScores.academics}%
                       </div>
                     </div>
@@ -1036,8 +1135,8 @@ export default function WhichRoleFitsMe() {
                   {/* You Have vs You Need */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* You Have */}
-                    <div className="p-4 rounded-2xl bg-[#1C1B17] border border-emerald-500/20 space-y-3">
-                      <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs font-mono uppercase tracking-wider">
+                    <div className="p-5 rounded-3xl bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-3">
+                      <div className="flex items-center gap-2 text-[#0D0431] font-heading font-black text-xs uppercase tracking-wider">
                         <CheckCircle2 className="w-4 h-4" />
                         <span>You Have (Verified Evidence)</span>
                       </div>
@@ -1045,9 +1144,9 @@ export default function WhichRoleFitsMe() {
                         {inspectedRole.strongMatchingEvidence.map((ev, i) => (
                           <div
                             key={i}
-                            className="flex items-start gap-2 text-xs text-zinc-200 bg-[#24231F] p-2 rounded-lg"
+                            className="flex items-start gap-2 text-xs font-bold text-[#0D0431] bg-white p-2.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
                           >
-                            <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+                            <Check className="w-3.5 h-3.5 text-[#0D0431] mt-0.5 shrink-0" />
                             <span>{ev}</span>
                           </div>
                         ))}
@@ -1055,8 +1154,8 @@ export default function WhichRoleFitsMe() {
                     </div>
 
                     {/* You Need */}
-                    <div className="p-4 rounded-2xl bg-[#1C1B17] border border-amber-500/20 space-y-3">
-                      <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs font-mono uppercase tracking-wider">
+                    <div className="p-5 rounded-3xl bg-[#FFC5B7] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-3">
+                      <div className="flex items-center gap-2 text-[#0D0431] font-heading font-black text-xs uppercase tracking-wider">
                         <AlertTriangle className="w-4 h-4" />
                         <span>You Need (Gaps to Close)</span>
                       </div>
@@ -1065,19 +1164,19 @@ export default function WhichRoleFitsMe() {
                           inspectedRole.missingSkills.map((gap, i) => (
                             <div
                               key={i}
-                              className="flex items-center justify-between text-xs text-zinc-200 bg-[#24231F] p-2 rounded-lg"
+                              className="flex items-center justify-between text-xs font-bold text-[#0D0431] bg-white p-2.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
                             >
                               <div className="flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                <span className="w-2 h-2 rounded-full bg-[#F85B52]" />
                                 <span>{gap.skill}</span>
                               </div>
-                              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300">
+                              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#FEDF6A] text-[#0D0431] border border-[#0D0431]">
                                 {gap.priority} Priority
                               </span>
                             </div>
                           ))
                         ) : (
-                          <div className="text-xs text-zinc-400 p-2">
+                          <div className="text-xs text-[#0D0431] font-bold p-3 bg-white rounded-xl border-2 border-[#0D0431]">
                             All core requirements are already matched in your profile.
                           </div>
                         )}
@@ -1086,14 +1185,14 @@ export default function WhichRoleFitsMe() {
                   </div>
 
                   {/* Key Responsibilities */}
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-400 font-semibold">
+                  <div className="space-y-2 bg-white p-5 rounded-3xl border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431]">
+                    <h4 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
                       Role Responsibilities in Industry
                     </h4>
-                    <ul className="space-y-1.5 text-xs text-zinc-300">
+                    <ul className="space-y-2 text-xs font-medium text-[#0D0431]">
                       {inspectedRole.keyResponsibilities.map((resp, i) => (
                         <li key={i} className="flex items-start gap-2">
-                          <span className="text-[#C7F36B] font-bold">›</span>
+                          <span className="text-[#0D0431] font-bold">›</span>
                           <span>{resp}</span>
                         </li>
                       ))}
@@ -1105,75 +1204,83 @@ export default function WhichRoleFitsMe() {
               {inspectedTab === "bridge" && (
                 <div className="space-y-4">
                   <div>
-                    <h4 className="text-sm font-bold text-white">
+                    <h4 className="text-base font-heading font-black text-[#0D0431]">
                       Actionable Roadmap to 95%+ Fit
                     </h4>
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-xs text-[#0D0431]/80 font-medium">
                       Complete these platform preparation modules to bridge your skill gaps for {inspectedRole.title}.
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <Link
                       to="/app/dsa"
-                      className="p-4 rounded-xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 transition-all group flex flex-col justify-between space-y-2"
+                      className="p-4 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] hover:-translate-y-0.5 transition-all group flex flex-col justify-between space-y-2"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-white font-semibold text-xs">
-                          <Code2 className="w-4 h-4 text-[#C7F36B]" />
+                        <div className="flex items-center gap-2 text-[#0D0431] font-heading font-bold text-xs">
+                          <div className="p-1 rounded-md bg-[#FEDF6A] border border-[#0D0431]">
+                            <Code2 className="w-4 h-4 text-[#0D0431]" />
+                          </div>
                           <span>DSA Problem Solving Arena</span>
                         </div>
-                        <ArrowUpRight className="w-4 h-4 text-zinc-500 group-hover:text-[#C7F36B] transition-colors" />
+                        <ArrowUpRight className="w-4 h-4 text-[#0D0431] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                       </div>
-                      <p className="text-[11px] text-zinc-400">
+                      <p className="text-[11px] text-[#0D0431]/80 font-medium">
                         Target {inspectedRole.targetDsaSolvedCount}+ LeetCode pattern questions required by {inspectedRole.shortTitle} hiring bars.
                       </p>
                     </Link>
 
                     <Link
                       to="/app/coding"
-                      className="p-4 rounded-xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 transition-all group flex flex-col justify-between space-y-2"
+                      className="p-4 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] hover:-translate-y-0.5 transition-all group flex flex-col justify-between space-y-2"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-white font-semibold text-xs">
-                          <Layers className="w-4 h-4 text-blue-400" />
+                        <div className="flex items-center gap-2 text-[#0D0431] font-heading font-bold text-xs">
+                          <div className="p-1 rounded-md bg-[#CDE1FF] border border-[#0D0431]">
+                            <Layers className="w-4 h-4 text-[#0D0431]" />
+                          </div>
                           <span>CS Core & Machine Coding</span>
                         </div>
-                        <ArrowUpRight className="w-4 h-4 text-zinc-500 group-hover:text-blue-400 transition-colors" />
+                        <ArrowUpRight className="w-4 h-4 text-[#0D0431] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                       </div>
-                      <p className="text-[11px] text-zinc-400">
+                      <p className="text-[11px] text-[#0D0431]/80 font-medium">
                         Practice Low Level Design, SQL indexes, and concurrency for technical machine rounds.
                       </p>
                     </Link>
 
                     <Link
                       to="/app/roadmap"
-                      className="p-4 rounded-xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 transition-all group flex flex-col justify-between space-y-2"
+                      className="p-4 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] hover:-translate-y-0.5 transition-all group flex flex-col justify-between space-y-2"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-white font-semibold text-xs">
-                          <Target className="w-4 h-4 text-purple-400" />
+                        <div className="flex items-center gap-2 text-[#0D0431] font-heading font-bold text-xs">
+                          <div className="p-1 rounded-md bg-[#E4CDFB] border border-[#0D0431]">
+                            <Target className="w-4 h-4 text-[#0D0431]" />
+                          </div>
                           <span>Placement Milestone Roadmap</span>
                         </div>
-                        <ArrowUpRight className="w-4 h-4 text-zinc-500 group-hover:text-purple-400 transition-colors" />
+                        <ArrowUpRight className="w-4 h-4 text-[#0D0431] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                       </div>
-                      <p className="text-[11px] text-zinc-400">
+                      <p className="text-[11px] text-[#0D0431]/80 font-medium">
                         Follow a week-by-week curriculum tailored for {inspectedRole.title} specifications.
                       </p>
                     </Link>
 
                     <Link
                       to="/app/resume"
-                      className="p-4 rounded-xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 transition-all group flex flex-col justify-between space-y-2"
+                      className="p-4 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] hover:-translate-y-0.5 transition-all group flex flex-col justify-between space-y-2"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-white font-semibold text-xs">
-                          <FileText className="w-4 h-4 text-emerald-400" />
+                        <div className="flex items-center gap-2 text-[#0D0431] font-heading font-bold text-xs">
+                          <div className="p-1 rounded-md bg-[#D4FDF7] border border-[#0D0431]">
+                            <FileText className="w-4 h-4 text-[#0D0431]" />
+                          </div>
                           <span>Resume Keyword Optimizer</span>
                         </div>
-                        <ArrowUpRight className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
+                        <ArrowUpRight className="w-4 h-4 text-[#0D0431] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                       </div>
-                      <p className="text-[11px] text-zinc-400">
+                      <p className="text-[11px] text-[#0D0431]/80 font-medium">
                         Inject Google XYZ impact bullets and verified technical keywords for {inspectedRole.title}.
                       </p>
                     </Link>
@@ -1184,14 +1291,17 @@ export default function WhichRoleFitsMe() {
               {inspectedTab === "jobs" && (
                 <div className="space-y-4">
                   {/* Hiring loop breakdown */}
-                  <div className="p-4 rounded-2xl bg-[#1C1B17] border border-[#3A3831] space-y-2">
-                    <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-400 font-semibold">
+                  <div className="p-5 rounded-3xl bg-white border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-3">
+                    <h4 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
                       Standard Hiring Loop Structure
                     </h4>
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       {inspectedRole.hiringBars.map((bar, i) => (
-                        <div key={i} className="flex items-center gap-2 text-xs text-zinc-300">
-                          <span className="w-5 h-5 rounded-full bg-[#24231F] text-[#C7F36B] font-mono text-[10px] font-bold flex items-center justify-center shrink-0 border border-white/[0.04]">
+                        <div
+                          key={i}
+                          className="flex items-center gap-2.5 text-xs font-bold text-[#0D0431] bg-[#FEF9CF] p-2.5 rounded-xl border-2 border-[#0D0431]"
+                        >
+                          <span className="w-6 h-6 rounded-full bg-[#FEDF6A] text-[#0D0431] font-heading font-black text-xs flex items-center justify-center shrink-0 border-2 border-[#0D0431]">
                             {i + 1}
                           </span>
                           <span>{bar}</span>
@@ -1202,7 +1312,7 @@ export default function WhichRoleFitsMe() {
 
                   {/* Matched marketplace jobs */}
                   <div className="space-y-2">
-                    <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-400 font-semibold">
+                    <h4 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
                       Live Matching Openings ({inspectedRole.matchedJobs.length})
                     </h4>
                     {inspectedRole.matchedJobs.length > 0 ? (
@@ -1210,19 +1320,25 @@ export default function WhichRoleFitsMe() {
                         {inspectedRole.matchedJobs.map((job) => (
                           <div
                             key={job._id || job.id}
-                            className="p-3.5 rounded-xl bg-[#24231F] border border-[#3A3831] flex flex-col justify-between space-y-2"
+                            className="p-4 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] flex flex-col justify-between space-y-2"
                           >
                             <div>
-                              <div className="text-xs font-bold text-white">{job.title}</div>
-                              <div className="text-[11px] text-[#C7F36B] font-medium">
+                              <div className="text-xs font-heading font-black text-[#0D0431]">
+                                {job.title}
+                              </div>
+                              <div className="text-[11px] text-[#0D0431]/80 font-bold">
                                 {job.company || "Leading Employer"} • {job.location || "Remote / Hybrid"}
                               </div>
                             </div>
-                            <div className="flex items-center justify-between text-[11px] pt-2 border-t border-white/[0.04]">
-                              <span className="text-zinc-400 font-mono">{job.salary || "Competitive"}</span>
+                            <div className="flex items-center justify-between text-[11px] pt-2 border-t-2 border-[#0D0431]">
+                              <span className="text-[#0D0431] font-mono font-bold">
+                                {job.salary || "Competitive"}
+                              </span>
                               <Link
-                                to={`/app/can-i-apply?company=${encodeURIComponent(job.company || "")}&role=${encodeURIComponent(job.title || "")}`}
-                                className="text-[#C7F36B] hover:underline font-semibold flex items-center gap-1"
+                                to={`/app/can-i-apply?company=${encodeURIComponent(
+                                  job.company || ""
+                                )}&role=${encodeURIComponent(job.title || "")}`}
+                                className="text-[#0D0431] hover:underline font-heading font-bold flex items-center gap-1"
                               >
                                 Can I Apply?
                                 <ArrowRight className="w-3 h-3" />
@@ -1232,7 +1348,7 @@ export default function WhichRoleFitsMe() {
                         ))}
                       </div>
                     ) : (
-                      <div className="p-4 rounded-xl bg-[#1C1B17] border border-[#2E2C26] text-zinc-400 text-xs">
+                      <div className="p-4 rounded-2xl bg-white border-2 border-[#0D0431] text-[#0D0431]/70 font-bold text-xs text-center">
                         Browse all openings in the Job Matching arena.
                       </div>
                     )}
@@ -1242,34 +1358,39 @@ export default function WhichRoleFitsMe() {
             </div>
 
             {/* Modal Footer Actions */}
-            <div className="p-6 border-t border-[#2E2C26] bg-[#1C1B17] flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="text-xs text-zinc-400">
+            <div className="p-6 border-t-2 border-[#0D0431] bg-[#FEDF6A] flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-xs text-[#0D0431] font-bold">
                 Avg Compensation:{" "}
-                <span className="text-[#C7F36B] font-mono font-bold">
+                <span className="font-heading font-black text-sm text-[#0D0431]">
                   {inspectedRole.avgCompensation.inrRange}
                 </span>
               </div>
 
               <div className="flex items-center gap-3 w-full sm:w-auto">
-                <button
+                <CaideButton
                   onClick={() => setInspectedRole(null)}
-                  className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-[#24231F] text-zinc-300 hover:text-white border border-[#3A3831] text-xs font-medium cursor-pointer"
+                  variant="secondary"
+                  size="sm"
                 >
                   Close
-                </button>
+                </CaideButton>
 
                 {!inspectedRole.isCurrentTarget ? (
-                  <button
+                  <CaideButton
                     onClick={() => {
                       setConfirmAdoptRole(inspectedRole);
                     }}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-[#C7F36B] text-zinc-950 font-bold text-xs hover:bg-[#b5e357] transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                    variant="stacked-coral"
+                    size="sm"
+                    icon={false}
                   >
-                    <Target className="w-4 h-4" />
-                    <span>Make This My Target Career Role</span>
-                  </button>
+                    <span className="flex items-center gap-1.5 font-bold">
+                      <Target className="w-4 h-4" />
+                      <span>Make This My Target Career Role</span>
+                    </span>
+                  </CaideButton>
                 ) : (
-                  <div className="px-3 py-2 rounded-xl bg-purple-500/15 text-purple-300 text-xs font-mono border border-purple-500/30 flex items-center gap-1.5">
+                  <div className="px-4 py-2 rounded-xl bg-[#D4FDF7] text-[#0D0431] text-xs font-mono font-bold border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1.5">
                     <Check className="w-3.5 h-3.5" /> Current Target Role
                   </div>
                 )}
@@ -1283,33 +1404,33 @@ export default function WhichRoleFitsMe() {
       {/* 8. SAFE TARGET ROLE ADOPTION CONFIRMATION MODAL */}
       {/* ========================================================================= */}
       {confirmAdoptRole && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl bg-[#181714] border border-[#3A3831] p-6 shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0D0431]/80 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-[#FEF9CF] border-2 border-[#0D0431] p-6 shadow-[8px_8px_0_0_#0D0431] space-y-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#C7F36B]/15 text-[#C7F36B] flex items-center justify-center shrink-0 border border-[#C7F36B]/30">
-                <Target className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-2xl bg-[#FEDF6A] text-[#0D0431] flex items-center justify-center shrink-0 border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                <Target className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">
+                <h3 className="text-base font-heading font-black text-[#0D0431]">
                   Confirm Target Career Goal
                 </h3>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-[#0D0431]/70 font-medium">
                   Update your platform ambition
                 </p>
               </div>
             </div>
 
             {adoptSuccessMessage ? (
-              <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <div className="p-4 rounded-2xl bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-[#0D0431] text-xs font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-[#0D0431]" />
                 <span>{adoptSuccessMessage}</span>
               </div>
             ) : (
-              <div className="space-y-3 text-xs text-zinc-300 bg-[#24231F] p-4 rounded-2xl border border-white/[0.04]">
+              <div className="space-y-3 text-xs text-[#0D0431] bg-white p-4 rounded-2xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] font-medium">
                 <p>
-                  Set <strong className="text-white">"{confirmAdoptRole.title}"</strong> as your primary target career role?
+                  Set <strong className="font-heading font-black text-[#0D0431]">"{confirmAdoptRole.title}"</strong> as your primary target career role?
                 </p>
-                <ul className="space-y-1 text-zinc-400 text-[11px] list-disc list-inside">
+                <ul className="space-y-1 text-[#0D0431]/80 text-[11px] list-disc list-inside">
                   <li>Calculates gap benchmarks against {confirmAdoptRole.title} standards</li>
                   <li>Calibrates your personalized 8-week placement roadmap</li>
                   <li>Reranks job recommendations matching this specialization</li>
@@ -1318,30 +1439,35 @@ export default function WhichRoleFitsMe() {
             )}
 
             <div className="flex items-center gap-3 pt-2">
-              <button
+              <CaideButton
                 disabled={isAdopting}
                 onClick={() => setConfirmAdoptRole(null)}
-                className="flex-1 py-2 px-4 rounded-xl bg-[#24231F] text-zinc-300 hover:text-white border border-[#3A3831] text-xs font-semibold cursor-pointer transition-colors"
+                variant="secondary"
+                size="sm"
+                fullWidth
               >
                 Cancel
-              </button>
-              <button
+              </CaideButton>
+              <CaideButton
                 disabled={isAdopting}
                 onClick={handleExecuteAdoption}
-                className="flex-1 py-2 px-4 rounded-xl bg-[#C7F36B] text-zinc-950 hover:bg-[#b5e357] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                variant="stacked-yellow"
+                size="sm"
+                fullWidth
+                icon={false}
               >
                 {isAdopting ? (
-                  <>
+                  <span className="flex items-center justify-center gap-2">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     <span>Saving...</span>
-                  </>
+                  </span>
                 ) : (
-                  <>
+                  <span className="flex items-center justify-center gap-1.5 font-bold">
                     <Check className="w-3.5 h-3.5" />
                     <span>Confirm & Set Target</span>
-                  </>
+                  </span>
                 )}
-              </button>
+              </CaideButton>
             </div>
           </div>
         </div>

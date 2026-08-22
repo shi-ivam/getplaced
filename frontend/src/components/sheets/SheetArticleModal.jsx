@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { sheetsService } from "@/services/sheetsService";
 
-// Helper component to render formatted tutorial markdown nicely
+// Helper component to render formatted tutorial markdown nicely in Caide design
 function MarkdownRenderer({ content }) {
   if (!content) return null;
 
@@ -27,7 +27,7 @@ function MarkdownRenderer({ content }) {
   const parts = content.split(/(```[\s\S]*?```)/g);
 
   return (
-    <div className="space-y-4 text-zinc-300 text-sm leading-relaxed font-sans">
+    <div className="space-y-4 text-[#0D0431] text-sm leading-relaxed font-sans font-medium">
       {parts.map((part, index) => {
         if (part.startsWith("```")) {
           // Extract language and code
@@ -36,12 +36,12 @@ function MarkdownRenderer({ content }) {
           const code = part.slice(firstLineEnd + 1, -3);
 
           return (
-            <div key={index} className="my-4 rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950">
-              <div className="flex items-center justify-between px-4 py-1.5 bg-zinc-900/90 border-b border-zinc-800 text-xs font-mono text-zinc-400">
-                <span className="uppercase text-[11px] font-semibold text-purple-400">{lang}</span>
+            <div key={index} className="my-4 rounded-2xl overflow-hidden border-2 border-[#0D0431] bg-[#0D0431] shadow-[4px_4px_0_0_#0D0431]">
+              <div className="flex items-center justify-between px-4 py-2 bg-[#FEF9CF] border-b-2 border-[#0D0431] text-xs font-mono text-[#0D0431]">
+                <span className="uppercase text-[11px] font-black">{lang}</span>
                 <CopyButton text={code} />
               </div>
-              <pre className="p-4 overflow-x-auto text-xs font-mono text-emerald-300/90 leading-normal">
+              <pre className="p-4 overflow-x-auto text-xs font-mono text-emerald-300 leading-normal">
                 <code>{code}</code>
               </pre>
             </div>
@@ -59,22 +59,22 @@ function MarkdownRenderer({ content }) {
               // Headers
               if (trimmed.startsWith("### ")) {
                 return (
-                  <h4 key={lIdx} className="text-base font-bold text-white mt-4 mb-2 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                  <h4 key={lIdx} className="text-base font-heading font-black text-[#0D0431] mt-5 mb-2 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#896EE2] border border-[#0D0431]" />
                     {trimmed.replace("### ", "")}
                   </h4>
                 );
               }
               if (trimmed.startsWith("## ")) {
                 return (
-                  <h3 key={lIdx} className="text-lg font-bold text-white mt-5 mb-2.5 pb-1 border-b border-zinc-800/80">
+                  <h3 key={lIdx} className="text-lg font-heading font-black text-[#0D0431] mt-6 mb-3 pb-1 border-b-2 border-[#0D0431]/15">
                     {trimmed.replace("## ", "")}
                   </h3>
                 );
               }
               if (trimmed.startsWith("# ")) {
                 return (
-                  <h2 key={lIdx} className="text-xl font-extrabold text-white mt-6 mb-3">
+                  <h2 key={lIdx} className="text-xl font-heading font-black text-[#0D0431] mt-7 mb-4">
                     {trimmed.replace("# ", "")}
                   </h2>
                 );
@@ -84,8 +84,8 @@ function MarkdownRenderer({ content }) {
               if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
                 const bulletText = trimmed.replace(/^[-*]\s+/, "");
                 return (
-                  <div key={lIdx} className="flex items-start gap-2.5 ml-2 text-zinc-300">
-                    <span className="text-purple-400 font-bold shrink-0 mt-0.5">•</span>
+                  <div key={lIdx} className="flex items-start gap-2.5 ml-2 text-[#0D0431]">
+                    <span className="text-[#896EE2] font-mono font-bold shrink-0 mt-0.5">•</span>
                     <span>{formatInlineMarkdown(bulletText)}</span>
                   </div>
                 );
@@ -94,8 +94,8 @@ function MarkdownRenderer({ content }) {
               // Numbered points
               if (/^\d+\.\s/.test(trimmed)) {
                 return (
-                  <div key={lIdx} className="flex items-start gap-2.5 ml-2 text-zinc-300">
-                    <span className="text-purple-400 font-mono text-xs font-bold shrink-0 mt-0.5">
+                  <div key={lIdx} className="flex items-start gap-2.5 ml-2 text-[#0D0431]">
+                    <span className="text-[#896EE2] font-mono text-xs font-black shrink-0 mt-0.5">
                       {trimmed.match(/^\d+\./)[0]}
                     </span>
                     <span>{formatInlineMarkdown(trimmed.replace(/^\d+\.\s+/, ""))}</span>
@@ -103,7 +103,7 @@ function MarkdownRenderer({ content }) {
                 );
               }
 
-              return <p key={lIdx} className="text-zinc-300">{formatInlineMarkdown(line)}</p>;
+              return <p key={lIdx} className="text-[#0D0431]">{formatInlineMarkdown(line)}</p>;
             })}
           </div>
         );
@@ -118,7 +118,7 @@ function formatInlineMarkdown(text) {
   return boldParts.map((bPart, bIdx) => {
     if (bPart.startsWith("**") && bPart.endsWith("**")) {
       return (
-        <strong key={bIdx} className="font-semibold text-white">
+        <strong key={bIdx} className="font-heading font-black text-[#0D0431]">
           {bPart.slice(2, -2)}
         </strong>
       );
@@ -131,7 +131,7 @@ function formatInlineMarkdown(text) {
         return (
           <code
             key={`${bIdx}-${cIdx}`}
-            className="px-1.5 py-0.5 rounded bg-zinc-800/80 text-purple-300 font-mono text-xs border border-zinc-700/50"
+            className="px-1.5 py-0.5 rounded-lg bg-[#FEF9CF] text-[#0D0431] font-mono font-bold text-xs border border-[#0D0431]"
           >
             {cPart.slice(1, -1)}
           </code>
@@ -155,9 +155,9 @@ function CopyButton({ text }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer px-2 py-0.5 rounded bg-zinc-800/60"
+      className="flex items-center gap-1 hover:bg-[#FEDF6A] text-[#0D0431] transition-colors cursor-pointer px-2.5 py-1 rounded-lg bg-white border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] font-mono font-bold text-xs"
     >
-      {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+      {copied ? <Check className="w-3.5 h-3.5 text-[#0D0431]" /> : <Copy className="w-3.5 h-3.5 text-[#0D0431]" />}
       <span>{copied ? "Copied" : "Copy"}</span>
     </button>
   );
@@ -211,26 +211,26 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
   const snippetLangs = Object.keys(snippets);
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 md:p-6 select-text animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0D0431]/80 backdrop-blur-sm p-3 md:p-6 select-text animate-in fade-in duration-200">
       <div
-        className={`bg-[#0c0c0e] border border-zinc-800/90 rounded-3xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ${
+        className={`bg-white border-2 border-[#0D0431] rounded-3xl shadow-[8px_8px_0_0_#0D0431] flex flex-col overflow-hidden transition-all duration-300 ${
           isMaximized ? "w-full h-full max-w-none rounded-none" : "w-full max-w-5xl max-h-[92vh]"
         }`}
       >
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800/80 bg-zinc-950/80 shrink-0">
-          <div className="flex items-center gap-3 min-w-0 pr-4">
-            <div className="p-2 rounded-lg bg-zinc-900 text-zinc-300 border border-zinc-800 shrink-0">
+        {/* Modal Header (Caide Bento Style with #FEF9CF titlebar) */}
+        <div className="flex items-center justify-between px-6 py-4 bg-[#FEF9CF] border-b-2 border-[#0D0431] shrink-0">
+          <div className="flex items-center gap-3.5 min-w-0 pr-4">
+            <div className="p-2 rounded-xl bg-[#E4CDFB] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] shrink-0">
               <BookOpen className="w-4 h-4" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800">
+                <span className="text-[10px] font-mono uppercase font-bold px-2.5 py-0.5 rounded-full bg-white text-[#0D0431] border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]">
                   {article?.category || "Tutorial"}
                 </span>
-                <span className="text-xs text-zinc-500 font-mono">Reference Article</span>
+                <span className="text-xs text-[#0D0431]/70 font-mono font-bold">Reference Article</span>
               </div>
-              <h2 className="text-base sm:text-lg font-bold text-white truncate tracking-tight mt-0.5">
+              <h2 className="text-base sm:text-lg font-heading font-black text-[#0D0431] truncate tracking-tight mt-0.5">
                 {article?.title || "Loading Article..."}
               </h2>
             </div>
@@ -240,7 +240,7 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
             <button
               type="button"
               onClick={() => setIsMaximized(!isMaximized)}
-              className="p-2 text-zinc-400 hover:text-white rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors"
+              className="p-2 text-[#0D0431] hover:bg-[#FEDF6A] rounded-full bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
               title={isMaximized ? "Restore size" : "Maximize"}
             >
               {isMaximized ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -248,7 +248,7 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
             <button
               type="button"
               onClick={onClose}
-              className="p-2 text-zinc-400 hover:text-white rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer"
+              className="p-2 text-[#0D0431] hover:bg-[#F85B52] hover:text-white rounded-full bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -256,36 +256,36 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white text-[#0D0431]">
           {loading ? (
-            <div className="py-20 flex flex-col items-center justify-center space-y-3 text-center">
-              <div className="w-6 h-6 rounded-full border-2 border-zinc-400 border-t-transparent animate-spin" />
-              <p className="text-xs text-zinc-400 font-mono">Loading tutorial...</p>
+            <div className="py-20 flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="w-8 h-8 rounded-full border-3 border-[#0D0431] border-t-transparent animate-spin" />
+              <p className="text-xs font-mono font-bold text-[#0D0431]">Loading tutorial...</p>
             </div>
           ) : error ? (
-            <div className="py-16 text-center space-y-3">
-              <div className="p-3 w-10 h-10 mx-auto rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
-                <FileText className="w-5 h-5" />
+            <div className="py-16 text-center space-y-3 bg-[#FFC5B7] border-2 border-[#0D0431] rounded-3xl p-6 shadow-[4px_4px_0_0_#0D0431]">
+              <div className="p-3 w-12 h-12 mx-auto rounded-2xl bg-white border-2 border-[#0D0431] text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center">
+                <FileText className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-white">Tutorial Unavailable</h3>
-              <p className="text-xs text-zinc-400 max-w-sm mx-auto">{error}</p>
+              <h3 className="text-base font-heading font-black text-[#0D0431]">Tutorial Unavailable</h3>
+              <p className="text-xs text-[#0D0431]/80 max-w-sm mx-auto font-medium">{error}</p>
             </div>
           ) : (
             <>
               {/* Problem Summary & Fast Action Bar */}
-              <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="p-5 rounded-3xl bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider font-semibold">
+                  <span className="text-[11px] font-mono text-[#0D0431] uppercase tracking-wider font-bold">
                     Summary
                   </span>
-                  <p className="text-xs text-zinc-200 leading-relaxed font-sans">{article.summary}</p>
+                  <p className="text-xs text-[#0D0431] leading-relaxed font-sans font-medium">{article.summary}</p>
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap shrink-0">
                   {article.related_problems?.[0]?.leetcode_slug && (
                     <Link
                       to={`/app/coding/${article.related_problems[0].leetcode_slug}`}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-950 text-xs font-semibold transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431] text-xs font-mono font-bold border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] hover:scale-105 active:scale-95 transition-all cursor-pointer"
                     >
                       <Terminal className="w-3.5 h-3.5" />
                       <span>Solve in IDE</span>
@@ -296,7 +296,7 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
                     <button
                       type="button"
                       onClick={() => onOpenVideo(article.related_problems[0].youtube_url, article.title)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-red-600/15 hover:bg-red-600/25 text-red-300 border border-red-500/30 text-xs font-semibold transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FFC5B7] hover:bg-[#FFB09F] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-xs font-mono font-bold hover:scale-105 active:scale-95 transition-all cursor-pointer"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
                       <span>Video Solution</span>
@@ -308,10 +308,10 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
                       href={article.original_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700/50 text-xs font-medium transition-colors"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-[#FEF9CF] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-xs font-mono font-bold transition-colors"
                     >
                       <span>Web Link</span>
-                      <ExternalLink className="w-3 h-3" />
+                      <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   )}
                 </div>
@@ -319,11 +319,11 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
 
               {/* Multi-Language Code Snippets Viewer (if available) */}
               {snippetLangs.length > 0 && (
-                <div className="rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-900 border-b border-zinc-800">
+                <div className="rounded-3xl border-2 border-[#0D0431] bg-[#0D0431] overflow-hidden shadow-[4px_4px_0_0_#0D0431]">
+                  <div className="flex items-center justify-between px-5 py-3 bg-[#FEF9CF] border-b-2 border-[#0D0431]">
                     <div className="flex items-center gap-2">
-                      <Code2 className="w-4 h-4 text-zinc-400" />
-                      <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
+                      <Code2 className="w-4 h-4 text-[#0D0431]" />
+                      <span className="text-xs font-heading font-black text-[#0D0431] uppercase tracking-wider">
                         Reference Implementations
                       </span>
                     </div>
@@ -334,10 +334,10 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
                           key={lang}
                           type="button"
                           onClick={() => setActiveSnippetLang(lang)}
-                          className={`px-3 py-1 rounded-md text-xs font-mono font-semibold uppercase transition-all cursor-pointer ${
+                          className={`px-3 py-1 rounded-xl text-xs font-mono font-bold uppercase transition-all cursor-pointer border-2 border-[#0D0431] ${
                             activeSnippetLang === lang
-                              ? "bg-zinc-100 text-zinc-950"
-                              : "text-zinc-400 hover:text-white bg-zinc-800/60 hover:bg-zinc-800"
+                              ? "bg-[#0D0431] text-white shadow-[1px_1px_0_0_#896EE2]"
+                              : "text-[#0D0431] bg-white hover:bg-[#FEDF6A] shadow-[1px_1px_0_0_#0D0431]"
                           }`}
                         >
                           {lang}
@@ -346,14 +346,14 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
                     </div>
                   </div>
 
-                  <div className="p-4 bg-[#09090b]">
+                  <div className="p-4 bg-[#0D0431]">
                     {snippets[activeSnippetLang] ? (
                       <div className="space-y-3">
                         {(Array.isArray(snippets[activeSnippetLang]) ? snippets[activeSnippetLang] : [snippets[activeSnippetLang]]).map(
                           (snippetText, sIdx) => (
-                            <div key={sIdx} className="rounded-lg border border-zinc-800/80 bg-black/60 overflow-hidden">
-                              <div className="flex items-center justify-between px-3.5 py-1.5 bg-zinc-900/60 border-b border-zinc-800/60 text-[11px] font-mono text-zinc-400">
-                                <span>{activeSnippetLang.toUpperCase()} Solution {sIdx > 0 ? `#${sIdx + 1}` : ""}</span>
+                            <div key={sIdx} className="rounded-2xl border-2 border-[#896EE2]/40 bg-black/80 overflow-hidden">
+                              <div className="flex items-center justify-between px-4 py-2 bg-[#140742] border-b-2 border-[#896EE2]/40 text-xs font-mono text-purple-300">
+                                <span className="font-bold">{activeSnippetLang.toUpperCase()} Solution {sIdx > 0 ? `#${sIdx + 1}` : ""}</span>
                                 <CopyButton text={snippetText} />
                               </div>
                               <pre className="p-4 overflow-x-auto text-xs font-mono text-emerald-300 leading-relaxed max-h-[380px] overflow-y-auto">
@@ -364,50 +364,54 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
                         )}
                       </div>
                     ) : (
-                      <p className="text-xs text-zinc-500 italic">No snippet available for {activeSnippetLang}.</p>
+                      <p className="text-xs text-white/60 italic font-mono p-4">No snippet available for {activeSnippetLang}.</p>
                     )}
                   </div>
                 </div>
               )}
 
               {/* Full Formatted Markdown Article Content */}
-              <div className="p-6 rounded-xl bg-zinc-950/60 border border-zinc-800/80 space-y-4">
-                <div className="flex items-center gap-2 pb-3 border-b border-zinc-800/60 text-xs font-mono text-zinc-400">
-                  <FileText className="w-4 h-4 text-zinc-400" />
-                  <span className="uppercase font-bold text-white tracking-wide">Walkthrough & Analysis</span>
+              <div className="p-6 md:p-8 rounded-3xl bg-[#FEF9CF]/30 border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-4">
+                <div className="flex items-center gap-2 pb-3 border-b-2 border-[#0D0431]/15 text-xs font-mono text-[#0D0431]">
+                  <FileText className="w-4 h-4 text-[#0D0431]" />
+                  <span className="uppercase font-heading font-black text-[#0D0431] tracking-wide">Walkthrough & Analysis</span>
                 </div>
                 <MarkdownRenderer content={article.content_markdown} />
               </div>
 
               {/* Related Sheet References */}
               {article.related_problems?.length > 1 && (
-                <div className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/60 space-y-2.5">
-                  <h4 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">
+                <div className="p-5 rounded-3xl bg-[#E4CDFB]/40 border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-3">
+                  <h4 className="text-xs font-heading font-black text-[#0D0431] uppercase tracking-wider">
                     Related Problems ({article.related_problems.length})
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {article.related_problems.map((rp, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800/80 text-xs"
-                      >
-                        <div className="truncate pr-2">
-                          <span className="font-semibold text-zinc-200 block truncate">{rp.problem_name}</span>
-                          <span className="text-[11px] text-zinc-500 font-mono truncate">{rp.sheet_title}</span>
-                        </div>
-                        <span
-                          className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded shrink-0 ${
-                            rp.difficulty?.toLowerCase() === "easy"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : rp.difficulty?.toLowerCase() === "medium"
-                              ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                              : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                          }`}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {article.related_problems.map((rp, idx) => {
+                      const diffLower = (rp.difficulty || "").toLowerCase();
+                      const diffBadgeStyle =
+                        diffLower === "easy"
+                          ? "bg-[#D3F8C6] text-[#0D0431] border-2 border-[#0D0431]"
+                          : diffLower === "medium"
+                          ? "bg-[#FEDF6A] text-[#0D0431] border-2 border-[#0D0431]"
+                          : "bg-[#FFC5B7] text-[#0D0431] border-2 border-[#0D0431]";
+
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between px-4 py-3 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-xs"
                         >
-                          {rp.difficulty}
-                        </span>
-                      </div>
-                    ))}
+                          <div className="truncate pr-2">
+                            <span className="font-heading font-black text-[#0D0431] block truncate">{rp.problem_name}</span>
+                            <span className="text-[11px] text-[#0D0431]/70 font-mono font-semibold truncate">{rp.sheet_title}</span>
+                          </div>
+                          <span
+                            className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full shadow-[1px_1px_0_0_#0D0431] shrink-0 ${diffBadgeStyle}`}
+                          >
+                            {rp.difficulty}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

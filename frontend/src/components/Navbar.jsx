@@ -1,128 +1,132 @@
-import React, { useState, useRef, useEffect } from "react";
-import { FiMenu, FiX, FiArrowUpRight } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
-import gsap from "gsap";
+import React, { useState } from "react";
+import { FiMenu, FiX } from "react-icons/fi";
+import { useNavigate, Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const navRef = useRef(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (navRef.current) {
-      gsap.fromTo(
-        navRef.current,
-        { y: -30, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
-      );
-    }
-  }, []);
-
   return (
-    <header className="fixed top-6 left-0 right-0 z-50 px-4 md:px-8 max-w-7xl mx-auto pointer-events-none">
-      <nav
-        ref={navRef}
-        className="pointer-events-auto backdrop-blur-2xl bg-[#1A312C]/90 border border-[#428475]/40 shadow-[0_20px_50px_rgba(10,20,18,0.85)] rounded-full px-6 py-3.5 flex items-center justify-between transition-all duration-300"
-      >
+    <header className="fixed top-3 left-0 right-0 z-50 px-4 sm:px-6 max-w-6xl mx-auto">
+      <nav className="bg-white/90 backdrop-blur-md text-[#17103D] border border-[#E2DEEC] rounded-2xl px-5 py-2.5 flex items-center justify-between shadow-[0_4px_20px_rgba(23,16,61,0.05)] transition-all">
         {/* Brand Logo */}
-        <div
-          onClick={() => navigate("/")}
-          className="flex items-center cursor-pointer group select-none"
+        <Link
+          to="/"
+          className="flex items-center gap-2 group select-none no-underline"
         >
-          <span className="text-xl font-bold tracking-tight text-[#FFF4E1] font-sans">
-            get<span className="text-[#89D7B7]">Placed</span>
+          <div className="w-8 h-8 rounded-xl bg-[#17103D] text-[#FFD84D] flex items-center justify-center font-heading font-black text-sm shadow-sm group-hover:bg-[#24195A] transition-colors">
+            GP
+          </div>
+          <span className="text-lg font-heading font-black tracking-tight text-[#17103D]">
+            Get<span className="text-[#6E44FF]">Placed</span>
           </span>
-        </div>
+        </Link>
 
         {/* Desktop Links */}
-        <ul className="hidden lg:flex items-center space-x-8 text-xs font-semibold uppercase tracking-wider text-[#FFF4E1]/70">
+        <div className="hidden lg:flex items-center space-x-6 text-xs font-semibold text-[#6F6A80]">
           {[
-            { label: "Interviews", path: "#hero" },
             { label: "Features", path: "#features" },
-            { label: "Resume", path: "#resume" },
-            { label: "Roadmap", path: "#calendar" },
-            { label: "Security", path: "#security" },
+            { label: "DSA Sheets", path: "/app/sheets" },
+            { label: "ATS Resume", path: "/app/resume" },
+            { label: "Mock Interviews", path: "/app/interview" },
+            { label: "FAQs", path: "#faqs" },
           ].map((link) => (
-            <li key={link.label}>
+            link.path.startsWith("#") ? (
               <a
+                key={link.label}
                 href={link.path}
-                className="hover:text-[#89D7B7] transition-colors duration-200 py-1 relative group text-[#FFF4E1]/70 font-mono text-[11px]"
+                className="text-[#6F6A80] hover:text-[#17103D] transition-colors"
               >
                 {link.label}
               </a>
-            </li>
+            ) : (
+              <Link
+                key={link.label}
+                to={link.path}
+                className="text-[#6F6A80] hover:text-[#17103D] transition-colors"
+              >
+                {link.label}
+              </Link>
+            )
           ))}
-        </ul>
+        </div>
 
         {/* Action Buttons */}
         <div className="hidden md:flex items-center space-x-3">
-          <button
-            onClick={() => navigate("/login")}
-            className="text-xs font-semibold uppercase tracking-wider text-[#FFF4E1]/85 hover:text-[#FFF4E1] px-4 py-2 rounded-full transition-all duration-200 hover:bg-[#428475]/25 border border-transparent hover:border-[#428475]/40 cursor-pointer"
+          <Link
+            to="/login"
+            className="text-xs font-bold text-[#17103D] hover:text-[#6E44FF] px-3 py-1.5 transition-colors"
           >
-            Sign In
-          </button>
-          <button
-            onClick={() => navigate("/register")}
-            className="group relative inline-flex items-center justify-center px-5 py-2 text-xs font-semibold uppercase tracking-wider text-[#1A312C] bg-[#89D7B7] rounded-full overflow-hidden shadow-[0_4px_20px_rgba(137,215,183,0.3)] hover:bg-[#a6e6ce] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 cursor-pointer font-bold"
+            Log in
+          </Link>
+          <Link
+            to="/register"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#17103D] hover:bg-[#24195A] text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
           >
-            <span>Get Started</span>
-            <FiArrowUpRight className="ml-1 w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-[#1A312C]" />
-          </button>
+            <span>Start Free</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
         {/* Mobile Toggle */}
         <button
-          className="lg:hidden text-[#FFF4E1] p-2 focus:outline-none cursor-pointer"
+          className="lg:hidden text-[#17103D] p-1.5 rounded-lg border border-[#E2DEEC] bg-[#F8F8F5] focus:outline-none cursor-pointer"
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle Navigation"
         >
-          {isOpen ? <FiX className="w-5 h-5 text-[#89D7B7]" /> : <FiMenu className="w-5 h-5" />}
+          {isOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
         </button>
       </nav>
 
       {/* Mobile Drawer */}
       {isOpen && (
-        <div className="pointer-events-auto mt-3 backdrop-blur-2xl bg-[#1A312C]/95 border border-[#428475]/40 rounded-3xl p-6 shadow-2xl flex flex-col space-y-4 lg:hidden animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="mt-2 bg-white text-[#17103D] border border-[#E2DEEC] rounded-2xl p-5 shadow-xl flex flex-col space-y-3 lg:hidden animate-in fade-in slide-in-from-top-2 duration-150">
           {[
-            { label: "Interviews", path: "#hero" },
             { label: "Features", path: "#features" },
-            { label: "Resume", path: "#resume" },
-            { label: "Roadmap", path: "#calendar" },
-            { label: "Security", path: "#security" },
+            { label: "DSA Sheets", path: "/app/sheets" },
+            { label: "ATS Resume", path: "/app/resume" },
+            { label: "Mock Interviews", path: "/app/interview" },
+            { label: "FAQs", path: "#faqs" },
           ].map((link) => (
-            <a
-              key={link.label}
-              href={link.path}
-              onClick={() => setIsOpen(false)}
-              className="text-[#FFF4E1]/80 hover:text-[#89D7B7] font-medium text-sm py-2 px-3 rounded-lg hover:bg-[#428475]/20 transition duration-200 font-mono text-xs"
-            >
-              {link.label}
-            </a>
+            link.path.startsWith("#") ? (
+              <a
+                key={link.label}
+                href={link.path}
+                onClick={() => setIsOpen(false)}
+                className="font-semibold text-xs py-1.5 text-[#17103D] hover:text-[#6E44FF]"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.label}
+                to={link.path}
+                onClick={() => setIsOpen(false)}
+                className="font-semibold text-xs py-1.5 text-[#17103D] hover:text-[#6E44FF]"
+              >
+                {link.label}
+              </Link>
+            )
           ))}
-          <div className="pt-4 border-t border-[#428475]/30 flex flex-col space-y-3">
-            <button
-              onClick={() => {
-                navigate("/login");
-                setIsOpen(false);
-              }}
-              className="w-full text-center py-2.5 text-xs font-semibold uppercase tracking-wider text-[#FFF4E1] hover:text-[#89D7B7] border border-[#428475]/40 rounded-full hover:bg-[#428475]/20 transition-colors"
+          <div className="pt-3 border-t border-[#E2DEEC] flex flex-col space-y-2">
+            <Link
+              to="/login"
+              onClick={() => setIsOpen(false)}
+              className="w-full text-center py-2 text-xs font-bold text-[#17103D]"
             >
               Sign In
-            </button>
-            <button
-              onClick={() => {
-                navigate("/register");
-                setIsOpen(false);
-              }}
-              className="w-full text-center py-2.5 text-xs font-semibold uppercase tracking-wider text-[#1A312C] bg-[#89D7B7] hover:bg-[#a6e6ce] rounded-full shadow-lg transition-colors font-bold"
+            </Link>
+            <Link
+              to="/register"
+              onClick={() => setIsOpen(false)}
+              className="w-full text-center py-2 text-xs font-bold bg-[#17103D] text-white rounded-xl shadow-sm"
             >
-              Get Started
-            </button>
+              Start Free
+            </Link>
           </div>
         </div>
       )}
     </header>
   );
 }
-

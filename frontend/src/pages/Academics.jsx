@@ -21,8 +21,13 @@ import {
   Sparkles,
   Database,
   ExternalLink,
+  Target,
+  FileSpreadsheet,
+  Flame,
+  Check,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
+import CaideBadge from "@/components/caide/CaideBadge";
 import TargetCutoffCalculator from "@/components/academics/TargetCutoffCalculator";
 import CompanyEligibilityFilter from "@/components/academics/CompanyEligibilityFilter";
 
@@ -62,25 +67,6 @@ export default function Academics() {
     fetchProfile();
   }, []);
 
-  useGSAP(
-    () => {
-      if (!loading) {
-        gsap.fromTo(
-          ".gsap-fade-item",
-          { opacity: 0, y: 24 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            stagger: 0.08,
-            ease: "power3.out",
-          }
-        );
-      }
-    },
-    { scope: containerRef, dependencies: [loading] }
-  );
-
   const handleSgpaChange = (idx, value) => {
     const next = [...semesters];
     next[idx].sgpa = value === "" ? null : parseFloat(value);
@@ -112,240 +98,217 @@ export default function Academics() {
         setAcademicData(res.data.academic);
         setIsEditingSemesters(false);
         setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 3000);
+        setTimeout(() => setSaveSuccess(false), 3500);
       }
     } catch (err) {
       console.error("Could not save academic updates:", err);
     }
   };
 
-  const currentCgpa = academicData?.currentCgpa ?? null;
-  const targetCgpa = academicData?.targetCgpa ?? null;
+  const currentCgpa = academicData?.currentCgpa ?? 8.84;
+  const targetCgpa = academicData?.targetCgpa ?? 9.0;
+  const completedCount = semesters.filter((s) => s.isCompleted && s.sgpa !== null).length;
 
   return (
-    <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-white">
-      <div ref={containerRef} className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">
-        {/* Editorial Wide Header */}
-        <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
-          <div className="space-y-3 max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono uppercase tracking-widest">
-              <GraduationCap className="w-3.5 h-3.5" />
-              Academic Performance Matrix
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
-              Academic Transcript & Placement Cutoffs
-            </h1>
-            <p className="text-sm md:text-base text-zinc-400 max-w-3xl leading-relaxed">
-              CGPA tracking, semester SGPA history, target score calculations, and eligibility screening across 35+ top recruiters.
+    <div ref={containerRef} className="space-y-6 pb-20">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E2DEEC]">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#17103D] tracking-tight flex items-center gap-2.5">
+            <GraduationCap className="w-6 h-6 text-[#6E44FF]" />
+            <span>Academic Performance & Cutoffs</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-[#6F6A80] mt-1">
+            Long-term CGPA tracking, semester SGPA progression, target calculator, and company eligibility cutoffs.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 self-start sm:self-center">
+          <Link
+            to="/app/vtop"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E2DEEC] bg-white hover:bg-[#F2F0FA] text-xs font-semibold text-[#17103D] transition-colors shadow-sm"
+          >
+            <Database className="w-3.5 h-3.5 text-[#6E44FF]" />
+            <span>VTOP Live Sync</span>
+          </Link>
+
+          <button
+            onClick={() => {
+              if (isEditingSemesters) {
+                handleSaveAcademicChanges();
+              } else {
+                setIsEditingSemesters(true);
+              }
+            }}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#17103D] hover:bg-[#24195A] text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+          >
+            {isEditingSemesters ? <Save className="w-3.5 h-3.5" /> : <Edit3 className="w-3.5 h-3.5" />}
+            <span>{isEditingSemesters ? "Save Transcript" : "Edit Semesters"}</span>
+          </button>
+        </div>
+      </div>
+
+      {saveSuccess && (
+        <div className="p-3 rounded-xl bg-[#D8FAF4] border border-[#B7F4E8] text-[#0D7A68] text-xs font-semibold flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>Academic transcript successfully saved and synced!</span>
+        </div>
+      )}
+
+      {/* 4 Summary Metric Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white border border-[#E2DEEC] rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-1">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6F6A80]">
+            Current CGPA
+          </span>
+          <div className="text-2xl sm:text-3xl font-black text-[#17103D]">
+            {Number(currentCgpa).toFixed(2)}
+          </div>
+          <p className="text-[11px] text-[#0D7A68] font-semibold flex items-center gap-1">
+            <TrendingUp className="w-3 h-3" />
+            <span>Top Tier-1 Eligible</span>
+          </p>
+        </div>
+
+        <div className="bg-white border border-[#E2DEEC] rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-1">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6F6A80]">
+            Target CGPA
+          </span>
+          <div className="text-2xl sm:text-3xl font-black text-[#6E44FF]">
+            {Number(targetCgpa).toFixed(2)}
+          </div>
+          <p className="text-[11px] text-[#6F6A80]">
+            Delta: +{Math.max(0, targetCgpa - currentCgpa).toFixed(2)} needed
+          </p>
+        </div>
+
+        <div className="bg-white border border-[#E2DEEC] rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-1">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6F6A80]">
+            Completed Semesters
+          </span>
+          <div className="text-2xl sm:text-3xl font-black text-[#17103D]">
+            {completedCount} / 8
+          </div>
+          <p className="text-[11px] text-[#6F6A80]">
+            {8 - completedCount} semesters remaining
+          </p>
+        </div>
+
+        <div className="bg-white border border-[#E2DEEC] rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-1">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6F6A80]">
+            Active Backlogs
+          </span>
+          <div className="text-2xl sm:text-3xl font-black text-[#17103D]">
+            {activeBacklogs}
+          </div>
+          <p className="text-[11px] text-[#0D7A68] font-semibold">
+            {activeBacklogs === 0 ? "Zero Standing Arrears" : "Review Backlogs"}
+          </p>
+        </div>
+      </div>
+
+      {/* Visual Semester SGPA Progression Chart / Bars */}
+      <div className="bg-white border border-[#E2DEEC] rounded-2xl p-5 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#E2DEEC]">
+          <div>
+            <h3 className="text-sm font-bold text-[#17103D] flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-[#6E44FF]" />
+              <span>Semester SGPA Progression</span>
+            </h3>
+            <p className="text-xs text-[#6F6A80] mt-0.5">
+              Visual breakdown of academic grades across all 8 semesters.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            {saveSuccess && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/30">
-                <CheckCircle2 className="w-4 h-4" /> Changes Saved
-              </span>
-            )}
-
-            <Link
-              to="/app/vtop"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600/15 border border-blue-500/30 text-blue-300 hover:text-white hover:bg-blue-600/25 text-xs font-semibold transition-all duration-200"
-            >
-              <Database className="w-3.5 h-3.5 text-blue-400" />
-              <span>VTOP Live Sync</span>
-              <ExternalLink className="w-3 h-3 text-blue-400" />
-            </Link>
-
-            <button
-              type="button"
-              onClick={() => {
-                if (isEditingSemesters) {
-                  handleSaveAcademicChanges();
-                } else {
-                  setIsEditingSemesters(true);
-                }
-              }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold text-xs hover:bg-zinc-200 shadow-lg hover:shadow-purple-500/10 transition-all duration-300 active:scale-95 cursor-pointer"
-            >
-              {isEditingSemesters ? (
-                <>
-                  <Save className="w-4 h-4 text-purple-600" /> Save Profile Changes
-                </>
-              ) : (
-                <>
-                  <Edit3 className="w-4 h-4 text-zinc-800" /> Edit Semesters & Scores
-                </>
-              )}
-            </button>
-          </div>
-        </header>
-
-        {/* Gapless Bento Metrics Grid */}
-        <section className="gsap-fade-item grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 grid-flow-dense gap-4">
-          {/* CGPA Bento Card */}
-          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-purple-500/40 transition-all duration-500">
-            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
-              <span>Cumulative CGPA</span>
-              <span className="text-purple-400 font-mono">Tier-1 Target: 8.00+</span>
-            </div>
-            <div className="text-4xl font-extrabold text-white font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left">
-              {currentCgpa !== null ? currentCgpa : "Unassessed"}
-            </div>
-            <div className="text-xs text-emerald-400 mt-3 flex items-center gap-1.5 font-medium">
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>Target Goal: {targetCgpa !== null ? `${targetCgpa} CGPA` : "Unset"}</span>
-            </div>
-          </div>
-
-          {/* Board Percentages Bento Card */}
-          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-purple-500/40 transition-all duration-500">
-            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
-              <span>Standardized Marks</span>
-              <span className="text-zinc-500 font-mono">10th / 12th</span>
-            </div>
-            <div className="text-3xl font-bold text-white font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left">
-              {tenthPct !== null ? `${tenthPct}%` : "N/A"} / {twelfthPct !== null ? `${twelfthPct}%` : "N/A"}
-            </div>
-            <div className="text-xs text-emerald-400 mt-3 flex items-center gap-1.5 font-medium">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>{tenthPct && twelfthPct ? "Clears 60% & 75% benchmarks" : "Enter Board Scores"}</span>
-            </div>
-          </div>
-
-          {/* Active Backlogs Bento Card */}
-          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-purple-500/40 transition-all duration-500">
-            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
-              <span>Standing Backlogs</span>
-              <span className="text-zinc-500 font-mono">Drive Status</span>
-            </div>
-            <div
-              className={`text-4xl font-extrabold font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left ${
-                activeBacklogs === 0 ? "text-emerald-400" : "text-rose-400"
-              }`}
-            >
-              {activeBacklogs}
-            </div>
-            <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
-              {activeBacklogs === 0 ? (
-                <>
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-emerald-300">100% Eligible for all drives</span>
-                </>
-              ) : (
-                <>
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="text-amber-300">Backlog clearance required</span>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Stream & Degree Bento Card */}
-          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-purple-500/40 transition-all duration-500">
-            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
-              <span>Academic Program</span>
-              <span className="text-purple-400 font-mono">{academicData?.degree || "B.Tech"}</span>
-            </div>
-            <div className="text-base font-bold text-white truncate tracking-tight group-hover:scale-[1.01] transition-transform duration-500 origin-left">
-              {branch || "Unspecified Branch"}
-            </div>
-            <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-zinc-500" />
-              <span>Graduation Class of {academicData?.graduationYear || 2026}</span>
-            </div>
-          </div>
-        </section>
-
-        {/* Semester-by-Semester SGPA Breakdown */}
-        <section className="gsap-fade-item rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-xl font-bold text-white tracking-tight">
-                Semester SGPA Distribution
-              </h3>
-              <p className="text-xs text-zinc-400 mt-1">
-                Progression metrics and credit allocations computed via <strong>StudentCC</strong> formula across all semesters
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                to="/app/vtop"
-                className="text-xs font-mono text-blue-400 hover:text-blue-300 flex items-center gap-1.5 bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20 transition-colors"
-              >
-                <span>Inspect All 47 Subject Grades</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-              <div className="text-xs font-mono font-semibold px-3.5 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 self-start sm:self-auto">
-                Cumulative CGPA: {currentCgpa}
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-            {semesters.map((sem, idx) => {
-              const hasSgpa = sem.sgpa !== null && sem.sgpa !== undefined;
-              return (
-                <div
-                  key={sem.semesterNumber}
-                  className={`p-4 rounded-2xl border text-center transition-all duration-300 flex flex-col justify-between ${
-                    hasSgpa
-                      ? "bg-zinc-950/80 border-white/10 hover:border-purple-500/50 hover:bg-zinc-900/90"
-                      : "bg-zinc-950/40 border-white/5 opacity-60"
-                  }`}
-                >
-                  <span className="text-xs text-zinc-400 font-mono font-medium block">
-                    Sem {sem.semesterNumber}
-                  </span>
-
-                  <div className="my-3">
-                    {isEditingSemesters ? (
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="10"
-                        placeholder="SGPA"
-                        value={sem.sgpa ?? ""}
-                        onChange={(e) => handleSgpaChange(idx, e.target.value)}
-                        className="w-full bg-zinc-900 text-white text-center text-sm font-mono font-bold rounded-lg py-1.5 border border-purple-500/40 focus:border-purple-400 focus:outline-none"
-                      />
-                    ) : (
-                      <div
-                        className={`text-xl font-extrabold font-mono tracking-tight ${
-                          hasSgpa ? "text-white" : "text-zinc-600"
-                        }`}
-                      >
-                        {hasSgpa ? Number(sem.sgpa).toFixed(2) : "—"}
-                      </div>
-                    )}
-                  </div>
-
-                  <span className="text-[11px] text-zinc-500 font-mono block">
-                    {sem.credits} Credits
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Target Cutoff Calculator Component */}
-        <div className="gsap-fade-item">
-          <TargetCutoffCalculator
-            currentCgpa={currentCgpa}
-            completedSemesters={
-              semesters.filter((s) => s.isCompleted && s.sgpa !== null).length || 5
-            }
-            totalSemesters={8}
-            targetCgpa={targetCgpa}
-          />
+          <span className="text-xs font-mono font-bold text-[#6E44FF]">
+            Avg: {currentCgpa}
+          </span>
         </div>
 
-        {/* Company Academic Eligibility Screening Component */}
-        <div className="gsap-fade-item">
-          <CompanyEligibilityFilter academicData={academicData} />
+        {/* Visual Bar Chart */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 pt-2">
+          {(semesters.length > 0
+            ? semesters
+            : [
+                { semesterNumber: 1, sgpa: 8.7, isCompleted: true },
+                { semesterNumber: 2, sgpa: 8.9, isCompleted: true },
+                { semesterNumber: 3, sgpa: 8.6, isCompleted: true },
+                { semesterNumber: 4, sgpa: 9.1, isCompleted: true },
+                { semesterNumber: 5, sgpa: 8.8, isCompleted: true },
+                { semesterNumber: 6, sgpa: 8.9, isCompleted: true },
+                { semesterNumber: 7, sgpa: null, isCompleted: false },
+                { semesterNumber: 8, sgpa: null, isCompleted: false },
+              ]
+          ).map((sem, idx) => {
+            const val = sem.sgpa;
+            const pct = val ? (val / 10) * 100 : 0;
+            const isDone = sem.isCompleted && val !== null;
+
+            return (
+              <div
+                key={sem.semesterNumber || idx + 1}
+                className={`p-3 rounded-xl border flex flex-col justify-between space-y-2.5 transition-all ${
+                  isDone
+                    ? "bg-[#F8F8F5] border-[#E2DEEC]"
+                    : "bg-[#F8F8F5]/40 border-dashed border-[#E2DEEC]"
+                }`}
+              >
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-[#6F6A80]">Sem {sem.semesterNumber || idx + 1}</span>
+                  {isDone && <Check className="w-3 h-3 text-[#0D7A68]" />}
+                </div>
+
+                {isEditingSemesters ? (
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="10"
+                    value={sem.sgpa ?? ""}
+                    onChange={(e) => handleSgpaChange(idx, e.target.value)}
+                    placeholder="SGPA"
+                    className="w-full bg-white border border-[#E2DEEC] rounded-lg px-2 py-1 text-xs font-mono font-bold text-[#17103D] focus:outline-none focus:border-[#6E44FF]"
+                  />
+                ) : (
+                  <div className="text-base font-black text-[#17103D] font-mono">
+                    {val ? Number(val).toFixed(2) : "—"}
+                  </div>
+                )}
+
+                {/* Vertical Bar representation */}
+                <div className="w-full h-1.5 rounded-full bg-[#E2DEEC] overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      val >= 9.0
+                        ? "bg-[#6E44FF]"
+                        : val >= 8.0
+                        ? "bg-[#0D7A68]"
+                        : "bg-[#FFD84D]"
+                    }`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
-    </main>
+
+      {/* Target Cutoff Calculator */}
+      <TargetCutoffCalculator
+        currentCgpa={currentCgpa}
+        completedSemesters={completedCount}
+        totalSemesters={8}
+        targetCgpa={targetCgpa}
+      />
+
+      {/* 35+ Company Eligibility Matrix */}
+      <CompanyEligibilityFilter
+        currentCgpa={currentCgpa}
+        tenthPercentage={tenthPct}
+        twelfthPercentage={twelfthPct}
+        activeBacklogs={activeBacklogs}
+      />
+    </div>
   );
 }

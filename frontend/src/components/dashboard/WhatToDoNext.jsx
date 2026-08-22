@@ -16,9 +16,11 @@ import {
   PlayCircle,
   Target,
   Zap,
+  Check,
+  Flame,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
-import { getWhatToDoNextCopy } from "@/utils/dynamicCopy";
+import CaideBadge from "@/components/caide/CaideBadge";
 
 const CATEGORY_ICONS = {
   dsa: Code2,
@@ -28,16 +30,6 @@ const CATEGORY_ICONS = {
   interview: BrainCog,
   study: PlayCircle,
   roadmap: Target,
-};
-
-const CATEGORY_COLORS = {
-  purple: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  blue: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  amber: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  indigo: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
-  red: "bg-red-500/10 text-red-400 border-red-500/20",
-  cyan: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
 };
 
 export default function WhatToDoNext({ userProfile, readinessScore }) {
@@ -81,159 +73,129 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
           { withCredentials: true }
         );
       } catch (err) {
-        console.warn("Could not log completed task on backend:", err.message);
+        console.warn("Could not record task completion:", err);
       }
     }
     setCompletedTaskIds(nextSet);
   };
 
-  const completedCount = completedTaskIds.size;
-  const totalCount = recommendations.length || 3;
-  const progressPct = Math.round((completedCount / totalCount) * 100);
-
-  const dynamicCopy = useMemo(() => {
-    return getWhatToDoNextCopy({
-      readinessScore,
-      streakDays,
-      tasksCompleted: completedCount,
-      totalTasks: totalCount,
-      targetCompany: userProfile?.targetCompany,
-    });
-  }, [readinessScore, streakDays, completedCount, totalCount, userProfile]);
+  const tasksToDisplay =
+    recommendations.length > 0
+      ? recommendations
+      : [
+          {
+            id: "task-1",
+            title: "Solve 2 Binary Search / Graph Problems",
+            category: "dsa",
+            badgeLabel: "High Impact",
+            description: "Target Microsoft Tier-1 benchmark (currently 78% of requirement).",
+            estimatedTime: "25 mins",
+            actionUrl: "/app/coding",
+            actionLabel: "Start Solving",
+          },
+          {
+            id: "task-2",
+            title: "Optimize 3 Action Bullets on Resume",
+            category: "resume",
+            badgeLabel: "ATS Boost",
+            description: "Apply XYZ formula to boost ATS score to 85+.",
+            estimatedTime: "10 mins",
+            actionUrl: "/app/resume",
+            actionLabel: "Audit Resume",
+          },
+          {
+            id: "task-3",
+            title: "Review Super Dream Cutoffs",
+            category: "academics",
+            badgeLabel: "Academics",
+            description: "Verify standing cutoffs for 35+ Tier-1 companies.",
+            estimatedTime: "5 mins",
+            actionUrl: "/app/academics",
+            actionLabel: "Check Cutoffs",
+          },
+        ];
 
   return (
-    <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-6 relative overflow-hidden">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-purple-400">
-              <Zap className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                {dynamicCopy.title}
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-400 font-mono font-normal border border-zinc-800">
-                  {dynamicCopy.badgeText}
-                </span>
-              </h2>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                {dynamicCopy.subtitle}
-              </p>
-            </div>
-          </div>
+    <div className="bg-white border border-[#E2DEEC] rounded-2xl p-5 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E2DEEC]">
+        <div className="flex items-center gap-2">
+          <Zap className="w-4 h-4 text-[#FFD84D]" />
+          <h3 className="text-sm font-bold text-[#17103D]">
+            Today's High-Yield Next Actions
+          </h3>
         </div>
 
-        {/* Daily Streak & Velocity */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300">
-            <span className="text-amber-400 font-semibold">{dynamicCopy.streakNote}</span>
-          </div>
-          <Link
-            to="/app/roadmap"
-            className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white font-mono transition-colors"
-          >
-            <span>Roadmap</span>
-            <ArrowRight className="w-3 h-3" />
-          </Link>
+        <div className="flex items-center gap-2 text-xs text-[#6F6A80]">
+          <span className="flex items-center gap-1 font-bold text-[#9E6700] bg-[#FEF6D6] px-2.5 py-0.5 rounded-full border border-[#FFE995]">
+            <Flame className="w-3.5 h-3.5 text-[#FFD84D] fill-[#FFD84D]" />
+            <span>{streakDays || 4} Day Prep Streak</span>
+          </span>
         </div>
       </div>
 
-      {/* Daily Progress Tracker */}
-      <div className="mb-6 p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <div className="text-[11px] text-zinc-400 font-mono">Daily Progress</div>
-          <div className="text-xs font-medium text-zinc-200 mt-0.5">
-            {dynamicCopy.progressSummary}
-          </div>
-        </div>
-        <div className="flex items-center gap-3 min-w-[180px]">
-          <div className="flex-1 bg-zinc-950 rounded-full h-1.5 overflow-hidden border border-zinc-800">
-            <div
-              className="bg-purple-500 h-1.5 rounded-full transition-all duration-500"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-          <span className="text-xs font-mono text-purple-400">{progressPct}%</span>
-        </div>
-      </div>
-
-      {/* Task Cards List */}
-      <div className="space-y-2.5">
-        {recommendations.map((item) => {
-          const isDone = completedTaskIds.has(item.id);
-          const IconComp = CATEGORY_ICONS[item.category] || Target;
-          const colorClass = CATEGORY_COLORS[item.badgeColor] || CATEGORY_COLORS.purple;
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {tasksToDisplay.map((task) => {
+          const Icon = CATEGORY_ICONS[task.category] || Target;
+          const isDone = completedTaskIds.has(task.id);
 
           return (
             <div
-              key={item.id}
-              className={`p-4 rounded-xl border transition-all duration-200 ${
+              key={task.id}
+              className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition-all ${
                 isDone
-                  ? "bg-zinc-950/40 border-zinc-800/40 opacity-60"
-                  : "bg-zinc-900/50 hover:bg-zinc-900 border-zinc-800 hover:border-zinc-700"
+                  ? "bg-[#F8F8F5]/60 border-[#E2DEEC] opacity-75"
+                  : "bg-white border-[#E2DEEC] hover:border-[#C8C3D8] shadow-sm hover:shadow-md"
               }`}
             >
-              <div className="flex items-start gap-3">
-                {/* Completion Checkbox */}
-                <button
-                  type="button"
-                  onClick={() => handleToggleComplete(item.id)}
-                  className="mt-0.5 text-zinc-500 hover:text-purple-400 transition-colors shrink-0 cursor-pointer"
-                >
-                  {isDone ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  ) : (
-                    <Circle className="w-4 h-4" />
-                  )}
-                </button>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <CaideBadge theme="light-purple" size="sm">
+                    {task.badgeLabel || "Next Step"}
+                  </CaideBadge>
+                  <span className="text-[11px] text-[#6F6A80] font-mono flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {task.estimatedTime || "15 mins"}
+                  </span>
+                </div>
 
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${colorClass}`}>
-                      {item.categoryLabel}
-                    </span>
-
-                    {item.priority === "CRITICAL" && (
-                      <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                        Priority
-                      </span>
-                    )}
-
-                    <div className="flex items-center gap-1 text-[11px] text-zinc-500 font-mono ml-auto">
-                      <Clock className="w-3 h-3 text-zinc-500" />
-                      <span>{item.estimatedMinutes} mins</span>
-                    </div>
-
-                    <div className="flex items-center gap-1 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                      <TrendingUp className="w-3 h-3" />
-                      <span>{item.impactReadinessBoost}</span>
-                    </div>
-                  </div>
-
-                  <h3
-                    className={`text-xs font-semibold transition-colors ${
-                      isDone ? "text-zinc-500 line-through" : "text-zinc-100"
-                    }`}
+                <div className="flex items-start gap-2.5">
+                  <button
+                    onClick={() => handleToggleComplete(task.id)}
+                    className="mt-0.5 shrink-0 text-[#6F6A80] hover:text-[#17103D] cursor-pointer"
                   >
-                    {item.title}
-                  </h3>
-
-                  <p className="text-xs text-zinc-400 mt-1 line-clamp-2 leading-relaxed font-sans">
-                    {item.description}
-                  </p>
-
-                  <div className="mt-3 flex items-center justify-between">
-                    <Link
-                      to={item.actionUrl}
-                      className="inline-flex items-center gap-1 text-xs font-mono text-purple-400 hover:text-purple-300 hover:underline transition-colors"
+                    {isDone ? (
+                      <CheckCircle2 className="w-4 h-4 text-[#0D7A68] fill-[#D8FAF4]" />
+                    ) : (
+                      <Circle className="w-4 h-4 text-[#E2DEEC] hover:text-[#6E44FF]" />
+                    )}
+                  </button>
+                  <div className="space-y-1 min-w-0">
+                    <h4
+                      className={`text-xs font-bold ${
+                        isDone ? "line-through text-[#6F6A80]" : "text-[#17103D]"
+                      }`}
                     >
-                      <span>{item.actionLabel || "Start Task"}</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
+                      {task.title}
+                    </h4>
+                    <p className="text-[11px] text-[#6F6A80] leading-relaxed line-clamp-2">
+                      {task.description}
+                    </p>
                   </div>
                 </div>
+              </div>
+
+              <div className="pt-2 border-t border-[#E2DEEC] flex items-center justify-between">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-[#6F6A80]">
+                  Priority Action
+                </span>
+
+                <Link
+                  to={task.actionUrl || "/app/coding"}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#6E44FF] hover:underline"
+                >
+                  <span>{task.actionLabel || "Start"}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
             </div>
           );
