@@ -26,6 +26,7 @@ import {
   Globe,
   Layers,
   ShieldCheck,
+  Compass,
 } from "lucide-react";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -174,6 +175,12 @@ const navigationGroups = [
     title: "Jobs & Opportunities",
     icon: Briefcase,
     items: [
+      {
+        title: "Which Role Fits Me?",
+        url: "/app/role-fit",
+        icon: Compass,
+        badge: "AI Fit",
+      },
       {
         title: "Job Recommendations",
         url: "/app/job",

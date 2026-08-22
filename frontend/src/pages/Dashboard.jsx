@@ -341,6 +341,14 @@ export default function Dashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <Link
+              to="/app/role-fit"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#C7F36B]/15 hover:bg-[#C7F36B]/25 text-[#C7F36B] border border-[#C7F36B]/30 text-xs font-semibold font-mono transition-colors"
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>Which Role Fits Me?</span>
+            </Link>
+
             {hasTarget ? (
               <div className="inline-flex items-center gap-2 bg-zinc-900/90 border border-zinc-800 px-3.5 py-2 rounded-xl text-xs">
                 <Target className="w-3.5 h-3.5 text-purple-400" />
@@ -634,7 +642,18 @@ export default function Dashboard() {
             <span className="text-[11px] text-zinc-500 font-mono">Direct Quick Actions</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
+            <Link
+              to="/app/role-fit"
+              className="p-3 rounded-xl bg-[#121215] border border-[#C7F36B]/30 hover:border-[#C7F36B]/60 transition-colors flex flex-col items-center text-center space-y-1.5 group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-[#C7F36B]/10 border border-[#C7F36B]/20 flex items-center justify-center text-[#C7F36B] group-hover:scale-105 transition-transform">
+                <Compass className="w-4 h-4 text-[#C7F36B]" />
+              </div>
+              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Role Discovery</span>
+              <span className="text-[10px] text-[#C7F36B] font-mono">Which Role Fits?</span>
+            </Link>
+
             <Link
               to="/app/profile"
               className="p-3 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"

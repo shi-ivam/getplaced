@@ -27,6 +27,7 @@ import CareerCoach from '@/pages/CareerCoach'
 import VtopDetails from '@/pages/VtopDetails'
 import PrivacyProtection from '@/pages/PrivacyProtection'
 import CanIApply from '@/pages/CanIApply'
+import WhichRoleFitsMe from '@/pages/WhichRoleFitsMe'
 
 
 function Routings() {
@@ -51,6 +52,8 @@ function Routings() {
           <Route path="/development" element={<Development />} />
           <Route path="/job" element={<JobRecommendations />} />
           <Route path="/jobs" element={<JobRecommendations />} />
+          <Route path="/role-fit" element={<WhichRoleFitsMe />} />
+          <Route path="/which-role-fits-me" element={<WhichRoleFitsMe />} />
           <Route path="/can-i-apply" element={<CanIApply />} />
           <Route path="/onboarding" element={<CareerCoach />} />
           <Route path="/onboarding/coach" element={<CareerCoach />} />
@@ -90,6 +93,8 @@ function Routings() {
             <Route path="company-intel" element={<CompanyIntelligence />} />
             <Route path="job" element={<JobRecommendations />} />
             <Route path="jobs" element={<JobRecommendations />} />
+            <Route path="role-fit" element={<WhichRoleFitsMe />} />
+            <Route path="which-role-fits-me" element={<WhichRoleFitsMe />} />
             <Route path="can-i-apply" element={<CanIApply />} />
             <Route path="profile" element={<Profile />} />
 

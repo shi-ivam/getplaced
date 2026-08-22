@@ -16,6 +16,7 @@ import {
   Save,
   ArrowRight,
   Code2,
+  Compass,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -617,6 +618,15 @@ export default function Profile() {
                   error={errors.targetJobRole}
                   customPromptPrefix="Target"
                 />
+                <div className="flex items-center justify-end -mt-2">
+                  <Link
+                    to="/app/role-fit"
+                    className="text-[11px] text-[#C7F36B] hover:underline flex items-center gap-1 font-mono"
+                  >
+                    <Compass className="w-3 h-3" />
+                    <span>Not sure? Find which role fits you best →</span>
+                  </Link>
+                </div>
 
                 <div className="space-y-1.5">
                   <Label htmlFor="locationPreference" className="text-zinc-300 text-xs font-medium flex items-center justify-between">
