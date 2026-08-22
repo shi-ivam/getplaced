@@ -279,7 +279,7 @@ def submit_solution(
     total_assertions = len(assert_lines) if assert_lines else 1
 
     script_content = f"""
-import sys, io, time, traceback
+import sys, io, time, traceback, resource
 
 null = None
 true = True
@@ -299,7 +299,9 @@ t0 = time.time()
 try:
     check(candidate)
     elapsed_ms = round((time.time() - t0) * 1000, 2)
-    print("__SUBMISSION_SUCCESS__" + str(elapsed_ms) + "__" + str({total_assertions}))
+    mem_kb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    mem_mb = round(mem_kb / 1024.0, 2)
+    print("__SUBMISSION_SUCCESS__" + str(elapsed_ms) + "__" + str({total_assertions}) + "__" + str(mem_mb))
 except AssertionError as e:
     tb = traceback.format_exc()
     lines = [l.strip() for l in tb.split("\\n") if l.strip()]
@@ -329,6 +331,11 @@ except Exception as e:
             parts = stdout.split("__SUBMISSION_SUCCESS__")[1].strip().split("__")
             run_ms = float(parts[0]) if len(parts) > 0 and parts[0] else total_time_ms
             passed = int(parts[1]) if len(parts) > 1 and parts[1] else total_assertions
+            if len(parts) > 2 and parts[2]:
+                memory_mb = float(parts[2])
+            else:
+                import resource
+                memory_mb = round(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024.0, 2)
             
             beats_runtime = round(max(60.0, min(99.4, 100.0 - (run_ms / 50.0) * 20.0)), 1)
             
@@ -338,7 +345,7 @@ except Exception as e:
                 "total_count": passed,
                 "runtime_ms": run_ms,
                 "beats_runtime_pct": beats_runtime,
-                "memory_mb": round(14.2 + (run_ms * 0.01), 1),
+                "memory_mb": memory_mb,
                 "error": None
             }
         elif "__ASSERTION_FAILED__" in stdout:

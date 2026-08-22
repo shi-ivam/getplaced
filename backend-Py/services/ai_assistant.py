@@ -31,7 +31,7 @@ def get_ai_code_assistance(
     
     api_key = (os.getenv("GOOGLE_API_KEY") or "").strip()
     if not api_key:
-        return "⚠️ Gemini API Key not configured. Please set `GOOGLE_API_KEY` in your `.env` file to enable AI coding hints and debugging."
+        raise ValueError("GOOGLE_API_KEY environment variable is not configured.")
 
     genai.configure(api_key=api_key)
 
@@ -131,4 +131,4 @@ Provide helpful guidance on how to solve or improve this problem.
             last_err = e
             continue
 
-    return f"AI Assistance is temporarily unavailable: {last_err}"
+    raise RuntimeError(f"AI Assistance service unavailable: {last_err}")
