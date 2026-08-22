@@ -97,8 +97,8 @@ export default function ResumeReportOverview({
 
     doc.setFontSize(9.5);
     doc.setFont("helvetica", "normal");
-    const matchedStr = (evaluation.matched_keywords || []).map((k) => k.keyword).join(", ");
-    const missingStr = (evaluation.missing_keywords || []).map((k) => k.keyword).join(", ");
+    const matchedStr = (evaluation.matched_keywords || []).map((k) => (typeof k === "string" ? k : k?.keyword || "")).filter(Boolean).join(", ");
+    const missingStr = (evaluation.missing_keywords || []).map((k) => (typeof k === "string" ? k : k?.keyword || "")).filter(Boolean).join(", ");
 
     doc.text(
       `Matched (${evaluation.matched_keywords?.length || 0}): ${matchedStr || "None"}`,
@@ -335,18 +335,22 @@ export default function ResumeReportOverview({
                 Matched Keywords & Skills ({matchedKeywords.length})
               </span>
               <div className="flex flex-wrap gap-2">
-                {matchedKeywords.map((k, i) => (
-                  <span
-                    key={i}
-                    className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-lg text-xs font-medium flex items-center gap-1.5"
-                  >
-                    <Check className="w-3 h-3 text-emerald-400 shrink-0" />
-                    <span className="break-words">{k.keyword}</span>
-                    {k.category && (
-                      <span className="text-[10px] text-emerald-400/60 font-mono">({k.category})</span>
-                    )}
-                  </span>
-                ))}
+                {matchedKeywords.map((k, i) => {
+                  const kwName = typeof k === "string" ? k : k?.keyword || `kw-${i}`;
+                  const kwCategory = typeof k === "object" ? k?.category : null;
+                  return (
+                    <span
+                      key={`${kwName}-${i}`}
+                      className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-lg text-xs font-medium flex items-center gap-1.5"
+                    >
+                      <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                      <span className="break-words">{kwName}</span>
+                      {kwCategory && (
+                        <span className="text-[10px] text-emerald-400/60 font-mono">({kwCategory})</span>
+                      )}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -358,24 +362,29 @@ export default function ResumeReportOverview({
                 Missing Keywords & Skills ({missingKeywords.length})
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {missingKeywords.map((k, i) => (
-                  <div
-                    key={i}
-                    className="p-3 bg-black/40 border border-amber-500/20 rounded-xl space-y-1.5 h-auto min-h-[70px] flex flex-col justify-between"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-semibold text-amber-200 truncate">{k.keyword}</span>
-                      <span className="px-1.5 py-0.5 text-[9px] font-mono uppercase bg-amber-500/10 text-amber-300 rounded border border-amber-500/20 shrink-0">
-                        {k.importance || "Required"}
-                      </span>
+                {missingKeywords.map((k, i) => {
+                  const kwName = typeof k === "string" ? k : k?.keyword || `gap-${i}`;
+                  const kwImportance = typeof k === "object" ? k?.importance || "Required" : "Required";
+                  const kwReason = typeof k === "object" ? k?.reason : "";
+                  return (
+                    <div
+                      key={`${kwName}-${i}`}
+                      className="p-3 bg-black/40 border border-amber-500/20 rounded-xl space-y-1.5 h-auto min-h-[70px] flex flex-col justify-between"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-semibold text-amber-200 truncate">{kwName}</span>
+                        <span className="px-1.5 py-0.5 text-[9px] font-mono uppercase bg-amber-500/10 text-amber-300 rounded border border-amber-500/20 shrink-0">
+                          {kwImportance}
+                        </span>
+                      </div>
+                      {kwReason && (
+                        <p className="text-[11px] text-neutral-400 leading-normal break-words">
+                          {kwReason}
+                        </p>
+                      )}
                     </div>
-                    {k.reason && (
-                      <p className="text-[11px] text-neutral-400 leading-normal break-words">
-                        {k.reason}
-                      </p>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

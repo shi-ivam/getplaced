@@ -152,21 +152,6 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
             </p>
           </div>
 
-          {/* Global Stats Counter */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap font-mono text-xs">
-            <div className="px-3.5 py-2.5 rounded-xl bg-zinc-900/90 border border-zinc-800">
-              <span className="text-zinc-500 block text-[10px] uppercase">Curated Sets</span>
-              <span className="text-zinc-100 font-bold text-sm">28 Lists</span>
-            </div>
-            <div className="px-3.5 py-2.5 rounded-xl bg-zinc-900/90 border border-zinc-800">
-              <span className="text-zinc-500 block text-[10px] uppercase">Total Problems</span>
-              <span className="text-zinc-100 font-bold text-sm">3,150 Items</span>
-            </div>
-            <div className="px-3.5 py-2.5 rounded-xl bg-zinc-900/90 border border-zinc-800">
-              <span className="text-zinc-500 block text-[10px] uppercase">Tutorials</span>
-              <span className="text-emerald-400 font-bold text-sm">2,088 Articles</span>
-            </div>
-          </div>
         </div>
 
         {/* Category Pill Tabs Below Title */}

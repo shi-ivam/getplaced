@@ -39,9 +39,12 @@ const ResumeAnalyzer = () => {
 
           if (analysis || user.resumeScore !== null) {
             const score = user.resumeScore ?? analysis?.ats_score ?? 88;
-            const keywords = analysis?.matched_keywords || analysis?.keywords || [
+            const rawKeywords = analysis?.matched_keywords || analysis?.keywords || [
               "Data Structures", "System Design", "JavaScript", "Python", "Git", "REST APIs"
             ];
+            const keywords = Array.isArray(rawKeywords)
+              ? rawKeywords.map(k => (typeof k === "string" ? k : k?.keyword || String(k))).filter(Boolean)
+              : [];
             
             const radarSkills = analysis?.skills || [
               { skill: "System Design", score: Math.min(100, score + 2) },
@@ -100,7 +103,11 @@ const ResumeAnalyzer = () => {
         });
         if (pyRes.data) {
           parsedScore = pyRes.data.ats_score || pyRes.data.score || 88;
-          if (pyRes.data.matched_keywords) parsedKeywords = pyRes.data.matched_keywords;
+          if (pyRes.data.matched_keywords) {
+            parsedKeywords = Array.isArray(pyRes.data.matched_keywords)
+              ? pyRes.data.matched_keywords.map(k => (typeof k === "string" ? k : k?.keyword || String(k))).filter(Boolean)
+              : [];
+          }
           if (pyRes.data.skills) parsedInsights = pyRes.data.skills;
         }
       } catch (pyErr) {
@@ -257,12 +264,15 @@ const ResumeAnalyzer = () => {
                   Detected Keywords
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {resumeData.keywordsFound.map((kw) => (
-                    <span key={kw} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#1A312C]/80 border border-[#428475]/40 text-xs text-[#FFF4E1] font-mono">
-                      <CheckCircle2 className="w-3 h-3 text-[#89D7B7] shrink-0" />
-                      <span className="truncate">{kw}</span>
-                    </span>
-                  ))}
+                  {resumeData.keywordsFound.map((kw, idx) => {
+                    const kwText = typeof kw === "string" ? kw : kw?.keyword || `keyword-${idx}`;
+                    return (
+                      <span key={`${kwText}-${idx}`} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#1A312C]/80 border border-[#428475]/40 text-xs text-[#FFF4E1] font-mono">
+                        <CheckCircle2 className="w-3 h-3 text-[#89D7B7] shrink-0" />
+                        <span className="truncate">{kwText}</span>
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             </div>

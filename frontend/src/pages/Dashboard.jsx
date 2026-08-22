@@ -327,12 +327,23 @@ export default function Dashboard() {
         {/* 1. HERO SECTION & CANDIDATE CAREER COMMAND CENTER */}
         {/* ========================================================================= */}
         <header className="gsap-reveal flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-zinc-800/80 pb-6">
-          <div className="max-w-3xl space-y-1.5">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span>{heroData.targetSummary ? `${heroData.targetSummary} · Benchmark Track` : "Benchmark Track"}</span>
+          <div className="max-w-3xl space-y-2">
+            <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full bg-zinc-900/90 border border-zinc-800 text-[11px] font-mono text-zinc-300 shadow-sm backdrop-blur-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-zinc-300 font-medium">
+                {userProfile?.targetCompany
+                  ? `${userProfile.targetCompany} · ${userProfile?.targetJobRole || "Software Engineer"}`
+                  : userProfile?.targetJobRole
+                  ? `${userProfile.targetJobRole} Track`
+                  : "Benchmark Track"}
+              </span>
+              <span className="text-zinc-700">|</span>
+              <span className="text-zinc-500 font-normal">Active Calibration</span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight leading-snug">
+            <h1 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight leading-snug">
               {heroData.title}
             </h1>
             <p className="text-xs text-zinc-400 max-w-2xl leading-relaxed">
@@ -340,42 +351,43 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 self-start md:self-center shrink-0">
+            {/* Target Role Selector Pill */}
+            <Link
+              to="/app/profile"
+              className="group inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 text-xs font-mono transition-all duration-200 shadow-sm h-[40px]"
+              title="Configure your target role and company benchmarks"
+            >
+              <div className="w-5 h-5 rounded-lg bg-zinc-800/80 flex items-center justify-center text-zinc-400 group-hover:text-purple-400 transition-colors">
+                <Target className="w-3.5 h-3.5" />
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-[9px] uppercase tracking-wider text-zinc-500 leading-none">Target Goal</span>
+                <span className="text-xs font-semibold text-zinc-200 group-hover:text-white leading-tight truncate max-w-[140px] sm:max-w-[180px]">
+                  {userProfile?.targetCompany
+                    ? `${userProfile.targetCompany} / ${userProfile?.targetJobRole || "Developer"}`
+                    : userProfile?.targetJobRole || "Set Target"}
+                </span>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 group-hover:translate-x-0.5 transition-all ml-0.5" />
+            </Link>
+
+            {/* Role Fit Action */}
             <Link
               to="/app/role-fit"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 text-xs font-mono transition-colors"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-xs font-mono font-medium transition-all duration-200 shadow-sm h-[40px]"
             >
               <Compass className="w-3.5 h-3.5 text-zinc-400" />
               <span>Role Fit</span>
             </Link>
 
-            {hasTarget ? (
-              <div className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-3 py-2 rounded-lg text-xs">
-                <Target className="w-3.5 h-3.5 text-zinc-400" />
-                <span className="text-zinc-500 font-mono">Target:</span>
-                <span className="font-semibold text-zinc-200 font-mono">
-                  {userProfile.targetCompany || "Any"} / {userProfile.targetJobRole || "Developer"}
-                </span>
-                <Link to="/app/profile" className="text-zinc-500 hover:text-white ml-1 text-[11px] underline font-mono">
-                  Edit
-                </Link>
-              </div>
-            ) : (
-              <Link
-                to="/app/profile"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold font-mono transition-colors"
-              >
-                <Target className="w-3.5 h-3.5" />
-                <span>Set Target</span>
-              </Link>
-            )}
-
+            {/* Audit Readiness Primary CTA */}
             <button
               type="button"
               onClick={handleStartAuditModal}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 text-xs font-mono transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-mono font-semibold transition-all duration-200 cursor-pointer shadow-sm hover:shadow active:scale-[0.98] h-[40px]"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+              <RefreshCw className="w-3.5 h-3.5 text-zinc-950" />
               <span>Audit Readiness</span>
             </button>
           </div>
