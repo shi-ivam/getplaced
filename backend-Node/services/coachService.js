@@ -4,67 +4,68 @@ import User from "../models/userModel.js";
 import AcademicProfile from "../models/academicProfileModel.js";
 import GitHubProfile from "../models/githubProfileModel.js";
 import LeetCodeProfile from "../models/leetcodeProfileModel.js";
+import VtopProfile from "../models/vtopProfileModel.js";
 import CompanyRequirement, { normalizeIdentifier } from "../models/companyRequirementModel.js";
 import { createPersonalizedRoadmap } from "./roadmapService.js";
 import { calculatePlacementReadiness } from "./readinessService.js";
 import { buildLevelComparison } from "./levelGapService.js";
 import { fetchGitHubUserData, extractGitHubUsername, formatGitHubProfileResponse } from "./githubService.js";
 import { fetchLeetCodeStats, extractLeetCodeUsername, formatLeetCodeProfileResponse } from "./leetcodeService.js";
+import { authenticateAndScrapeVtop } from "./vtopLiveAuthService.js";
 
 export async function getOrCreateCoachSession(userId, user = null) {
   let session = await CoachConversation.findOne({ userId });
 
   if (!session) {
-    const userName = user?.name || "there";
-    const initialTarget = user?.targetCompany || "Microsoft";
-    const initialRole = user?.targetJobRole || "Software Development Engineer";
-    const initialCgpa = user?.cgpa || 8.5;
+    const userName = user?.name || "";
+    const initialTarget = user?.targetCompany || "";
+    const initialRole = user?.targetJobRole || "";
+    const initialCgpa = user?.cgpa ?? null;
 
     session = await CoachConversation.create({
       userId,
       onboardingStep: 1,
       onboardingStatus: "IN_PROGRESS",
       isCompleted: false,
-      profileCompletion: 15,
+      profileCompletion: 0,
       collectedData: {
-        name: user?.name || "",
-        college: user?.college || "VIT Chennai",
-        degree: user?.degree || "B.Tech",
-        branch: "Computer Science & Engineering",
-        graduationYear: user?.graduationYear || 2026,
+        name: userName,
+        college: user?.college || "",
+        degree: user?.degree || "",
+        branch: user?.branch || "",
+        graduationYear: user?.graduationYear ?? null,
         cgpa: initialCgpa,
-        tenthPercentage: user?.tenthPercentage || 90,
-        twelfthPercentage: user?.twelfthPercentage || 88,
+        tenthPercentage: user?.tenthPercentage ?? null,
+        twelfthPercentage: user?.twelfthPercentage ?? null,
         targetCompany: initialTarget,
         targetJobRole: initialRole,
-        targetTimelineWeeks: 8,
+        targetTimelineWeeks: user?.targetTimelineWeeks ?? null,
       },
       extractedProfile: {
         targetCompany: initialTarget,
         targetJobRole: initialRole,
-        graduationYear: user?.graduationYear || 2026,
-        college: user?.college || "VIT Chennai",
-        degree: user?.degree || "B.Tech",
-        branch: "Computer Science & Engineering",
+        graduationYear: user?.graduationYear ?? null,
+        college: user?.college || "",
+        degree: user?.degree || "",
+        branch: user?.branch || "",
         cgpa: initialCgpa,
-        tenthPercentage: user?.tenthPercentage || 90,
-        twelfthPercentage: user?.twelfthPercentage || 88,
+        tenthPercentage: user?.tenthPercentage ?? null,
+        twelfthPercentage: user?.twelfthPercentage ?? null,
         leetcodeUsername: "",
         githubUsername: "",
-        primarySkills: ["Data Structures", "Algorithms", "React", "Node.js", "Java"],
-        targetTimelineWeeks: 8,
+        primarySkills: [],
+        targetTimelineWeeks: user?.targetTimelineWeeks ?? null,
       },
       messages: [
         {
           sender: "coach",
-          text: `Hey ${userName} 👋 I'm your GetPlaced Career Coach.\n\nInstead of having you fill out a long, tedious registration form, I'll have a quick conversation with you to understand where you stand and build your placement profile automatically.\n\nI'll integrate your goals with real evidence from GitHub, LeetCode, and your academic background.\n\nReady to get started? What role and companies are you targeting?`,
+          text: `Hey${userName ? ` ${userName}` : ""} 👋 I'm your GetPlaced Career Coach.\n\nI'll have a quick conversation with you to understand your goals and build your placement profile automatically.\n\nWhat target company and role are you aiming for?`,
           chips: [
-            "Target: Microsoft · Software Development Engineer",
-            "Target: Google · Software Engineer",
-            "Target: Amazon · SDE-1",
-            "Target: Atlassian · Software Engineer",
-            "Target: TCS Digital / Prime",
-            "I haven't decided yet",
+            "Software Development Engineer",
+            "Frontend Engineer",
+            "Backend Engineer",
+            "Full Stack Engineer",
+            "Data / ML Engineer",
           ],
           timestamp: new Date(),
         },
@@ -73,9 +74,10 @@ export async function getOrCreateCoachSession(userId, user = null) {
   }
 
   // Check if user already had connected profiles in DB
-  const [existingGh, existingLc] = await Promise.all([
+  const [existingGh, existingLc, existingVtop] = await Promise.all([
     GitHubProfile.findOne({ userId }),
     LeetCodeProfile.findOne({ userId }),
+    VtopProfile.findOne({ userId }),
   ]);
 
   if (existingGh && !session.connectedProfiles?.github?.connected) {
@@ -86,8 +88,9 @@ export async function getOrCreateCoachSession(userId, user = null) {
       publicRepos: existingGh.publicReposCount || 0,
       languages: existingGh.languages?.map((l) => l.languageName) || [],
       topRepos: existingGh.topRepositories?.map((r) => r.name) || [],
-      projectScore: existingGh.projectScore || null,
+      projectScore: existingGh.projectScore ?? null,
     };
+    session.extractedProfile.githubUsername = existingGh.username;
   }
 
   if (existingLc && !session.connectedProfiles?.leetcode?.connected) {
@@ -100,9 +103,37 @@ export async function getOrCreateCoachSession(userId, user = null) {
       mediumSolved: existingLc.mediumSolved || 0,
       hardSolved: existingLc.hardSolved || 0,
       primaryLanguage: existingLc.primaryLanguage || "",
-      ranking: existingLc.ranking || null,
+      ranking: existingLc.ranking ?? null,
       streak: existingLc.streak || 0,
     };
+    session.extractedProfile.leetcodeUsername = existingLc.username;
+  }
+
+  if (existingVtop && !session.connectedProfiles?.vtop?.connected) {
+    if (!session.connectedProfiles) session.connectedProfiles = {};
+    session.connectedProfiles.vtop = {
+      connected: true,
+      regNo: existingVtop.regNo || "",
+      cgpa: existingVtop.currentCgpa ?? null,
+      branch: existingVtop.program || "",
+      college: existingVtop.campus || "",
+      activeBacklogs: existingVtop.activeBacklogs || 0,
+      historyOfBacklogs: existingVtop.historyOfBacklogs || 0,
+      creditsEarned: existingVtop.totalCreditsEarned || 0,
+      lastSyncedAt: existingVtop.lastSyncedAt || new Date(),
+    };
+    if (existingVtop.currentCgpa) {
+      session.extractedProfile.cgpa = existingVtop.currentCgpa;
+      session.collectedData.cgpa = existingVtop.currentCgpa;
+    }
+    if (existingVtop.campus) {
+      session.extractedProfile.college = existingVtop.campus;
+      session.collectedData.college = existingVtop.campus;
+    }
+    if (existingVtop.program) {
+      session.extractedProfile.branch = existingVtop.program;
+      session.collectedData.branch = existingVtop.program;
+    }
   }
 
   return session;
@@ -130,13 +161,13 @@ export async function processCoachMessage(userId, userMessage, user = null) {
     if (l.includes("microsoft")) return "Microsoft";
     if (l.includes("amazon")) return "Amazon";
     if (l.includes("atlassian")) return "Atlassian";
-    if (l.includes("tcs") || l.includes("prime") || l.includes("digital")) return "TCS Digital / Prime";
+    if (l.includes("tcs")) return "TCS";
     if (l.includes("adobe")) return "Adobe";
     if (l.includes("uber")) return "Uber";
     if (l.includes("flipkart")) return "Flipkart";
     if (l.includes("goldman")) return "Goldman Sachs";
     if (l.includes("cisco")) return "Cisco";
-    return "Microsoft";
+    return text.trim();
   };
 
   // Helper parser for role
@@ -147,17 +178,16 @@ export async function processCoachMessage(userId, userMessage, user = null) {
     if (l.includes("full stack") || l.includes("fullstack")) return "Full Stack Engineer";
     if (l.includes("devops") || l.includes("cloud")) return "Cloud / DevOps Engineer";
     if (l.includes("data") || l.includes("ai") || l.includes("ml")) return "Data / ML Engineer";
-    return "Software Development Engineer";
+    return text.trim();
   };
 
   // Step 1: Target Ambition (Company & Role)
   if (step === 1) {
-    if (lower.includes("haven't decided") || lower.includes("not decided") || lower.includes("don't have")) {
-      session.extractedProfile.targetCompany = "Microsoft";
-      session.extractedProfile.targetJobRole = "Software Development Engineer";
-      session.collectedData.targetCompany = "Microsoft";
-      session.collectedData.targetJobRole = "Software Development Engineer";
-      replyText = `No problem! We'll start with Microsoft Software Development Engineer as a general tier-1 benchmark, which you can adjust at any time.\n\nNow, let's look at your academic baseline. What is your college, degree/branch, current CGPA, and expected graduation year?`;
+    if (lower.includes("haven't decided") || lower.includes("not decided") || lower.includes("not sure")) {
+      session.extractedProfile.targetCompany = "";
+      session.extractedProfile.targetJobRole = "";
+      session.collectedData.targetCompany = "";
+      session.collectedData.targetJobRole = "";
     } else {
       const company = parseCompany(userMessage);
       const role = parseRole(userMessage);
@@ -165,17 +195,43 @@ export async function processCoachMessage(userId, userMessage, user = null) {
       session.extractedProfile.targetJobRole = role;
       session.collectedData.targetCompany = company;
       session.collectedData.targetJobRole = role;
-      replyText = `Target locked: ${company} — ${role}. Excellent choice!\n\nNext, let's verify your academic baseline for campus eligibility cutoffs. What is your college, degree/branch, current CGPA, and graduation year?`;
     }
 
-    session.profileCompletion = 25;
-    nextStep = 2;
-    nextChips = [
-      "VIT Chennai · B.Tech CSE (2026 Batch) · 8.8 CGPA",
-      "B.Tech CSE (2026 Batch) · 8.2 CGPA",
-      "B.Tech IT (2025 Batch) · 9.1 CGPA",
-      "B.Tech ECE (2026 Batch) · 7.9 CGPA",
-    ];
+    const targetAck = session.extractedProfile.targetCompany
+      ? `Target recorded: ${session.extractedProfile.targetCompany}${session.extractedProfile.targetJobRole ? ` — ${session.extractedProfile.targetJobRole}` : ""}.`
+      : `No problem! You can set your target company and role at any time.`;
+
+    const isVtop = Boolean(session.connectedProfiles?.vtop?.connected);
+    const isGh = Boolean(session.connectedProfiles?.github?.connected);
+    const isLc = Boolean(session.connectedProfiles?.leetcode?.connected);
+
+    if (isVtop) {
+      const vtopAck = `Your academic record is verified via VTOP (${session.connectedProfiles.vtop.cgpa ? `${session.connectedProfiles.vtop.cgpa} CGPA` : "Verified"}).`;
+      if (isGh && isLc) {
+        replyText = `${targetAck}\n\n${vtopAck}\n\nYour GitHub (@${session.connectedProfiles.github.username}) and LeetCode (@${session.connectedProfiles.leetcode.username}) are already linked ✓.\n\nNext, what programming languages, frameworks, or developer tools do you use regularly?`;
+        nextStep = 5;
+        session.profileCompletion = 75;
+        nextChips = ["Skip for now"];
+      } else if (isGh) {
+        replyText = `${targetAck}\n\n${vtopAck}\n\nYour GitHub is already linked (@${session.connectedProfiles.github.username} ✓).\n\nNow, let's sync your problem-solving record. What is your LeetCode username or profile URL?`;
+        nextStep = 4;
+        session.profileCompletion = 60;
+        nextChips = ["Skip LeetCode for now"];
+      } else {
+        replyText = `${targetAck}\n\n${vtopAck}\n\nNow let's connect your engineering proof. What is your GitHub username or profile URL?`;
+        nextStep = 3;
+        session.profileCompletion = 40;
+        nextChips = ["Skip GitHub for now"];
+      }
+    } else {
+      replyText = `${targetAck}\n\nNext, let's record your academic details. What is your college, degree/branch, current CGPA, and graduation year? (Or connect your VTOP to auto-fill verified details).`;
+      nextStep = 2;
+      session.profileCompletion = 20;
+      nextChips = [
+        "Connect via VTOP",
+        "Enter details manually",
+      ];
+    }
   }
   // Step 2: Academic Baseline
   else if (step === 2) {
@@ -193,24 +249,50 @@ export async function processCoachMessage(userId, userMessage, user = null) {
       session.collectedData.graduationYear = gradYear;
     }
 
-    if (lower.includes("vit")) session.collectedData.college = "VIT Chennai";
-    if (lower.includes("b.tech") || lower.includes("btech")) session.collectedData.degree = "B.Tech";
-    if (lower.includes("cse") || lower.includes("computer science")) session.collectedData.branch = "Computer Science & Engineering";
+    if (lower.includes("vit")) {
+      session.collectedData.college = "VIT Chennai";
+      session.extractedProfile.college = "VIT Chennai";
+    }
+    if (lower.includes("b.tech") || lower.includes("btech")) {
+      session.collectedData.degree = "B.Tech";
+      session.extractedProfile.degree = "B.Tech";
+    }
+    if (lower.includes("cse") || lower.includes("computer science")) {
+      session.collectedData.branch = "Computer Science & Engineering";
+      session.extractedProfile.branch = "Computer Science & Engineering";
+    }
 
-    session.profileCompletion = 40;
-    nextStep = 3;
+    const isVtop = Boolean(session.connectedProfiles?.vtop?.connected);
+    const verifiedTag = isVtop ? " [VTOP Verified ✓]" : "";
+    const cgpaDisplay = session.collectedData.cgpa ? `${session.collectedData.cgpa} CGPA` : "details recorded";
+    const degreeDisplay = session.collectedData.degree ? ` (${session.collectedData.degree}${session.collectedData.graduationYear ? `, ${session.collectedData.graduationYear}` : ""})` : "";
+    const academicAck = `Academic record updated${verifiedTag}: ${cgpaDisplay}${degreeDisplay}.`;
 
-    replyText = `Academic record verified: ${session.collectedData.cgpa || 8.5} CGPA (${session.collectedData.degree || "B.Tech"}, ${session.collectedData.graduationYear || 2026}). You comfortably meet the academic cutoff for ${session.extractedProfile.targetCompany}.\n\nNow let's connect your engineering proof. What is your GitHub username or profile URL?`;
-    nextChips = [
-      "https://github.com/octocat",
-      "github.com/torvalds",
-      "Skip GitHub for now",
-    ];
+    const isGh = Boolean(session.connectedProfiles?.github?.connected);
+    const isLc = Boolean(session.connectedProfiles?.leetcode?.connected);
+
+    if (isGh && isLc) {
+      replyText = `${academicAck}\n\nYour GitHub (@${session.connectedProfiles.github.username}) and LeetCode (@${session.connectedProfiles.leetcode.username}) are already linked ✓.\n\nWhich programming languages, frameworks, or developer tools do you use regularly?`;
+      nextStep = 5;
+      session.profileCompletion = 75;
+      nextChips = ["Skip for now"];
+    } else if (isGh) {
+      replyText = `${academicAck}\n\nYour GitHub is already linked (@${session.connectedProfiles.github.username} ✓).\n\nNow, let's sync your problem-solving record. What is your LeetCode username or profile URL?`;
+      nextStep = 4;
+      session.profileCompletion = 60;
+      nextChips = ["Skip LeetCode for now"];
+    } else {
+      replyText = `${academicAck}\n\nNow let's connect your engineering proof. What is your GitHub username or profile URL?`;
+      nextStep = 3;
+      session.profileCompletion = 40;
+      nextChips = ["Skip GitHub for now"];
+    }
   }
   // Step 3: GitHub Integration
   else if (step === 3) {
-    if (lower.includes("skip") || lower.includes("later") || lower.includes("don't have")) {
-      replyText = `No worries! You can connect GitHub anytime from your profile settings.\n\nNext, let's sync your problem-solving record. What is your LeetCode username or profile URL?`;
+    let ghAck = "";
+    if (lower.includes("skip") || lower.includes("later") || lower.includes("don't have") || lower.includes("no")) {
+      ghAck = `Understood. You can connect GitHub anytime from your profile ledger.`;
     } else {
       const cleanGh = extractGitHubUsername(userMessage);
       if (cleanGh) {
@@ -229,15 +311,14 @@ export async function processCoachMessage(userId, userMessage, user = null) {
             publicRepos: ghProfile.publicReposCount || 0,
             languages: ghProfile.languages?.map((l) => l.languageName) || [],
             topRepos: ghProfile.topRepositories?.map((r) => r.name) || [],
-            projectScore: ghProfile.projectScore || null,
+            projectScore: ghProfile.projectScore ?? null,
           };
 
-          // Save discovered projects
           if (ghProfile.repositories && ghProfile.repositories.length > 0) {
             session.discoveredProjects = ghProfile.repositories.slice(0, 5).map((r) => ({
               name: r.name,
-              description: r.description || "Public repository project",
-              language: r.language || "JavaScript",
+              description: r.description || "",
+              language: r.language || "",
               stars: r.stars || 0,
               topics: r.topics || [],
               isMain: r.stars > 0 || r.hasLiveUrl,
@@ -245,30 +326,35 @@ export async function processCoachMessage(userId, userMessage, user = null) {
           }
 
           const topLangs = (ghProfile.languages || []).slice(0, 3).map((l) => l.languageName).join(", ");
-          replyText = `GitHub connected: @${cleanGh} ✓ Found ${ghProfile.publicReposCount} repositories (${topLangs || "TypeScript, JavaScript"}). Project dimension calibrated to ${ghProfile.projectScore || 75}/100.\n\nNow, let's check your DSA record. What is your LeetCode username or profile URL?`;
+          ghAck = `GitHub connected: @${cleanGh} ✓ Found ${ghProfile.publicReposCount || 0} repositories${topLangs ? ` (${topLangs})` : ""}.`;
         } catch (err) {
           console.warn("GitHub fetch error during onboarding:", err.message);
-          replyText = `Couldn't retrieve GitHub profile (@${cleanGh}) right now, but saved for connection.\n\nWhat is your LeetCode username or profile URL?`;
+          ghAck = `Recorded GitHub username @${cleanGh}.`;
           session.extractedProfile.githubUsername = cleanGh;
         }
       } else {
-        replyText = `GitHub noted.\n\nWhat is your LeetCode username or profile URL?`;
+        ghAck = `GitHub noted.`;
       }
     }
 
-    session.profileCompletion = 60;
-    nextStep = 4;
-    nextChips = [
-      "https://leetcode.com/tourist",
-      "leetcode.com/u/neal_wu",
-      "tourist",
-      "Skip LeetCode for now",
-    ];
+    const isLc = Boolean(session.connectedProfiles?.leetcode?.connected);
+    if (isLc) {
+      replyText = `${ghAck}\n\nYour LeetCode is already linked (@${session.connectedProfiles.leetcode.username} ✓ Solved ${session.connectedProfiles.leetcode.totalSolved || 0} problems).\n\nNext, what programming languages, frameworks, or developer tools do you use regularly?`;
+      nextStep = 5;
+      session.profileCompletion = 75;
+      nextChips = ["Skip for now"];
+    } else {
+      replyText = `${ghAck}\n\nNow, let's check your DSA record. What is your LeetCode username or profile URL?`;
+      nextStep = 4;
+      session.profileCompletion = 60;
+      nextChips = ["Skip LeetCode for now"];
+    }
   }
   // Step 4: LeetCode Integration
   else if (step === 4) {
-    if (lower.includes("skip") || lower.includes("later") || lower.includes("don't have")) {
-      replyText = `Understood. We'll calibrate your DSA level based on core requirements and self-rating.\n\nWhich programming languages and technologies do you use most frequently (e.g. C++, Java, Python, React, Spring Boot, SQL)?`;
+    let lcAck = "";
+    if (lower.includes("skip") || lower.includes("later") || lower.includes("don't have") || lower.includes("no")) {
+      lcAck = `Understood.`;
     } else {
       const cleanLc = extractLeetCodeUsername(userMessage);
       if (cleanLc) {
@@ -288,82 +374,91 @@ export async function processCoachMessage(userId, userMessage, user = null) {
             easySolved: lcProfile.easySolved || 0,
             mediumSolved: lcProfile.mediumSolved || 0,
             hardSolved: lcProfile.hardSolved || 0,
-            primaryLanguage: lcProfile.primaryLanguage || "C++",
-            ranking: lcProfile.ranking || null,
+            primaryLanguage: lcProfile.primaryLanguage || "",
+            ranking: lcProfile.ranking ?? null,
             streak: lcProfile.streak || 0,
           };
 
-          replyText = `LeetCode connected: @${cleanLc} ✓ Solved ${lcProfile.totalSolved} problems (${lcProfile.easySolved} Easy, ${lcProfile.mediumSolved} Medium, ${lcProfile.hardSolved} Hard). Primary language: ${lcProfile.primaryLanguage || "C++"}.\n\nNext, what other programming languages, frameworks, or developer tools do you use regularly?`;
+          const solvedInfo = lcProfile.totalSolved
+            ? `Solved ${lcProfile.totalSolved} problems (${lcProfile.easySolved || 0} Easy, ${lcProfile.mediumSolved || 0} Medium, ${lcProfile.hardSolved || 0} Hard)`
+            : "Profile linked";
+
+          lcAck = `LeetCode connected: @${cleanLc} ✓ ${solvedInfo}.`;
         } catch (err) {
           console.warn("LeetCode fetch error during onboarding:", err.message);
-          replyText = `Couldn't retrieve public LeetCode stats for @${cleanLc} right now, but recorded your handle.\n\nWhich languages and frameworks do you use regularly?`;
+          lcAck = `Recorded LeetCode handle @${cleanLc}.`;
           session.extractedProfile.leetcodeUsername = cleanLc;
         }
       } else {
-        replyText = `LeetCode noted.\n\nWhich languages and frameworks do you use regularly?`;
+        lcAck = `LeetCode noted.`;
       }
     }
 
+    replyText = `${lcAck}\n\nNext, what programming languages, frameworks, or developer tools do you use regularly?`;
     session.profileCompletion = 75;
     nextStep = 5;
     nextChips = [
-      "Java, Spring Boot, React, SQL, DSA",
-      "C++, Python, React, Node.js, System Design",
-      "Python, FastApi, PostgreSQL, Docker, DSA",
-      "MERN Stack (MongoDB, Express, React, Node.js)",
+      "Skip for now",
     ];
   }
   // Step 5: Technical Skills & Self-Assessment
   else if (step === 5) {
     const rawSkills = userMessage.split(/[,;\n•]+/).map((s) => s.trim()).filter(Boolean);
-    const discoveredSkills = rawSkills.length > 0
-      ? rawSkills
-      : ["Java", "React", "Data Structures", "SQL", "Spring Boot"];
+    const discoveredSkills = rawSkills.filter(
+      (s) => !["skip", "later", "none", "no"].includes(s.toLowerCase())
+    );
 
     session.extractedProfile.primarySkills = discoveredSkills;
 
-    // Self-assessment question
     session.profileCompletion = 85;
     nextStep = 6;
 
-    replyText = `Captured core competencies: ${discoveredSkills.join(", ")}.\n\nOn a scale of 1–10 (or Beginner/Intermediate/Advanced), how confident do you feel in your Technical Interviews & DSA problem-solving right now?`;
+    const skillsSummary = discoveredSkills.length > 0 ? `Captured competencies: ${discoveredSkills.join(", ")}.\n\n` : "";
+    replyText = `${skillsSummary}How would you rate your technical confidence and interview readiness right now (Beginner, Intermediate, or Advanced)?`;
     nextChips = [
-      "Intermediate (7/10) · Confident in Medium DSA",
-      "Beginner (5/10) · Building foundations",
-      "Advanced (8.5/10) · Competitive programmer",
-      "Strong in Projects (8/10), Moderate in DSA (6/10)",
+      "Beginner",
+      "Intermediate",
+      "Advanced",
     ];
   }
   // Step 6: Self-Assessment, Career Timeline & Synthesis
   else if (step === 6) {
-    let conf = 7;
+    let conf = null;
     const numMatch = userMessage.match(/(\d(?:\.\d+)?)/);
     if (numMatch && parseFloat(numMatch[1]) <= 10) {
       conf = parseFloat(numMatch[1]);
     } else if (lower.includes("advanced") || lower.includes("expert")) {
-      conf = 8.5;
+      conf = 9;
+    } else if (lower.includes("intermediate")) {
+      conf = 6;
     } else if (lower.includes("beginner")) {
-      conf = 5;
+      conf = 3;
     }
 
     session.collectedData.technicalConfidence = conf;
-    session.collectedData.communicationConfidence = 7.5;
-    session.collectedData.hrConfidence = 7;
+    session.collectedData.communicationConfidence = conf;
+    session.collectedData.hrConfidence = conf;
 
-    let weeks = 8;
+    let weeks = null;
     if (lower.includes("4")) weeks = 4;
+    else if (lower.includes("8")) weeks = 8;
     else if (lower.includes("12")) weeks = 12;
-    session.extractedProfile.targetTimelineWeeks = weeks;
-    session.collectedData.targetTimelineWeeks = weeks;
+    if (weeks) {
+      session.extractedProfile.targetTimelineWeeks = weeks;
+      session.collectedData.targetTimelineWeeks = weeks;
+    }
 
     // Synthesize profile into database models
     await applyOnboardingToProfile(userId, session.extractedProfile);
 
-    // Build level comparison and readiness
+    // Build real level comparison and readiness
     const updatedUser = await User.findById(userId);
     const [readinessData, gapData] = await Promise.all([
       calculatePlacementReadiness(updatedUser),
       (async () => {
+        if (!session.extractedProfile.targetCompany && !session.extractedProfile.targetJobRole) {
+          return { skills: [] };
+        }
         const req = await CompanyRequirement.findOne({
           companyNormalized: normalizeIdentifier(session.extractedProfile.targetCompany),
           roleNormalized: normalizeIdentifier(session.extractedProfile.targetJobRole),
@@ -373,22 +468,22 @@ export async function processCoachMessage(userId, userMessage, user = null) {
       })(),
     ]);
 
-    // Build evidence skills
+    // Build evidence skills from verified gap data
     session.evidenceSkills = (gapData.skills || []).slice(0, 6).map((s) => ({
       name: s.skillName,
-      estimatedLevel: s.currentLevel || 6.5,
-      requiredLevel: s.requiredLevel || 8,
-      gap: s.gap || -1.5,
-      confidence: s.confidenceScore || 82,
-      sources: s.sources || ["github", "self_assessment"],
-      explanation: s.explanation || `Derived from verified activity and self-reported proficiency.`,
+      estimatedLevel: s.currentLevel ?? 0,
+      requiredLevel: s.requiredLevel ?? 0,
+      gap: s.gap ?? 0,
+      confidence: s.confidenceScore ?? 0,
+      sources: s.sources || [],
+      explanation: s.explanation || "",
       selfRating: conf,
     }));
 
     session.readinessSnapshot = {
-      overallScore: readinessData.overallScore || 74,
-      targetBenchmark: readinessData.targetBenchmark || 80,
-      statusLabel: readinessData.statusLabel || "Competitive Ready",
+      overallScore: readinessData.overallScore ?? 0,
+      targetBenchmark: readinessData.targetBenchmark ?? 0,
+      statusLabel: readinessData.statusLabel || "Profile Initialized",
       dimensions: readinessData.dimensions || {},
       topGaps: readinessData.topGaps || [],
     };
@@ -398,22 +493,24 @@ export async function processCoachMessage(userId, userMessage, user = null) {
     session.profileCompletion = 100;
     nextStep = 7;
 
-    const readinessScore = readinessData.overallScore || 74;
-    const topGapText = readinessData.topGaps && readinessData.topGaps.length > 0
-      ? readinessData.topGaps.map((g) => `${g.dimensionLabel} (${g.gap > 0 ? "+" : ""}${g.gap})`).join(", ")
-      : "DSA & System Fundamentals";
+    const targetInfo = session.extractedProfile.targetCompany
+      ? ` for ${session.extractedProfile.targetCompany}${session.extractedProfile.targetJobRole ? ` (${session.extractedProfile.targetJobRole})` : ""}`
+      : "";
 
-    replyText = `🎉 Profile Calibration Complete!\n\nHere is your Initial Placement Analysis for ${session.extractedProfile.targetCompany} (${session.extractedProfile.targetJobRole}):\n\n• Initial Placement Readiness: ${readinessScore}/100\n• Academic Standing: ${session.extractedProfile.cgpa || 8.5} CGPA (${session.collectedData.degree || "B.Tech"})\n• GitHub Evidence: ${session.connectedProfiles?.github?.connected ? `Connected (@${session.connectedProfiles.github.username})` : "Pending"}\n• LeetCode Evidence: ${session.connectedProfiles?.leetcode?.connected ? `Connected (@${session.connectedProfiles.leetcode.username})` : "Pending"}\n• Primary Focus Gaps: ${topGapText}\n\nReview your profile below and click "Enter My Dashboard" to access your tailored roadmap and live analytics.`;
+    const vtopStatus = session.connectedProfiles?.vtop?.connected ? `Connected (${session.connectedProfiles.vtop.regNo})` : "Not connected";
+    const ghStatus = session.connectedProfiles?.github?.connected ? `Connected (@${session.connectedProfiles.github.username})` : "Not connected";
+    const lcStatus = session.connectedProfiles?.leetcode?.connected ? `Connected (@${session.connectedProfiles.leetcode.username})` : "Not connected";
+
+    replyText = `🎉 Profile Setup Complete!\n\nYour profile has been saved${targetInfo}:\n\n• Academic Status: ${session.extractedProfile.cgpa ? `${session.extractedProfile.cgpa} CGPA` : "Recorded"}\n• VTOP Integration: ${vtopStatus}\n• GitHub Proof: ${ghStatus}\n• LeetCode Proof: ${lcStatus}\n\nYou can view and refine your verified details or launch your personalized dashboard at any time.`;
     nextChips = [
-      "Enter My Dashboard →",
+      "Enter Dashboard →",
       "Launch Placement Roadmap",
-      "Explore Target Company Dossier",
     ];
   }
   // Step 7: Completed State
   else {
     replyText = `Your placement profile is active and synced. You can update any information from your Dashboard or Profile settings at any time.`;
-    nextChips = ["Enter My Dashboard →", "Placement Roadmap"];
+    nextChips = ["Enter Dashboard →", "Launch Placement Roadmap"];
   }
 
   session.onboardingStep = nextStep;
@@ -446,58 +543,67 @@ export async function processCoachMessage(userId, userMessage, user = null) {
 export async function applyOnboardingToProfile(userId, extracted) {
   if (!extracted) return;
 
-  const targetJobRole = extracted.targetJobRole || "Software Development Engineer";
-  const targetCompany = extracted.targetCompany || "Microsoft";
+  const targetJobRole = extracted.targetJobRole || "";
+  const targetCompany = extracted.targetCompany || "";
 
-  await User.findByIdAndUpdate(userId, {
-    name: extracted.name || undefined,
-    targetCompany,
-    targetCompanyNormalized: normalizeIdentifier(targetCompany),
-    targetJobRole,
-    targetRoleNormalized: normalizeIdentifier(targetJobRole),
-    graduationYear: extracted.graduationYear || 2026,
-    college: extracted.college || "VIT Chennai",
-    degree: extracted.degree || "B.Tech",
-    cgpa: extracted.cgpa || 8.5,
-    tenthPercentage: extracted.tenthPercentage || 90,
-    twelfthPercentage: extracted.twelfthPercentage || 88,
+  const userUpdate = {
     onboardingCompleted: true,
-  });
+  };
+
+  if (extracted.name) userUpdate.name = extracted.name;
+  if (targetCompany) {
+    userUpdate.targetCompany = targetCompany;
+    userUpdate.targetCompanyNormalized = normalizeIdentifier(targetCompany);
+  }
+  if (targetJobRole) {
+    userUpdate.targetJobRole = targetJobRole;
+    userUpdate.targetRoleNormalized = normalizeIdentifier(targetJobRole);
+  }
+  if (extracted.graduationYear) userUpdate.graduationYear = extracted.graduationYear;
+  if (extracted.college) userUpdate.college = extracted.college;
+  if (extracted.degree) userUpdate.degree = extracted.degree;
+  if (extracted.cgpa) userUpdate.cgpa = extracted.cgpa;
+  if (extracted.tenthPercentage) userUpdate.tenthPercentage = extracted.tenthPercentage;
+  if (extracted.twelfthPercentage) userUpdate.twelfthPercentage = extracted.twelfthPercentage;
+
+  await User.findByIdAndUpdate(userId, userUpdate);
 
   let academic = await AcademicProfile.findOne({ userId });
   if (academic) {
-    academic.currentCgpa = extracted.cgpa || academic.currentCgpa;
-    academic.college = extracted.college || academic.college;
-    academic.degree = extracted.degree || academic.degree;
-    academic.branch = extracted.branch || academic.branch;
-    academic.graduationYear = extracted.graduationYear || academic.graduationYear;
+    if (extracted.cgpa) academic.currentCgpa = extracted.cgpa;
+    if (extracted.college) academic.college = extracted.college;
+    if (extracted.degree) academic.degree = extracted.degree;
+    if (extracted.branch) academic.branch = extracted.branch;
+    if (extracted.graduationYear) academic.graduationYear = extracted.graduationYear;
+    if (extracted.tenthPercentage) academic.tenthPercentage = extracted.tenthPercentage;
+    if (extracted.twelfthPercentage) academic.twelfthPercentage = extracted.twelfthPercentage;
     await academic.save();
   } else {
     await AcademicProfile.create({
       userId,
-      college: extracted.college || "VIT Chennai",
-      degree: extracted.degree || "B.Tech",
-      branch: extracted.branch || "Computer Science & Engineering",
-      graduationYear: extracted.graduationYear || 2026,
-      currentCgpa: extracted.cgpa || 8.5,
-      targetCgpa: 9.0,
-      tenthPercentage: extracted.tenthPercentage || 90,
-      twelfthPercentage: extracted.twelfthPercentage || 88,
+      college: extracted.college || "",
+      degree: extracted.degree || "",
+      branch: extracted.branch || "",
+      graduationYear: extracted.graduationYear ?? null,
+      currentCgpa: extracted.cgpa ?? null,
+      tenthPercentage: extracted.tenthPercentage ?? null,
+      twelfthPercentage: extracted.twelfthPercentage ?? null,
     });
   }
 
-  try {
-    await createPersonalizedRoadmap(
-      userId,
-      targetCompany,
-      targetJobRole,
-      extracted.targetTimelineWeeks || 8
-    );
-  } catch (err) {
-    console.warn("Could not auto-generate roadmap:", err.message);
+  if (targetCompany && targetJobRole) {
+    try {
+      await createPersonalizedRoadmap(
+        userId,
+        targetCompany,
+        targetJobRole,
+        extracted.targetTimelineWeeks || 8
+      );
+    } catch (err) {
+      console.warn("Roadmap generation note:", err.message);
+    }
   }
 
-  // Mark session as completed
   await CoachConversation.findOneAndUpdate(
     { userId },
     { isCompleted: true, onboardingStatus: "COMPLETED", profileCompletion: 100 }
@@ -505,7 +611,7 @@ export async function applyOnboardingToProfile(userId, extracted) {
 
   return {
     success: true,
-    message: "Profile, academic baseline, and placement roadmap successfully calibrated!",
+    message: "Profile and academic baseline calibrated.",
   };
 }
 
@@ -529,23 +635,59 @@ export async function connectGitHubInCoach(userId, username) {
       publicRepos: profile.publicReposCount || 0,
       languages: profile.languages?.map((l) => l.languageName) || [],
       topRepos: profile.topRepositories?.map((r) => r.name) || [],
-      projectScore: profile.projectScore || null,
+      projectScore: profile.projectScore ?? null,
     };
     if (profile.repositories && profile.repositories.length > 0) {
       session.discoveredProjects = profile.repositories.slice(0, 5).map((r) => ({
         name: r.name,
-        description: r.description || "Public repository",
-        language: r.language || "JavaScript",
+        description: r.description || "",
+        language: r.language || "",
         stars: r.stars || 0,
         topics: r.topics || [],
         isMain: r.stars > 0 || r.hasLiveUrl,
       }));
     }
     session.extractedProfile.githubUsername = cleanUsername;
+
+    const topLangs = (profile.languages || []).slice(0, 3).map((l) => l.languageName).join(", ");
+    const ghAck = `GitHub connected: @${cleanUsername} ✓ Found ${profile.publicReposCount || 0} repositories${topLangs ? ` (${topLangs})` : ""}.`;
+
+    const isLc = Boolean(session.connectedProfiles?.leetcode?.connected);
+
+    // If user was on Step 3 (or earlier), adaptively advance
+    if (session.onboardingStep <= 3) {
+      if (isLc) {
+        session.onboardingStep = 5;
+        session.profileCompletion = Math.max(session.profileCompletion, 75);
+        session.messages.push({
+          sender: "coach",
+          text: `${ghAck}\n\nYour LeetCode is already linked (@${session.connectedProfiles.leetcode.username} ✓).\n\nWhich programming languages, frameworks, or developer tools do you use regularly?`,
+          chips: ["Skip for now"],
+          timestamp: new Date(),
+        });
+      } else {
+        session.onboardingStep = 4;
+        session.profileCompletion = Math.max(session.profileCompletion, 60);
+        session.messages.push({
+          sender: "coach",
+          text: `${ghAck}\n\nNow, let's sync your problem-solving record. What is your LeetCode username or profile URL?`,
+          chips: ["Skip LeetCode for now"],
+          timestamp: new Date(),
+        });
+      }
+    } else {
+      session.messages.push({
+        sender: "coach",
+        text: ghAck,
+        chips: session.messages[session.messages.length - 1]?.chips || [],
+        timestamp: new Date(),
+      });
+    }
+
     await session.save();
   }
 
-  return { success: true, profile: formatGitHubProfileResponse(profile) };
+  return { success: true, profile: formatGitHubProfileResponse(profile), session };
 }
 
 export async function connectLeetCodeInCoach(userId, username) {
@@ -570,13 +712,156 @@ export async function connectLeetCodeInCoach(userId, username) {
       mediumSolved: profile.mediumSolved || 0,
       hardSolved: profile.hardSolved || 0,
       primaryLanguage: profile.primaryLanguage || "",
-      ranking: profile.ranking || null,
+      ranking: profile.ranking ?? null,
       streak: profile.streak || 0,
     };
     session.extractedProfile.leetcodeUsername = cleanUsername;
+
+    const solvedInfo = profile.totalSolved
+      ? `Solved ${profile.totalSolved} problems (${profile.easySolved || 0} Easy, ${profile.mediumSolved || 0} Medium, ${profile.hardSolved || 0} Hard)`
+      : "Profile linked";
+    const lcAck = `LeetCode connected: @${cleanUsername} ✓ ${solvedInfo}.`;
+
+    if (session.onboardingStep <= 4) {
+      session.onboardingStep = 5;
+      session.profileCompletion = Math.max(session.profileCompletion, 75);
+      session.messages.push({
+        sender: "coach",
+        text: `${lcAck}\n\nNext, what programming languages, frameworks, or developer tools do you use regularly?`,
+        chips: ["Skip for now"],
+        timestamp: new Date(),
+      });
+    } else {
+      session.messages.push({
+        sender: "coach",
+        text: lcAck,
+        chips: session.messages[session.messages.length - 1]?.chips || [],
+        timestamp: new Date(),
+      });
+    }
+
     await session.save();
   }
 
-  return { success: true, profile: formatLeetCodeProfileResponse(profile) };
+  return { success: true, profile: formatLeetCodeProfileResponse(profile), session };
+}
+
+export async function connectVtopInCoach(userId, { username, password, captchaStr, sessionId, semesterId, regNo }) {
+  let vtopProfile = null;
+
+  if (username && password && captchaStr) {
+    const liveResult = await authenticateAndScrapeVtop(userId, {
+      username: username.trim(),
+      password: password.trim(),
+      captchaStr: captchaStr.trim(),
+      sessionId,
+      semesterId,
+    });
+
+    if (!liveResult.success) {
+      return liveResult;
+    }
+    vtopProfile = liveResult.vtop;
+  } else if (regNo || username) {
+    const targetReg = (regNo || username).toUpperCase().trim();
+    let vtop = await VtopProfile.findOne({ userId });
+    if (!vtop) {
+      vtop = new VtopProfile({
+        userId,
+        regNo: targetReg,
+        syncStatus: "unverified",
+        lastSyncedAt: new Date(),
+      });
+    } else {
+      vtop.regNo = targetReg;
+      vtop.lastSyncedAt = new Date();
+    }
+    await vtop.save();
+    vtopProfile = vtop;
+  } else {
+    vtopProfile = await VtopProfile.findOne({ userId });
+    if (!vtopProfile) {
+      throw new Error("No VTOP credentials or profile provided");
+    }
+  }
+
+  const session = await CoachConversation.findOne({ userId });
+  if (session) {
+    if (!session.connectedProfiles) session.connectedProfiles = {};
+    session.connectedProfiles.vtop = {
+      connected: true,
+      regNo: vtopProfile.regNo || "",
+      cgpa: vtopProfile.currentCgpa ?? null,
+      branch: vtopProfile.program || "",
+      college: vtopProfile.campus || "",
+      activeBacklogs: vtopProfile.activeBacklogs || 0,
+      historyOfBacklogs: vtopProfile.historyOfBacklogs || 0,
+      creditsEarned: vtopProfile.totalCreditsEarned || 0,
+      lastSyncedAt: vtopProfile.lastSyncedAt || new Date(),
+    };
+    if (vtopProfile.currentCgpa) {
+      session.extractedProfile.cgpa = vtopProfile.currentCgpa;
+      session.collectedData.cgpa = vtopProfile.currentCgpa;
+    }
+    if (vtopProfile.campus) {
+      session.extractedProfile.college = vtopProfile.campus;
+      session.collectedData.college = vtopProfile.campus;
+    }
+    if (vtopProfile.program) {
+      session.extractedProfile.branch = vtopProfile.program;
+      session.collectedData.branch = vtopProfile.program;
+    }
+
+    const vtopAck = `VTOP academic profile connected: ${vtopProfile.regNo}${vtopProfile.currentCgpa ? ` (${vtopProfile.currentCgpa} CGPA)` : ""}.`;
+    const isGh = Boolean(session.connectedProfiles?.github?.connected);
+    const isLc = Boolean(session.connectedProfiles?.leetcode?.connected);
+
+    if (session.onboardingStep <= 2) {
+      if (isGh && isLc) {
+        session.onboardingStep = 5;
+        session.profileCompletion = Math.max(session.profileCompletion, 75);
+        session.messages.push({
+          sender: "coach",
+          text: `${vtopAck}\n\nYour GitHub (@${session.connectedProfiles.github.username}) and LeetCode (@${session.connectedProfiles.leetcode.username}) are already linked ✓.\n\nWhich programming languages, frameworks, or developer tools do you use regularly?`,
+          chips: ["Skip for now"],
+          timestamp: new Date(),
+        });
+      } else if (isGh) {
+        session.onboardingStep = 4;
+        session.profileCompletion = Math.max(session.profileCompletion, 60);
+        session.messages.push({
+          sender: "coach",
+          text: `${vtopAck}\n\nYour GitHub is already linked (@${session.connectedProfiles.github.username} ✓).\n\nNow, let's sync your problem-solving record. What is your LeetCode username or profile URL?`,
+          chips: ["Skip LeetCode for now"],
+          timestamp: new Date(),
+        });
+      } else {
+        session.onboardingStep = 3;
+        session.profileCompletion = Math.max(session.profileCompletion, 40);
+        session.messages.push({
+          sender: "coach",
+          text: `${vtopAck}\n\nNow let's connect your engineering proof. What is your GitHub username or profile URL?`,
+          chips: ["Skip GitHub for now"],
+          timestamp: new Date(),
+        });
+      }
+    } else {
+      session.messages.push({
+        sender: "coach",
+        text: vtopAck,
+        chips: session.messages[session.messages.length - 1]?.chips || [],
+        timestamp: new Date(),
+      });
+    }
+
+    await session.save();
+  }
+
+  return {
+    success: true,
+    vtop: vtopProfile,
+    session,
+    message: `VTOP academic profile connected: ${vtopProfile.regNo}${vtopProfile.currentCgpa ? ` (${vtopProfile.currentCgpa} CGPA)` : ""}`,
+  };
 }
 

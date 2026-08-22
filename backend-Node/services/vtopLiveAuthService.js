@@ -3,7 +3,7 @@ import * as cheerio from "cheerio";
 import VtopProfile from "../models/vtopProfileModel.js";
 import AcademicProfile from "../models/academicProfileModel.js";
 import User from "../models/userModel.js";
-import { computeVtopPlacementImpact, generateDefaultVtopData } from "./vtopService.js";
+import { computeVtopPlacementImpact } from "./vtopService.js";
 
 // Bypass self-signed / internal SSL certificate errors for VTOP
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -224,7 +224,13 @@ export async function authenticateAndScrapeVtop(userId, credentials) {
   const user = await User.findById(userId);
   let vtop = await VtopProfile.findOne({ userId });
   if (!vtop) {
-    vtop = new VtopProfile(generateDefaultVtopData(userId, user));
+    vtop = new VtopProfile({
+      userId,
+      regNo: username.trim().toUpperCase(),
+      studentName: user?.name || "",
+      syncStatus: "in_progress",
+      lastSyncedAt: new Date(),
+    });
   }
 
   try {
@@ -397,11 +403,11 @@ export async function authenticateAndScrapeVtop(userId, credentials) {
       { userId },
       {
         currentCgpa: vtop.currentCgpa,
-        activeBacklogs: vtop.activeBacklogs,
-        historyOfBacklogs: vtop.historyOfBacklogs,
-        college: "VIT Chennai",
+        activeBacklogs: vtop.activeBacklogs || 0,
+        historyOfBacklogs: vtop.historyOfBacklogs || 0,
+        college: vtop.campus || "VIT Chennai",
         degree: "B.Tech",
-        branch: vtop.program || "Computer Science & Engineering",
+        branch: vtop.program || "",
       },
       { upsert: true }
     );
@@ -606,10 +612,10 @@ async function harvestVtopLiveDetails(client, authorizedId, csrf, vtopDoc, semes
             gradeRecords.push({
               courseCode: code,
               courseTitle: title,
-              courseType: type || "Theory",
-              credits: credits || 3,
-              grade: grade || "Pass",
-              semester: examMonth || "Past",
+              courseType: type || "",
+              credits: credits || 0,
+              grade: grade || "",
+              semester: examMonth || "",
               isArrear,
             });
             if (isArrear) activeArrears++;

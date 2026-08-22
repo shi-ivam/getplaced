@@ -220,7 +220,7 @@ export default function Dashboard() {
               {userProfile?.name ? `Welcome back, ${userProfile.name}` : "Candidate Career Hub"}
             </h1>
             <p className="text-xs text-zinc-400 max-w-2xl leading-relaxed">
-              Your comprehensive placement command center centered around the Four Pillars of Engineering Placement: Coding, Development, Resume, and Interview.
+              Your comprehensive placement command center for engineering placement readiness, gap analysis, and target benchmarks.
             </p>
           </div>
 
@@ -395,349 +395,14 @@ export default function Dashboard() {
         )}
 
         {/* ========================================================================= */}
-        {/* 2. THE FOUR PRIMARY PILLARS (DISTINCT VISUAL Bento CARDS) */}
-        {/* ========================================================================= */}
-        <section className="gsap-reveal space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Layers className="w-5 h-5 text-purple-400" />
-              <h2 className="text-base md:text-lg font-bold text-zinc-100 tracking-tight">
-                The Four Primary Pillars
-              </h2>
-            </div>
-            <span className="text-xs font-mono text-zinc-500">Primary Candidate Navigation</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            {/* PILLAR 1: CODING */}
-            <div className="group relative rounded-2xl bg-gradient-to-br from-[#13111c] via-[#121215] to-zinc-950 border border-purple-900/40 hover:border-purple-500/60 p-6 space-y-5 flex flex-col justify-between transition-all duration-300 shadow-lg hover:shadow-purple-950/20">
-              <div className="space-y-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-105 transition-transform">
-                      <Terminal className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] uppercase font-mono font-bold text-purple-400 tracking-wider">
-                          Pillar 1 • 25% Weight
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-bold text-white tracking-tight">
-                        Coding & DSA Practice
-                      </h3>
-                      <p className="text-xs text-zinc-400">
-                        2,800+ LeetCode problems, topic benchmarks & live Python sandbox
-                      </p>
-                    </div>
-                  </div>
-
-                  <span className="text-xs px-2.5 py-1 rounded-full font-mono font-bold bg-purple-950/80 text-purple-300 border border-purple-800 shrink-0">
-                    {codingScore} / {codingTarget}
-                  </span>
-                </div>
-
-                {/* Metric Strip */}
-                <div className="grid grid-cols-3 gap-2 bg-zinc-900/60 border border-zinc-800/80 p-2.5 rounded-xl text-xs font-mono">
-                  <div className="text-center">
-                    <span className="text-[10px] text-zinc-500 block">Solved</span>
-                    <span className="font-bold text-purple-300">128 Probs</span>
-                  </div>
-                  <div className="text-center border-l border-zinc-800">
-                    <span className="text-[10px] text-zinc-500 block">Med/Hard</span>
-                    <span className="font-bold text-amber-400">64 Solved</span>
-                  </div>
-                  <div className="text-center border-l border-zinc-800">
-                    <span className="text-[10px] text-zinc-500 block">Benchmark</span>
-                    <span className="font-bold text-emerald-400">{codingScore >= codingTarget ? "Met" : "-3 pts"}</span>
-                  </div>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="space-y-1">
-                  <div className="w-full bg-zinc-950 rounded-full h-2 overflow-hidden relative">
-                    <div
-                      className="absolute top-0 bottom-0 w-0.5 bg-zinc-400 z-10"
-                      style={{ left: `${codingTarget}%` }}
-                    />
-                    <div
-                      className="h-full rounded-full bg-purple-500 transition-all duration-500"
-                      style={{ width: `${codingScore}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono text-zinc-500">
-                    <span>Current: {codingScore}%</span>
-                    <span>Target: {codingTarget}%</span>
-                  </div>
-                </div>
-
-                {/* Priority Gap Tag */}
-                <div className="p-2.5 bg-purple-950/30 border border-purple-900/40 rounded-xl text-xs text-purple-300 flex items-center justify-between">
-                  <span className="text-[11px] font-mono truncate">Top Priority: Dynamic Programming (DP)</span>
-                  <span className="text-[10px] font-mono font-bold text-purple-400 uppercase">Solve 2 Med</span>
-                </div>
-              </div>
-
-              <Link
-                to="/app/coding"
-                className="w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors shadow-md font-sans"
-              >
-                <span>Explore Coding Workspace</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-
-            {/* PILLAR 2: DEVELOPMENT */}
-            <div className="group relative rounded-2xl bg-gradient-to-br from-[#0c1814] via-[#121215] to-zinc-950 border border-emerald-900/40 hover:border-emerald-500/60 p-6 space-y-5 flex flex-col justify-between transition-all duration-300 shadow-lg hover:shadow-emerald-950/20">
-              <div className="space-y-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform">
-                      <FolderGit2 className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] uppercase font-mono font-bold text-emerald-400 tracking-wider">
-                          Pillar 2 • 15% Weight
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-bold text-white tracking-tight">
-                        Development & Projects
-                      </h3>
-                      <p className="text-xs text-zinc-400">
-                        GitHub repositories, technology stack profile & live deployment verification
-                      </p>
-                    </div>
-                  </div>
-
-                  <span className="text-xs px-2.5 py-1 rounded-full font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800 shrink-0">
-                    {devScore} / {devTarget}
-                  </span>
-                </div>
-
-                {/* Metric Strip */}
-                <div className="grid grid-cols-3 gap-2 bg-zinc-900/60 border border-zinc-800/80 p-2.5 rounded-xl text-xs font-mono">
-                  <div className="text-center">
-                    <span className="text-[10px] text-zinc-500 block">Repos</span>
-                    <span className="font-bold text-emerald-300">
-                      {githubProfile?.originalReposCount || 6} Projects
-                    </span>
-                  </div>
-                  <div className="text-center border-l border-zinc-800">
-                    <span className="text-[10px] text-zinc-500 block">Stars</span>
-                    <span className="font-bold text-amber-400">
-                      {githubProfile?.totalStars || 14} Stars
-                    </span>
-                  </div>
-                  <div className="text-center border-l border-zinc-800">
-                    <span className="text-[10px] text-zinc-500 block">Status</span>
-                    <span className="font-bold text-emerald-400">{githubProfile ? "Connected" : "Pending"}</span>
-                  </div>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="space-y-1">
-                  <div className="w-full bg-zinc-950 rounded-full h-2 overflow-hidden relative">
-                    <div
-                      className="absolute top-0 bottom-0 w-0.5 bg-zinc-400 z-10"
-                      style={{ left: `${devTarget}%` }}
-                    />
-                    <div
-                      className="h-full rounded-full bg-emerald-500 transition-all duration-500"
-                      style={{ width: `${devScore}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono text-zinc-500">
-                    <span>Current: {devScore}%</span>
-                    <span>Target: {devTarget}%</span>
-                  </div>
-                </div>
-
-                {/* Priority Gap Tag */}
-                <div className="p-2.5 bg-emerald-950/30 border border-emerald-900/40 rounded-xl text-xs text-emerald-300 flex items-center justify-between">
-                  <span className="text-[11px] font-mono truncate">Top Priority: Live Production Demo & CI/CD</span>
-                  <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase">Deploy Vercel</span>
-                </div>
-              </div>
-
-              <Link
-                to="/app/development"
-                className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors shadow-md font-sans"
-              >
-                <span>Explore Development Workspace</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-
-            {/* PILLAR 3: RESUME */}
-            <div className="group relative rounded-2xl bg-gradient-to-br from-[#1c160c] via-[#121215] to-zinc-950 border border-amber-900/40 hover:border-amber-500/60 p-6 space-y-5 flex flex-col justify-between transition-all duration-300 shadow-lg hover:shadow-amber-950/20">
-              <div className="space-y-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-105 transition-transform">
-                      <FileText className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] uppercase font-mono font-bold text-amber-400 tracking-wider">
-                          Pillar 3 • 10% Weight
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-bold text-white tracking-tight">
-                        Resume & ATS Action Center
-                      </h3>
-                      <p className="text-xs text-zinc-400">
-                        ATS score audit, Google XYZ metric quantification & missing keyword injection
-                      </p>
-                    </div>
-                  </div>
-
-                  <span className="text-xs px-2.5 py-1 rounded-full font-mono font-bold bg-amber-950/80 text-amber-300 border border-amber-800 shrink-0">
-                    {resumeScore} / {resumeTarget}
-                  </span>
-                </div>
-
-                {/* Metric Strip */}
-                <div className="grid grid-cols-3 gap-2 bg-zinc-900/60 border border-zinc-800/80 p-2.5 rounded-xl text-xs font-mono">
-                  <div className="text-center">
-                    <span className="text-[10px] text-zinc-500 block">ATS Score</span>
-                    <span className="font-bold text-amber-300">{resumeScore}%</span>
-                  </div>
-                  <div className="text-center border-l border-zinc-800">
-                    <span className="text-[10px] text-zinc-500 block">Keywords</span>
-                    <span className="font-bold text-emerald-400">88% Match</span>
-                  </div>
-                  <div className="text-center border-l border-zinc-800">
-                    <span className="text-[10px] text-zinc-500 block">Open Fixes</span>
-                    <span className="font-bold text-amber-400">3 Pending</span>
-                  </div>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="space-y-1">
-                  <div className="w-full bg-zinc-950 rounded-full h-2 overflow-hidden relative">
-                    <div
-                      className="absolute top-0 bottom-0 w-0.5 bg-zinc-400 z-10"
-                      style={{ left: `${resumeTarget}%` }}
-                    />
-                    <div
-                      className="h-full rounded-full bg-amber-500 transition-all duration-500"
-                      style={{ width: `${resumeScore}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono text-zinc-500">
-                    <span>Current: {resumeScore}%</span>
-                    <span>Target: {resumeTarget}%</span>
-                  </div>
-                </div>
-
-                {/* Priority Gap Tag */}
-                <div className="p-2.5 bg-amber-950/30 border border-amber-900/40 rounded-xl text-xs text-amber-300 flex items-center justify-between">
-                  <span className="text-[11px] font-mono truncate">Top Priority: Quantify Latency Metrics in XYZ</span>
-                  <span className="text-[10px] font-mono font-bold text-amber-400 uppercase">Apply Fix</span>
-                </div>
-              </div>
-
-              <Link
-                to="/app/resume"
-                className="w-full py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-zinc-950 text-xs font-semibold flex items-center justify-center gap-2 transition-colors shadow-md font-sans"
-              >
-                <span>Explore Resume Intelligence</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-
-            {/* PILLAR 4: INTERVIEW */}
-            <div className="group relative rounded-2xl bg-gradient-to-br from-[#0c131c] via-[#121215] to-zinc-950 border border-sky-900/40 hover:border-sky-500/60 p-6 space-y-5 flex flex-col justify-between transition-all duration-300 shadow-lg hover:shadow-sky-950/20">
-              <div className="space-y-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 group-hover:scale-105 transition-transform">
-                      <BrainCog className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] uppercase font-mono font-bold text-sky-400 tracking-wider">
-                          Pillar 4 • 20% Weight
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-bold text-white tracking-tight">
-                        Interview & Communication
-                      </h3>
-                      <p className="text-xs text-zinc-400">
-                        AI mock simulation chamber, speech acoustics lab & company intelligence dossiers
-                      </p>
-                    </div>
-                  </div>
-
-                  <span className="text-xs px-2.5 py-1 rounded-full font-mono font-bold bg-sky-950/80 text-sky-300 border border-sky-800 shrink-0">
-                    {interviewScore} / {interviewTarget}
-                  </span>
-                </div>
-
-                {/* Metric Strip */}
-                <div className="grid grid-cols-3 gap-2 bg-zinc-900/60 border border-zinc-800/80 p-2.5 rounded-xl text-xs font-mono">
-                  <div className="text-center">
-                    <span className="text-[10px] text-zinc-500 block">Mock Score</span>
-                    <span className="font-bold text-sky-300">{interviewScore}%</span>
-                  </div>
-                  <div className="text-center border-l border-zinc-800">
-                    <span className="text-[10px] text-zinc-500 block">Speech WPM</span>
-                    <span className="font-bold text-emerald-400">135 WPM</span>
-                  </div>
-                  <div className="text-center border-l border-zinc-800">
-                    <span className="text-[10px] text-zinc-500 block">STAR Structure</span>
-                    <span className="font-bold text-sky-400">84% Score</span>
-                  </div>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="space-y-1">
-                  <div className="w-full bg-zinc-950 rounded-full h-2 overflow-hidden relative">
-                    <div
-                      className="absolute top-0 bottom-0 w-0.5 bg-zinc-400 z-10"
-                      style={{ left: `${interviewTarget}%` }}
-                    />
-                    <div
-                      className="h-full rounded-full bg-sky-500 transition-all duration-500"
-                      style={{ width: `${interviewScore}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono text-zinc-500">
-                    <span>Current: {interviewScore}%</span>
-                    <span>Target: {interviewTarget}%</span>
-                  </div>
-                </div>
-
-                {/* Priority Gap Tag */}
-                <div className="p-2.5 bg-sky-950/30 border border-sky-900/40 rounded-xl text-xs text-sky-300 flex items-center justify-between">
-                  <span className="text-[11px] font-mono truncate">Top Priority: Google Leadership Principles Round</span>
-                  <span className="text-[10px] font-mono font-bold text-sky-400 uppercase">Start Mock</span>
-                </div>
-              </div>
-
-              <Link
-                to="/app/interview"
-                className="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors shadow-md font-sans"
-              >
-                <span>Explore Interview Hub</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 3. YOUR NEXT MOVE (HIGH-IMPACT ACTION BANNER) */}
+        {/* 2. YOUR NEXT MOVE (HIGH-IMPACT ACTION BANNER) */}
         {/* ========================================================================= */}
         <section className="gsap-reveal">
           <WhatToDoNext userProfile={userProfile} readinessScore={readiness?.overallScore} />
         </section>
 
         {/* ========================================================================= */}
-        {/* 4. QUICK INTELLIGENCE / GLOBAL TOOLS ROW (7 SHORTCUTS) */}
+        {/* 3. QUICK INTELLIGENCE / GLOBAL TOOLS ROW (7 SHORTCUTS) */}
         {/* ========================================================================= */}
         <section className="gsap-reveal space-y-3">
           <div className="flex items-center justify-between">
@@ -828,7 +493,7 @@ export default function Dashboard() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 5. GAP ANALYSIS & BENCHMARK COMPARISON TABLES */}
+        {/* 4. GAP ANALYSIS & BENCHMARK COMPARISON TABLES */}
         {/* ========================================================================= */}
         <section className="gsap-reveal space-y-6">
           <LevelComparisonTable
@@ -888,7 +553,7 @@ export default function Dashboard() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 6. PROGRESS & VELOCITY SUMMARY */}
+        {/* 5. PROGRESS & VELOCITY SUMMARY */}
         {/* ========================================================================= */}
         <section className="gsap-reveal grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           <StatCard

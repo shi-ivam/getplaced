@@ -48,7 +48,7 @@ const coachConversationSchema = new mongoose.Schema(
     },
     profileCompletion: {
       type: Number,
-      default: 15,
+      default: 0,
     },
     collectedData: {
       name: String,
@@ -88,6 +88,17 @@ const coachConversationSchema = new mongoose.Schema(
         primaryLanguage: { type: String, default: "" },
         ranking: { type: Number, default: null },
         streak: { type: Number, default: 0 },
+      },
+      vtop: {
+        connected: { type: Boolean, default: false },
+        regNo: { type: String, default: "" },
+        cgpa: { type: Number, default: null },
+        branch: { type: String, default: "" },
+        college: { type: String, default: "" },
+        activeBacklogs: { type: Number, default: 0 },
+        historyOfBacklogs: { type: Number, default: 0 },
+        creditsEarned: { type: Number, default: 0 },
+        lastSyncedAt: { type: Date },
       },
       linkedin: {
         provided: { type: Boolean, default: false },

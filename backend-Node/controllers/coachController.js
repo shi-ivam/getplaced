@@ -6,6 +6,7 @@ import {
   applyOnboardingToProfile,
   connectGitHubInCoach,
   connectLeetCodeInCoach,
+  connectVtopInCoach,
 } from "../services/coachService.js";
 
 // @desc    Get current AI career coach onboarding session
@@ -65,6 +66,22 @@ export const connectLeetCode = asyncHandler(async (req, res) => {
     throw new Error("LeetCode username or URL is required");
   }
   const result = await connectLeetCodeInCoach(req.user._id, username);
+  res.json(result);
+});
+
+// @desc    Direct connect VTOP academic profile during coach session
+// @route   POST /api/coach/connect-vtop
+// @access  Private
+export const connectVtop = asyncHandler(async (req, res) => {
+  const { username, password, captchaStr, sessionId, semesterId, regNo } = req.body;
+  const result = await connectVtopInCoach(req.user._id, {
+    username,
+    password,
+    captchaStr,
+    sessionId,
+    semesterId,
+    regNo,
+  });
   res.json(result);
 });
 
