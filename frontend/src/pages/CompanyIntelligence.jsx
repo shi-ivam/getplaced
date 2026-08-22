@@ -25,15 +25,6 @@ import {
 } from "lucide-react";
 import { PY_API_URL } from "@/config/api";
 
-const FEATURED_COMPANIES_PRESET = [
-  { name: "Google", slug: "google", tier: "Tier-1 Big Tech", industry: "Search / Cloud / AI", tag: "Googliness & Scalability" },
-  { name: "Amazon", slug: "amazon", tier: "Tier-1 Big Tech", industry: "Cloud / E-Commerce", tag: "16 Leadership Principles" },
-  { name: "Meta", slug: "meta", tier: "Tier-1 Big Tech", industry: "Social / AI / Systems", tag: "Move Fast & High Agency" },
-  { name: "Microsoft", slug: "microsoft", tier: "Tier-1 Big Tech", industry: "Enterprise / Cloud", tag: "Growth Mindset" },
-  { name: "Netflix", slug: "netflix", tier: "Tier-1 Streaming", industry: "Media / Distributed", tag: "Freedom & Responsibility" },
-  { name: "Uber", slug: "uber", tier: "Tier-1 Real-time", industry: "Logistics / Dispatch", tag: "Geospatial & Low Latency" }
-];
-
 export default function CompanyIntelligence() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -41,6 +32,7 @@ export default function CompanyIntelligence() {
 
   const [searchQuery, setSearchQuery] = useState(initialCompany);
   const [companyIntel, setCompanyIntel] = useState(null);
+  const [featuredCompanies, setFeaturedCompanies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("all"); // 'all' | 'rounds' | 'patterns' | 'culture' | 'stack'
   
@@ -49,7 +41,20 @@ export default function CompanyIntelligence() {
 
   useEffect(() => {
     fetchCompanyIntelligence(initialCompany);
+    fetchFeaturedCompanies();
   }, []);
+
+  const fetchFeaturedCompanies = async () => {
+    try {
+      const res = await axios.get(`${PY_API_URL}/api/company/featured`);
+      if (res.data?.companies) {
+        setFeaturedCompanies(res.data.companies);
+      }
+    } catch (e) {
+      console.warn("Could not fetch featured companies from backend:", e);
+      setFeaturedCompanies([]);
+    }
+  };
 
   const fetchCompanyIntelligence = async (companyName) => {
     if (!companyName || !companyName.trim()) return;
@@ -143,13 +148,6 @@ export default function CompanyIntelligence() {
             <span>HR & Leadership Prep</span>
           </Link>
           <Link
-            to="/app/communication"
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
-          >
-            <Cpu className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Communication Lab</span>
-          </Link>
-          <Link
             to="/app/company-intel"
             className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-white text-black font-semibold shadow-sm"
           >
@@ -195,13 +193,14 @@ export default function CompanyIntelligence() {
             {/* Quick Profile Selectors */}
             <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-zinc-900 px-2">
               <span className="text-[11px] font-mono text-zinc-500 uppercase mr-1">Curated Profiles:</span>
-              {FEATURED_COMPANIES_PRESET.map((comp) => {
+              {featuredCompanies.map((comp) => {
+                const slug = comp.slug || comp.name?.toLowerCase().replace(/\s+/g, "");
                 const isSelected =
-                  companyIntel?.slug === comp.slug ||
-                  companyIntel?.name?.toLowerCase().includes(comp.slug);
+                  companyIntel?.slug === slug ||
+                  companyIntel?.name?.toLowerCase().includes(slug);
                 return (
                   <button
-                    key={comp.slug}
+                    key={slug}
                     type="button"
                     onClick={() => fetchCompanyIntelligence(comp.name)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
@@ -270,13 +269,115 @@ export default function CompanyIntelligence() {
                 </div>
               </div>
 
-              {/* Culture & Hiring Philosophy Thesis */}
-              {companyIntel.culture_summary && (
-                <div className="mt-6 p-4 sm:p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800/70 text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans">
-                  <span className="text-xs uppercase font-mono font-bold text-violet-400 block mb-1">
-                    Hiring & Engineering Philosophy
+              {/* Executive Snapshot Cards: Products, Tech, Culture, Process */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-zinc-900">
+                {/* 1. Products & Scale */}
+                <div
+                  onClick={() => setActiveTab("all")}
+                  className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 hover:border-violet-500/50 transition-all cursor-pointer space-y-2 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-violet-400 font-semibold flex items-center gap-1.5">
+                      <Globe className="w-3.5 h-3.5" />
+                      Products & Scale
+                    </span>
+                    <span className="text-[10px] font-mono text-zinc-500">{companyIntel.founded || "Global"}</span>
+                  </div>
+                  <div className="text-sm font-bold text-white group-hover:text-violet-200 transition-colors">
+                    {companyIntel.industry || "Cloud & Web Scale"}
+                  </div>
+                  <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed">
+                    Flagship distributed systems and digital platforms serving enterprise and consumer scale.
+                  </p>
+                  <span className="text-[10px] font-mono text-violet-400 flex items-center gap-1 pt-1">
+                    <span>[ Details ]</span>
                   </span>
-                  {companyIntel.culture_summary}
+                </div>
+
+                {/* 2. Tech Stack */}
+                <div
+                  onClick={() => setActiveTab("stack")}
+                  className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 hover:border-violet-500/50 transition-all cursor-pointer space-y-2 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-semibold flex items-center gap-1.5">
+                      <Cpu className="w-3.5 h-3.5" />
+                      Tech Architecture
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-400/80">Production</span>
+                  </div>
+                  <div className="text-sm font-bold text-white group-hover:text-emerald-200 transition-colors">
+                    {companyIntel.tech_stack?.languages?.slice(0, 2).join(", ") || "Go, Java, C++"}
+                  </div>
+                  <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed">
+                    {companyIntel.tech_stack?.frameworks?.slice(0, 3).join(" • ") || "Microservices, Distributed Caching & Cloud Infrastructure."}
+                  </p>
+                  <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1 pt-1">
+                    <span>[ View Stack Matrix ]</span>
+                  </span>
+                </div>
+
+                {/* 3. Culture & Values */}
+                <div
+                  onClick={() => setActiveTab("culture")}
+                  className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 hover:border-violet-500/50 transition-all cursor-pointer space-y-2 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-semibold flex items-center gap-1.5">
+                      <Award className="w-3.5 h-3.5" />
+                      Culture & Values
+                    </span>
+                    <span className="text-[10px] font-mono text-amber-400/80">Hiring Bar</span>
+                  </div>
+                  <div className="text-sm font-bold text-white group-hover:text-amber-200 transition-colors">
+                    Leadership Principles
+                  </div>
+                  <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed">
+                    Rigorous STAR evaluation emphasizing ownership, customer obsession, and technical excellence.
+                  </p>
+                  <span className="text-[10px] font-mono text-amber-400 flex items-center gap-1 pt-1">
+                    <span>[ View Behavioral Bar ]</span>
+                  </span>
+                </div>
+
+                {/* 4. Process & Stages */}
+                <div
+                  onClick={() => setActiveTab("rounds")}
+                  className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 hover:border-violet-500/50 transition-all cursor-pointer space-y-2 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-sky-400 font-semibold flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      Hiring Process
+                    </span>
+                    <span className="text-[10px] font-mono text-sky-400/80">
+                      {companyIntel.interview_rounds?.length || 4} Rounds
+                    </span>
+                  </div>
+                  <div className="text-sm font-bold text-white group-hover:text-sky-200 transition-colors">
+                    OA ➔ Technical ➔ System ➔ HR
+                  </div>
+                  <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed">
+                    Optimal Big-O problem solving, clean modular design, and behavioral alignment.
+                  </p>
+                  <span className="text-[10px] font-mono text-sky-400 flex items-center gap-1 pt-1">
+                    <span>[ View Round Architecture ]</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Culture & Hiring Philosophy Thesis (Collapsible / Concise) */}
+              {companyIntel.culture_summary && (
+                <div className="mt-5 p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 text-xs text-zinc-300 leading-relaxed font-sans flex items-start gap-3">
+                  <Zap className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-[10px] uppercase font-mono font-bold text-violet-400 block">
+                      Hiring & Engineering Philosophy:
+                    </span>
+                    <p className="text-zinc-300 mt-0.5">
+                      {companyIntel.culture_summary}
+                    </p>
+                  </div>
                 </div>
               )}
 

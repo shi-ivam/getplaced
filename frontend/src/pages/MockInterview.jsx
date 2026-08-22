@@ -89,6 +89,7 @@ export default function MockInterview() {
   // Live Feedback & Error State
   const [evaluatingAnswer, setEvaluatingAnswer] = useState(false);
   const [liveFeedback, setLiveFeedback] = useState(null);
+  const [showLiveModelAnswer, setShowLiveModelAnswer] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [evalError, setEvalError] = useState("");
   const [reportError, setReportError] = useState("");
@@ -856,7 +857,7 @@ export default function MockInterview() {
             {/* LIVE EVALUATION POPUP MODAL */}
             {liveFeedback && (
               <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-                <div className="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 max-h-[85vh] overflow-y-auto gsap-fade-in">
+                <div className="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-2xl w-full p-6 space-y-4 max-h-[85vh] overflow-y-auto gsap-fade-in">
                   <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-center text-white font-mono font-bold text-sm">
@@ -865,56 +866,71 @@ export default function MockInterview() {
                       <div>
                         <h3 className="text-sm font-bold text-white">Instant Diagnostics</h3>
                         <span className="text-xs text-neutral-400 font-mono">
-                          Overall Score: {liveFeedback.score}/100
+                          Score: {liveFeedback.score}/100
                         </span>
                       </div>
                     </div>
 
                     <span className="px-2.5 py-1 text-xs rounded-full bg-neutral-950 text-neutral-300 border border-neutral-800 font-mono">
-                      STAR Compliance: {liveFeedback.star_compliance?.score || 70}%
+                      STAR Score: {liveFeedback.star_compliance?.score || 70}%
                     </span>
                   </div>
 
-                  <div className="space-y-4">
-                    {/* Strengths & Improvements Bento */}
+                  <div className="space-y-3">
+                    {/* Good (Strengths) & Improve (Targeted Refinements) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1.5">
+                      <div className="p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
                         <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          Validated Strengths
+                          Good
                         </span>
-                        <ul className="text-xs text-neutral-300 space-y-1">
-                          {liveFeedback.strengths?.map((s, i) => (
+                        <ul className="text-xs text-neutral-300 space-y-0.5">
+                          {liveFeedback.strengths?.slice(0, 3).map((s, i) => (
                             <li key={i} className="flex items-start gap-1.5">
-                              <span className="text-neutral-500">•</span>
-                              <span>{s}</span>
+                              <span className="text-emerald-500">•</span>
+                              <span className="line-clamp-2">{s}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
 
-                      <div className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1.5">
+                      <div className="p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
                         <span className="text-xs font-semibold text-amber-400 flex items-center gap-1.5">
                           <AlertTriangle className="w-3.5 h-3.5" />
-                          Targeted Refinements
+                          Improve
                         </span>
-                        <ul className="text-xs text-neutral-300 space-y-1">
-                          {liveFeedback.areas_for_improvement?.map((a, i) => (
+                        <ul className="text-xs text-neutral-300 space-y-0.5">
+                          {liveFeedback.areas_for_improvement?.slice(0, 3).map((a, i) => (
                             <li key={i} className="flex items-start gap-1.5">
-                              <span className="text-neutral-500">•</span>
-                              <span>{a}</span>
+                              <span className="text-amber-500">•</span>
+                              <span className="line-clamp-2">{a}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
                     </div>
 
+                    {/* One Tip (Crisp Takeaway) */}
+                    <div className="p-3 bg-neutral-950/90 border border-neutral-800/80 rounded-xl flex items-start gap-2.5 text-xs text-neutral-300">
+                      <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold text-neutral-200 block text-[11px] uppercase tracking-wider font-mono">
+                          One Actionable Tip:
+                        </span>
+                        <p className="text-neutral-300">
+                          {liveFeedback.one_tip ||
+                            liveFeedback.key_takeaway ||
+                            "Anchor your answer in quantifiable metrics and end with the organizational impact."}
+                        </p>
+                      </div>
+                    </div>
+
                     {/* Follow-up Question Probe */}
                     {liveFeedback.follow_up_question && (
-                      <div className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
-                        <span className="text-xs font-bold text-neutral-200 flex items-center gap-1.5">
+                      <div className="p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-0.5">
+                        <span className="text-xs font-bold text-neutral-300 flex items-center gap-1.5">
                           <BrainCog className="w-3.5 h-3.5 text-neutral-400" />
-                          Adaptive Follow-up Inquiry:
+                          Interviewer Follow-up:
                         </span>
                         <p className="text-xs text-neutral-300 italic">
                           "{liveFeedback.follow_up_question}"
@@ -922,15 +938,26 @@ export default function MockInterview() {
                       </div>
                     )}
 
-                    {/* Exemplary Model Answer */}
+                    {/* Progressive Disclosure: Collapsible Model Answer */}
                     {liveFeedback.suggested_better_answer && (
-                      <div className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
-                        <span className="text-xs font-semibold text-neutral-300">
-                          Exemplary STAR Formulation:
-                        </span>
-                        <p className="text-xs text-neutral-400 leading-relaxed">
-                          {liveFeedback.suggested_better_answer}
-                        </p>
+                      <div className="pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowLiveModelAnswer(!showLiveModelAnswer)}
+                          className="text-xs font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>{showLiveModelAnswer ? "Hide Polished Model Answer" : "View Polished STAR Model Answer [ Details ]"}</span>
+                        </button>
+                        {showLiveModelAnswer && (
+                          <div className="mt-2 p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
+                            <span className="text-xs font-semibold text-neutral-300">
+                              Exemplary Formulation:
+                            </span>
+                            <p className="text-xs text-neutral-400 leading-relaxed">
+                              {liveFeedback.suggested_better_answer}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -939,7 +966,7 @@ export default function MockInterview() {
                   <div className="pt-3 border-t border-neutral-800 flex justify-end">
                     <button
                       onClick={handleNextQuestion}
-                      className="px-5 py-2.5 bg-white hover:bg-neutral-200 text-neutral-950 rounded-xl text-xs font-bold flex items-center gap-2 transition"
+                      className="px-5 py-2.5 bg-white hover:bg-neutral-200 text-neutral-950 rounded-xl text-xs font-bold flex items-center gap-2 transition cursor-pointer"
                     >
                       <span>
                         {currentIndex + 1 < questions.length

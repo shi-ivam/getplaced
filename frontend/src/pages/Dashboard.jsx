@@ -529,7 +529,95 @@ export default function Dashboard() {
         )}
 
         {/* ========================================================================= */}
-        {/* 2. YOUR NEXT MOVE (HIGH-IMPACT ACTION BANNER) */}
+        {/* 2. TOP 3 CRITICAL GAPS & FAST-CLOSURE MATRIX */}
+        {/* ========================================================================= */}
+        {readiness?.topGaps && readiness.topGaps.length > 0 && (
+          <section className="gsap-reveal space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-rose-400" />
+                <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-widest font-mono">
+                  Top 3 Priority Readiness Gaps
+                </h3>
+              </div>
+              <span className="text-[11px] text-zinc-500 font-mono">
+                Highest weight impact on benchmark score
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+              {readiness.topGaps.slice(0, 3).map((gapItem, gIdx) => {
+                const IconComp = DIMENSION_ICONS[gapItem.id] || Zap;
+                const isUnassessed = gapItem.score === null || gapItem.score === undefined;
+                const currentScore = isUnassessed ? 0 : gapItem.score;
+                const requiredScore = gapItem.requiredScore || 75;
+                const gapPoints = Math.max(0, requiredScore - currentScore);
+
+                return (
+                  <div
+                    key={gapItem.id || gIdx}
+                    className="p-4 rounded-xl bg-[#121215] border border-zinc-800/90 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-3 group"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
+                          <div className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-purple-400 group-hover:text-purple-300">
+                            <IconComp className="w-3.5 h-3.5" />
+                          </div>
+                          <span>{gapItem.fullName || gapItem.name}</span>
+                        </div>
+
+                        <span
+                          className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+                            gapPoints > 15
+                              ? "bg-rose-500/10 text-rose-400 border-rose-500/20 font-bold"
+                              : gapPoints > 0
+                              ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                              : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          }`}
+                        >
+                          {isUnassessed ? "Unstarted" : `-${gapPoints} pts`}
+                        </span>
+                      </div>
+
+                      <div className="flex items-baseline gap-2 font-mono">
+                        <span className="text-2xl font-bold text-zinc-100">
+                          {isUnassessed ? "—" : `${currentScore}%`}
+                        </span>
+                        <span className="text-xs text-zinc-500">/ Target {requiredScore}%</span>
+                      </div>
+
+                      {/* Compact Progress Bar */}
+                      <div className="relative w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-rose-500 transition-all"
+                          style={{
+                            width: `${Math.min(100, Math.max(5, (currentScore / requiredScore) * 100))}%`,
+                          }}
+                        />
+                      </div>
+
+                      <p className="text-[11px] text-zinc-400 line-clamp-1 leading-normal font-sans">
+                        {gapItem.recommendation || `Close ${gapPoints} pt gap to meet ${userProfile?.targetCompany || "tier"} hiring standard.`}
+                      </p>
+                    </div>
+
+                    <Link
+                      to={gapItem.actionLink || "/app/roadmap"}
+                      className="inline-flex items-center justify-between px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-medium text-zinc-200 hover:text-white font-mono transition-colors"
+                    >
+                      <span>{gapItem.actionLabel || "Close Gap"}</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* ========================================================================= */}
+        {/* 3. YOUR NEXT MOVE (HIGH-IMPACT ACTION BANNER) */}
         {/* ========================================================================= */}
         <section className="gsap-reveal">
           <WhatToDoNext userProfile={userProfile} readinessScore={readiness?.overallScore} />
@@ -693,7 +781,7 @@ export default function Dashboard() {
             }
             subtitle={
               githubProfile
-                ? `${githubProfile.totalStars || 0} Stars ⭐`
+                ? `${githubProfile.totalStars || 0} Stars`
                 : "Connect GitHub"
             }
           />
@@ -797,7 +885,7 @@ export default function Dashboard() {
                   label: "Evaluating GitHub codebases & engineering depth",
                   icon: FolderGit2,
                   detail: githubProfile
-                    ? `${githubProfile.originalReposCount || 0} Repos • ${githubProfile.totalStars || 0} Stars ⭐`
+                    ? `${githubProfile.originalReposCount || 0} Repos • ${githubProfile.totalStars || 0} Stars`
                     : "Analyzing commit frequency & architecture",
                 },
                 {

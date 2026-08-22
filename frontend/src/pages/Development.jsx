@@ -30,6 +30,7 @@ import {
   TrendingUp,
   Sliders,
   Award,
+  X,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
 import GitHubConnectCard from "@/components/github/GitHubConnectCard";
@@ -117,6 +118,7 @@ export default function Development() {
   const [testUrl, setTestUrl] = useState("");
   const [testingUrl, setTestingUrl] = useState(false);
   const [testResult, setTestResult] = useState(null);
+  const [selectedRepoModal, setSelectedRepoModal] = useState(null);
 
   // Fetch all initial data
   const fetchData = async () => {
@@ -498,27 +500,36 @@ export default function Development() {
 
                       <div className="flex items-center justify-between text-[11px] font-mono pt-2 text-zinc-500 border-t border-zinc-800/60">
                         <span>{repo.language || "TypeScript"}</span>
-                        {repo.hasLiveDemo && repo.liveDemoUrl ? (
-                          <a
-                            href={repo.liveDemoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-emerald-400 hover:underline flex items-center gap-1"
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedRepoModal(repo)}
+                            className="text-zinc-400 hover:text-emerald-400 px-1.5 py-0.5 rounded hover:bg-zinc-800 transition-colors cursor-pointer"
                           >
-                            <Globe className="w-3 h-3" />
-                            <span>Live Demo</span>
-                          </a>
-                        ) : (
-                          <a
-                            href={repo.htmlUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-zinc-400 hover:text-white flex items-center gap-1"
-                          >
-                            <span>Code</span>
-                            <ExternalLink className="w-2.5 h-2.5" />
-                          </a>
-                        )}
+                            [ Details ]
+                          </button>
+                          {repo.hasLiveDemo && repo.liveDemoUrl ? (
+                            <a
+                              href={repo.liveDemoUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-emerald-400 hover:underline flex items-center gap-1"
+                            >
+                              <Globe className="w-3 h-3" />
+                              <span>Live Demo</span>
+                            </a>
+                          ) : (
+                            <a
+                              href={repo.htmlUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-zinc-400 hover:text-white flex items-center gap-1"
+                            >
+                              <span>Code</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -992,6 +1003,101 @@ export default function Development() {
         )}
 
       </div>
+
+      {/* Progressive Project Detail Modal */}
+      {selectedRepoModal && (
+        <div
+          onClick={() => setSelectedRepoModal(null)}
+          className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#121215] border border-zinc-800 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl relative"
+          >
+            <div className="flex items-start justify-between border-b border-zinc-800 pb-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <FolderGit2 className="w-4 h-4 text-emerald-400" />
+                  <h3 className="text-sm font-bold text-white font-mono">
+                    {selectedRepoModal.name}
+                  </h3>
+                  {selectedRepoModal.isFork && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 font-mono">
+                      Fork
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-zinc-400 font-sans">
+                  {selectedRepoModal.description || "Production repository codebase."}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedRepoModal(null)}
+                className="text-zinc-500 hover:text-white p-1 rounded-lg hover:bg-zinc-800"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Metrics Matrix */}
+            <div className="grid grid-cols-3 gap-2.5 text-center text-xs font-mono">
+              <div className="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800">
+                <span className="text-[10px] text-zinc-500 block">Language</span>
+                <span className="font-bold text-zinc-200">{selectedRepoModal.language || "TypeScript"}</span>
+              </div>
+              <div className="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800">
+                <span className="text-[10px] text-zinc-500 block">Stars ⭐</span>
+                <span className="font-bold text-amber-400">{selectedRepoModal.stars || 0}</span>
+              </div>
+              <div className="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800">
+                <span className="text-[10px] text-zinc-500 block">Forks</span>
+                <span className="font-bold text-sky-400">{selectedRepoModal.forks || 0}</span>
+              </div>
+            </div>
+
+            {/* Architecture Verdict */}
+            <div className="p-3.5 bg-zinc-900/60 border border-zinc-800/80 rounded-xl space-y-1 text-xs">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-semibold block">
+                Portfolio Assessment Verdict
+              </span>
+              <p className="text-zinc-300 font-sans leading-relaxed text-xs">
+                {selectedRepoModal.isFork
+                  ? "Open-source contribution and upstream repository fork."
+                  : (selectedRepoModal.stars > 5 || selectedRepoModal.hasLiveDemo)
+                  ? "High-impact production project with verified architectural complexity."
+                  : "Standard application repository. Deploy live demo to maximize recruiter impact."}
+              </p>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-2 border-t border-zinc-800 flex items-center justify-between gap-3">
+              {selectedRepoModal.hasLiveDemo && selectedRepoModal.liveDemoUrl && (
+                <a
+                  href={selectedRepoModal.liveDemoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold text-center flex items-center justify-center gap-1.5"
+                >
+                  <Globe className="w-3 h-3" />
+                  <span>Open Live Demo</span>
+                </a>
+              )}
+              <a
+                href={selectedRepoModal.htmlUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium text-center flex items-center justify-center gap-1.5"
+              >
+                <FolderGit2 className="w-3.5 h-3.5" />
+                <span>View on GitHub</span>
+                <ExternalLink className="w-3 h-3 text-zinc-500" />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

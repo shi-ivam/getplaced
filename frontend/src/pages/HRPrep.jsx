@@ -56,6 +56,7 @@ export default function HRPrep() {
   const [practiceAnswer, setPracticeAnswer] = useState("");
   const [evaluating, setEvaluating] = useState(false);
   const [evaluationResult, setEvaluationResult] = useState(null);
+  const [showModelAnswer, setShowModelAnswer] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
 
@@ -491,21 +492,32 @@ export default function HRPrep() {
 
               {/* Evaluation Results */}
               {evaluationResult && (
-                <div className="space-y-4 pt-3 border-t border-neutral-800">
-                  <div className="flex items-center justify-between bg-neutral-950 p-3.5 rounded-xl border border-neutral-800">
+                <div className="space-y-3.5 pt-3 border-t border-neutral-800 font-sans">
+                  <div className="flex items-center justify-between bg-neutral-950 p-3 rounded-xl border border-neutral-800">
                     <span className="text-xs font-semibold text-neutral-300">
                       Overall Evaluation Score:
                     </span>
-                    <span className="text-base font-mono font-bold text-white">
-                      {evaluationResult.score} / 100
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-mono font-bold text-white">
+                        {evaluationResult.score} / 100
+                      </span>
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+                        evaluationResult.score >= 80
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          : evaluationResult.score >= 60
+                          ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                          : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                      }`}>
+                        {evaluationResult.score >= 80 ? "Interview Ready" : evaluationResult.score >= 60 ? "Developing" : "Needs Practice"}
+                      </span>
+                    </div>
                   </div>
 
                   {/* STAR Detection Badges */}
                   {evaluationResult.star_compliance && (
-                    <div className="space-y-2">
-                      <span className="text-xs font-semibold text-neutral-300 block">
-                        STAR Component Verification:
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block">
+                        STAR Structure Audit:
                       </span>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         {["situation", "task", "action", "result"].map((k) => {
@@ -514,13 +526,13 @@ export default function HRPrep() {
                           return (
                             <div
                               key={k}
-                              className={`p-2 rounded-xl border text-center text-xs font-mono font-bold ${
+                              className={`p-1.5 rounded-lg border text-center text-[11px] font-mono font-semibold ${
                                 detected
                                   ? "bg-neutral-950 border-emerald-500/50 text-emerald-400"
-                                  : "bg-neutral-950 border-red-500/40 text-red-400"
+                                  : "bg-neutral-950 border-rose-500/40 text-rose-400"
                               }`}
                             >
-                              {k.toUpperCase()}: {detected ? "Verified" : "Missing"}
+                              {k.toUpperCase()}: {detected ? "✓ Verified" : "✗ Missing"}
                             </div>
                           );
                         })}
@@ -528,15 +540,80 @@ export default function HRPrep() {
                     </div>
                   )}
 
-                  {/* Polished Exemplary Answer */}
-                  {evaluationResult.suggested_better_answer && (
-                    <div className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1.5">
-                      <span className="text-xs font-bold text-neutral-200 block">
-                        Polished STAR Model Answer:
+                  {/* Good & Improve Bento */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
+                      <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Good (Strengths)
                       </span>
-                      <p className="text-xs text-neutral-400 leading-relaxed">
-                        {evaluationResult.suggested_better_answer}
+                      <ul className="text-xs text-neutral-300 space-y-0.5">
+                        {(evaluationResult.strengths || [
+                          "Structured technical articulation",
+                          "Clear individual role identification",
+                        ]).slice(0, 2).map((s, i) => (
+                          <li key={i} className="flex items-start gap-1">
+                            <span className="text-emerald-500">•</span>
+                            <span className="line-clamp-2">{s}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
+                      <span className="text-xs font-semibold text-amber-400 flex items-center gap-1.5">
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        Improve (Refinements)
+                      </span>
+                      <ul className="text-xs text-neutral-300 space-y-0.5">
+                        {(evaluationResult.areas_for_improvement || [
+                          "Add quantifiable business or latency metrics",
+                          "Elaborate on architectural trade-offs in Action phase",
+                        ]).slice(0, 2).map((a, i) => (
+                          <li key={i} className="flex items-start gap-1">
+                            <span className="text-amber-500">•</span>
+                            <span className="line-clamp-2">{a}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* One Tip */}
+                  <div className="p-3 bg-neutral-950/90 border border-neutral-800/80 rounded-xl flex items-start gap-2 text-xs text-neutral-300">
+                    <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-neutral-200 block text-[11px] uppercase tracking-wider font-mono">
+                        One Key Tip:
+                      </span>
+                      <p className="text-neutral-300">
+                        {evaluationResult.one_tip ||
+                          evaluationResult.key_takeaway ||
+                          "Focus 50% of your time on the Action phase detailing your direct technical contribution and trade-offs."}
                       </p>
+                    </div>
+                  </div>
+
+                  {/* Polished Exemplary Answer (Progressive Disclosure) */}
+                  {evaluationResult.suggested_better_answer && (
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setShowModelAnswer(!showModelAnswer)}
+                        className="text-xs font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>{showModelAnswer ? "Hide Polished Model Answer" : "View Polished STAR Model Answer [ Details ]"}</span>
+                      </button>
+                      {showModelAnswer && (
+                        <div className="mt-2 p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-1">
+                          <span className="text-xs font-bold text-neutral-200 block">
+                            Polished STAR Model Answer:
+                          </span>
+                          <p className="text-xs text-neutral-400 leading-relaxed">
+                            {evaluationResult.suggested_better_answer}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

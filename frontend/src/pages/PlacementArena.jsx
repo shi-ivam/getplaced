@@ -155,10 +155,15 @@ export default function PlacementArena() {
 
   const topRankers = leaderboardData?.topRankers || [];
   const challenges = challengesData || [];
+  const currentUserEntry = topRankers.find((u) => u.isCurrentUser);
+  const top1Ranker = topRankers[0] || null;
+  const deltaToTop1 = top1Ranker && currentUserEntry
+    ? Math.max(0, (top1Ranker.readinessScore || 0) - (currentUserEntry.readinessScore || 0))
+    : 0;
 
   return (
     <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-white">
-      <div ref={containerRef} className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">
+      <div ref={containerRef} className="p-6 md:p-10 max-w-7xl mx-auto space-y-8">
         {/* Editorial Wide Header */}
         <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
           <div className="space-y-3 max-w-4xl">
@@ -170,17 +175,42 @@ export default function PlacementArena() {
               Placement Arena & Squad Battles
             </h1>
             <p className="text-sm md:text-base text-zinc-400 max-w-3xl leading-relaxed">
-              Campus and national leaderboards, collaborative peer study squads, and weekly sprint challenges.
+              Campus leaderboards, peer accountability squads, and weekly sprint challenges.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="px-4 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-xs flex items-center gap-2 shadow-lg">
-              <Trophy className="w-4 h-4 text-yellow-400" />
-              <span className="text-zinc-400 font-mono">Current Standing:</span>
-              <span className="text-yellow-300 font-bold font-mono text-sm">
-                Rank #{leaderboardData?.userRank || 12}
-              </span>
+          {/* Compact Rank & Momentum Bar */}
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <div className="px-4 py-3 rounded-2xl bg-zinc-900/90 border border-white/10 flex items-center gap-4 shadow-xl font-mono text-xs">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-yellow-400" />
+                <div>
+                  <span className="text-zinc-500 text-[10px] block">Your Rank</span>
+                  <span className="text-yellow-300 font-bold text-sm">
+                    {leaderboardData?.userRank ? `#${leaderboardData.userRank}` : "Unranked"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="h-7 w-px bg-white/10" />
+
+              <div>
+                <span className="text-zinc-500 text-[10px] block">Delta to #1</span>
+                <span className={`font-semibold ${deltaToTop1 === 0 && currentUserEntry?.rank === 1 ? "text-emerald-400" : "text-amber-400"}`}>
+                  {currentUserEntry?.rank === 1
+                    ? "Rank #1 Leader"
+                    : `-${deltaToTop1} pts`}
+                </span>
+              </div>
+
+              <div className="h-7 w-px bg-white/10" />
+
+              <div>
+                <span className="text-zinc-500 text-[10px] block">Tier</span>
+                <span className="text-purple-300 font-semibold">
+                  {currentUserEntry?.tier || "Silver"}
+                </span>
+              </div>
             </div>
           </div>
         </header>
@@ -367,8 +397,8 @@ export default function PlacementArena() {
                           {squadData.weeklyGoal?.title || "Weekly Collective Target"}
                         </span>
                         <span className="font-mono text-purple-400 font-bold">
-                          {squadData.weeklyGoal?.currentCount || 54} /{" "}
-                          {squadData.weeklyGoal?.targetCount || 60} Solved
+                          {squadData.weeklyGoal?.currentCount || 0} /{" "}
+                          {squadData.weeklyGoal?.targetCount || 0} Solved
                         </span>
                       </div>
 
@@ -379,8 +409,8 @@ export default function PlacementArena() {
                             width: `${Math.min(
                               100,
                               Math.round(
-                                ((squadData.weeklyGoal?.currentCount || 54) /
-                                  (squadData.weeklyGoal?.targetCount || 60)) *
+                                ((squadData.weeklyGoal?.currentCount || 0) /
+                                  (squadData.weeklyGoal?.targetCount || 1)) *
                                   100
                               )
                             )}%`,
@@ -393,7 +423,7 @@ export default function PlacementArena() {
                   {/* Squad Members Roster */}
                   <div className="rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl space-y-4">
                     <h4 className="text-base font-bold text-white tracking-tight">
-                      Active Squad Members ({squadData.members?.length || 4})
+                      Active Squad Members ({squadData.members?.length || 0})
                     </h4>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
