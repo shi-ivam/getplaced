@@ -15,9 +15,9 @@ export const seedJobsIfNeeded = async () => {
   try {
     const existingCount = await Job.countDocuments();
     if (existingCount === 0) {
-      console.log("No jobs found in database. Initializing 24 seed listings...");
+      console.log(`No jobs found in database. Initializing ${SEED_JOBS.length} seed listings...`);
       await Job.insertMany(SEED_JOBS);
-      console.log("Successfully seeded 24 demo tech job opportunities.");
+      console.log(`Successfully seeded ${SEED_JOBS.length} demo tech job opportunities.`);
       return { success: true, count: SEED_JOBS.length, seeded: true };
     }
     return { success: true, count: existingCount, seeded: false };
@@ -251,6 +251,7 @@ export const queryJobs = async (queryParams, user = null, userReadiness = null) 
     workMode = "ALL",
     experience = "ALL",
     employmentType = "ALL",
+    skills = "ALL",
     minSalary = 0,
     sort = "recommended",
     category = "all",
@@ -282,6 +283,16 @@ export const queryJobs = async (queryParams, user = null, userReadiness = null) 
   // Experience Level filter
   if (experience && experience !== "ALL") {
     filterQuery.experienceLevel = experience;
+  }
+
+  // Skills filter
+  if (skills && skills !== "ALL") {
+    const skillList = (Array.isArray(skills) ? skills : skills.split(","))
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (skillList.length > 0) {
+      filterQuery.skills = { $in: skillList.map((s) => new RegExp(`^${s}$`, "i")) };
+    }
   }
 
   // Location filter
@@ -318,12 +329,69 @@ export const queryJobs = async (queryParams, user = null, userReadiness = null) 
   try {
     if (mongoose.connection?.readyState === 1) {
       rawJobs = await Job.find(filterQuery).lean();
-    } else {
-      rawJobs = [...SEED_JOBS];
     }
   } catch (err) {
     console.warn("Falling back to seed jobs array:", err.message);
-    rawJobs = [...SEED_JOBS];
+  }
+
+  if (!rawJobs || rawJobs.length === 0) {
+    let memoryJobs = [...SEED_JOBS];
+    if (role && role !== "ALL") {
+      if (role === "Internship") {
+        memoryJobs = memoryJobs.filter(
+          (j) => j.employmentType === "Internship" || j.roleCategory === "Internship"
+        );
+      } else {
+        memoryJobs = memoryJobs.filter((j) => j.roleCategory === role);
+      }
+    }
+    if (workMode && workMode !== "ALL") {
+      memoryJobs = memoryJobs.filter((j) => j.workMode === workMode);
+    }
+    if (employmentType && employmentType !== "ALL") {
+      memoryJobs = memoryJobs.filter((j) => j.employmentType === employmentType);
+    }
+    if (experience && experience !== "ALL") {
+      memoryJobs = memoryJobs.filter((j) => j.experienceLevel === experience);
+    }
+    if (skills && skills !== "ALL") {
+      const skillList = (Array.isArray(skills) ? skills : skills.split(",")).map((s) =>
+        s.trim().toLowerCase()
+      );
+      memoryJobs = memoryJobs.filter((j) =>
+        (j.skills || []).some((js) =>
+          skillList.some((s) => js.toLowerCase() === s || js.toLowerCase().includes(s))
+        )
+      );
+    }
+    if (location && location !== "ALL") {
+      if (location === "Remote") {
+        memoryJobs = memoryJobs.filter(
+          (j) => j.workMode === "Remote" || (j.city || "").toLowerCase() === "remote"
+        );
+      } else {
+        memoryJobs = memoryJobs.filter((j) =>
+          (j.city || "").toLowerCase().includes(location.toLowerCase())
+        );
+      }
+    }
+    if (parsedMinSalary > 0) {
+      memoryJobs = memoryJobs.filter((j) => (j.maxSalary || 0) >= parsedMinSalary);
+    }
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      memoryJobs = memoryJobs.filter((j) => {
+        return (
+          (j.title || "").toLowerCase().includes(q) ||
+          (j.company || "").toLowerCase().includes(q) ||
+          (j.city || "").toLowerCase().includes(q) ||
+          (j.description || "").toLowerCase().includes(q) ||
+          (j.skills || []).some((s) => s.toLowerCase().includes(q)) ||
+          (j.tags || []).some((t) => t.toLowerCase().includes(q))
+        );
+      });
+    }
+    rawJobs = memoryJobs;
   }
 
   const savedJobIds = new Set((user?.savedJobs || []).map((id) => String(id)));

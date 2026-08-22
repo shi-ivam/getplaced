@@ -148,7 +148,6 @@ const handleJobRecommendations = async (req, res) => {
 };
 
 app.get("/job-recommendations", handleJobRecommendations);
-app.get("/api/jobs/recommendations", handleJobRecommendations);
 
 app.listen(PORT, () => {
   console.log("Server listening on port: " + PORT)

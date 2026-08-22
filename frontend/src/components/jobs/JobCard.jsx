@@ -33,30 +33,32 @@ export default function JobCard({
       })
     : "Recently";
 
-  const matchScore = job.matchScore || 75;
+  const matchScore = job.matchScore != null ? job.matchScore : null;
 
-  // Match score color gradient
+  // Match score styling
   const getScoreColor = (score) => {
-    if (score >= 80) return "text-emerald-400 border-emerald-500/30 bg-emerald-500/10";
-    if (score >= 65) return "text-violet-400 border-violet-500/30 bg-violet-500/10";
+    if (score == null) return "text-[#A8A59C] border-[#3A3831] bg-[#1A1916]";
+    if (score >= 80) return "text-[#C7F36B] border-[#C7F36B]/40 bg-[#C7F36B]/10";
+    if (score >= 65) return "text-sky-400 border-sky-500/30 bg-sky-500/10";
     return "text-amber-400 border-amber-500/30 bg-amber-500/10";
   };
 
   const getScoreBarGradient = (score) => {
-    if (score >= 80) return "from-emerald-500 to-teal-400";
-    if (score >= 65) return "from-violet-500 to-purple-400";
-    return "from-amber-500 to-orange-400";
+    if (score == null) return "from-zinc-600 to-zinc-700";
+    if (score >= 80) return "from-[#C7F36B] to-emerald-400";
+    if (score >= 65) return "from-sky-400 to-teal-400";
+    return "from-amber-400 to-orange-400";
   };
 
   if (viewMode === "list") {
     return (
       <div
         onClick={() => onSelect(job)}
-        className="group relative rounded-2xl bg-zinc-950/80 border border-zinc-800/80 hover:border-zinc-700 p-5 shadow-lg hover:shadow-violet-950/20 transition-all duration-200 cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between gap-4 backdrop-blur-md"
+        className="group relative rounded-2xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 p-5 shadow-lg hover:shadow-2xl hover:shadow-[#C7F36B]/5 transition-all duration-200 cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between gap-4 backdrop-blur-md"
       >
         <div className="flex items-start gap-4 flex-1 min-w-0">
           {/* Company Avatar */}
-          <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white font-bold text-base overflow-hidden shrink-0 group-hover:border-violet-500/40 transition-colors">
+          <div className="w-12 h-12 rounded-xl bg-[#11110F] border border-[#3A3831] flex items-center justify-center text-[#FAF8F2] font-bold text-base overflow-hidden shrink-0 group-hover:border-[#C7F36B]/40 transition-colors">
             {job.companyLogo ? (
               <img
                 src={job.companyLogo}
@@ -73,18 +75,18 @@ export default function JobCard({
 
           <div className="space-y-1 min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-mono font-bold text-zinc-400 tracking-wide uppercase">
+              <span className="text-xs font-mono font-bold text-[#A8A59C] tracking-wide uppercase">
                 {employerName}
               </span>
               {isDemo && (
-                <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-700/60">
+                <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-[#1A1916] text-[#A8A59C] border border-[#3A3831]">
                   Demo Listing
                 </span>
               )}
               {job.fitStatus && (
                 <span
                   className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded border ${
-                    job.fitBadgeClass || "bg-zinc-800 text-zinc-300 border-zinc-700"
+                    job.fitBadgeClass || "bg-[#1A1916] text-[#FAF8F2] border-[#3A3831]"
                   }`}
                 >
                   {job.fitStatus}
@@ -92,23 +94,23 @@ export default function JobCard({
               )}
             </div>
 
-            <h3 className="text-base font-bold text-white group-hover:text-violet-300 transition-colors truncate">
+            <h3 className="text-base font-bold text-[#FAF8F2] group-hover:text-[#C7F36B] transition-colors truncate">
               {job.title}
             </h3>
 
-            <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 pt-0.5">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-[#A8A59C] pt-0.5">
               <span className="flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-zinc-500" />
+                <MapPin className="w-3.5 h-3.5 text-[#8C8980]" />
                 {isRemote ? "Remote" : `${job.city || "Bengaluru"}, India`}
               </span>
-              <span className="text-zinc-600">•</span>
+              <span className="text-[#3A3831]">•</span>
               <span>{job.workMode || "Hybrid"}</span>
-              <span className="text-zinc-600">•</span>
+              <span className="text-[#3A3831]">•</span>
               <span>{job.experience || "0-2 years"}</span>
               {job.salary && (
                 <>
-                  <span className="text-zinc-600">•</span>
-                  <span className="text-emerald-400 font-mono font-semibold">
+                  <span className="text-[#3A3831]">•</span>
+                  <span className="text-[#C7F36B] font-mono font-semibold">
                     {job.salary}
                   </span>
                 </>
@@ -118,9 +120,9 @@ export default function JobCard({
         </div>
 
         {/* Match Score & Actions */}
-        <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-zinc-900">
+        <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-[#3A3831]">
           <div className="text-right">
-            <div className="text-[10px] font-mono uppercase text-zinc-500 font-semibold">
+            <div className="text-[10px] font-mono uppercase text-[#8C8980] font-semibold">
               Profile Fit
             </div>
             <div
@@ -129,7 +131,7 @@ export default function JobCard({
               )}`}
             >
               <Sparkles className="w-3 h-3" />
-              {matchScore}% Match
+              {matchScore != null ? `${matchScore}% Match` : "Unassessed Fit"}
             </div>
           </div>
 
@@ -143,8 +145,8 @@ export default function JobCard({
               aria-label={job.isSaved ? "Unsave Job" : "Save Job"}
               className={`p-2.5 rounded-xl border transition-all ${
                 job.isSaved
-                  ? "bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-950/60"
-                  : "bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border-zinc-800"
+                  ? "bg-[#C7F36B] text-[#11110F] border-[#C7F36B] shadow-md shadow-[#C7F36B]/20 font-bold"
+                  : "bg-[#11110F] hover:bg-[#1A1916] text-[#A8A59C] hover:text-[#FAF8F2] border-[#3A3831]"
               }`}
             >
               <Bookmark className={`w-4 h-4 ${job.isSaved ? "fill-current" : ""}`} />
@@ -153,7 +155,7 @@ export default function JobCard({
             <button
               type="button"
               onClick={() => onSelect(job)}
-              className="px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all shadow-md shadow-violet-950/50 flex items-center gap-1"
+              className="px-3.5 py-2 rounded-xl bg-[#C7F36B] hover:bg-[#bbf055] text-[#11110F] text-xs font-bold transition-all shadow-md shadow-[#C7F36B]/20 flex items-center gap-1"
             >
               <span>Details</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -168,13 +170,13 @@ export default function JobCard({
   return (
     <div
       onClick={() => onSelect(job)}
-      className="job-card group relative rounded-3xl bg-zinc-950/90 border border-zinc-800/80 hover:border-zinc-700 p-6 shadow-xl hover:shadow-2xl hover:shadow-violet-950/20 flex flex-col justify-between space-y-5 transition-all duration-300 backdrop-blur-md cursor-pointer"
+      className="job-card group relative rounded-3xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 p-6 shadow-xl hover:shadow-2xl hover:shadow-[#C7F36B]/5 flex flex-col justify-between space-y-5 transition-all duration-300 backdrop-blur-md cursor-pointer"
     >
       <div className="space-y-4">
         {/* Top Header: Company Info + Save Button */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white font-bold text-base overflow-hidden shrink-0 group-hover:border-violet-500/50 transition-colors">
+            <div className="w-12 h-12 rounded-2xl bg-[#11110F] border border-[#3A3831] flex items-center justify-center text-[#FAF8F2] font-bold text-base overflow-hidden shrink-0 group-hover:border-[#C7F36B]/40 transition-colors">
               {job.companyLogo ? (
                 <img
                   src={job.companyLogo}
@@ -191,12 +193,12 @@ export default function JobCard({
 
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <h3 className="text-xs font-mono font-bold text-zinc-300 tracking-wide uppercase truncate">
+                <h3 className="text-xs font-mono font-bold text-[#A8A59C] tracking-wide uppercase truncate">
                   {employerName}
                 </h3>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-zinc-400 mt-0.5">
-                <MapPin className="w-3 h-3 text-zinc-500 shrink-0" />
+              <div className="flex items-center gap-1.5 text-xs text-[#8C8980] mt-0.5">
+                <MapPin className="w-3 h-3 text-[#8C8980] shrink-0" />
                 <span className="truncate">
                   {isRemote
                     ? "Remote"
@@ -208,7 +210,7 @@ export default function JobCard({
 
           <div className="flex items-center gap-1.5 shrink-0">
             {isDemo && (
-              <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-zinc-900/90 text-zinc-400 border border-zinc-800">
+              <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-[#11110F] text-[#A8A59C] border border-[#3A3831]">
                 Demo
               </span>
             )}
@@ -222,8 +224,8 @@ export default function JobCard({
               aria-label={job.isSaved ? "Saved to your list" : "Save Job"}
               className={`p-2 rounded-xl border transition-all ${
                 job.isSaved
-                  ? "bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-950/60"
-                  : "bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border-zinc-800"
+                  ? "bg-[#C7F36B] text-[#11110F] border-[#C7F36B] shadow-md shadow-[#C7F36B]/20 font-bold"
+                  : "bg-[#11110F] hover:bg-[#1A1916] text-[#A8A59C] hover:text-[#FAF8F2] border-[#3A3831]"
               }`}
             >
               <Bookmark className={`w-3.5 h-3.5 ${job.isSaved ? "fill-current" : ""}`} />
@@ -233,28 +235,28 @@ export default function JobCard({
 
         {/* Job Title & Badges */}
         <div className="space-y-2">
-          <h2 className="text-base font-bold text-white group-hover:text-violet-300 transition-colors leading-snug line-clamp-2">
+          <h2 className="text-base font-bold text-[#FAF8F2] group-hover:text-[#C7F36B] transition-colors leading-snug line-clamp-2">
             {job.title}
           </h2>
 
-          <div className="flex flex-wrap gap-1.5 text-[11px] font-medium text-zinc-400">
-            <span className="px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300">
+          <div className="flex flex-wrap gap-1.5 text-[11px] font-medium text-[#A8A59C]">
+            <span className="px-2 py-0.5 rounded-md bg-[#11110F] border border-[#3A3831] text-[#FAF8F2]">
               {job.employmentType || "Full-time"}
             </span>
-            <span className="px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300">
+            <span className="px-2 py-0.5 rounded-md bg-[#11110F] border border-[#3A3831] text-[#FAF8F2]">
               {job.workMode || "Hybrid"}
             </span>
-            <span className="px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300">
+            <span className="px-2 py-0.5 rounded-md bg-[#11110F] border border-[#3A3831] text-[#FAF8F2]">
               {job.experienceLevel || job.experience || "Entry Level"}
             </span>
           </div>
         </div>
 
         {/* Match Score Meter */}
-        <div className="p-3 rounded-2xl bg-zinc-900/70 border border-zinc-800/70 space-y-2">
+        <div className="p-3.5 rounded-2xl bg-[#11110F] border border-[#3A3831] space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1.5 font-mono text-[10px] text-zinc-400 uppercase font-semibold">
-              <Sparkles className="w-3 h-3 text-violet-400" />
+            <div className="flex items-center gap-1.5 font-mono text-[10px] text-[#A8A59C] uppercase font-semibold">
+              <Sparkles className="w-3 h-3 text-[#C7F36B]" />
               <span>Your Match</span>
             </div>
             <div
@@ -262,23 +264,23 @@ export default function JobCard({
                 matchScore
               )}`}
             >
-              {matchScore}%
+              {matchScore != null ? `${matchScore}%` : "Unassessed"}
             </div>
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-[#1A1916] rounded-full overflow-hidden border border-[#3A3831]/50">
             <div
               className={`h-full rounded-full bg-gradient-to-r ${getScoreBarGradient(
                 matchScore
               )} transition-all duration-500`}
-              style={{ width: `${Math.min(matchScore, 100)}%` }}
+              style={{ width: `${matchScore != null ? Math.min(matchScore, 100) : 0}%` }}
             />
           </div>
 
           {/* Missing Skills Warning */}
           {job.missingSkills && job.missingSkills.length > 0 && (
-            <div className="flex items-center gap-1.5 text-[11px] text-amber-400/90 pt-0.5 truncate">
+            <div className="flex items-center gap-1.5 text-[11px] text-amber-400 pt-0.5 truncate">
               <AlertTriangle className="w-3 h-3 shrink-0 text-amber-400" />
               <span className="truncate">
                 Gap: {job.missingSkills.slice(0, 2).join(", ")}
@@ -298,8 +300,8 @@ export default function JobCard({
                   key={sIdx}
                   className={`text-[10px] font-mono px-2 py-0.5 rounded border transition-colors ${
                     isMissing
-                      ? "bg-amber-500/5 text-amber-300/90 border-amber-500/20"
-                      : "bg-violet-950/40 text-violet-300 border-violet-800/40"
+                      ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
+                      : "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
                   }`}
                 >
                   {skill}
@@ -307,7 +309,7 @@ export default function JobCard({
               );
             })}
             {job.skills.length > 4 && (
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-500">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#11110F] border border-[#3A3831] text-[#8C8980]">
                 +{job.skills.length - 4}
               </span>
             )}
@@ -316,14 +318,14 @@ export default function JobCard({
       </div>
 
       {/* Footer Meta & Actions */}
-      <div className="pt-4 border-t border-zinc-900 space-y-3">
-        <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500">
+      <div className="pt-4 border-t border-[#3A3831] space-y-3">
+        <div className="flex items-center justify-between text-[11px] font-mono text-[#8C8980]">
           <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3 text-zinc-600" />
+            <Clock className="w-3 h-3 text-[#8C8980]" />
             {postedDate}
           </span>
           {job.salary && (
-            <span className="text-emerald-400 font-semibold truncate max-w-[170px] text-right">
+            <span className="text-[#C7F36B] font-semibold truncate max-w-[170px] text-right">
               {job.salary}
             </span>
           )}
@@ -333,7 +335,7 @@ export default function JobCard({
           <button
             type="button"
             onClick={() => onSelect(job)}
-            className="py-2.5 px-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold text-center tracking-wide uppercase shadow-md shadow-violet-950/60 transition-all flex items-center justify-center gap-1.5"
+            className="py-2.5 px-3 rounded-xl bg-[#C7F36B] hover:bg-[#bbf055] text-[#11110F] text-xs font-bold text-center tracking-wide uppercase shadow-md shadow-[#C7F36B]/20 transition-all flex items-center justify-center gap-1.5"
           >
             <span>View Job</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -344,10 +346,10 @@ export default function JobCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 hover:border-zinc-700 text-xs font-semibold text-center transition-all flex items-center justify-center gap-1"
+            className="py-2.5 px-3 rounded-xl bg-[#11110F] hover:bg-[#1A1916] text-[#FAF8F2] border border-[#3A3831] hover:border-[#4A473F] text-xs font-semibold text-center transition-all flex items-center justify-center gap-1"
           >
             <span>Apply</span>
-            <ExternalLink className="w-3 h-3 text-zinc-500" />
+            <ExternalLink className="w-3 h-3 text-[#8C8980]" />
           </a>
         </div>
       </div>
