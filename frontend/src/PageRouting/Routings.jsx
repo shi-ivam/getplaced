@@ -5,7 +5,6 @@ import Layout from './Layout'
 import AnalyzeResume from '@/pages/AnalyzeResume'
 import MockInterview from '@/pages/MockInterview'
 import HRPrep from '@/pages/HRPrep'
-import CommunicationLab from '@/pages/CommunicationLab'
 import CompanyIntelligence from '@/pages/CompanyIntelligence'
 
 import LoginPage from '@/pages/Login'
@@ -27,6 +26,7 @@ import PlacementArena from '@/pages/PlacementArena'
 import CareerCoach from '@/pages/CareerCoach'
 import VtopDetails from '@/pages/VtopDetails'
 import PrivacyProtection from '@/pages/PrivacyProtection'
+import CanIApply from '@/pages/CanIApply'
 
 
 function Routings() {
@@ -38,15 +38,20 @@ function Routings() {
           <Route path="/resume" element={<AnalyzeResume />} />
           <Route path="/interview" element={<MockInterview />} />
           <Route path="/hr-prep" element={<HRPrep />} />
-          <Route path="/communication" element={<CommunicationLab />} />
           <Route path="/company-intel" element={<CompanyIntelligence />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/coding" element={<CodingArena />} />
+          <Route path="/coding/:slug" element={<CodingWorkspace />} />
+          <Route path="/problems" element={<CodingArena />} />
+          <Route path="/problems/:slug" element={<CodingWorkspace />} />
+          <Route path="/dsa" element={<DSAContent />} />
           <Route path="/sheets" element={<DSAContent defaultTab="sheets" />} />
+          <Route path="/sheets/:sheetId" element={<DSAContent defaultTab="sheets" />} />
           <Route path="/development" element={<Development />} />
           <Route path="/job" element={<JobRecommendations />} />
           <Route path="/jobs" element={<JobRecommendations />} />
+          <Route path="/can-i-apply" element={<CanIApply />} />
           <Route path="/onboarding" element={<CareerCoach />} />
           <Route path="/onboarding/coach" element={<CareerCoach />} />
           <Route path="/privacy" element={<div className="min-h-screen bg-[#1A312C] text-[#FFF4E1]"><PrivacyProtection /></div>} />
@@ -82,10 +87,10 @@ function Routings() {
             <Route path="resume" element={<AnalyzeResume />} />
             <Route path="interview" element={<MockInterview />} />
             <Route path="hr-prep" element={<HRPrep />} />
-            <Route path="communication" element={<CommunicationLab />} />
             <Route path="company-intel" element={<CompanyIntelligence />} />
             <Route path="job" element={<JobRecommendations />} />
             <Route path="jobs" element={<JobRecommendations />} />
+            <Route path="can-i-apply" element={<CanIApply />} />
             <Route path="profile" element={<Profile />} />
 
             {/* New Group C Surfaces */}

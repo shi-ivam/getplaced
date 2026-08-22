@@ -25,6 +25,7 @@ import {
   GitFork,
   Globe,
   Layers,
+  ShieldCheck,
 } from "lucide-react";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -73,7 +74,7 @@ const navigationGroups = [
         icon: Terminal,
       },
       {
-        title: "Striver & Top Sheets",
+        title: "Study Plan",
         url: "/app/sheets",
         icon: Layers,
         badge: "28 Lists",
@@ -129,11 +130,6 @@ const navigationGroups = [
         icon: BookOpen,
       },
       {
-        title: "Communication Lab",
-        url: "/app/communication",
-        icon: Mic,
-      },
-      {
         title: "Company Intelligence",
         url: "/app/company-intel",
         icon: Building,
@@ -182,6 +178,12 @@ const navigationGroups = [
         title: "Job Recommendations",
         url: "/app/job",
         icon: Briefcase,
+      },
+      {
+        title: "Can I Apply?",
+        url: "/app/can-i-apply",
+        icon: ShieldCheck,
+        badge: "Check",
       },
       {
         title: "Company Dossiers",

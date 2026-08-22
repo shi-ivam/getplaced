@@ -691,6 +691,17 @@ export default function Dashboard() {
             </Link>
 
             <Link
+              to="/app/can-i-apply"
+              className="p-3 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              </div>
+              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Can I Apply?</span>
+              <span className="text-[10px] text-zinc-500 font-mono">Readiness Audit</span>
+            </Link>
+
+            <Link
               to="/app/academics"
               className="p-3 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
