@@ -52,48 +52,48 @@ const academicProfileSchema = new mongoose.Schema(
     degree: {
       type: String,
       trim: true,
-      default: "B.Tech",
+      default: "",
     },
     branch: {
       type: String,
       trim: true,
-      default: "Computer Science & Engineering",
+      default: "",
     },
     graduationYear: {
       type: Number,
-      default: 2026,
+      default: null,
     },
     currentSemester: {
       type: Number,
-      default: 6,
+      default: null,
     },
     totalSemesters: {
       type: Number,
-      default: 8,
+      default: null,
     },
     currentCgpa: {
       type: Number,
       min: 0,
       max: 10,
-      default: 8.0,
+      default: null,
     },
     targetCgpa: {
       type: Number,
       min: 0,
       max: 10,
-      default: 8.5,
+      default: null,
     },
     tenthPercentage: {
       type: Number,
       min: 0,
       max: 100,
-      default: 85,
+      default: null,
     },
     twelfthPercentage: {
       type: Number,
       min: 0,
       max: 100,
-      default: 85,
+      default: null,
     },
     diplomaPercentage: {
       type: Number,

@@ -18,9 +18,9 @@ export const getAcademicProfile = asyncHandler(async (req, res) => {
 
   const targetCalc = calculateTargetCgpaRequirement(
     academic.currentCgpa,
-    academic.semesters.filter((s) => s.isCompleted).length || 5,
-    academic.totalSemesters || 8,
-    academic.targetCgpa || 8.5
+    (academic.semesters || []).filter((s) => s.isCompleted).length || 0,
+    academic.totalSemesters,
+    academic.targetCgpa
   );
 
   res.json({
@@ -86,9 +86,9 @@ export const updateAcademicProfile = asyncHandler(async (req, res) => {
 
   const targetCalc = calculateTargetCgpaRequirement(
     academic.currentCgpa,
-    academic.semesters.filter((s) => s.isCompleted).length || 5,
-    academic.totalSemesters || 8,
-    academic.targetCgpa || 8.5
+    (academic.semesters || []).filter((s) => s.isCompleted).length || 0,
+    academic.totalSemesters,
+    academic.targetCgpa
   );
 
   res.json({

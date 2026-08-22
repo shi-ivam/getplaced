@@ -17,6 +17,7 @@ import {
   FileText,
   Upload,
   Sparkles,
+  ExternalLink,
 } from "lucide-react";
 import { NODE_API_URL, PY_API_URL } from "@/config/api";
 
@@ -751,30 +752,49 @@ export default function CareerCoach() {
               </div>
 
               {/* AI Resume ATS & Google XYZ Audit */}
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-purple-950/20 border border-purple-800/40 text-xs">
-                <div className="flex items-center gap-2 min-w-0 pr-1">
-                  <FileText className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                  <div className="min-w-0">
-                    <span className="text-zinc-200 block truncate font-medium">AI Resume ATS</span>
-                    {connectedProfiles?.resume?.score || extractedProfile?.resumeScore ? (
-                      <span className="text-[10px] text-purple-300 font-mono block truncate">
-                        ATS: {connectedProfiles?.resume?.score || extractedProfile?.resumeScore}/100
-                      </span>
-                    ) : (
-                      <span className="text-[10px] text-zinc-500 font-mono block truncate">
-                        Not uploaded yet
-                      </span>
-                    )}
+              <div className="p-2.5 rounded-xl bg-purple-950/20 border border-purple-800/40 text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 min-w-0 pr-1">
+                    <FileText className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                    <div className="min-w-0">
+                      <span className="text-zinc-200 block truncate font-medium">AI Resume ATS</span>
+                      {connectedProfiles?.resume?.score || extractedProfile?.resumeScore ? (
+                        <span className="text-[10px] text-purple-300 font-mono block truncate">
+                          ATS Score: {connectedProfiles?.resume?.score || extractedProfile?.resumeScore}/100
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-zinc-500 font-mono block truncate">
+                          PDF not uploaded yet
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowResumeModal(true)}
+                    className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-semibold transition-colors shrink-0 cursor-pointer flex items-center gap-1"
+                  >
+                    <Upload className="w-3 h-3" />
+                    <span>{connectedProfiles?.resume?.score || extractedProfile?.resumeScore ? "Re-upload" : "Upload PDF"}</span>
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowResumeModal(true)}
-                  className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-semibold transition-colors shrink-0 cursor-pointer flex items-center gap-1"
-                >
-                  <Upload className="w-3 h-3" />
-                  <span>{connectedProfiles?.resume?.score || extractedProfile?.resumeScore ? "Re-audit" : "Upload"}</span>
-                </button>
+
+                {(connectedProfiles?.resume?.score || extractedProfile?.resumeScore) && (
+                  <div className="pt-1.5 border-t border-purple-900/40 flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3" />
+                      Audited
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/app/resume")}
+                      className="text-[10px] font-mono text-purple-300 hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+                    >
+                      <span>Resume Intelligence</span>
+                      <ExternalLink className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1249,11 +1269,23 @@ export default function CareerCoach() {
               )}
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-800">
+            <div className="flex items-center justify-between gap-2 pt-2 border-t border-zinc-800">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowResumeModal(false);
+                  navigate("/app/resume");
+                }}
+                className="px-3 py-1.5 rounded-xl text-xs font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span>Open in Resume Intelligence</span>
+                <ExternalLink className="w-3 h-3" />
+              </button>
+
               <button
                 type="button"
                 onClick={() => setShowResumeModal(false)}
-                className="px-4 py-2 rounded-xl text-xs text-zinc-400 hover:text-zinc-200"
+                className="px-4 py-2 rounded-xl text-xs text-zinc-400 hover:text-zinc-200 cursor-pointer"
               >
                 Close
               </button>

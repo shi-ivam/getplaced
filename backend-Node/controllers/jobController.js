@@ -35,7 +35,7 @@ const getOptionalUser = async (req) => {
 // @access  Public / Authenticated
 export const getJobsList = asyncHandler(async (req, res) => {
   const user = await getOptionalUser(req);
-  let userReadiness = 74;
+  let userReadiness = null;
 
   if (user) {
     try {
@@ -57,7 +57,7 @@ export const getJobsList = asyncHandler(async (req, res) => {
 // @access  Public / Authenticated
 export const getRecommendedJobs = asyncHandler(async (req, res) => {
   const user = await getOptionalUser(req);
-  let userReadiness = 74;
+  let userReadiness = null;
 
   if (user) {
     try {
@@ -84,7 +84,7 @@ export const getRecommendedJobs = asyncHandler(async (req, res) => {
 // @access  Public / Authenticated
 export const getJobById = asyncHandler(async (req, res) => {
   const user = await getOptionalUser(req);
-  let userReadiness = 74;
+  let userReadiness = null;
 
   if (user) {
     try {
@@ -122,7 +122,7 @@ export const getSavedJobs = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
-  let userReadiness = 74;
+  let userReadiness = null;
   try {
     const readinessData = await calculatePlacementReadiness(user);
     if (readinessData?.overallScore) {

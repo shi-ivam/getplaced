@@ -45,113 +45,68 @@ export const ACTIVE_WEEKLY_CHALLENGES = [
   },
 ];
 
-export const DUMMY_LEADERBOARD_USERS = [
-  {
-    rank: 1,
-    name: "Aarav Sharma",
-    college: "IIT Bombay",
-    readinessScore: 96,
-    tier: "Diamond",
-    problemsSolved: 340,
-    streakDays: 48,
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=60",
-    targetCompany: "Google",
-    xp: 4200,
-  },
-  {
-    rank: 2,
-    name: "Priya Patel",
-    college: "BITS Pilani",
-    readinessScore: 94,
-    tier: "Diamond",
-    problemsSolved: 310,
-    streakDays: 35,
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=60",
-    targetCompany: "Microsoft",
-    xp: 3850,
-  },
-  {
-    rank: 3,
-    name: "Rohan Verma",
-    college: "VIT Chennai",
-    readinessScore: 91,
-    tier: "Diamond",
-    problemsSolved: 285,
-    streakDays: 28,
-    avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=60",
-    targetCompany: "Amazon",
-    xp: 3400,
-  },
-  {
-    rank: 4,
-    name: "Ananya Iyer",
-    college: "NIT Trichy",
-    readinessScore: 89,
-    tier: "Platinum",
-    problemsSolved: 245,
-    streakDays: 22,
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=60",
-    targetCompany: "Atlassian",
-    xp: 3100,
-  },
-  {
-    rank: 5,
-    name: "Aditya Nair",
-    college: "IIT Delhi",
-    readinessScore: 88,
-    tier: "Platinum",
-    problemsSolved: 220,
-    streakDays: 19,
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=60",
-    targetCompany: "Uber",
-    xp: 2950,
-  },
-  {
-    rank: 6,
-    name: "Sneha Mukherjee",
-    college: "Jadavpur University",
-    readinessScore: 86,
-    tier: "Platinum",
-    problemsSolved: 198,
-    streakDays: 15,
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=60",
-    targetCompany: "Adobe",
-    xp: 2700,
-  },
-];
-
 export async function getArenaLeaderboard(userId, user = null, collegeFilter = "all") {
-  const currentUserName = user?.name || "Demo Candidate";
-  const currentUserCollege = user?.college || "VIT Chennai";
-  const currentUserTarget = user?.targetCompany || "Microsoft";
-
-  let userEntry = {
-    rank: 12,
-    name: currentUserName,
-    college: currentUserCollege,
-    readinessScore: 82,
-    tier: "Platinum",
-    problemsSolved: 145,
-    streakDays: 7,
-    avatar: "",
-    targetCompany: currentUserTarget,
-    xp: 1850,
-    isCurrentUser: true,
-  };
-
-  let list = [...DUMMY_LEADERBOARD_USERS, userEntry];
-
+  const filterQuery = {};
   if (collegeFilter && collegeFilter !== "all") {
-    list = list.filter((u) => u.college.toLowerCase().includes(collegeFilter.toLowerCase()));
+    filterQuery.college = new RegExp(collegeFilter, "i");
   }
 
-  list.sort((a, b) => b.readinessScore - a.readinessScore);
-  list = list.map((item, idx) => ({ ...item, rank: idx + 1 }));
+  let users = [];
+  let progressList = [];
+
+  if (mongoose.connection?.readyState === 1) {
+    try {
+      users = await User.find(filterQuery)
+        .select("name college targetCompany avatar readinessScore cgpa skills")
+        .lean();
+      const userIds = users.map((u) => u._id);
+      progressList = await Progress.find({ userId: { $in: userIds } }).lean();
+    } catch (err) {
+      console.warn("Could not query users/progress for leaderboard:", err.message);
+    }
+  }
+
+  const progressMap = new Map(progressList.map((p) => [String(p.userId), p]));
+
+  let leaderboardEntries = users.map((u) => {
+    const userProgress = progressMap.get(String(u._id));
+    const readinessScore = u.readinessScore || 0;
+    const streakDays = userProgress?.dailyStreak || 0;
+    const problemsSolved = userProgress?.totalProblemsSolved || 0;
+    const xp = problemsSolved * 20 + streakDays * 15;
+
+    let tier = "Bronze";
+    if (readinessScore >= 90) tier = "Diamond";
+    else if (readinessScore >= 80) tier = "Platinum";
+    else if (readinessScore >= 70) tier = "Gold";
+    else if (readinessScore >= 60) tier = "Silver";
+
+    return {
+      userId: u._id,
+      name: u.name || "Candidate",
+      college: u.college || "Unspecified College",
+      readinessScore,
+      tier,
+      problemsSolved,
+      streakDays,
+      avatar: u.avatar || "",
+      targetCompany: u.targetCompany || "Tier 1 Tech",
+      xp,
+      isCurrentUser: Boolean(userId && String(u._id) === String(userId)),
+    };
+  });
+
+  leaderboardEntries.sort((a, b) => b.readinessScore - a.readinessScore || b.xp - a.xp);
+  leaderboardEntries.forEach((item, idx) => {
+    item.rank = idx + 1;
+  });
+
+  const currentUserEntry = leaderboardEntries.find((u) => u.isCurrentUser);
 
   return {
-    totalParticipants: 1420,
-    userRank: list.find((u) => u.isCurrentUser)?.rank || 12,
-    topRankers: list,
+    totalParticipants: leaderboardEntries.length,
+    userRank: currentUserEntry ? currentUserEntry.rank : null,
+    topRankers: leaderboardEntries,
   };
 }
 
@@ -159,79 +114,10 @@ export async function getUserSquad(userId, user = null) {
   let squad = await Squad.findOne({ "members.userId": userId });
 
   if (!squad) {
-    const currentUserName = user?.name || "Demo Candidate";
-    squad = await Squad.create({
-      name: "Algorithmic Titans",
-      code: "TITAN2026",
-      description: "Dedicated peer squad grinding FAANG/Tier-1 campus placements & mock interviews daily.",
-      avatar: "⚡",
-      targetTier: "Tier 1 Product Companies",
-      creatorId: userId,
-      members: [
-        {
-          userId,
-          name: currentUserName,
-          role: "leader",
-          joinedAt: new Date(),
-          weeklyContribution: 12,
-          readinessScore: 84,
-          streakDays: 7,
-        },
-        {
-          userId: new mongoose.Types.ObjectId(),
-          name: "Karan Malhotra",
-          role: "member",
-          joinedAt: new Date(Date.now() - 3 * 86400000),
-          weeklyContribution: 18,
-          readinessScore: 88,
-          streakDays: 14,
-        },
-        {
-          userId: new mongoose.Types.ObjectId(),
-          name: "Meera Sen",
-          role: "member",
-          joinedAt: new Date(Date.now() - 5 * 86400000),
-          weeklyContribution: 9,
-          readinessScore: 79,
-          streakDays: 5,
-        },
-        {
-          userId: new mongoose.Types.ObjectId(),
-          name: "Siddharth Rao",
-          role: "member",
-          joinedAt: new Date(Date.now() - 8 * 86400000),
-          weeklyContribution: 15,
-          readinessScore: 86,
-          streakDays: 9,
-        },
-      ],
-      weeklyGoal: {
-        title: "Collective Target: 60 Problems Solved",
-        targetCount: 60,
-        currentCount: 54,
-        endsAt: new Date(Date.now() + 3 * 86400000),
-      },
-      messages: [
-        {
-          senderId: userId,
-          senderName: "Karan Malhotra",
-          text: "Just cracked Amazon OA 2nd question using Monotonic Stack! Shared my notes in Study Library 🚀",
-          type: "achievement",
-          createdAt: new Date(Date.now() - 4 * 3600000),
-        },
-        {
-          senderId: userId,
-          senderName: "Meera Sen",
-          text: "Let us finish the remaining 6 problems today to hit our weekly squad target! 🔥",
-          type: "cheer",
-          createdAt: new Date(Date.now() - 1 * 3600000),
-        },
-      ],
-      aggregateReadiness: 84,
-    });
+    return null;
   }
 
-  const totalReadiness = squad.members.reduce((acc, m) => acc + (m.readinessScore || 70), 0);
+  const totalReadiness = squad.members.reduce((acc, m) => acc + (m.readinessScore || 0), 0);
   squad.aggregateReadiness = Math.round(totalReadiness / (squad.members.length || 1));
 
   return squad;

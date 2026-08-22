@@ -554,17 +554,6 @@ export default function Dashboard() {
             </Link>
 
             <Link
-              to="/app/library"
-              className="p-3 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
-            >
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-sky-400">
-                <BookOpen className="w-4 h-4 text-sky-400" />
-              </div>
-              <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Study Library</span>
-              <span className="text-[10px] text-zinc-500 font-mono">Curated Notes</span>
-            </Link>
-
-            <Link
               to="/app/job"
               className="p-3 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >

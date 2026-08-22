@@ -60,38 +60,38 @@ const vtopProfileSchema = new mongoose.Schema(
     regNo: {
       type: String,
       trim: true,
-      default: "22BCE1042",
+      default: "",
     },
     studentName: {
       type: String,
       trim: true,
-      default: "Student",
+      default: "",
     },
     campus: {
       type: String,
-      default: "VIT Chennai (vtopcc.vit.ac.in)",
+      default: "",
     },
     program: {
       type: String,
-      default: "B.Tech Computer Science and Engineering",
+      default: "",
     },
     school: {
       type: String,
-      default: "School of Computer Science and Engineering (SCOPE)",
+      default: "",
     },
     currentCgpa: {
       type: Number,
       min: 0,
       max: 10,
-      default: 8.74,
+      default: null,
     },
     totalCreditsEarned: {
       type: Number,
-      default: 118,
+      default: 0,
     },
     totalCreditsRequired: {
       type: Number,
-      default: 160,
+      default: null,
     },
     activeBacklogs: {
       type: Number,
@@ -103,15 +103,15 @@ const vtopProfileSchema = new mongoose.Schema(
     },
     overallAttendancePercentage: {
       type: Number,
-      default: 89.2,
+      default: null,
     },
     totalClassesAttended: {
       type: Number,
-      default: 342,
+      default: 0,
     },
     totalClassesConducted: {
       type: Number,
-      default: 384,
+      default: 0,
     },
     feeDuesStatus: {
       type: Boolean,
@@ -119,24 +119,24 @@ const vtopProfileSchema = new mongoose.Schema(
     },
     proctorName: {
       type: String,
-      default: "Dr. S. Venkatesh (SCOPE)",
+      default: "",
     },
     proctorEmail: {
       type: String,
-      default: "proctor.scope@vit.ac.in",
+      default: "",
     },
     lastSyncedAt: {
       type: Date,
-      default: Date.now,
+      default: null,
     },
     syncStatus: {
       type: String,
       enum: ["synced", "pending", "simulated", "disconnected"],
-      default: "synced",
+      default: "pending",
     },
     activeSemesterId: {
       type: String,
-      default: "CH2024251",
+      default: "",
     },
     availableSemesters: [
       {

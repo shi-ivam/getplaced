@@ -47,7 +47,7 @@ import {
 } from "./services/academicService.js";
 import { CURATED_STUDY_VIDEOS } from "./services/studyLibraryService.js";
 import { MASTER_MILESTONES } from "./services/milestoneService.js";
-import { ACTIVE_WEEKLY_CHALLENGES, DUMMY_LEADERBOARD_USERS } from "./services/arenaService.js";
+import { ACTIVE_WEEKLY_CHALLENGES, getArenaLeaderboard } from "./services/arenaService.js";
 
 console.log("==========================================");
 console.log("RUNNING GETPLACED BACKEND TEST SUITE");
@@ -382,9 +382,10 @@ async function runAllTests() {
     assert.equal(tiers.length, 5); // Bronze, Silver, Gold, Platinum, Diamond
   });
 
-  await test("ACTIVE_WEEKLY_CHALLENGES and Leaderboard data are populated", () => {
+  await test("ACTIVE_WEEKLY_CHALLENGES and Leaderboard data are populated", async () => {
     assert.ok(ACTIVE_WEEKLY_CHALLENGES.length >= 3);
-    assert.ok(DUMMY_LEADERBOARD_USERS.length >= 5);
+    const leaderboard = await getArenaLeaderboard("user123");
+    assert.ok(Array.isArray(leaderboard.topRankers));
   });
 
   console.log("\n==========================================");

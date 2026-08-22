@@ -60,7 +60,7 @@ export default function JobDetailModal({
 
   const handleLearnSkill = (skill) => {
     onClose();
-    navigate(`/app/library?search=${encodeURIComponent(skill)}`);
+    navigate(`/app/dsa?search=${encodeURIComponent(skill)}`);
   };
 
   const handlePrepareJob = () => {

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
-import { AlertCircle, Loader2, Sparkles } from "lucide-react";
+import { AlertCircle, Loader2, Sparkles, ShieldCheck } from "lucide-react";
 
 import {
   Card,
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { NODE_API_URL } from "@/config/api";
+import { NODE_API_URL, SUPPORT_EMAIL } from "@/config/api";
 
 export function LoginForm(props) {
   const navigate = useNavigate();
@@ -92,7 +92,7 @@ export function LoginForm(props) {
               </div>
 
               <div className="grid gap-2">
-                <div className="flex items-center">
+                <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="text-gray-300">Password</Label>
                 </div>
                 <Input
@@ -132,11 +132,20 @@ export function LoginForm(props) {
               </Button>
             </div>
 
-            <div className="mt-4 text-center text-sm text-gray-400">
-              Don&apos;t have an account?{" "}
-              <Link to="/register" className="text-purple-400 underline underline-offset-4 hover:text-purple-300">
-                Sign up
-              </Link>
+            <div className="mt-6 pt-4 border-t border-gray-800 text-center space-y-2 text-xs text-gray-400">
+              <div>
+                Don&apos;t have an account?{" "}
+                <Link to="/register" className="text-purple-400 underline underline-offset-4 hover:text-purple-300 font-semibold">
+                  Sign up
+                </Link>
+              </div>
+              <div className="flex items-center justify-center gap-4 text-[11px] text-gray-500">
+                <Link to="/privacy" className="hover:text-gray-300 transition-colors">Privacy Policy</Link>
+                <span>&bull;</span>
+                <Link to="/terms" className="hover:text-gray-300 transition-colors">Terms of Service</Link>
+                <span>&bull;</span>
+                <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-purple-400 transition-colors">Contact Support</a>
+              </div>
             </div>
           </form>
         </CardContent>

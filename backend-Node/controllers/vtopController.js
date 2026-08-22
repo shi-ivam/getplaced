@@ -7,7 +7,6 @@ import {
   getOrCreateVtopProfile,
   computeVtopPlacementImpact,
   getVtopAuthProtocolSummary,
-  generateDefaultVtopData,
 } from "../services/vtopService.js";
 import {
   getLiveVtopCaptcha,
@@ -19,60 +18,56 @@ import {
 // @access  Private
 export const getVtopProfile = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const user = await User.findById(userId).lean();
-  const vtopProfile = await getOrCreateVtopProfile(userId, user);
+  const vtopProfile = await getOrCreateVtopProfile(userId);
+
+  if (!vtopProfile) {
+    return res.json({
+      success: true,
+      connected: false,
+      message: "No connected VTOP profile found for this account.",
+      vtop: null,
+      placementImpact: null,
+      protocol: getVtopAuthProtocolSummary(),
+    });
+  }
 
   const placementImpact = computeVtopPlacementImpact(vtopProfile);
 
   res.json({
     success: true,
+    connected: true,
     vtop: vtopProfile,
     placementImpact,
     protocol: getVtopAuthProtocolSummary(),
   });
 });
 
-// @desc    Trigger VTOP sync / simulated scrape using StudentCC pipeline
+// @desc    Trigger VTOP sync using authentic credentials / StudentCC pipeline
 // @route   POST /api/vtop/sync
 // @access  Private
 export const syncVtopProfile = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const { regNo, password, semesterId, simulationMode } = req.body;
-  const user = await User.findById(userId);
+  const { regNo, password, captchaStr, sessionId, semesterId } = req.body;
 
-  let vtop = await VtopProfile.findOne({ userId });
-
-  if (!vtop) {
-    vtop = new VtopProfile(generateDefaultVtopData(userId, user));
+  if (!regNo || !password || !captchaStr) {
+    res.status(400);
+    throw new Error("Authentic VTOP credentials (regNo, password, captchaStr) are required.");
   }
 
-  // Update timestamps and sync state
-  vtop.lastSyncedAt = new Date();
-  vtop.syncStatus = simulationMode ? "simulated" : "synced";
-
-  if (regNo) vtop.regNo = regNo.toUpperCase();
-  if (semesterId) vtop.activeSemesterId = semesterId;
-
-  await vtop.save();
-
-  // Also sync updated CGPA and backlogs to AcademicProfile to keep platform synchronized
-  await AcademicProfile.findOneAndUpdate(
-    { userId },
-    {
-      currentCgpa: vtop.currentCgpa,
-      activeBacklogs: vtop.activeBacklogs,
-      historyOfBacklogs: vtop.historyOfBacklogs,
-      college: "VIT Chennai",
-      degree: "B.Tech",
-      branch: "Computer Science & Engineering",
-    },
-    { upsert: true }
-  );
-
-  await User.findByIdAndUpdate(userId, {
-    cgpa: vtop.currentCgpa,
+  const result = await authenticateAndScrapeVtop(userId, {
+    username: regNo,
+    password,
+    captchaStr: captchaStr.trim(),
+    sessionId,
+    semesterId,
   });
 
+  if (!result.success) {
+    res.status(401);
+    throw new Error(result.error || "VTOP live authentication failed.");
+  }
+
+  const vtop = await VtopProfile.findOne({ userId });
   const placementImpact = computeVtopPlacementImpact(vtop);
 
   res.json({
@@ -132,7 +127,13 @@ export const updateCourseMarks = asyncHandler(async (req, res) => {
 // @access  Private
 export const getPlacementImpact = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const vtop = await getOrCreateVtopProfile(userId, req.user);
+  const vtop = await getOrCreateVtopProfile(userId);
+  if (!vtop) {
+    return res.status(404).json({
+      message: "No VTOP profile found. Please login to VTOP first.",
+      placementImpact: null,
+    });
+  }
   const placementImpact = computeVtopPlacementImpact(vtop);
 
   res.json(placementImpact);

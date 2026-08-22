@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowRight, Zap, Github, Twitter, Linkedin, Mail } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { SUPPORT_EMAIL } from "@/config/api";
 
 export default function Footer() {
   const navigate = useNavigate();
@@ -63,8 +64,8 @@ export default function Footer() {
             <ul className="space-y-2 text-xs font-medium">
               <li><a href="#security" className="hover:text-[#89D7B7] transition-colors">AES-256 Encryption</a></li>
               <li><a href="#security" className="hover:text-[#89D7B7] transition-colors">SOC-2 Compliance</a></li>
-              <li><a href="#" className="hover:text-[#89D7B7] transition-colors">Privacy Standard</a></li>
-              <li><a href="#" className="hover:text-[#89D7B7] transition-colors">System Telemetry</a></li>
+              <li><Link to="/privacy" className="hover:text-[#89D7B7] transition-colors">Privacy Standard</Link></li>
+              <li><a href="#hero" className="hover:text-[#89D7B7] transition-colors">System Telemetry</a></li>
             </ul>
           </div>
 
@@ -72,20 +73,22 @@ export default function Footer() {
           <div>
             <h4 className="text-xs font-mono uppercase tracking-widest text-[#89D7B7] font-bold mb-4">Connect</h4>
             <div className="flex space-x-4 mb-4 text-[#FFF4E1]/80">
-              <a href="#" className="p-2 rounded-lg bg-[#1A312C] border border-[#428475]/30 hover:border-[#89D7B7]/50 hover:text-[#89D7B7] transition-colors">
+              <a href="https://github.com/getplaced" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[#1A312C] border border-[#428475]/30 hover:border-[#89D7B7]/50 hover:text-[#89D7B7] transition-colors">
                 <Github className="w-4 h-4" />
               </a>
-              <a href="#" className="p-2 rounded-lg bg-[#1A312C] border border-[#428475]/30 hover:border-[#89D7B7]/50 hover:text-[#89D7B7] transition-colors">
+              <a href="https://twitter.com/getplaced" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[#1A312C] border border-[#428475]/30 hover:border-[#89D7B7]/50 hover:text-[#89D7B7] transition-colors">
                 <Twitter className="w-4 h-4" />
               </a>
-              <a href="#" className="p-2 rounded-lg bg-[#1A312C] border border-[#428475]/30 hover:border-[#89D7B7]/50 hover:text-[#89D7B7] transition-colors">
+              <a href="https://linkedin.com/company/getplaced" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[#1A312C] border border-[#428475]/30 hover:border-[#89D7B7]/50 hover:text-[#89D7B7] transition-colors">
                 <Linkedin className="w-4 h-4" />
               </a>
-              <a href="#" className="p-2 rounded-lg bg-[#1A312C] border border-[#428475]/30 hover:border-[#89D7B7]/50 hover:text-[#89D7B7] transition-colors">
+              <a href={`mailto:${SUPPORT_EMAIL}`} className="p-2 rounded-lg bg-[#1A312C] border border-[#428475]/30 hover:border-[#89D7B7]/50 hover:text-[#89D7B7] transition-colors">
                 <Mail className="w-4 h-4" />
               </a>
             </div>
-            <span className="text-[11px] text-[#89D7B7] font-mono">support@getplaced.ai</span>
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-[11px] text-[#89D7B7] font-mono hover:underline">
+              {SUPPORT_EMAIL}
+            </a>
           </div>
 
         </div>
@@ -94,9 +97,9 @@ export default function Footer() {
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-[#FFF4E1]/60 gap-4">
           <p>&copy; {new Date().getFullYear()} getPlaced Platform. All rights reserved.</p>
           <div className="flex space-x-6 text-[11px]">
-            <a href="#" className="hover:text-[#FFF4E1] transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-[#FFF4E1] transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-[#FFF4E1] transition-colors">Cookie Settings</a>
+            <Link to="/terms" className="hover:text-[#FFF4E1] transition-colors">Terms of Service</Link>
+            <Link to="/privacy" className="hover:text-[#FFF4E1] transition-colors">Privacy Policy</Link>
+            <Link to="/privacy" className="hover:text-[#FFF4E1] transition-colors">Cookie Settings</Link>
           </div>
         </div>
 

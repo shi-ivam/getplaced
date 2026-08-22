@@ -6,7 +6,7 @@
     "dev": "pnpm --prefix frontend dev",
     "dev:frontend": "pnpm --prefix frontend dev",
     "dev:backend-node": "pnpm --prefix backend-Node dev",
-    "dev:backend-py": "cd backend-Py && .venv/bin/uvicorn main:app --reload --port 8000",
+    "dev:backend-py": "cd backend-Py && PYTHONDONTWRITEBYTECODE=1 .venv/bin/uvicorn main:app --reload --port 8000",
     "build": "pnpm --prefix frontend build"
   }
 }

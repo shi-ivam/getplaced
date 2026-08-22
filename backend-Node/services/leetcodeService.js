@@ -263,6 +263,21 @@ export const fetchLeetCodeStats = async (rawUsername) => {
   }
 
   const data = response?.data?.data;
+  const errors = response?.data?.errors;
+
+  if (errors && (!data || !data.matchedUser)) {
+    const errMsg = Array.isArray(errors) ? errors.map((e) => e.message).join("; ") : "LeetCode API Error";
+    if (errMsg.toLowerCase().includes("not found") || errMsg.toLowerCase().includes("does not exist")) {
+      const notFoundError = new Error(
+        `Couldn't find a LeetCode profile with username "${cleanUsername}". Please verify your username or public profile link.`
+      );
+      notFoundError.statusCode = 404;
+      throw notFoundError;
+    }
+    const apiError = new Error(`LeetCode API service error: ${errMsg}`);
+    apiError.statusCode = 502;
+    throw apiError;
+  }
 
   // If user is not found on LeetCode
   if (!data || !data.matchedUser) {
@@ -991,10 +1006,12 @@ export const formatLeetCodeProfileResponse = (profile) => {
 
   const doc = profile.toObject ? profile.toObject() : { ...profile };
 
-  const total = Number(doc.problemsSolved?.total ?? doc.totalSolved ?? 0);
-  const easy = Number(doc.problemsSolved?.easy ?? doc.easySolved ?? 0);
-  const medium = Number(doc.problemsSolved?.medium ?? doc.mediumSolved ?? 0);
-  const hard = Number(doc.problemsSolved?.hard ?? doc.hardSolved ?? 0);
+  const isFailedUnsynced = doc.syncStatus === "failed" && !doc.lastSyncedAt;
+
+  const total = isFailedUnsynced ? null : Number(doc.problemsSolved?.total ?? doc.totalSolved ?? 0);
+  const easy = isFailedUnsynced ? null : Number(doc.problemsSolved?.easy ?? doc.easySolved ?? 0);
+  const medium = isFailedUnsynced ? null : Number(doc.problemsSolved?.medium ?? doc.mediumSolved ?? 0);
+  const hard = isFailedUnsynced ? null : Number(doc.problemsSolved?.hard ?? doc.hardSolved ?? 0);
 
   const problemsSolved = {
     total,
@@ -1003,12 +1020,12 @@ export const formatLeetCodeProfileResponse = (profile) => {
     hard,
   };
 
-  const totalSub = Number(doc.submissions?.total ?? (doc.totalSolved > 0 ? doc.totalSolved : 0));
-  const acceptedSub = Number(doc.submissions?.accepted ?? doc.totalSolved ?? 0);
-  const rejectedSub = Number(
-    doc.submissions?.rejected ?? Math.max(0, totalSub - acceptedSub)
+  const totalSub = isFailedUnsynced ? null : Number(doc.submissions?.total ?? (doc.totalSolved > 0 ? doc.totalSolved : 0));
+  const acceptedSub = isFailedUnsynced ? null : Number(doc.submissions?.accepted ?? doc.totalSolved ?? 0);
+  const rejectedSub = isFailedUnsynced ? null : Number(
+    doc.submissions?.rejected ?? Math.max(0, (totalSub || 0) - (acceptedSub || 0))
   );
-  const rate = Number(doc.submissions?.acceptanceRate ?? doc.acceptanceRate ?? 0);
+  const rate = isFailedUnsynced ? null : Number(doc.submissions?.acceptanceRate ?? doc.acceptanceRate ?? 0);
 
   const submissions = {
     total: totalSub,
@@ -1048,14 +1065,14 @@ export const formatLeetCodeProfileResponse = (profile) => {
     totalSubmissionNum: [],
   };
 
-  const activeDays = Number(doc.activeDays) || 0;
-  const streak = Number(doc.streak) || 0;
+  const activeDays = isFailedUnsynced ? null : Number(doc.activeDays) || 0;
+  const streak = isFailedUnsynced ? null : Number(doc.streak) || 0;
   const submissionCalendar =
     typeof doc.submissionCalendar === "string"
       ? doc.submissionCalendar
       : JSON.stringify(doc.submissionCalendar || {});
   const efficiencyRatio =
-    doc.efficiencyRatio !== undefined && doc.efficiencyRatio !== null
+    !isFailedUnsynced && doc.efficiencyRatio !== undefined && doc.efficiencyRatio !== null
       ? Number(doc.efficiencyRatio)
       : null;
 
@@ -1071,7 +1088,7 @@ export const formatLeetCodeProfileResponse = (profile) => {
     calendarMap = {};
   }
 
-  const archetypeInfo = classifyConsistencyArchetype(activeDays, streak, total, calendarMap);
+  const archetypeInfo = classifyConsistencyArchetype(activeDays || 0, streak || 0, total || 0, calendarMap);
 
   const cleanRanking =
     typeof doc.ranking === "number" && doc.ranking > 0 && doc.ranking < 5000000

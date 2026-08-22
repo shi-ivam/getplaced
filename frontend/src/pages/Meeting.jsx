@@ -2,17 +2,52 @@ import React, { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { motion } from "framer-motion";
-import { Calendar as CalendarIcon, Clock, CheckCircle, Sparkles, BookOpen } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, CheckCircle, Sparkles, BookOpen, Download, ExternalLink, Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import "./customCalendar.css";
 
 const upcomingModules = [
-  { time: "09:00 AM", title: "Graph Algorithms & Topological Sort", type: "DSA Prep", status: "Scheduled" },
-  { time: "02:30 PM", title: "System Design: Distributed Rate Limiter", type: "AI Mock", status: "Upcoming" },
-  { time: "06:00 PM", title: "Behavioral STAR Method Review", type: "AI Telemetry", status: "Pending" }
+  { time: "09:00 AM", title: "Graph Algorithms & Topological Sort", type: "DSA Prep", status: "Scheduled", route: "/app/dsa" },
+  { time: "02:30 PM", title: "System Design: Distributed Rate Limiter", type: "AI Mock", status: "Upcoming", route: "/app/interview" },
+  { time: "06:00 PM", title: "Behavioral STAR Method Review", type: "AI Telemetry", status: "Pending", route: "/app/communication" }
 ];
 
 const CrazyCalendar = () => {
+  const navigate = useNavigate();
   const [date, setDate] = useState(new Date());
+  const [synced, setSynced] = useState(false);
+  const [syncNotice, setSyncNotice] = useState("");
+
+  const handleConnectSync = () => {
+    // Generate .ics event data for calendar export
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//getPlaced Platform//Placement Roadmap Calendar//EN
+BEGIN:VEVENT
+SUMMARY:getPlaced Daily Placement Roadmap & AI Mock Interview
+DESCRIPTION:Synchronized Placement Preparation Roadmap session.
+DTSTART:${date.toISOString().replace(/-|:|\.\d+/g, "")}
+DURATION:PT1H
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute("download", `getPlaced-Schedule-${date.toISOString().split("T")[0]}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setSynced(true);
+    setSyncNotice("Calendar synced! iCal schedule downloaded & connected.");
+    setTimeout(() => setSyncNotice(""), 4000);
+  };
+
+  const handleTileSelect = (selectedDate) => {
+    setDate(selectedDate);
+  };
 
   return (
     <section id="calendar" className="py-24 md:py-36 bg-[#1A312C] text-[#FFF4E1] relative overflow-hidden">
@@ -50,16 +85,25 @@ const CrazyCalendar = () => {
             
             <div className="w-full flex justify-center">
               <Calendar
-                onChange={setDate}
+                onChange={handleTileSelect}
                 value={date}
                 className="crazy-calendar"
                 tileClassName="crazy-tile"
               />
             </div>
 
-            <div className="mt-6 inline-flex items-center gap-2 bg-[#428475]/30 px-5 py-2 rounded-full border border-[#89D7B7]/40 text-xs text-[#89D7B7] font-mono">
-              <span>Active Target:</span>
-              <span className="font-bold text-[#FFF4E1]">{date.toDateString()}</span>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <div className="inline-flex items-center gap-2 bg-[#428475]/30 px-5 py-2 rounded-full border border-[#89D7B7]/40 text-xs text-[#89D7B7] font-mono">
+                <span>Active Target:</span>
+                <span className="font-bold text-[#FFF4E1]">{date.toDateString()}</span>
+              </div>
+              <button
+                onClick={() => navigate("/app/roadmap")}
+                className="px-4 py-2 rounded-full bg-[#89D7B7]/15 hover:bg-[#89D7B7]/30 border border-[#89D7B7]/40 text-xs text-[#FFF4E1] font-semibold flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <span>View Full Roadmap</span>
+                <ExternalLink className="w-3.5 h-3.5 text-[#89D7B7]" />
+              </button>
             </div>
           </motion.div>
 
@@ -77,15 +121,16 @@ const CrazyCalendar = () => {
                 key={idx}
                 whileHover={{ x: 6 }}
                 transition={{ duration: 0.2 }}
-                className="p-5 rounded-2xl bg-[#152824] border border-[#428475]/35 hover:border-[#89D7B7]/50 shadow-lg flex items-center justify-between"
+                onClick={() => navigate(item.route)}
+                className="p-5 rounded-2xl bg-[#152824] border border-[#428475]/35 hover:border-[#89D7B7]/50 shadow-lg flex items-center justify-between cursor-pointer group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-[#428475]/25 border border-[#428475]/40 flex items-center justify-center text-[#89D7B7]">
+                  <div className="w-10 h-10 rounded-xl bg-[#428475]/25 border border-[#428475]/40 flex items-center justify-center text-[#89D7B7] group-hover:bg-[#89D7B7]/20 transition-colors">
                     <BookOpen className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="text-xs font-mono text-[#89D7B7] mb-0.5">{item.time} &bull; {item.type}</div>
-                    <div className="font-bold text-[#FFF4E1] text-sm md:text-base">{item.title}</div>
+                    <div className="font-bold text-[#FFF4E1] text-sm md:text-base group-hover:text-[#89D7B7] transition-colors">{item.title}</div>
                   </div>
                 </div>
 
@@ -97,12 +142,24 @@ const CrazyCalendar = () => {
             ))}
 
             <div className="p-6 rounded-2xl bg-gradient-to-r from-[#1A312C] to-[#428475]/40 border border-[#89D7B7]/30 mt-4">
-              <div className="flex items-center justify-between text-xs text-[#FFF4E1]/90 font-medium">
-                <span>Integrated Google & Outlook Calendar Sync</span>
-                <button className="text-xs text-[#89D7B7] hover:text-[#FFF4E1] font-semibold underline underline-offset-4 cursor-pointer">
-                  Connect Sync
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#FFF4E1]/90 font-medium">
+                <div>
+                  <span className="font-semibold block text-[#FFF4E1]">Integrated Google & Outlook Calendar Sync</span>
+                  <span className="text-[11px] text-[#FFF4E1]/65">Sync daily interview milestones directly into your calendar.</span>
+                </div>
+                <button
+                  onClick={handleConnectSync}
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#89D7B7] text-[#1A312C] hover:bg-[#a6e6ce] font-bold text-xs transition cursor-pointer shrink-0 shadow-md"
+                >
+                  {synced ? <Check className="w-3.5 h-3.5" /> : <Download className="w-3.5 h-3.5" />}
+                  <span>{synced ? "Synced (.ics Exported)" : "Connect Sync"}</span>
                 </button>
               </div>
+              {syncNotice && (
+                <div className="mt-3 text-xs text-[#89D7B7] font-mono bg-[#89D7B7]/10 p-2 rounded border border-[#89D7B7]/30">
+                  {syncNotice}
+                </div>
+              )}
             </div>
           </div>
 

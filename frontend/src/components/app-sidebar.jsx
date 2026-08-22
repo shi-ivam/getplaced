@@ -88,11 +88,6 @@ const navigationGroups = [
         url: "/app/arena",
         icon: Swords,
       },
-      {
-        title: "Study Library",
-        url: "/app/library",
-        icon: PlayCircle,
-      },
     ],
   },
   {

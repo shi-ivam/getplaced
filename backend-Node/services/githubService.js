@@ -189,6 +189,14 @@ export const scrapeGitHubUserDataFallback = async (cleanUsername) => {
   const nameMatch = mainHtml.match(/<span[^>]*class="[^"]*p-name[^"]*"[^>]*>([\s\S]*?)<\/span>/i);
   const name = nameMatch ? nameMatch[1].trim() : "";
 
+  if (!avatarUrl && !name && !mainHtml.includes("vcard-username") && !mainHtml.includes("p-name")) {
+    const notFoundError = new Error(
+      `Could not find a valid public GitHub profile for user "${cleanUsername}".`
+    );
+    notFoundError.statusCode = 404;
+    throw notFoundError;
+  }
+
   // Extract Bio
   const bioMatch =
     mainHtml.match(/<div[^>]*class="[^"]*p-note[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
@@ -574,16 +582,21 @@ export const formatGitHubProfileResponse = (profile) => {
 
   const doc = profile.toObject ? profile.toObject() : { ...profile };
 
-  const projectScore =
-    doc.projectScore !== undefined && doc.projectScore !== null
-      ? Number(doc.projectScore)
-      : calculateGitHubProjectScore(doc);
+  const isFailedUnsynced = doc.syncStatus === "failed" && !doc.lastSyncedAt;
 
-  let scoreTier = "Developing";
-  if (projectScore >= 85) scoreTier = "Exceptional";
-  else if (projectScore >= 70) scoreTier = "Strong";
-  else if (projectScore >= 50) scoreTier = "Solid";
-  else if (projectScore >= 30) scoreTier = "Moderate";
+  const projectScore = isFailedUnsynced
+    ? null
+    : doc.projectScore !== undefined && doc.projectScore !== null
+    ? Number(doc.projectScore)
+    : calculateGitHubProjectScore(doc);
+
+  let scoreTier = isFailedUnsynced ? null : "Developing";
+  if (projectScore !== null) {
+    if (projectScore >= 85) scoreTier = "Exceptional";
+    else if (projectScore >= 70) scoreTier = "Strong";
+    else if (projectScore >= 50) scoreTier = "Solid";
+    else if (projectScore >= 30) scoreTier = "Moderate";
+  }
 
   const languages = Array.isArray(doc.languages) ? doc.languages : [];
   const topLanguage = languages.length > 0 ? languages[0] : null;
@@ -599,13 +612,13 @@ export const formatGitHubProfileResponse = (profile) => {
     company: doc.company || "",
     location: doc.location || "",
     blog: doc.blog || "",
-    publicReposCount: Number(doc.publicReposCount) || (doc.repositories?.length ?? 0),
-    followers: Number(doc.followers) || 0,
-    following: Number(doc.following) || 0,
-    totalStars: Number(doc.totalStars) || 0,
-    totalForks: Number(doc.totalForks) || 0,
-    originalReposCount: Number(doc.originalReposCount) || 0,
-    forkedReposCount: Number(doc.forkedReposCount) || 0,
+    publicReposCount: isFailedUnsynced ? null : Number(doc.publicReposCount) || (doc.repositories?.length ?? 0),
+    followers: isFailedUnsynced ? null : Number(doc.followers) || 0,
+    following: isFailedUnsynced ? null : Number(doc.following) || 0,
+    totalStars: isFailedUnsynced ? null : Number(doc.totalStars) || 0,
+    totalForks: isFailedUnsynced ? null : Number(doc.totalForks) || 0,
+    originalReposCount: isFailedUnsynced ? null : Number(doc.originalReposCount) || 0,
+    forkedReposCount: isFailedUnsynced ? null : Number(doc.forkedReposCount) || 0,
     projectScore,
     scoreTier,
     topLanguage,

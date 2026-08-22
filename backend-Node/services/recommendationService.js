@@ -175,10 +175,10 @@ export async function getNextRecommendedActions(user) {
   }
 
   return {
-    streakDays: progress?.dailyStreak || 3,
+    streakDays: progress?.dailyStreak || 0,
     todayCompletedCount: progress?.totalTasksCompleted || 0,
     dailyGoalCount: 3,
-    overallReadiness: readiness?.overallScore || 72,
+    overallReadiness: readiness?.overallScore || null,
     targetCompany,
     targetRole,
     recommendations: recommendations.slice(0, 5),

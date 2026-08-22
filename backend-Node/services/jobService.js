@@ -35,7 +35,7 @@ export const seedJobsIfNeeded = async () => {
  * @param {number} userReadiness - Placement readiness score (0-100)
  * @returns {Object} Match analytics and personalization package
  */
-export const calculateJobMatch = (job, user = null, userReadiness = 75) => {
+export const calculateJobMatch = (job, user = null, userReadiness = null) => {
   const targetCompany = user?.targetCompany?.trim() || "";
   const targetJobRole = user?.targetJobRole?.trim() || "";
   const locationPref = user?.locationPreference?.trim() || "";
@@ -229,7 +229,9 @@ export const calculateJobMatch = (job, user = null, userReadiness = 75) => {
     readinessComparison: {
       readinessScore: userReadiness,
       matchScore,
-      summaryNote: `You match this role's requirements at ${matchScore}%. Your current placement readiness is ${userReadiness}%.`,
+      summaryNote: userReadiness !== null && userReadiness !== undefined
+        ? `You match this role's requirements at ${matchScore}%. Your current placement readiness is ${userReadiness}%.`
+        : `You match this role's requirements at ${matchScore}%. Placement readiness unassessed.`,
     },
     preparationPlan,
   };
@@ -238,7 +240,7 @@ export const calculateJobMatch = (job, user = null, userReadiness = 75) => {
 /**
  * Queries and enriches jobs with client filters, search, and user match calculation.
  */
-export const queryJobs = async (queryParams, user = null, userReadiness = 75) => {
+export const queryJobs = async (queryParams, user = null, userReadiness = null) => {
   // Ensure seed data exists
   await seedJobsIfNeeded();
 
@@ -420,7 +422,7 @@ export const queryJobs = async (queryParams, user = null, userReadiness = 75) =>
 /**
  * Retrieves a single detailed job by MongoDB ID or custom jobId.
  */
-export const getJobDetails = async (id, user = null, userReadiness = 75) => {
+export const getJobDetails = async (id, user = null, userReadiness = null) => {
   await seedJobsIfNeeded();
 
   let job = null;

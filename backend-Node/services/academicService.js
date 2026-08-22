@@ -307,35 +307,21 @@ export async function getOrCreateAcademicProfile(userId, fallbackUser = null) {
   let academic = await AcademicProfile.findOne({ userId });
 
   if (!academic) {
-    const semesters = [];
-    const baseCgpa = fallbackUser?.cgpa ?? 8.2;
-    for (let i = 1; i <= 8; i++) {
-      semesters.push({
-        semesterNumber: i,
-        sgpa: i <= 5 ? Number((baseCgpa + (Math.sin(i) * 0.3)).toFixed(2)) : null,
-        credits: 22,
-        backlogs: 0,
-        totalSubjects: 6,
-        passedSubjects: 6,
-        isCompleted: i <= 5,
-      });
-    }
-
     academic = await AcademicProfile.create({
       userId,
-      college: fallbackUser?.college || "National Institute of Technology",
-      degree: fallbackUser?.degree || "B.Tech",
-      branch: "Computer Science & Engineering",
-      graduationYear: fallbackUser?.graduationYear || 2026,
-      currentSemester: 6,
-      totalSemesters: 8,
-      currentCgpa: baseCgpa,
-      targetCgpa: 8.5,
-      tenthPercentage: fallbackUser?.tenthPercentage ?? 88.5,
-      twelfthPercentage: fallbackUser?.twelfthPercentage ?? 86.0,
+      college: fallbackUser?.college || "",
+      degree: fallbackUser?.degree || "",
+      branch: fallbackUser?.branch || "",
+      graduationYear: fallbackUser?.graduationYear || null,
+      currentSemester: null,
+      totalSemesters: null,
+      currentCgpa: fallbackUser?.cgpa ?? null,
+      targetCgpa: null,
+      tenthPercentage: fallbackUser?.tenthPercentage ?? null,
+      twelfthPercentage: fallbackUser?.twelfthPercentage ?? null,
       activeBacklogs: 0,
       historyOfBacklogs: 0,
-      semesters,
+      semesters: [],
     });
   }
 
@@ -346,6 +332,9 @@ export async function getOrCreateAcademicProfile(userId, fallbackUser = null) {
  * Calculate required SGPA in remaining semesters to achieve target CGPA.
  */
 export function calculateTargetCgpaRequirement(currentCgpa, completedSemesters, totalSemesters, targetCgpa) {
+  if (currentCgpa === null || currentCgpa === undefined || targetCgpa === null || targetCgpa === undefined) {
+    return null;
+  }
   const current = Number(currentCgpa) || 0;
   const target = Number(targetCgpa) || 0;
   const completed = Math.max(1, Math.min(Number(completedSemesters) || 1, 8));

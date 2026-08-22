@@ -136,6 +136,28 @@ export async function getOrCreateCoachSession(userId, user = null) {
     }
   }
 
+  if (user && (user.resumeScore !== undefined && user.resumeScore !== null || user.resumeAnalysis)) {
+    if (!session.connectedProfiles) session.connectedProfiles = {};
+    if (!session.connectedProfiles.resume || !session.connectedProfiles.resume.provided) {
+      const matchedKeywords = (user.resumeAnalysis?.matched_keywords || []).map((k) =>
+        typeof k === "string" ? k : k.keyword || ""
+      );
+      session.connectedProfiles.resume = {
+        provided: true,
+        filename: "resume.pdf",
+        score: user.resumeScore ?? user.resumeAnalysis?.ats_score ?? null,
+        extractedSkills: matchedKeywords,
+        analysis: user.resumeAnalysis || null,
+      };
+    }
+    if (!session.extractedProfile) session.extractedProfile = {};
+    if (session.extractedProfile.resumeScore === undefined || session.extractedProfile.resumeScore === null) {
+      session.extractedProfile.resumeScore = user.resumeScore ?? user.resumeAnalysis?.ats_score ?? null;
+      session.extractedProfile.resumeText = user.resumeText || "";
+      session.extractedProfile.resumeAnalysis = user.resumeAnalysis || null;
+    }
+  }
+
   return session;
 }
 

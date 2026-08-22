@@ -116,6 +116,9 @@ const getUserProfile = asyncHandler(async (req, res) => {
       targetCompanyNormalized,
       locationPreference: user.locationPreference || "",
       onboardingCompleted: Boolean(user.onboardingCompleted),
+      resumeScore: user.resumeScore ?? null,
+      resumeText: user.resumeText || "",
+      resumeAnalysis: user.resumeAnalysis || null,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     })
@@ -150,8 +153,23 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     targetCompany,
     locationPreference,
     onboardingCompleted,
+    resumeScore,
+    resumeText,
+    resumeAnalysis,
     password,
   } = req.body
+
+  if (resumeScore !== undefined) {
+    user.resumeScore = resumeScore !== null && !isNaN(Number(resumeScore)) ? Number(resumeScore) : null
+  }
+
+  if (resumeText !== undefined) {
+    user.resumeText = typeof resumeText === "string" ? resumeText : ""
+  }
+
+  if (resumeAnalysis !== undefined) {
+    user.resumeAnalysis = resumeAnalysis
+  }
 
   if (onboardingCompleted !== undefined) {
     user.onboardingCompleted = Boolean(onboardingCompleted)
@@ -276,6 +294,9 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     targetCompanyNormalized: finalCompanyNormalized,
     locationPreference: updatedUser.locationPreference || "",
     onboardingCompleted: Boolean(updatedUser.onboardingCompleted),
+    resumeScore: updatedUser.resumeScore ?? null,
+    resumeText: updatedUser.resumeText || "",
+    resumeAnalysis: updatedUser.resumeAnalysis || null,
     createdAt: updatedUser.createdAt,
     updatedAt: updatedUser.updatedAt,
   })

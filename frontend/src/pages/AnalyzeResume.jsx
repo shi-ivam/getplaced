@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -16,9 +17,11 @@ import {
   Layers,
   ChevronRight,
   ShieldCheck,
-  Check
+  Check,
+  ExternalLink,
+  Bot
 } from "lucide-react";
-import { PY_API_URL } from "@/config/api";
+import { PY_API_URL, NODE_API_URL } from "@/config/api";
 import ResumeActionCenter from "@/components/resume/ResumeActionCenter";
 import ResumeReportOverview from "@/components/resume/ResumeReportOverview";
 import ResumeVersionHistory from "@/components/resume/ResumeVersionHistory";
@@ -216,6 +219,9 @@ export default function AnalyzeResume() {
   // Version History State
   const [versions, setVersions] = useState([]);
 
+  const [isProfileLinked, setIsProfileLinked] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+
   // Builder State
   const [builderData, setBuilderData] = useState(INITIAL_BUILDER_DATA);
 
@@ -228,13 +234,76 @@ export default function AnalyzeResume() {
     );
   }, { dependencies: [activeTab], scope: containerRef });
 
-  // Load versions from localStorage on mount & initialize evaluation if available
+  // Load versions & fetch real resume analysis from authenticated User Profile & Coach Session
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+    const initResumeIntelligence = async () => {
       let initialVersions = [];
-      if (saved) {
-        initialVersions = JSON.parse(saved);
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          initialVersions = JSON.parse(saved);
+        }
+      } catch (e) {
+        console.warn("Could not read resume history from local storage:", e);
+      }
+
+      try {
+        // Fetch authenticated user profile & coach session to link real data
+        const [profileRes, coachRes] = await Promise.allSettled([
+          axios.get(`${NODE_API_URL}/api/users/profile`, { withCredentials: true }),
+          axios.get(`${NODE_API_URL}/api/coach/session`, { withCredentials: true }),
+        ]);
+
+        const profileData = profileRes.status === "fulfilled" ? profileRes.value?.data : null;
+        const coachData = coachRes.status === "fulfilled" ? coachRes.value?.data : null;
+
+        const liveAnalysis =
+          profileData?.resumeAnalysis ||
+          coachData?.connectedProfiles?.resume?.analysis ||
+          coachData?.extractedProfile?.resumeAnalysis;
+        const liveText = profileData?.resumeText || coachData?.extractedProfile?.resumeText;
+        const liveScore = profileData?.resumeScore ?? coachData?.connectedProfiles?.resume?.score;
+        const userTargetRole = profileData?.targetJobRole || coachData?.extractedProfile?.targetJobRole;
+
+        if (userTargetRole) {
+          setTargetRole(userTargetRole);
+        }
+
+        if (liveAnalysis && liveAnalysis.ats_score !== undefined) {
+          setEvaluation(liveAnalysis);
+          setActions(liveAnalysis.structured_actions || DEMO_STRUCTURED_ACTIONS);
+          if (liveText) setRawText(liveText);
+          setIsProfileLinked(true);
+
+          const syncedVersion = {
+            id: "ver-onboarding-live",
+            name: "Candidate Profile Benchmark (Live)",
+            timestamp: new Date().toISOString(),
+            targetRole: userTargetRole || "Software Engineer",
+            targetCompany: profileData?.targetCompany || "Target Placement",
+            atsScore: liveAnalysis.ats_score || liveScore || 75,
+            tier: liveAnalysis.score_tier || "Strong",
+            categoryScores: liveAnalysis.category_scores || {},
+            matchedCount: liveAnalysis.matched_keywords?.length || 0,
+            missingCount: liveAnalysis.missing_keywords?.length || 0,
+            summaryCritique: liveAnalysis.summary_critique || "",
+            fullEvaluation: liveAnalysis,
+          };
+
+          const mergedVersions = [
+            syncedVersion,
+            ...initialVersions.filter((v) => v.id !== "ver-onboarding-live"),
+          ];
+          setVersions(mergedVersions);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedVersions));
+          setProfileLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.warn("Could not load user profile resume link:", err.message);
+      }
+
+      if (initialVersions.length > 0) {
         setVersions(initialVersions);
       } else {
         const demoVersion = {
@@ -261,7 +330,7 @@ export default function AnalyzeResume() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify([demoVersion]));
       }
 
-      // Populate default benchmark evaluation so Action Center is interactive immediately
+      // Default benchmark evaluation fallback
       const defaultEval = {
         ats_score: 74,
         score_tier: "Competitive",
@@ -327,9 +396,10 @@ export default function AnalyzeResume() {
 
       setEvaluation(defaultEval);
       setActions(defaultEval.structured_actions || DEMO_STRUCTURED_ACTIONS);
-    } catch (e) {
-      console.error("Failed to load versions from storage:", e);
-    }
+      setProfileLoading(false);
+    };
+
+    initResumeIntelligence();
   }, []);
 
   const saveEvaluationToHistory = (evalData, customName = null) => {
@@ -374,6 +444,7 @@ export default function AnalyzeResume() {
 
     try {
       let evalData = null;
+      let extractedResumeText = rawText;
 
       if (file) {
         const formData = new FormData();
@@ -386,6 +457,7 @@ export default function AnalyzeResume() {
         });
         evalData = res.data.evaluation;
         if (res.data.extracted_text) {
+          extractedResumeText = res.data.extracted_text;
           setRawText(res.data.extracted_text);
         }
       } else {
@@ -403,6 +475,23 @@ export default function AnalyzeResume() {
       setActions(actionItems);
       saveEvaluationToHistory(evalData, file ? `${file.name.replace(".pdf", "")}` : null);
       setActiveTab("actions");
+
+      // Sync with Node User Profile & Coach Session
+      try {
+        await axios.post(
+          `${NODE_API_URL}/api/coach/save-resume-analysis`,
+          {
+            resumeScore: evalData.ats_score,
+            resumeText: extractedResumeText,
+            resumeAnalysis: evalData,
+            filename: file ? file.name : "resume.pdf",
+          },
+          { withCredentials: true }
+        );
+        setIsProfileLinked(true);
+      } catch (syncErr) {
+        console.warn("Could not sync with Node candidate profile:", syncErr.message);
+      }
     } catch (err) {
       console.warn("API call failed, running fallback evaluation:", err);
       try {
@@ -435,6 +524,22 @@ export default function AnalyzeResume() {
       setRawText(updatedText);
     }
     saveEvaluationToHistory(newEval, `Optimized (${newEval.ats_score} ATS)`);
+
+    // Sync updated ATS score to Node candidate profile & coach session
+    try {
+      axios.post(
+        `${NODE_API_URL}/api/coach/save-resume-analysis`,
+        {
+          resumeScore: newEval.ats_score,
+          resumeText: updatedText || rawText,
+          resumeAnalysis: newEval,
+          filename: file ? file.name : "resume_optimized.pdf",
+        },
+        { withCredentials: true }
+      ).catch(() => {});
+    } catch (e) {
+      console.warn("Could not sync updated evaluation:", e);
+    }
   };
 
   // Revert back to previous evaluation
@@ -469,19 +574,37 @@ export default function AnalyzeResume() {
         
         {/* Header Strip & Navigation Pill */}
         <header className="flex flex-col gap-4 border-b border-white/[0.07] pb-6">
-          <div className="space-y-1.5 max-w-2xl">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
-                ATS Action Matrix
-              </span>
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div className="space-y-1.5 max-w-2xl">
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
+                  ATS Action Matrix
+                </span>
+                {isProfileLinked && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                    <ShieldCheck className="w-3 h-3" /> Candidate Profile Linked
+                  </span>
+                )}
+              </div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+                Resume Action Center & ATS Intelligence
+              </h1>
+              <p className="text-xs sm:text-sm text-neutral-400 font-normal">
+                Interactive recommendation selector, customizable change previews, and verified ATS score recalculation.
+              </p>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
-              Resume Action Center & ATS Intelligence
-            </h1>
-            <p className="text-xs sm:text-sm text-neutral-400 font-normal">
-              Interactive recommendation selector, customizable change previews, and verified ATS score recalculation.
-            </p>
+
+            <div className="flex items-center gap-2.5 shrink-0 self-start">
+              <Link
+                to="/app/coach"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 hover:border-zinc-600 text-xs font-mono text-zinc-200 transition-colors"
+              >
+                <Bot className="w-3.5 h-3.5 text-purple-400" />
+                <span>AI Career Coach</span>
+                <ChevronRight className="w-3 h-3 text-zinc-500" />
+              </Link>
+            </div>
           </div>
 
           {/* Segmented Navigation Tab Pill Below Title */}
