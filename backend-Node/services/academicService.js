@@ -337,18 +337,23 @@ export function calculateTargetCgpaRequirement(currentCgpa, completedSemesters, 
   }
   const current = Number(currentCgpa) || 0;
   const target = Number(targetCgpa) || 0;
-  const completed = Math.max(1, Math.min(Number(completedSemesters) || 1, 8));
-  const total = Math.max(completed + 1, Math.min(Number(totalSemesters) || 8, 10));
-  const remaining = total - completed;
+  const total = Math.max(1, Math.min(Number(totalSemesters) || 8, 10));
+  const completed = Math.max(0, Math.min(Number(completedSemesters) || 0, total));
+  const remaining = Math.max(0, total - completed);
 
-  if (remaining <= 0) {
+  if (completed >= total || remaining <= 0) {
+    const isAchieved = current >= target;
     return {
-      achievable: current >= target,
-      requiredSgpaPerSem: 0,
+      achievable: isAchieved,
+      currentCgpa: current,
+      targetCgpa: target,
+      completedSemesters: completed,
+      totalSemesters: total,
       remainingSemesters: 0,
+      requiredSgpaPerSem: 0,
       maxPossibleCgpa: current,
-      difficultyLevel: current >= target ? "Already Achieved" : "No Remaining Semesters",
-      statusMessage: current >= target ? "Target already satisfied!" : "No semesters left to improve CGPA.",
+      difficultyLevel: isAchieved ? "Already Achieved" : "No Remaining Semesters",
+      statusMessage: isAchieved ? "Target already satisfied!" : "No semesters left to improve CGPA.",
     };
   }
 

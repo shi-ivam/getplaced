@@ -607,28 +607,31 @@ export function evaluateApplicationReadiness({
   // -------------------------------------------------------------
   // 1. ELIGIBILITY CHECK (Strict Cutoff / Blocker dimension)
   // -------------------------------------------------------------
-  const userCgpa =
+  const parseNumeric = (val) =>
+    val !== null && val !== undefined && val !== "" && !isNaN(Number(val)) ? Number(val) : null;
+
+  const rawCgpa =
     academicProfile?.currentCgpa ??
     userProfile?.cgpa ??
-    (readinessData?.dimensions?.academics?.score ? readinessData.dimensions.academics.score / 10 : 8.0);
-  const userCgpaNum = Number(userCgpa) || 8.0;
+    (readinessData?.dimensions?.academics?.score != null ? readinessData.dimensions.academics.score / 10 : null);
+  const userCgpaNum = parseNumeric(rawCgpa);
 
-  const userActiveBacklogs = Number(academicProfile?.activeBacklogs ?? userProfile?.activeBacklogs ?? 0);
-  const userHistoryBacklogs = Number(academicProfile?.historyOfBacklogs ?? userProfile?.historyOfBacklogs ?? 0);
-  const user10th = Number(academicProfile?.tenthPercentage ?? userProfile?.tenthPercentage ?? 85);
-  const user12th = Number(academicProfile?.twelfthPercentage ?? userProfile?.twelfthPercentage ?? 84);
+  const userActiveBacklogs = parseNumeric(academicProfile?.activeBacklogs ?? userProfile?.activeBacklogs) ?? 0;
+  const userHistoryBacklogs = parseNumeric(academicProfile?.historyOfBacklogs ?? userProfile?.historyOfBacklogs) ?? 0;
+  const user10th = parseNumeric(academicProfile?.tenthPercentage ?? userProfile?.tenthPercentage);
+  const user12th = parseNumeric(academicProfile?.twelfthPercentage ?? userProfile?.twelfthPercentage);
   const userDegree = userProfile?.degree || academicProfile?.degree || "B.Tech Computer Science";
   const userGradYear = userProfile?.graduationYear || academicProfile?.graduationYear || 2026;
   const userBranch = academicProfile?.branch || userProfile?.branch || "Computer Science & Engineering";
 
-  const cgpaPass = userCgpaNum >= benchmark.minCgpa;
-  const cgpaDelta = (userCgpaNum - benchmark.minCgpa).toFixed(2);
+  const cgpaPass = userCgpaNum !== null && userCgpaNum >= benchmark.minCgpa;
+  const cgpaDelta = userCgpaNum !== null ? (userCgpaNum - benchmark.minCgpa).toFixed(2) : null;
 
   const backlogsPass =
     userActiveBacklogs <= benchmark.maxActiveBacklogs &&
     userHistoryBacklogs <= benchmark.maxHistoryBacklogs;
-  const tenthPass = user10th >= benchmark.minTenthPct;
-  const twelfthPass = user12th >= benchmark.minTwelfthPct;
+  const tenthPass = user10th !== null ? user10th >= benchmark.minTenthPct : false;
+  const twelfthPass = user12th !== null ? user12th >= benchmark.minTwelfthPct : false;
 
   // Degree fit check
   const degreeLower = userDegree.toLowerCase();
@@ -639,22 +642,58 @@ export function evaluateApplicationReadiness({
     degreeLower.includes("cs") ||
     degreeLower.includes("engineering");
 
+  // Branch fit check
+  const userBranchLower = (userBranch || "").toLowerCase();
+  const isCsOrIt =
+    userBranchLower.includes("computer") ||
+    userBranchLower.includes("cs") ||
+    userBranchLower.includes("information technology") ||
+    userBranchLower.includes("it");
+  const isCircuit =
+    isCsOrIt ||
+    userBranchLower.includes("electronics") ||
+    userBranchLower.includes("ece") ||
+    userBranchLower.includes("electrical") ||
+    userBranchLower.includes("eee") ||
+    userBranchLower.includes("telecomm") ||
+    userBranchLower.includes("instrumentation");
+
+  const branchPass =
+    !benchmark.allowedBranches ||
+    benchmark.allowedBranches.length === 0 ||
+    benchmark.allowedBranches.includes("All Branches") ||
+    benchmark.allowedBranches.includes("All Engineering Branches") ||
+    benchmark.allowedBranches.some((b) => {
+      const bLower = b.toLowerCase();
+      if (bLower === "all branches" || bLower === "all engineering branches") return true;
+      if (bLower.includes("cs") || bLower.includes("it")) {
+        if (isCsOrIt) return true;
+      }
+      if (bLower.includes("circuit")) {
+        if (isCircuit) return true;
+      }
+      return userBranchLower.includes(bLower) || bLower.includes(userBranchLower);
+    });
+
   // Overall eligibility state
-  const isFullyEligible = cgpaPass && backlogsPass && tenthPass && twelfthPass && degreePass;
-  const hasHardBlocker = !cgpaPass || !backlogsPass || !degreePass;
+  const isFullyEligible = cgpaPass && backlogsPass && tenthPass && twelfthPass && degreePass && branchPass;
+  const hasHardBlocker = !cgpaPass || !backlogsPass || !degreePass || !branchPass;
 
   const eligibilityChecklist = [
     {
       id: "cgpa",
       label: "Cumulative CGPA Cutoff",
       required: `Minimum ${benchmark.minCgpa} CGPA (Preferred: ${benchmark.preferredCgpa})`,
-      actual: `${userCgpaNum.toFixed(2)} CGPA`,
-      isPassed: cgpaPass,
-      isBlocker: !cgpaPass,
-      statusText: cgpaPass ? "Eligible ✓" : "Blocker 🔴",
-      detail: cgpaPass
-        ? `Your CGPA (${userCgpaNum.toFixed(2)}) satisfies ${benchmark.name}'s ${benchmark.minCgpa} minimum cutoff.`
-        : `Your CGPA (${userCgpaNum.toFixed(2)}) is below ${benchmark.name}'s strict ${benchmark.minCgpa} cutoff (-${Math.abs(cgpaDelta)} pts deficit).`,
+      actual: userCgpaNum !== null ? `${userCgpaNum.toFixed(2)} CGPA` : "Not Provided",
+      isPassed: userCgpaNum !== null ? cgpaPass : false,
+      isBlocker: userCgpaNum === null || !cgpaPass,
+      statusText: userCgpaNum !== null && cgpaPass ? "Eligible ✓" : "Blocker 🔴",
+      detail:
+        userCgpaNum === null
+          ? "Academic record unassessed or CGPA missing."
+          : cgpaPass
+          ? `Your CGPA (${userCgpaNum.toFixed(2)}) satisfies ${benchmark.name}'s ${benchmark.minCgpa} minimum cutoff.`
+          : `Your CGPA (${userCgpaNum.toFixed(2)}) is below ${benchmark.name}'s strict ${benchmark.minCgpa} cutoff (-${Math.abs(cgpaDelta)} pts deficit).`,
       fixAction: {
         label: "Calculate Target SGPA",
         url: "/app/academics",
@@ -681,12 +720,15 @@ export function evaluateApplicationReadiness({
       label: "Degree & Discipline Alignment",
       required: `${benchmark.allowedDegrees.slice(0, 3).join(" / ")} in STEM discipline`,
       actual: `${userDegree} (${userBranch})`,
-      isPassed: degreePass,
-      isBlocker: !degreePass,
-      statusText: degreePass ? "Eligible ✓" : "Blocker 🔴",
-      detail: degreePass
-        ? `Enrolled in accredited engineering curriculum recognized by ${benchmark.name}.`
-        : `Degree (${userDegree}) requires campus recruiter verification.`,
+      isPassed: degreePass && branchPass,
+      isBlocker: !degreePass || !branchPass,
+      statusText: degreePass && branchPass ? "Eligible ✓" : "Blocker 🔴",
+      detail:
+        degreePass && branchPass
+          ? `Enrolled in accredited engineering curriculum recognized by ${benchmark.name}.`
+          : !degreePass
+          ? `Degree (${userDegree}) requires campus recruiter verification.`
+          : `Branch (${userBranch}) is not in the eligible branches list for ${benchmark.name}.`,
       fixAction: {
         label: "Update Degree in Profile",
         url: "/app/profile",
@@ -696,7 +738,7 @@ export function evaluateApplicationReadiness({
       id: "schooling",
       label: "10th & 12th Academic Benchmark",
       required: `Min ${benchmark.minTenthPct}% in 10th & ${benchmark.minTwelfthPct}% in 12th`,
-      actual: `10th: ${user10th}% • 12th: ${user12th}%`,
+      actual: `10th: ${user10th !== null ? `${user10th}%` : "N/A"} • 12th: ${user12th !== null ? `${user12th}%` : "N/A"}`,
       isPassed: tenthPass && twelfthPass,
       isBlocker: false,
       statusText: tenthPass && twelfthPass ? "Eligible ✓" : "Review 🟡",
@@ -951,8 +993,14 @@ export function evaluateApplicationReadiness({
     allPotentialGaps.push({
       id: "cgpa_gap",
       pillar: "Eligibility",
-      title: `CGPA Gap: ${userCgpaNum.toFixed(2)} vs ${benchmark.minCgpa} Cutoff`,
-      description: `Your CGPA is below ${benchmark.name}'s minimum cutoff. Calculate upcoming semester SGPA targets.`,
+      title:
+        userCgpaNum !== null
+          ? `CGPA Gap: ${userCgpaNum.toFixed(2)} vs ${benchmark.minCgpa} Cutoff`
+          : `Missing CGPA (Cutoff: ${benchmark.minCgpa})`,
+      description:
+        userCgpaNum !== null
+          ? `Your CGPA is below ${benchmark.name}'s minimum cutoff. Calculate upcoming semester SGPA targets.`
+          : `Your academic record is unassessed or CGPA is missing. Update your profile to evaluate eligibility.`,
       actionLabel: "Fix via SGPA Calculator",
       actionUrl: "/app/academics",
       impact: "High / Blocker",
@@ -1045,24 +1093,24 @@ export function evaluateApplicationReadiness({
   // -------------------------------------------------------------
   const coveredStrengths = [];
 
-  if (cgpaPass) {
+  if (cgpaPass && userCgpaNum !== null) {
     coveredStrengths.push({
       title: `Academic Cutoff Satisfied`,
       detail: `Your ${userCgpaNum.toFixed(2)} CGPA clears ${benchmark.name}'s ${benchmark.minCgpa} cutoff with zero standing backlogs.`,
     });
   }
 
-  if (tenthPass && twelfthPass) {
+  if (tenthPass && twelfthPass && user10th !== null && user12th !== null) {
     coveredStrengths.push({
       title: `Secondary Schooling Benchmarks Cleared`,
       detail: `10th (${user10th}%) and 12th (${user12th}%) fulfill eligibility thresholds.`,
     });
   }
 
-  if (degreePass) {
+  if (degreePass && branchPass) {
     coveredStrengths.push({
       title: `Accredited Engineering Discipline`,
-      detail: `${userDegree} is in full compliance with recruiter educational standards.`,
+      detail: `${userDegree} (${userBranch}) is in full compliance with recruiter educational standards.`,
     });
   }
 

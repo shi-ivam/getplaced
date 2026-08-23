@@ -171,12 +171,16 @@ export async function getUserMilestones(userId, user = null) {
     Progress.findOne({ userId }),
   ]);
 
+  if (!user && userId) {
+    user = await User.findById(userId);
+  }
+
   const readiness = user ? await calculatePlacementReadiness(user) : null;
-  const overallScore = readiness?.overallScore ?? 74;
-  const problemsSolved = progress?.totalProblemsSolved ?? 85;
-  const streak = progress?.dailyStreak ?? 5;
-  const cgpa = user?.cgpa ?? 8.8;
-  const resumeScore = readiness?.dimensions?.resume?.score ?? 82;
+  const overallScore = readiness?.overallScore ?? 0;
+  const problemsSolved = progress?.totalProblemsSolved ?? 0;
+  const streak = progress?.dailyStreak ?? 0;
+  const cgpa = user?.cgpa ?? 0;
+  const resumeScore = readiness?.dimensions?.resume?.score ?? 0;
 
   const unlocked = [];
   const inProgress = [];
@@ -190,25 +194,29 @@ export async function getUserMilestones(userId, user = null) {
 
     if (m.category === "tier") {
       isComplete = overallScore >= m.requiredScore;
-      progressPct = Math.min(100, Math.round((overallScore / m.requiredScore) * 100));
+      progressPct = m.requiredScore > 0 ? Math.min(100, Math.round((overallScore / m.requiredScore) * 100)) : 0;
     } else if (m.id.startsWith("dsa")) {
       const target = m.requiredMetric.value;
       isComplete = problemsSolved >= target;
-      progressPct = Math.min(100, Math.round((problemsSolved / target) * 100));
+      progressPct = target > 0 ? Math.min(100, Math.round((problemsSolved / target) * 100)) : 0;
     } else if (m.id.startsWith("resume")) {
       const target = m.requiredMetric.value;
       isComplete = resumeScore >= target;
-      progressPct = Math.min(100, Math.round((resumeScore / target) * 100));
+      progressPct = target > 0 ? Math.min(100, Math.round((resumeScore / target) * 100)) : 0;
     } else if (m.id === "academic-scholar") {
       isComplete = cgpa >= 8.5;
       progressPct = Math.min(100, Math.round((cgpa / 8.5) * 100));
     } else if (m.category === "streak") {
       const target = m.requiredMetric.value;
       isComplete = streak >= target;
-      progressPct = Math.min(100, Math.round((streak / target) * 100));
+      progressPct = target > 0 ? Math.min(100, Math.round((streak / target) * 100)) : 0;
+    } else if (m.id === "squad-champion" || m.category === "social") {
+      const isSquadMember = Boolean(user?.squadId || progress?.squadMember);
+      isComplete = isSquadMember;
+      progressPct = isSquadMember ? 100 : 0;
     } else {
-      isComplete = true;
-      progressPct = 100;
+      isComplete = false;
+      progressPct = 0;
     }
 
     const isClaimed = claimedIds.includes(m.id);
@@ -218,7 +226,7 @@ export async function getUserMilestones(userId, user = null) {
       isUnlocked: isComplete,
       isClaimed,
       progressPct,
-      unlockedAt: isComplete ? new Date(Date.now() - 3 * 86400000) : null,
+      unlockedAt: isComplete ? new Date() : null,
     };
 
     if (isComplete) {
@@ -237,7 +245,7 @@ export async function getUserMilestones(userId, user = null) {
   else if (overallScore >= 40) currentTier = "Silver";
 
   return {
-    totalXp: Math.max(totalXp, 750),
+    totalXp: milestoneDoc?.totalXp ?? totalXp ?? 0,
     currentTier,
     unlockedCount: unlocked.length,
     claimedCount: unlocked.filter((u) => u.isClaimed).length,
@@ -252,14 +260,27 @@ export async function getUserMilestones(userId, user = null) {
  * Claim an unlocked milestone reward
  */
 export async function claimMilestoneReward(userId, milestoneId) {
-  let milestoneDoc = await Milestone.findOne({ userId });
+  let [milestoneDoc, user] = await Promise.all([
+    Milestone.findOne({ userId }),
+    User.findById(userId),
+  ]);
+
   if (!milestoneDoc) {
-    milestoneDoc = await Milestone.create({ userId, claimedMilestoneIds: [], totalXp: 750 });
+    milestoneDoc = await Milestone.create({ userId, claimedMilestoneIds: [], totalXp: 0 });
   }
 
   const milestone = MASTER_MILESTONES.find((m) => m.id === milestoneId);
   if (!milestone) {
     throw new Error("Milestone not found");
+  }
+
+  const userMilestonesData = await getUserMilestones(userId, user);
+  const targetMilestone =
+    userMilestonesData.unlockedMilestones.find((m) => m.id === milestoneId) ||
+    userMilestonesData.inProgressMilestones.find((m) => m.id === milestoneId);
+
+  if (!targetMilestone || targetMilestone.isUnlocked !== true) {
+    throw new Error("Milestone requirements not yet achieved");
   }
 
   if (milestoneDoc.claimedMilestoneIds.includes(milestoneId)) {
@@ -268,12 +289,12 @@ export async function claimMilestoneReward(userId, milestoneId) {
       alreadyClaimed: true,
       milestoneId,
       xpGained: 0,
-      totalXp: milestoneDoc.totalXp,
+      totalXp: milestoneDoc.totalXp || 0,
     };
   }
 
   milestoneDoc.claimedMilestoneIds.push(milestoneId);
-  milestoneDoc.totalXp = (milestoneDoc.totalXp || 750) + milestone.xp;
+  milestoneDoc.totalXp = (milestoneDoc.totalXp || 0) + milestone.xp;
   await milestoneDoc.save();
 
   return {

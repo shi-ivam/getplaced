@@ -927,20 +927,56 @@ export function getRoleBySlug(slug) {
 }
 
 /**
+ * Tokenizes compound skill names (e.g., "C / C++", "Python / Bash", "Pandas & NumPy")
+ */
+function getSkillTokens(skillName) {
+  if (!skillName || typeof skillName !== "string") return [];
+  const normalized = skillName.toLowerCase().trim();
+  const splitRegex = new RegExp("[/,]|(?:\\s+&\\s+)");
+  const tokens = normalized
+    .split(splitRegex)
+    .map((t) => t.trim())
+    .filter(Boolean);
+
+  if (!tokens.includes(normalized)) {
+    tokens.push(normalized);
+  }
+  return tokens;
+}
+
+/**
+ * Checks if a token matches within a text body with single-char boundary safety
+ */
+function matchTextToken(text, token) {
+  if (!text || !token) return false;
+  if (token.length === 1) {
+    const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`\\b${escaped}\\b`, "i");
+    return regex.test(text);
+  }
+  return text.includes(token);
+}
+
+/**
  * Normalizes user skill list across various potential formats
  */
-function extractCandidateSkills(userProfile, readinessData) {
+function extractCandidateSkills(userProfile) {
   const skillSet = new Set();
+
+  const addSkill = (s) => {
+    if (typeof s === "string" && s.trim()) {
+      const lower = s.trim().toLowerCase();
+      skillSet.add(lower);
+      const tokens = getSkillTokens(lower);
+      tokens.forEach((t) => skillSet.add(t));
+    } else if (s && typeof s.name === "string" && s.name.trim()) {
+      addSkill(s.name);
+    }
+  };
 
   // From userProfile.skills array
   if (Array.isArray(userProfile?.skills)) {
-    userProfile.skills.forEach((s) => {
-      if (typeof s === "string" && s.trim()) {
-        skillSet.add(s.trim().toLowerCase());
-      } else if (s && typeof s.name === "string" && s.name.trim()) {
-        skillSet.add(s.name.trim().toLowerCase());
-      }
-    });
+    userProfile.skills.forEach(addSkill);
   }
 
   // From userProfile.resumeAnalysis
@@ -949,11 +985,7 @@ function extractCandidateSkills(userProfile, readinessData) {
     userProfile?.resumeAnalysis?.skills ||
     [];
   if (Array.isArray(resumeSkills)) {
-    resumeSkills.forEach((s) => {
-      if (typeof s === "string" && s.trim()) {
-        skillSet.add(s.trim().toLowerCase());
-      }
-    });
+    resumeSkills.forEach(addSkill);
   }
 
   return Array.from(skillSet);
@@ -970,7 +1002,10 @@ export function evaluateRoleFit({
   leetcodeProfile = null,
   marketplaceJobs = [],
 }) {
-  const candidateSkills = extractCandidateSkills(userProfile, readinessData);
+  const parseNumeric = (val) =>
+    val !== null && val !== undefined && val !== "" && !isNaN(Number(val)) ? Number(val) : null;
+
+  const candidateSkills = extractCandidateSkills(userProfile);
 
   // GitHub signals
   const hasGitHub = Boolean(githubProfile && (githubProfile.username || githubProfile.connected));
@@ -1007,7 +1042,7 @@ export function evaluateRoleFit({
   const coursework = (academicProfile?.coursework || []).map((c) =>
     (typeof c === "string" ? c : c.name || "").toLowerCase()
   );
-  const currentCgpa = Number(academicProfile?.currentCgpa ?? userProfile?.cgpa ?? 8.0);
+  const currentCgpa = parseNumeric(academicProfile?.currentCgpa ?? userProfile?.cgpa);
 
   // Data sufficiency check (avoids fabricating high match scores when candidate profile is completely empty)
   let sufficiencyPoints = 0;
@@ -1015,7 +1050,7 @@ export function evaluateRoleFit({
   if (hasGitHub && (originalReposCount > 0 || githubLanguages.length > 0)) sufficiencyPoints += 25;
   if (hasLeetCode && leetcodeSolved > 0) sufficiencyPoints += 20;
   if (userProfile?.resumeScore || userProfile?.resumeText) sufficiencyPoints += 15;
-  if (degree || branch || currentCgpa > 0) sufficiencyPoints += 10;
+  if (degree || branch || (currentCgpa !== null && currentCgpa > 0)) sufficiencyPoints += 10;
 
   const hasLowData = sufficiencyPoints < 35;
 
@@ -1032,16 +1067,19 @@ export function evaluateRoleFit({
 
     role.coreRequiredSkills.forEach((skillItem) => {
       totalCorePoints += skillItem.weight;
-      const sLower = skillItem.name.toLowerCase();
+      const tokens = getSkillTokens(skillItem.name);
 
       // Check candidateSkills direct or partial match
-      const matchedDirect = candidateSkills.some(
-        (cs) => cs === sLower || cs.includes(sLower) || sLower.includes(cs)
+      const matchedDirect = candidateSkills.some((cs) =>
+        tokens.some((token) => cs === token || cs.includes(token) || token.includes(cs))
       );
       // Check GitHub languages match
-      const matchedLang = githubLanguages.some((gl) => gl.name.includes(sLower) || sLower.includes(gl.name));
+      const matchedLang = githubLanguages.some((gl) =>
+        tokens.some((token) => gl.name.includes(token) || token.includes(gl.name))
+      );
       // Check resume keywords match
-      const matchedResume = resumeText.length > 0 && resumeText.includes(sLower);
+      const matchedResume =
+        resumeText.length > 0 && tokens.some((token) => matchTextToken(resumeText, token));
 
       if (matchedDirect || matchedLang || matchedResume) {
         matchedCorePoints += skillItem.weight;
@@ -1064,10 +1102,12 @@ export function evaluateRoleFit({
     // Preferred skills bonus (up to 15 bonus pts)
     let preferredMatchedCount = 0;
     role.preferredSkills.forEach((pref) => {
-      const pLower = pref.name.toLowerCase();
+      const prefTokens = getSkillTokens(pref.name);
       const isMatched =
-        candidateSkills.some((cs) => cs.includes(pLower) || pLower.includes(cs)) ||
-        resumeText.includes(pLower);
+        candidateSkills.some((cs) =>
+          prefTokens.some((token) => cs.includes(token) || token.includes(cs))
+        ) ||
+        (resumeText.length > 0 && prefTokens.some((token) => matchTextToken(resumeText, token)));
       if (isMatched) {
         preferredMatchedCount += 1;
         strongMatchingEvidence.push(`${pref.name} (Bonus Technology)`);
@@ -1146,7 +1186,8 @@ export function evaluateRoleFit({
     let resumeMatchedKeywordsCount = 0;
 
     role.coreRequiredSkills.forEach((s) => {
-      if (resumeText.includes(s.name.toLowerCase())) {
+      const tokens = getSkillTokens(s.name);
+      if (resumeText.length > 0 && tokens.some((token) => matchTextToken(resumeText, token))) {
         resumeMatchedKeywordsCount += 1;
       }
     });

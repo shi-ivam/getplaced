@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import {
   GraduationCap,
   Building2,
@@ -31,11 +29,22 @@ import GpBadge from "@/components/gp/GpBadge";
 import TargetCutoffCalculator from "@/components/academics/TargetCutoffCalculator";
 import CompanyEligibilityFilter from "@/components/academics/CompanyEligibilityFilter";
 
+const DEFAULT_SEMESTERS = [
+  { semesterNumber: 1, sgpa: null, credits: 20, isCompleted: false },
+  { semesterNumber: 2, sgpa: null, credits: 20, isCompleted: false },
+  { semesterNumber: 3, sgpa: null, credits: 20, isCompleted: false },
+  { semesterNumber: 4, sgpa: null, credits: 20, isCompleted: false },
+  { semesterNumber: 5, sgpa: null, credits: 20, isCompleted: false },
+  { semesterNumber: 6, sgpa: null, credits: 20, isCompleted: false },
+  { semesterNumber: 7, sgpa: null, credits: 20, isCompleted: false },
+  { semesterNumber: 8, sgpa: null, credits: 20, isCompleted: false },
+];
+
 export default function Academics() {
   const containerRef = useRef(null);
   const [academicData, setAcademicData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [semesters, setSemesters] = useState([]);
+  const [_loading, setLoading] = useState(true);
+  const [semesters, setSemesters] = useState(DEFAULT_SEMESTERS);
   const [tenthPct, setTenthPct] = useState(null);
   const [twelfthPct, setTwelfthPct] = useState(null);
   const [activeBacklogs, setActiveBacklogs] = useState(0);
@@ -51,11 +60,17 @@ export default function Academics() {
         });
         if (res.data?.academic) {
           setAcademicData(res.data.academic);
-          setSemesters(res.data.academic.semesters || []);
+          const sems =
+            res.data.academic.semesters && res.data.academic.semesters.length > 0
+              ? res.data.academic.semesters
+              : DEFAULT_SEMESTERS;
+          setSemesters(sems);
           setTenthPct(res.data.academic.tenthPercentage ?? null);
           setTwelfthPct(res.data.academic.twelfthPercentage ?? null);
           setActiveBacklogs(res.data.academic.activeBacklogs || 0);
           setBranch(res.data.academic.branch || "");
+        } else {
+          setSemesters(DEFAULT_SEMESTERS);
         }
       } catch (err) {
         console.warn("Could not load academic profile from backend:", err.message);
@@ -68,23 +83,50 @@ export default function Academics() {
   }, []);
 
   const handleSgpaChange = (idx, value) => {
-    const next = [...semesters];
-    next[idx].sgpa = value === "" ? null : parseFloat(value);
-    next[idx].isCompleted = next[idx].sgpa !== null;
+    const baseList = semesters.length > 0 ? semesters : DEFAULT_SEMESTERS;
+    const next = baseList.map((s, i) => {
+      if (i === idx) {
+        const parsed = value === "" ? null : parseFloat(value);
+        return {
+          ...s,
+          semesterNumber: s.semesterNumber || i + 1,
+          sgpa: parsed !== null && !isNaN(parsed) ? parsed : null,
+          credits: Number(s.credits) || 20,
+          isCompleted: parsed !== null && !isNaN(parsed),
+        };
+      }
+      return { ...s, semesterNumber: s.semesterNumber || i + 1, credits: Number(s.credits) || 20 };
+    });
     setSemesters(next);
   };
 
   const handleSaveAcademicChanges = async () => {
     try {
-      const completedSems = semesters.filter((s) => s.isCompleted && s.sgpa !== null);
-      const totalSgpa = completedSems.reduce((acc, s) => acc + s.sgpa, 0);
-      const computedCgpa =
-        completedSems.length > 0 ? Number((totalSgpa / completedSems.length).toFixed(2)) : null;
+      const currentList = semesters.length > 0 ? semesters : DEFAULT_SEMESTERS;
+      const completedSems = currentList.filter(
+        (s) => s.isCompleted && s.sgpa !== null && !isNaN(s.sgpa)
+      );
+
+      let computedCgpa = null;
+      if (completedSems.length > 0) {
+        const totalGradedCredits = completedSems.reduce(
+          (acc, s) => acc + (Number(s.credits) || 20),
+          0
+        );
+        const totalWeightedPoints = completedSems.reduce(
+          (acc, s) => acc + Number(s.sgpa) * (Number(s.credits) || 20),
+          0
+        );
+        computedCgpa =
+          totalGradedCredits > 0
+            ? Number((totalWeightedPoints / totalGradedCredits).toFixed(2))
+            : null;
+      }
 
       const res = await axios.put(
         `${NODE_API_URL}/api/academics/profile`,
         {
-          semesters,
+          semesters: currentList,
           currentCgpa: computedCgpa,
           tenthPercentage: tenthPct,
           twelfthPercentage: twelfthPct,
@@ -96,6 +138,11 @@ export default function Academics() {
 
       if (res.data?.academic) {
         setAcademicData(res.data.academic);
+        setSemesters(
+          res.data.academic.semesters && res.data.academic.semesters.length > 0
+            ? res.data.academic.semesters
+            : currentList
+        );
         setIsEditingSemesters(false);
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3500);
@@ -105,9 +152,9 @@ export default function Academics() {
     }
   };
 
-  const currentCgpa = academicData?.currentCgpa ?? 8.84;
+  const currentCgpa = academicData?.currentCgpa ?? (semesters.some((s) => s.sgpa !== null) ? null : 8.84);
   const targetCgpa = academicData?.targetCgpa ?? 9.0;
-  const completedCount = semesters.filter((s) => s.isCompleted && s.sgpa !== null).length;
+  const completedCount = semesters.filter((s) => s.isCompleted && s.sgpa !== null && !isNaN(s.sgpa)).length;
 
   return (
     <div ref={containerRef} className="space-y-6 pb-20">
@@ -227,19 +274,7 @@ export default function Academics() {
 
         {/* Visual Bar Chart */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 pt-2">
-          {(semesters.length > 0
-            ? semesters
-            : [
-                { semesterNumber: 1, sgpa: 8.7, isCompleted: true },
-                { semesterNumber: 2, sgpa: 8.9, isCompleted: true },
-                { semesterNumber: 3, sgpa: 8.6, isCompleted: true },
-                { semesterNumber: 4, sgpa: 9.1, isCompleted: true },
-                { semesterNumber: 5, sgpa: 8.8, isCompleted: true },
-                { semesterNumber: 6, sgpa: 8.9, isCompleted: true },
-                { semesterNumber: 7, sgpa: null, isCompleted: false },
-                { semesterNumber: 8, sgpa: null, isCompleted: false },
-              ]
-          ).map((sem, idx) => {
+          {(semesters.length > 0 ? semesters : DEFAULT_SEMESTERS).map((sem, idx) => {
             const val = sem.sgpa;
             const pct = val ? (val / 10) * 100 : 0;
             const isDone = sem.isCompleted && val !== null;
@@ -304,6 +339,7 @@ export default function Academics() {
 
       {/* 35+ Company Eligibility Matrix */}
       <CompanyEligibilityFilter
+        academicData={academicData}
         currentCgpa={currentCgpa}
         tenthPercentage={tenthPct}
         twelfthPercentage={twelfthPct}

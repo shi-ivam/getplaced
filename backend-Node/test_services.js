@@ -343,6 +343,18 @@ async function runAllTests() {
     const impossibleCalc = calculateTargetCgpaRequirement(6.0, 7, 8, 9.5);
     assert.equal(impossibleCalc.achievable, false);
     assert.equal(impossibleCalc.difficultyLevel, "Impossible");
+
+    // Boundary clamping: completed >= total (8/8) with target satisfied
+    const completedAchieved = calculateTargetCgpaRequirement(8.5, 8, 8, 8.0);
+    assert.equal(completedAchieved.remainingSemesters, 0);
+    assert.equal(completedAchieved.achievable, true);
+    assert.equal(completedAchieved.difficultyLevel, "Already Achieved");
+
+    // Boundary clamping: completed >= total (8/8) with target not satisfied
+    const completedNotAchieved = calculateTargetCgpaRequirement(7.5, 8, 8, 8.5);
+    assert.equal(completedNotAchieved.remainingSemesters, 0);
+    assert.equal(completedNotAchieved.achievable, false);
+    assert.equal(completedNotAchieved.difficultyLevel, "No Remaining Semesters");
   });
 
   await test("evaluateAllCompaniesEligibility correctly filters 35+ companies", () => {
