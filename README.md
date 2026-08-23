@@ -1,8 +1,8 @@
-# 🚀 GetPlaced
+# GetPlaced
 
 ### AI-Powered Placement & Career Readiness Platform
 
-🌐 **Live Demo:** [https://getplaced.siqht.in](https://getplaced.siqht.in)
+**Live Demo:** [https://getplaced.siqht.in](https://getplaced.siqht.in)
 
 GetPlaced is an AI-powered placement and career development platform that helps students understand **how ready they are for a specific company and role**, identify their biggest skill gaps, and receive a personalized action plan to improve their chances of getting hired.
 
@@ -10,19 +10,19 @@ Instead of simply tracking activities such as LeetCode problems solved, GitHub r
 
 ---
 
-# 🎯 The Problem
+# The Problem
 
 Placement preparation is fragmented across multiple platforms.
 
 Students use:
 
-- **LeetCode** → DSA practice
-- **GitHub** → Projects and coding activity
-- **YouTube** → Learning resources
-- **Resume tools** → ATS optimization
-- **Interview platforms** → Technical and HR preparation
-- **Job portals** → Job discovery
-- **LinkedIn** → Professional profile
+- **LeetCode** -> DSA practice
+- **GitHub** -> Projects and coding activity
+- **YouTube** -> Learning resources
+- **Resume tools** -> ATS optimization
+- **Interview platforms** -> Technical and HR preparation
+- **Job portals** -> Job discovery
+- **LinkedIn** -> Professional profile
 
 But these platforms operate independently.
 
@@ -42,7 +42,7 @@ GetPlaced brings these signals together and answers three important questions:
 
 ---
 
-# 💡 Our Solution
+# Our Solution
 
 GetPlaced creates a personalized placement profile using information from:
 
@@ -80,9 +80,9 @@ The goal is not simply to tell students what they have done.
 
 ---
 
-# ⭐ Key Features
+# Key Features
 
-### 🤖 AI-Powered Onboarding
+### AI-Powered Onboarding
 Instead of filling out a long form, users interact with an AI onboarding assistant.
 
 The assistant collects:
@@ -96,7 +96,7 @@ The collected information is used to build the student's career profile.
 
 ---
 
-### 📊 Placement Readiness Score
+### Placement Readiness Score
 GetPlaced generates a role-specific placement readiness score.
 
 ```text
@@ -118,7 +118,7 @@ This gives students a measurable understanding of where they currently stand.
 
 ---
 
-### 🔎 Skill Gap Analysis
+### Skill Gap Analysis
 GetPlaced identifies the difference between the user's current skill level and the level required for their target role.
 
 ```text
@@ -139,7 +139,7 @@ The system avoids blindly trusting a single source.
 
 ---
 
-### 💻 Coding & DSA
+### Coding & DSA
 The Coding workspace helps students improve their DSA preparation with:
 - Topic-wise analysis & DSA analytics
 - LeetCode practice & problem recommendations
@@ -157,7 +157,7 @@ Easy: 8  |  Medium: 17  |  Hard: 7
 
 ---
 
-### 🚀 Development & Project Analysis
+### Development & Project Analysis
 GetPlaced evaluates technical project profiles across multiple dimensions:
 - Technology stack
 - Complexity & Architecture
@@ -178,11 +178,11 @@ Impact            6 / 10
 Overall          82 / 100
 ```
 
-Identifies technology gaps based on the target role (e.g., Spring Boot: Your Level `4/10` vs Required `7/10` → Gap `3`).
+Identifies technology gaps based on the target role (e.g., Spring Boot: Your Level `4/10` vs Required `7/10` -> Gap `3`).
 
 ---
 
-### 📄 AI Resume Builder
+### AI Resume Builder
 Create and refine resumes using information already available in the profile:
 - Education, Skills, and Projects
 - GitHub stats, LeetCode achievements, and Experience
@@ -190,7 +190,7 @@ Create and refine resumes using information already available in the profile:
 
 ---
 
-### 🎯 ATS Resume Analysis & Improvement
+### ATS Resume Analysis & Improvement
 Analyzes resumes against selected roles with granular ATS scoring:
 
 ```text
@@ -199,16 +199,16 @@ Keywords: 88% | Structure: 92% | Skills: 85% | Projects: 78% | Formatting: 90%
 ```
 
 Identifies actionable fixes:
-- ❌ Add missing React keywords
-- ❌ Add measurable project impact (Google XYZ formula)
-- ❌ Improve project descriptions with action verbs
-- ❌ Add deployment links
+- Add missing React keywords
+- Add measurable project impact (Google XYZ formula)
+- Improve project descriptions with action verbs
+- Add deployment links
 
 Users can review suggested diffs and apply fixes with 1-click.
 
 ---
 
-### 📈 Resume Version Tracking
+### Resume Version Tracking
 Tracks resume score improvements over time:
 
 ```text
@@ -221,7 +221,7 @@ Current   ──> 89 (+31 points since first resume)
 
 ---
 
-### 🎤 Interview Preparation & Practice
+### Interview Preparation & Practice
 
 - **Technical Preparation:** DSA, OOP, DBMS, Operating Systems, Computer Networks, System Design, Project Walkthroughs.
 - **HR Preparation:** Behavioral scenarios, leadership, conflict resolution, failure analysis, career vision, and salary expectations.
@@ -233,7 +233,7 @@ Question ──> User Answer ──> AI Evaluation ──> Score & Weak Points �
 
 ---
 
-### 🏢 Company Interview Intelligence
+### Company Interview Intelligence
 Understand company-specific interview structures, values, culture, products, and tech stacks.
 
 ```text
@@ -241,26 +241,26 @@ LIKELY PROCESS (e.g., Microsoft):
 Online Assessment ──> Technical Round 1 ──> Technical Round 2 ──> HR
 
 Preparation Priorities:
-★★★★★ DSA
-★★★★★ Projects
-★★★★☆ OOP
-★★★★☆ DBMS
-★★★☆☆ OS
-★★★☆☆ HR
+DSA (High Priority)
+Projects (High Priority)
+OOP (Medium-High Priority)
+DBMS (Medium-High Priority)
+OS (Medium Priority)
+HR (Medium Priority)
 ```
 
 ---
 
-### 🎯 Career Intelligence
-- **🎯 Can I Apply?** — Checks eligibility and readiness for target job openings.
-- **🧭 Which Role Fits Me?** — Matches current skills and projects to best-fitting roles.
-- **⚡ Fastest Path** — Pinpoints the top 3-4 high-ROI tasks to achieve maximum readiness jump.
-- **🧪 What If?** — Simulates how improving a specific skill changes projected readiness.
-- **🧠 Don't Work On This Yet** — Flags low-priority distractions to keep focus on high-impact gaps.
+### Career Intelligence
+- **Can I Apply?** — Checks eligibility and readiness for target job openings.
+- **Which Role Fits Me?** — Matches current skills and projects to best-fitting roles.
+- **Fastest Path** — Pinpoints the top 3-4 high-ROI tasks to achieve maximum readiness jump.
+- **What If?** — Simulates how improving a specific skill changes projected readiness.
+- **Don't Work On This Yet** — Flags low-priority distractions to keep focus on high-impact gaps.
 
 ---
 
-### 🗺️ Personalized Placement Roadmap
+### Personalized Placement Roadmap
 Generates a customized timeline based on your goals (e.g., *"Crack Microsoft SDE in 4 months"*):
 
 ```text
@@ -277,31 +277,31 @@ YOUR NEXT 7 DAYS:
 
 ---
 
-### 📈 Progress Tracking & Milestones
+### Progress Tracking & Milestones
 - Historical tracking across DSA, Projects, Resume, Communication, and HR.
 - **Readiness Milestones:**
-  - `0–40%` 🔴 Not Ready
-  - `40–60%` 🟠 Developing
-  - `60–75%` 🟡 Getting Ready
-  - `75–90%` 🟢 Interview Ready
-  - `90–100%` ⭐ Highly Ready
+  - `0–40%` Not Ready
+  - `40–60%` Developing
+  - `60–75%` Getting Ready
+  - `75–90%` Interview Ready
+  - `90–100%` Highly Ready
 
 ---
 
-### 🏆 Placement Arena
+### Placement Arena
 Social preparation experience for peer groups:
 - Leaderboards & Readiness rankings
 - Progress comparisons & Activity streaks
-- Encouragement, emojis, and friendly competition
+- Encouragement and friendly competition
 
 ---
 
-### 🎓 Academic & Eligibility Analysis
+### Academic & Eligibility Analysis
 Tracks college metrics: 10th %, 12th %, CGPA, backlogs, graduation year, and degree eligibility thresholds against target companies.
 
 ---
 
-# 🏗️ Product Architecture
+# Product Architecture
 
 ```text
                          GETPLACED
@@ -354,7 +354,7 @@ Tracks college metrics: 10th %, 12th %, CGPA, backlogs, graduation year, and deg
 
 ---
 
-# 🛠️ Technology Stack
+# Technology Stack
 
 | Layer | Technologies |
 |---|---|
@@ -373,7 +373,7 @@ Tracks college metrics: 10th %, 12th %, CGPA, backlogs, graduation year, and deg
 
 ---
 
-# 🔄 Technology → Feature Mapping
+# Technology -> Feature Mapping
 
 | Feature | Technology / Service |
 |---|---|
@@ -399,7 +399,7 @@ Tracks college metrics: 10th %, 12th %, CGPA, backlogs, graduation year, and deg
 
 ---
 
-# 🧩 Backend Architecture
+# Backend Architecture
 
 GetPlaced uses separate backend responsibilities:
 
@@ -418,7 +418,7 @@ Responsible for AI, document processing, and intelligence features:
 
 ---
 
-# ⚙️ Environment Variables
+# Environment Variables
 
 Copy `.env.example` to create your `.env` files:
 ```bash
@@ -436,11 +436,11 @@ cp .env.example .env
 | `VITE_NODE_API_URL` | Node.js backend URL (default: `http://localhost:3000`) |
 | `VITE_PY_API_URL` | Python AI backend URL (default: `http://localhost:8000`) |
 
-> 🔒 **Security Note**: Never commit `.env` files, API keys, database credentials, or secrets to the repository.
+> **Security Note**: Never commit `.env` files, API keys, database credentials, or secrets to the repository.
 
 ---
 
-# 🚀 Quick Start
+# Quick Start
 
 ### Option A: Docker Compose (Recommended)
 
@@ -489,7 +489,7 @@ uvicorn main:app --port 8000 --reload
 
 ---
 
-# 📌 Core User Journey
+# Core User Journey
 
 ```text
                  YOUR GOAL
@@ -515,7 +515,7 @@ uvicorn main:app --port 8000 --reload
 
 ---
 
-# 🧠 The Core Differentiator
+# The Core Differentiator
 
 Most platforms tell students:
 > *"What have you done?"*
@@ -539,6 +539,6 @@ $$\text{Activity} \longrightarrow \text{Evidence} \longrightarrow \text{Readines
 
 ---
 
-# 👥 Team
+# Team
 
-Built with ❤️ for the hackathon.
+Built with love for the hackathon.
