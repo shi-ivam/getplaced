@@ -1,0 +1,88 @@
+name: Deploy getPlaced to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Execute Deployment on EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER || 'ubuntu' }}
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'DEPLOY_SCRIPT'
+            set -e
+            echo "========================================="
+            echo " Starting CI/CD Deployment on EC2 Server"
+            echo "========================================="
+
+            APP_DIR="/home/ubuntu/getplaced"
+            cd "$APP_DIR"
+
+            # 1. Fetch latest changes from Git
+            echo "[1/6] Fetching latest commits from origin/main..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            # 2. Update Node.js Backend dependencies
+            echo "[2/6] Updating Node.js dependencies..."
+            cd "$APP_DIR/backend-Node"
+            npm install --legacy-peer-deps
+
+            # 3. Update Python AI Backend dependencies
+            echo "[3/6] Updating Python virtual environment..."
+            cd "$APP_DIR/backend-Py"
+            if [ ! -d ".venv" ]; then
+              python3 -m venv .venv
+            fi
+            source .venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            deactivate
+
+            # 4. Build Optimized React Frontend
+            echo "[4/6] Building React Frontend with Vite..."
+            cd "$APP_DIR/frontend"
+            npm install --legacy-peer-deps
+            VITE_NODE_API_URL="" VITE_PY_API_URL="" NODE_OPTIONS="--max-old-space-size=1536" npm run build
+
+            # 5. Copy built assets to Nginx web root
+            echo "[5/6] Deploying web assets to /var/www/getplaced/dist..."
+            sudo mkdir -p /var/www/getplaced/dist
+            sudo cp -r "$APP_DIR/frontend/dist/"* /var/www/getplaced/dist/
+            sudo chown -R www-data:www-data /var/www/getplaced
+
+            # 6. Restart & reload services
+            echo "[6/6] Reloading systemd services and Nginx..."
+            sudo systemctl restart getplaced-node
+            sudo systemctl restart getplaced-py
+            sudo systemctl reload nginx
+
+            echo "========================================="
+            echo " Deployment Finished Successfully! "
+            echo "========================================="
+          DEPLOY_SCRIPT
+
+      - name: Secure Cleanup
+        if: always()
+        run: rm -f ~/.ssh/id_rsa

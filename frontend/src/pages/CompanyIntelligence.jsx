@@ -311,7 +311,7 @@ export default function CompanyIntelligence() {
                     variant="secondary"
                     size="sm"
                     icon={false}
-                    onClick={() => navigate("/app/hr-prep")}
+                    onClick={() => navigate(`/app/hr-prep?company=${encodeURIComponent(companyIntel.name || searchQuery)}`)}
                   >
                     <span className="flex items-center gap-1.5 font-bold">
                       <Award className="w-4 h-4" /> HR Prep
@@ -574,7 +574,7 @@ export default function CompanyIntelligence() {
                       variant="stacked-yellow"
                       fullWidth
                       icon={false}
-                      onClick={() => navigate("/app/hr-prep")}
+                      onClick={() => navigate(`/app/hr-prep?company=${encodeURIComponent(companyIntel.name || searchQuery)}`)}
                     >
                       <span className="font-bold text-[#0D0431]">
                         Practice Behavioral Questions

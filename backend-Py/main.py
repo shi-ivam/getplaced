@@ -332,6 +332,7 @@ class GenerateQuestionsRequest(BaseModel):
     interview_type: Optional[str] = "Mixed"  # HR, Behavioral, Technical, Mixed, System Design
     difficulty: Optional[str] = "Medium"
     count: Optional[int] = 5
+    category: Optional[str] = None
     resume_text: Optional[str] = None
 
 class EvaluateAnswerRequest(BaseModel):
@@ -358,6 +359,7 @@ def generate_questions_api(req: GenerateQuestionsRequest):
             interview_type=req.interview_type,
             difficulty=req.difficulty,
             count=req.count or 5,
+            category=req.category,
             resume_text=req.resume_text
         )
         return {"questions": questions}

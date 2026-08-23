@@ -145,10 +145,11 @@ Respond strictly in valid JSON format:
         raw = query_gemini(prompt, json_mode=True)
         ai_evaluation = extract_json(raw)
         if not ai_evaluation or not isinstance(ai_evaluation, dict):
-            raise RuntimeError("Invalid response from communication evaluation model.")
+            logger.warning("Invalid AI communication evaluation JSON, using fallback.")
+            ai_evaluation = get_fallback_star_evaluation(clean_text, word_count)
     except Exception as e:
-        logger.error(f"Gemini communication evaluation failed: {e}")
-        raise RuntimeError(f"Communication evaluation service failed: {e}")
+        logger.warning(f"Gemini communication evaluation failed ({e}). Using deterministic rule-based analysis.")
+        ai_evaluation = get_fallback_star_evaluation(clean_text, word_count)
 
     clarity_score = int(ai_evaluation.get("clarity_score", 75))
     confidence_score = int(ai_evaluation.get("confidence_score", 70))

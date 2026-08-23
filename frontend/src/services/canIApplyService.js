@@ -904,7 +904,7 @@ export function evaluateApplicationReadiness({
       currentScore: behavioralScore,
       isPassed: behavioralScore >= benchmark.targetBehavioralScore,
       gap: Math.max(0, benchmark.targetBehavioralScore - behavioralScore),
-      fixLink: "/app/hr-prep",
+      fixLink: `/app/hr-prep?company=${benchmark.slug}`,
       fixLabel: "Open HR & Culture Studio",
       detail:
         behavioralScore >= benchmark.targetBehavioralScore
@@ -1041,7 +1041,7 @@ export function evaluateApplicationReadiness({
       title: `Behavioral Alignment: ${benchmark.behavioralPillars[0]}`,
       description: `Prepare STAR responses demonstrating ${benchmark.behavioralPillars.slice(0, 2).join(" and ")}.`,
       actionLabel: "Calibrate HR Prep",
-      actionUrl: "/app/hr-prep",
+      actionUrl: `/app/hr-prep?company=${benchmark.slug}`,
       impact: "Medium",
       color: "amber",
     });

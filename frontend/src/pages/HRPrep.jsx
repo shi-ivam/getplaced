@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -15,6 +15,7 @@ import {
   Mic,
   Square,
   ChevronRight,
+  ChevronDown,
   BookOpen,
   Zap,
   RotateCcw,
@@ -24,13 +25,35 @@ import {
   X,
   Award,
   Lightbulb,
+  Search,
+  Bookmark,
+  BookmarkCheck,
+  Plus,
+  Trash2,
+  Edit3,
+  Clock,
+  ArrowRight,
+  FileText,
+  Volume2,
+  MessageSquare,
+  ShieldCheck,
+  TrendingUp,
 } from "lucide-react";
 import { PY_API_URL } from "@/config/api";
-import { getInterviewMentorCopy } from "@/utils/dynamicCopy";
 import GpBadge from "@/components/gp/GpBadge";
 import GpCard from "@/components/gp/GpCard";
 import GpButton from "@/components/gp/GpButton";
 import GpModal from "@/components/gp/GpModal";
+import { COMPANY_FRAMEWORKS } from "@/data/leadershipFrameworks";
+import {
+  getSavedStories,
+  saveStory,
+  deleteStory,
+  getSavedBookmarks,
+  toggleBookmark,
+  getPracticeHistory,
+  recordPracticeResult,
+} from "@/services/behavioralStoryService";
 
 const COMPANY_FILTERS = [
   "All Companies",
@@ -39,48 +62,138 @@ const COMPANY_FILTERS = [
   "Meta (Move Fast & Impact)",
   "Microsoft (Growth Mindset)",
   "Netflix (Freedom & Responsibility)",
-  "Uber (Customer Obsession)",
+  "Apple (Craftsmanship & Detail)",
+  "Uber (Trip Obsession & Grit)",
+  "Stripe (Users First & Rigor)",
+  "Atlassian (Open Company & Teamwork)",
 ];
 
 const CATEGORY_FILTERS = [
   "All Categories",
-  "Conflict Resolution & Teamwork",
   "Technical Execution & Problem Solving",
+  "Conflict Resolution & Teamwork",
   "Accountability & Growth Mindset",
-  "Culture Fit & Motivation",
   "Navigating Ambiguity & Bias for Action",
+  "Customer Obsession & Product Impact",
+  "Culture Fit & Motivation",
+  "Leadership & Mentorship",
 ];
 
+const DIFFICULTY_FILTERS = ["All Levels", "Easy", "Medium", "Hard"];
+
 export default function HRPrep() {
-  const [selectedCompany, setSelectedCompany] = useState("All Companies");
-  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Active Main Tab: "practice" | "frameworks" | "story-matrix" | "masterclass"
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get("tab") || "practice"
+  );
+
+  // Filters
+  const [selectedCompany, setSelectedCompany] = useState(() => {
+    const paramComp = searchParams.get("company");
+    if (paramComp) {
+      const match = COMPANY_FILTERS.find((c) =>
+        c.toLowerCase().includes(paramComp.toLowerCase())
+      );
+      if (match) return match;
+    }
+    return "All Companies";
+  });
+
+  const [selectedCategory, setSelectedCategory] = useState(
+    searchParams.get("category") || "All Categories"
+  );
+  const [selectedDifficulty, setSelectedDifficulty] = useState("All Levels");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
+  const [showPracticedOnly, setShowPracticedOnly] = useState(false);
+
+  // Questions Data
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [bookmarkedIds, setBookmarkedIds] = useState([]);
+  const [practiceHistory, setPracticeHistory] = useState({});
 
   // Active Practice Modal
   const [activeQuestion, setActiveQuestion] = useState(null);
+  const [practiceMode, setPracticeMode] = useState("guided"); // "guided" | "freeform"
+  const [guidedStar, setGuidedStar] = useState({
+    situation: "",
+    task: "",
+    action: "",
+    result: "",
+  });
   const [practiceAnswer, setPracticeAnswer] = useState("");
   const [evaluating, setEvaluating] = useState(false);
   const [evaluationResult, setEvaluationResult] = useState(null);
   const [showModelAnswer, setShowModelAnswer] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [recordDuration, setRecordDuration] = useState(0);
   const [copiedId, setCopiedId] = useState(null);
+
+  // Follow-up practice state
+  const [followUpAnswer, setFollowUpAnswer] = useState("");
+  const [followUpSubmitted, setFollowUpSubmitted] = useState(false);
+
+  // Frameworks Directory State
+  const [selectedFrameworkCompany, setSelectedFrameworkCompany] =
+    useState("amazon");
+  const [expandedPrinciples, setExpandedPrinciples] = useState({});
+
+  // Story Matrix State
+  const [savedStories, setSavedStories] = useState([]);
+  const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
+  const [editingStory, setEditingStory] = useState(null);
+  const [storyForm, setStoryForm] = useState({
+    title: "",
+    project: "",
+    techStack: "",
+    competencies: [],
+    situation: "",
+    task: "",
+    action: "",
+    result: "",
+  });
 
   const containerRef = useRef(null);
   const recognitionRef = useRef(null);
+  const timerRef = useRef(null);
+
+  // Sync initial query params
+  useEffect(() => {
+    const compParam = searchParams.get("company");
+    if (compParam) {
+      const match = COMPANY_FILTERS.find((c) =>
+        c.toLowerCase().includes(compParam.toLowerCase())
+      );
+      if (match) setSelectedCompany(match);
+      const frameworkKey = compParam.toLowerCase().split(" ")[0];
+      if (COMPANY_FRAMEWORKS[frameworkKey]) {
+        setSelectedFrameworkCompany(frameworkKey);
+      }
+    }
+  }, [searchParams]);
+
+  // Load persistent user data (Bookmarks, History, Stories)
+  useEffect(() => {
+    setBookmarkedIds(getSavedBookmarks());
+    setPracticeHistory(getPracticeHistory());
+    setSavedStories(getSavedStories());
+  }, []);
 
   // GSAP animation
   useGSAP(
     () => {
       gsap.from(".gsap-bento-card", {
         opacity: 0,
-        y: 18,
-        duration: 0.45,
-        stagger: 0.06,
+        y: 16,
+        duration: 0.4,
+        stagger: 0.05,
         ease: "power2.out",
       });
     },
-    { dependencies: [questions, activeQuestion], scope: containerRef }
+    { dependencies: [questions, activeTab, selectedFrameworkCompany], scope: containerRef }
   );
 
   // Initialize Web Speech Recognition
@@ -94,39 +207,55 @@ export default function HRPrep() {
       rec.lang = "en-US";
 
       rec.onresult = (event) => {
-        let transcript = "";
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript;
+        let fullTranscript = "";
+        for (let i = 0; i < event.results.length; ++i) {
+          fullTranscript += event.results[i][0].transcript + " ";
         }
-        if (transcript.trim()) {
-          setPracticeAnswer(transcript);
+        if (fullTranscript.trim()) {
+          setPracticeAnswer(fullTranscript.trim());
         }
       };
 
-      rec.onerror = () => setIsRecording(false);
+      rec.onerror = (e) => {
+        console.warn("Speech recognition error:", e);
+        setIsRecording(false);
+        if (timerRef.current) clearInterval(timerRef.current);
+      };
+
+      rec.onend = () => {
+        setIsRecording(false);
+        if (timerRef.current) clearInterval(timerRef.current);
+      };
+
       recognitionRef.current = rec;
     }
   }, []);
 
   // Fetch Questions
   useEffect(() => {
-    fetchQuestions();
-  }, [selectedCompany, selectedCategory]);
+    if (activeTab === "practice") {
+      fetchQuestions();
+    }
+  }, [selectedCompany, selectedCategory, selectedDifficulty, activeTab]);
 
   const fetchQuestions = async () => {
     setLoading(true);
     try {
-      const companyQuery =
+      const companyClean =
         selectedCompany === "All Companies"
           ? "Top Tech"
           : selectedCompany.split(" ")[0];
-      const res = await axios.post(`${PY_API_URL}/api/interview/generate-questions`, {
-        company: companyQuery,
-        role: "Software Engineer",
-        interview_type: "HR",
-        difficulty: "Medium",
-        count: 6,
-      });
+      const res = await axios.post(
+        `${PY_API_URL}/api/interview/generate-questions`,
+        {
+          company: companyClean,
+          role: "Software Engineer",
+          interview_type: "HR",
+          category: selectedCategory === "All Categories" ? null : selectedCategory,
+          difficulty: selectedDifficulty === "All Levels" ? null : selectedDifficulty,
+          count: 8,
+        }
+      );
       setQuestions(res.data.questions || []);
     } catch (e) {
       console.error("Failed to load HR questions:", e);
@@ -137,55 +266,203 @@ export default function HRPrep() {
 
   const handleToggleVoice = () => {
     if (!recognitionRef.current) {
-      alert("Speech recognition not supported in this browser. Please type your response.");
+      alert("Speech recognition is not supported in this browser. Please type your response.");
       return;
     }
 
     if (isRecording) {
       recognitionRef.current.stop();
       setIsRecording(false);
+      if (timerRef.current) clearInterval(timerRef.current);
     } else {
       try {
+        setRecordDuration(0);
         recognitionRef.current.start();
         setIsRecording(true);
+        timerRef.current = setInterval(() => {
+          setRecordDuration((prev) => prev + 1);
+        }, 1000);
       } catch (err) {
         console.warn("Speech recognition start failed:", err);
       }
     }
   };
 
+  // Compile Guided STAR into Practice Answer
+  const handleCompileGuidedStar = () => {
+    const parts = [];
+    if (guidedStar.situation.trim())
+      parts.push(`Situation: ${guidedStar.situation.trim()}`);
+    if (guidedStar.task.trim())
+      parts.push(`Task: ${guidedStar.task.trim()}`);
+    if (guidedStar.action.trim())
+      parts.push(`Action: ${guidedStar.action.trim()}`);
+    if (guidedStar.result.trim())
+      parts.push(`Result: ${guidedStar.result.trim()}`);
+
+    const compiled = parts.join("\n\n");
+    setPracticeAnswer(compiled);
+    setPracticeMode("freeform");
+  };
+
+  const handleImportStoryToGuided = (story) => {
+    setGuidedStar({
+      situation: story.situation || "",
+      task: story.task || "",
+      action: story.action || "",
+      result: story.result || "",
+    });
+  };
+
   const handleEvaluatePractice = async () => {
-    if (!practiceAnswer.trim()) {
-      alert("Please enter or record an answer to evaluate.");
+    const answerToEvaluate =
+      practiceMode === "guided"
+        ? [
+            guidedStar.situation && `Situation: ${guidedStar.situation}`,
+            guidedStar.task && `Task: ${guidedStar.task}`,
+            guidedStar.action && `Action: ${guidedStar.action}`,
+            guidedStar.result && `Result: ${guidedStar.result}`,
+          ]
+            .filter(Boolean)
+            .join("\n\n")
+        : practiceAnswer;
+
+    if (!answerToEvaluate.trim() || answerToEvaluate.length < 15) {
+      alert("Please provide a more detailed STAR response to receive AI evaluation.");
       return;
     }
 
     if (isRecording && recognitionRef.current) {
       recognitionRef.current.stop();
       setIsRecording(false);
+      if (timerRef.current) clearInterval(timerRef.current);
     }
 
     setEvaluating(true);
+    setFollowUpSubmitted(false);
+    setFollowUpAnswer("");
+
     try {
-      const res = await axios.post(`${PY_API_URL}/api/interview/evaluate-answer`, {
-        question: activeQuestion.question,
-        answer: practiceAnswer,
-        company: selectedCompany,
-        interview_type: "behavioral",
-      });
+      const res = await axios.post(
+        `${PY_API_URL}/api/interview/evaluate-answer`,
+        {
+          question: activeQuestion.question,
+          answer: answerToEvaluate,
+          company: selectedCompany.split(" ")[0],
+          role: "Software Engineer",
+          interview_type: "behavioral",
+          audio_duration_seconds: recordDuration > 0 ? recordDuration : null,
+        }
+      );
       setEvaluationResult(res.data);
+
+      // Record practice history
+      if (activeQuestion.id) {
+        const updatedHistory = recordPracticeResult(
+          activeQuestion.id,
+          res.data.score,
+          res.data
+        );
+        setPracticeHistory(updatedHistory);
+      }
     } catch (e) {
       console.error("Evaluation error:", e);
+      alert("Evaluation encountered an issue. Using instant fallback analysis.");
     } finally {
       setEvaluating(false);
     }
   };
 
-  const handleCopyModel = (text, id) => {
+  const handleToggleBookmarkItem = (qId) => {
+    const updated = toggleBookmark(qId);
+    setBookmarkedIds(updated);
+  };
+
+  const handleCopyText = (text, id) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
+
+  // Story Matrix Operations
+  const handleOpenNewStoryModal = (storyToEdit = null) => {
+    if (storyToEdit) {
+      setEditingStory(storyToEdit);
+      setStoryForm({
+        title: storyToEdit.title || "",
+        project: storyToEdit.project || "",
+        techStack: storyToEdit.techStack || "",
+        competencies: storyToEdit.competencies || [],
+        situation: storyToEdit.situation || "",
+        task: storyToEdit.task || "",
+        action: storyToEdit.action || "",
+        result: storyToEdit.result || "",
+      });
+    } else {
+      setEditingStory(null);
+      setStoryForm({
+        title: "",
+        project: "",
+        techStack: "",
+        competencies: ["Technical Execution"],
+        situation: "",
+        task: "",
+        action: "",
+        result: "",
+      });
+    }
+    setIsStoryModalOpen(true);
+  };
+
+  const handleSaveStoryForm = () => {
+    if (!storyForm.title.trim() || !storyForm.action.trim()) {
+      alert("Please provide a title and Action description.");
+      return;
+    }
+    const storyData = {
+      ...(editingStory ? { id: editingStory.id } : {}),
+      ...storyForm,
+    };
+    const updated = saveStory(storyData);
+    setSavedStories(updated);
+    setIsStoryModalOpen(false);
+  };
+
+  const handleDeleteStory = (id) => {
+    if (window.confirm("Are you sure you want to delete this master STAR story?")) {
+      const updated = deleteStory(id);
+      setSavedStories(updated);
+    }
+  };
+
+  const togglePrincipleExpand = (principleId) => {
+    setExpandedPrinciples((prev) => ({
+      ...prev,
+      [principleId]: !prev[principleId],
+    }));
+  };
+
+  // Filter questions for display
+  const filteredQuestions = questions.filter((q) => {
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const matchQ = (q.question || "").toLowerCase().includes(query);
+      const matchCat = (q.category || "").toLowerCase().includes(query);
+      const matchPrinciple = (q.principle || "").toLowerCase().includes(query);
+      const matchWhy = (q.why_asked || "").toLowerCase().includes(query);
+      if (!matchQ && !matchCat && !matchPrinciple && !matchWhy) return false;
+    }
+    if (showBookmarkedOnly && !bookmarkedIds.includes(q.id)) {
+      return false;
+    }
+    if (showPracticedOnly && !practiceHistory[q.id]) {
+      return false;
+    }
+    return true;
+  });
+
+  const selectedFrameworkData =
+    COMPANY_FRAMEWORKS[selectedFrameworkCompany] || COMPANY_FRAMEWORKS.amazon;
 
   return (
     <main
@@ -196,24 +473,24 @@ export default function HRPrep() {
         {/* Header Hero Section */}
         <div className="text-center space-y-4">
           <GpBadge theme="light-purple" dot={true}>
-            Behavioral Strategy & Leadership Principles
+            Behavioral Strategy & Leadership Principles Hub
           </GpBadge>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black text-[#0D0431] tracking-tight max-w-5xl mx-auto leading-tight">
             Behavioral & Leadership Preparation
           </h1>
           <p className="text-sm md:text-base text-[#0D0431]/80 max-w-3xl mx-auto leading-relaxed font-sans font-medium">
-            Structured STAR response practice calibrated against company-specific leadership frameworks and cultural competencies.
+            Structured STAR response coaching calibrated against company-specific leadership frameworks (Amazon 16 LPs, Google Googliness, Meta Values) with speech analytics and story mapping.
           </p>
         </div>
 
-        {/* Retro Interview Navigation Tabs */}
+        {/* Global Navigation Between Interview Hubs */}
         <nav className="flex items-center justify-center gap-3 overflow-x-auto pb-2 font-sans text-xs">
           <Link
             to="/app/interview"
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold whitespace-nowrap bg-white text-[#0D0431] hover:bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] transition-all"
           >
             <BrainCog className="w-4 h-4 text-[#896EE2]" />
-            <span>Mock Interview</span>
+            <span>Mock Interview Simulator</span>
           </Link>
           <Link
             to="/app/hr-prep"
@@ -231,281 +508,1189 @@ export default function HRPrep() {
           </Link>
         </nav>
 
-        {/* STAR Formula Blueprint Banner & Filter Bar */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 grid-flow-dense">
-          {/* STAR Framework Blueprint Bento Card */}
-          <div className="col-span-12 bg-white border-2 border-[#0D0431] rounded-3xl p-6 md:p-8 shadow-[6px_6px_0_0_#0D0431] space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-[#0D0431] pb-4">
-              <div className="flex items-center gap-2.5">
-                <span className="w-3 h-3 rounded-full bg-[#896EE2] border border-[#0D0431]" />
-                <h3 className="font-heading font-black text-sm uppercase text-[#0D0431] tracking-wider">
-                  STAR Response Framework Blueprint
-                </h3>
-              </div>
-              <span className="text-xs text-[#0D0431] font-mono font-bold bg-[#FEF9CF] px-3 py-1 rounded-full border border-[#0D0431]">
-                Target allocation for behavioral answers
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Situation Card */}
-              <div className="p-4 bg-[#FEF9CF] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-heading font-black text-xs text-[#0D0431]">Situation</span>
-                  <span className="font-mono text-[11px] font-bold text-[#0D0431] bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
-                    20% Weight
-                  </span>
-                </div>
-                <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
-                  Context, system constraints, business stakes, and project scope.
-                </p>
-              </div>
-
-              {/* Task Card */}
-              <div className="p-4 bg-[#D4FDF7] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-heading font-black text-xs text-[#0D0431]">Task</span>
-                  <span className="font-mono text-[11px] font-bold text-[#0D0431] bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
-                    10% Weight
-                  </span>
-                </div>
-                <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
-                  Your specific individual responsibility and primary objective.
-                </p>
-              </div>
-
-              {/* Action Card */}
-              <div className="p-4 bg-[#FEDF6A] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-heading font-black text-xs text-[#0D0431]">Action</span>
-                  <span className="font-mono text-[11px] font-bold text-[#0D0431] bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
-                    50% Weight
-                  </span>
-                </div>
-                <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
-                  Technical decisions, trade-offs, architecture, and proactive execution steps.
-                </p>
-              </div>
-
-              {/* Result Card */}
-              <div className="p-4 bg-[#E4CDFB] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-heading font-black text-xs text-[#0D0431]">Result</span>
-                  <span className="font-mono text-[11px] font-bold text-[#0D0431] bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
-                    20% Weight
-                  </span>
-                </div>
-                <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
-                  Quantifiable metrics, business outcomes, latency savings, and lessons.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Filter & Control Bar */}
-          <div className="col-span-12 flex flex-wrap items-center justify-between gap-4 bg-white border-2 border-[#0D0431] p-4 rounded-2xl shadow-[4px_4px_0_0_#0D0431]">
-            <div className="flex flex-wrap items-center gap-3">
-              <select
-                value={selectedCompany}
-                onChange={(e) => setSelectedCompany(e.target.value)}
-                className="px-4 py-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold shadow-[2px_2px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:outline-none transition-all cursor-pointer"
-              >
-                {COMPANY_FILTERS.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold shadow-[2px_2px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:outline-none transition-all cursor-pointer"
-              >
-                {CATEGORY_FILTERS.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
+        {/* 4-Tab Cockpit Switcher */}
+        <div className="flex items-center justify-center gap-2 overflow-x-auto pb-1">
+          <div className="bg-white p-1.5 rounded-2xl border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] inline-flex items-center gap-1.5 flex-wrap justify-center">
+            <button
+              type="button"
+              onClick={() => setActiveTab("practice")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-heading font-black uppercase tracking-wider transition-all cursor-pointer ${
+                activeTab === "practice"
+                  ? "bg-[#FEDF6A] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
+                  : "text-[#0D0431]/70 hover:bg-[#FEF9CF] hover:text-[#0D0431] border border-transparent"
+              }`}
+            >
+              <BrainCog className="w-4 h-4" />
+              <span>Practice Arena</span>
+            </button>
 
             <button
               type="button"
-              onClick={fetchQuestions}
-              disabled={loading}
-              className="flex items-center gap-1.5 text-xs text-[#0D0431] font-bold bg-[#FEDF6A] hover:bg-[#FFE995] px-4 py-2.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
+              onClick={() => setActiveTab("frameworks")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-heading font-black uppercase tracking-wider transition-all cursor-pointer ${
+                activeTab === "frameworks"
+                  ? "bg-[#D4FDF7] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
+                  : "text-[#0D0431]/70 hover:bg-[#FEF9CF] hover:text-[#0D0431] border border-transparent"
+              }`}
             >
-              <RotateCcw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-              Refresh Prompts
+              <Building className="w-4 h-4" />
+              <span>Company Frameworks</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("story-matrix")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-heading font-black uppercase tracking-wider transition-all cursor-pointer ${
+                activeTab === "story-matrix"
+                  ? "bg-[#E4CDFB] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
+                  : "text-[#0D0431]/70 hover:bg-[#FEF9CF] hover:text-[#0D0431] border border-transparent"
+              }`}
+            >
+              <Layers className="w-4 h-4" />
+              <span>STAR Story Vault ({savedStories.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("masterclass")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-heading font-black uppercase tracking-wider transition-all cursor-pointer ${
+                activeTab === "masterclass"
+                  ? "bg-[#FFC5B7] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
+                  : "text-[#0D0431]/70 hover:bg-[#FEF9CF] hover:text-[#0D0431] border border-transparent"
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>STAR Masterclass</span>
             </button>
           </div>
         </div>
 
-        {/* Questions Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 grid-flow-dense">
-          {questions.map((q, idx) => (
-            <div
-              key={q.id || idx}
-              className="gsap-bento-card bg-white border-2 border-[#0D0431] hover:border-[#0D0431] rounded-3xl p-6 md:p-7 shadow-[4px_4px_0_0_#0D0431] hover:shadow-[6px_6px_0_0_#0D0431] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-4"
-            >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <GpBadge theme="light-purple" size="sm">
-                    {q.category || "Behavioral Track"}
-                  </GpBadge>
-                  <GpBadge theme="yellow" size="sm">
-                    Level: {q.difficulty || "Medium"}
-                  </GpBadge>
+        {/* ========================================================================= */}
+        {/* TAB 1: PRACTICE ARENA                                                    */}
+        {/* ========================================================================= */}
+        {activeTab === "practice" && (
+          <div className="space-y-6">
+            {/* STAR Formula Blueprint Banner */}
+            <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 md:p-8 shadow-[6px_6px_0_0_#0D0431] space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-[#0D0431] pb-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-3 h-3 rounded-full bg-[#896EE2] border border-[#0D0431]" />
+                  <h3 className="font-heading font-black text-sm uppercase text-[#0D0431] tracking-wider">
+                    STAR Response Framework Blueprint
+                  </h3>
                 </div>
-
-                <h3 className="text-base sm:text-lg font-heading font-bold text-[#0D0431] leading-snug">
-                  "{q.question}"
-                </h3>
-
-                {q.why_asked && (
-                  <div className="text-xs text-[#0D0431] bg-[#FEF9CF] border-2 border-[#0D0431] rounded-xl p-3.5 space-y-1 shadow-[2px_2px_0_0_#0D0431]">
-                    <span className="font-heading font-bold text-[#0D0431] block uppercase tracking-wider text-[10px]">
-                      Evaluator Intent:
-                    </span>
-                    <p className="text-[#0D0431]/80 leading-relaxed font-sans font-medium">{q.why_asked}</p>
-                  </div>
-                )}
-
-                {q.star_tips && (
-                  <div className="p-3.5 bg-[#D4FDF7] border-2 border-[#0D0431] rounded-xl text-xs space-y-1 shadow-[2px_2px_0_0_#0D0431]">
-                    <span className="font-heading font-bold text-[#0D0431] flex items-center gap-1.5">
-                      <HelpCircle className="w-3.5 h-3.5 text-[#0D0431]" />
-                      STAR Strategy:
-                    </span>
-                    <p className="text-[#0D0431]/80 font-mono text-[11px] leading-relaxed">
-                      {q.star_tips}
-                    </p>
-                  </div>
-                )}
+                <span className="text-xs text-[#0D0431] font-mono font-bold bg-[#FEF9CF] px-3 py-1 rounded-full border border-[#0D0431]">
+                  Target allocation for FAANG behavioral rounds
+                </span>
               </div>
 
-              {/* Action Buttons */}
-              <div className="pt-4 border-t-2 border-[#0D0431] flex items-center justify-between gap-3 flex-wrap">
-                {q.sample_answer ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Situation */}
+                <div className="p-4 bg-[#FEF9CF] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-heading font-black text-xs text-[#0D0431]">1. Situation</span>
+                    <span className="font-mono text-[11px] font-bold text-[#0D0431] bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
+                      20% Weight
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
+                    System scale, business stakes, architectural constraints, and initial problem bottleneck.
+                  </p>
+                </div>
+
+                {/* Task */}
+                <div className="p-4 bg-[#D4FDF7] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-heading font-black text-xs text-[#0D0431]">2. Task</span>
+                    <span className="font-mono text-[11px] font-bold text-[#0D0431] bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
+                      10% Weight
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
+                    Your specific personal mandate, primary engineering objective, and success criteria.
+                  </p>
+                </div>
+
+                {/* Action */}
+                <div className="p-4 bg-[#FEDF6A] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-heading font-black text-xs text-[#0D0431]">3. Action</span>
+                    <span className="font-mono text-[11px] font-bold text-[#0D0431] bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
+                      50% Weight
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
+                    Technical decisions, trade-offs evaluated, tools, PRs, and individual execution steps (Use "I").
+                  </p>
+                </div>
+
+                {/* Result */}
+                <div className="p-4 bg-[#E4CDFB] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-heading font-black text-xs text-[#0D0431]">4. Result</span>
+                    <span className="font-mono text-[11px] font-bold text-[#0D0431] bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
+                      20% Weight
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
+                    Quantified metrics (latency, % improvement, revenue), uptime, and institutional learnings.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Filter & Control Bar */}
+            <div className="bg-white border-2 border-[#0D0431] p-4 md:p-5 rounded-2xl shadow-[4px_4px_0_0_#0D0431] space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* Search input */}
+                <div className="relative">
+                  <Search className="w-4 h-4 text-[#0D0431]/50 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search questions or principles..."
+                    className="w-full pl-9 pr-4 py-2.5 bg-white text-[#0D0431] placeholder-[#0D0431]/40 border-2 border-[#0D0431] rounded-xl text-xs font-bold shadow-[2px_2px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:outline-none transition-all"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#0D0431]/60 hover:text-[#0D0431] text-xs cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Company Filter */}
+                <select
+                  value={selectedCompany}
+                  onChange={(e) => setSelectedCompany(e.target.value)}
+                  className="px-3.5 py-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold shadow-[2px_2px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:outline-none transition-all cursor-pointer"
+                >
+                  {COMPANY_FILTERS.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Category Filter */}
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="px-3.5 py-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold shadow-[2px_2px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:outline-none transition-all cursor-pointer"
+                >
+                  {CATEGORY_FILTERS.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Difficulty Filter */}
+                <select
+                  value={selectedDifficulty}
+                  onChange={(e) => setSelectedDifficulty(e.target.value)}
+                  className="px-3.5 py-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold shadow-[2px_2px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:outline-none transition-all cursor-pointer"
+                >
+                  {DIFFICULTY_FILTERS.map((diff) => (
+                    <option key={diff} value={diff}>
+                      Level: {diff}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Secondary filter toggles and Refresh button */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#0D0431]/10">
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
                     type="button"
-                    onClick={() => handleCopyModel(q.sample_answer, q.id || idx)}
-                    className="flex items-center gap-1.5 text-xs text-[#0D0431] bg-white hover:bg-[#FEF9CF] px-3.5 py-2 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all font-mono font-bold cursor-pointer"
+                    onClick={() => setShowBookmarkedOnly(!showBookmarkedOnly)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer ${
+                      showBookmarkedOnly
+                        ? "bg-[#FEDF6A] text-[#0D0431]"
+                        : "bg-white text-[#0D0431]/70 hover:bg-[#FEF9CF]"
+                    }`}
                   >
-                    {copiedId === (q.id || idx) ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-[#0D0431]" />
-                        <span className="text-[#0D0431]">Copied</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5 text-[#896EE2]" />
-                        <span>Copy Model</span>
-                      </>
-                    )}
+                    <Bookmark className="w-3.5 h-3.5 text-[#0D0431]" />
+                    <span>Saved Bookmarks ({bookmarkedIds.length})</span>
                   </button>
-                ) : (
-                  <div />
-                )}
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPracticedOnly(!showPracticedOnly)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer ${
+                      showPracticedOnly
+                        ? "bg-[#D4FDF7] text-[#0D0431]"
+                        : "bg-white text-[#0D0431]/70 hover:bg-[#FEF9CF]"
+                    }`}
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0D0431]" />
+                    <span>Practiced ({Object.keys(practiceHistory).length})</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={fetchQuestions}
+                  disabled={loading}
+                  className="flex items-center gap-1.5 text-xs text-[#0D0431] font-bold bg-[#FEDF6A] hover:bg-[#FFE995] px-4 py-2 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
+                >
+                  <RotateCcw
+                    className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
+                  />
+                  <span>Refresh Prompts</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Questions Bento Grid */}
+            {filteredQuestions.length === 0 ? (
+              <div className="p-12 text-center bg-white border-2 border-[#0D0431] rounded-3xl shadow-[4px_4px_0_0_#0D0431] space-y-3">
+                <HelpCircle className="w-10 h-10 text-[#896EE2] mx-auto" />
+                <h4 className="font-heading font-bold text-base text-[#0D0431]">
+                  No questions match your active filters
+                </h4>
+                <p className="text-xs text-[#0D0431]/70 max-w-md mx-auto">
+                  Try adjusting your search query, clearing category filters, or clicking Refresh Prompts.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("All Categories");
+                    setSelectedDifficulty("All Levels");
+                    setShowBookmarkedOnly(false);
+                    setShowPracticedOnly(false);
+                  }}
+                  className="text-xs font-bold font-mono text-[#896EE2] underline hover:text-[#0D0431]"
+                >
+                  Reset All Filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 grid-flow-dense">
+                {filteredQuestions.map((q, idx) => {
+                  const isBookmarked = bookmarkedIds.includes(q.id || idx);
+                  const historyItem = practiceHistory[q.id || idx];
+
+                  return (
+                    <div
+                      key={q.id || idx}
+                      className="gsap-bento-card bg-white border-2 border-[#0D0431] hover:border-[#0D0431] rounded-3xl p-6 md:p-7 shadow-[4px_4px_0_0_#0D0431] hover:shadow-[6px_6px_0_0_#0D0431] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-4"
+                    >
+                      <div className="space-y-4">
+                        {/* Top Badges & Actions */}
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <GpBadge theme="light-purple" size="sm">
+                              {q.category || "Behavioral"}
+                            </GpBadge>
+                            {q.principle && (
+                              <GpBadge theme="yellow" size="sm">
+                                {q.principle}
+                              </GpBadge>
+                            )}
+                            <GpBadge theme="mint" size="sm">
+                              {q.difficulty || "Medium"}
+                            </GpBadge>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {historyItem && (
+                              <span
+                                className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-[#0D0431] ${
+                                  historyItem.score >= 80
+                                    ? "bg-[#D4FDF7] text-[#0D0431]"
+                                    : historyItem.score >= 60
+                                    ? "bg-[#FFE995] text-[#0D0431]"
+                                    : "bg-[#FFC5B7] text-[#0D0431]"
+                                }`}
+                              >
+                                Last Score: {historyItem.score}/100
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleToggleBookmarkItem(q.id || idx)}
+                              className="p-1.5 rounded-lg border-2 border-[#0D0431] bg-white hover:bg-[#FEF9CF] text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
+                              title={isBookmarked ? "Remove Bookmark" : "Save Bookmark"}
+                            >
+                              {isBookmarked ? (
+                                <BookmarkCheck className="w-3.5 h-3.5 text-[#896EE2] fill-current" />
+                              ) : (
+                                <Bookmark className="w-3.5 h-3.5 text-[#0D0431]/60" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Question Text */}
+                        <h3 className="text-base sm:text-lg font-heading font-bold text-[#0D0431] leading-snug">
+                          "{q.question}"
+                        </h3>
+
+                        {/* Evaluator Intent Box */}
+                        {q.why_asked && (
+                          <div className="text-xs text-[#0D0431] bg-[#FEF9CF] border-2 border-[#0D0431] rounded-xl p-3.5 space-y-1 shadow-[2px_2px_0_0_#0D0431]">
+                            <span className="font-heading font-bold text-[#0D0431] flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
+                              <Target className="w-3.5 h-3.5 text-[#896EE2]" />
+                              Evaluator Intent & Green Flags:
+                            </span>
+                            <p className="text-[#0D0431]/80 leading-relaxed font-sans font-medium">
+                              {q.why_asked}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* STAR Strategy Tip Box */}
+                        {q.star_tips && (
+                          <div className="p-3.5 bg-[#D4FDF7] border-2 border-[#0D0431] rounded-xl text-xs space-y-1 shadow-[2px_2px_0_0_#0D0431]">
+                            <span className="font-heading font-bold text-[#0D0431] flex items-center gap-1.5">
+                              <Lightbulb className="w-3.5 h-3.5 text-[#0D0431]" />
+                              STAR Blueprint Advice:
+                            </span>
+                            <p className="text-[#0D0431]/80 font-mono text-[11px] leading-relaxed">
+                              {q.star_tips}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Bar */}
+                      <div className="pt-4 border-t-2 border-[#0D0431] flex items-center justify-between gap-3 flex-wrap">
+                        {q.sample_answer ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleCopyText(q.sample_answer, q.id || idx)
+                            }
+                            className="flex items-center gap-1.5 text-xs text-[#0D0431] bg-white hover:bg-[#FEF9CF] px-3.5 py-2 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all font-mono font-bold cursor-pointer"
+                          >
+                            {copiedId === (q.id || idx) ? (
+                              <>
+                                <Check className="w-3.5 h-3.5 text-[#0D0431]" />
+                                <span>Copied Model</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3.5 h-3.5 text-[#896EE2]" />
+                                <span>Copy Model Answer</span>
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          <div />
+                        )}
+
+                        <GpButton
+                          onClick={() => {
+                            setActiveQuestion(q);
+                            setPracticeAnswer("");
+                            setGuidedStar({
+                              situation: "",
+                              task: "",
+                              action: "",
+                              result: "",
+                            });
+                            setEvaluationResult(null);
+                            setFollowUpAnswer("");
+                            setFollowUpSubmitted(false);
+                          }}
+                          variant="stacked-yellow"
+                          size="sm"
+                        >
+                          Practice Response
+                        </GpButton>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 2: COMPANY LEADERSHIP FRAMEWORKS                                      */}
+        {/* ========================================================================= */}
+        {activeTab === "frameworks" && (
+          <div className="space-y-6">
+            {/* Company Selector Pills */}
+            <div className="bg-white border-2 border-[#0D0431] p-4 rounded-2xl shadow-[4px_4px_0_0_#0D0431] overflow-x-auto flex items-center gap-2">
+              {Object.keys(COMPANY_FRAMEWORKS).map((key) => {
+                const comp = COMPANY_FRAMEWORKS[key];
+                const isSelected = selectedFrameworkCompany === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setSelectedFrameworkCompany(key)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+                      isSelected
+                        ? "bg-[#0D0431] text-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#FEDF6A]"
+                        : "bg-white text-[#0D0431] border-2 border-[#0D0431] hover:bg-[#FEF9CF] shadow-[2px_2px_0_0_#0D0431]"
+                    }`}
+                  >
+                    <span>{comp.name}</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#FEDF6A] text-[#0D0431] font-bold">
+                      {comp.principles.length} Principles
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Selected Company Dossier Banner */}
+            <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 md:p-8 shadow-[6px_6px_0_0_#0D0431] space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-[#0D0431] pb-4">
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1">
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#FEDF6A] border border-[#0D0431]" />
+                    <h2 className="text-2xl font-heading font-black text-[#0D0431]">
+                      {selectedFrameworkData.name} Behavioral Architecture
+                    </h2>
+                  </div>
+                  <p className="text-xs font-mono font-bold text-[#896EE2]">
+                    {selectedFrameworkData.tagline}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <GpButton
+                    onClick={() => {
+                      setSelectedCompany(
+                        COMPANY_FILTERS.find((c) =>
+                          c.toLowerCase().includes(selectedFrameworkData.id)
+                        ) || selectedFrameworkData.name
+                      );
+                      setActiveTab("practice");
+                    }}
+                    variant="stacked-yellow"
+                    size="sm"
+                  >
+                    Practice {selectedFrameworkData.name} Questions
+                  </GpButton>
+                </div>
+              </div>
+
+              <p className="text-sm text-[#0D0431]/90 leading-relaxed font-sans font-medium">
+                {selectedFrameworkData.description}
+              </p>
+
+              {/* Bar Raiser Pro-Tip */}
+              <div className="p-4 bg-[#FEF9CF] border-2 border-[#0D0431] rounded-2xl flex items-start gap-3 shadow-[3px_3px_0_0_#0D0431]">
+                <ShieldCheck className="w-5 h-5 text-[#896EE2] shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-heading font-black text-xs uppercase tracking-wider text-[#0D0431] block mb-0.5">
+                    {selectedFrameworkData.name} Bar Raiser Secret:
+                  </span>
+                  <p className="text-xs text-[#0D0431]/80 leading-relaxed font-medium">
+                    {selectedFrameworkData.barRaiserTip}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Grid of Company Principles */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {selectedFrameworkData.principles.map((pr, index) => {
+                const isExpanded = !!expandedPrinciples[pr.id];
+                return (
+                  <div
+                    key={pr.id}
+                    className="gsap-bento-card bg-white border-2 border-[#0D0431] rounded-3xl p-6 shadow-[4px_4px_0_0_#0D0431] hover:shadow-[6px_6px_0_0_#0D0431] transition-all space-y-4"
+                  >
+                    {/* Principle Header */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <span className="font-mono text-[11px] font-bold text-[#896EE2] uppercase">
+                          Pillar #{index + 1}
+                        </span>
+                        <h3 className="font-heading font-black text-lg text-[#0D0431] leading-snug">
+                          {pr.name}
+                        </h3>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => togglePrincipleExpand(pr.id)}
+                        className="p-1.5 rounded-lg border-2 border-[#0D0431] bg-[#FEF9CF] hover:bg-[#FEDF6A] text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
+                        title={isExpanded ? "Collapse Details" : "Expand Details"}
+                      >
+                        {isExpanded ? (
+                          <X className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-[#0D0431]/80 leading-relaxed font-medium">
+                      {pr.summary}
+                    </p>
+
+                    {/* STAR Strategy Tip */}
+                    <div className="p-3 bg-[#D4FDF7] border-2 border-[#0D0431] rounded-xl text-xs space-y-1 shadow-[2px_2px_0_0_#0D0431]">
+                      <span className="font-heading font-bold text-[#0D0431] flex items-center gap-1.5 text-[11px]">
+                        <Lightbulb className="w-3.5 h-3.5 text-[#0D0431]" />
+                        Master STAR Strategy:
+                      </span>
+                      <p className="text-[#0D0431]/80 font-mono text-[11px] leading-relaxed">
+                        {pr.starTip}
+                      </p>
+                    </div>
+
+                    {/* Expanded Details (Green Flags, Red Flags, Sample Questions) */}
+                    {isExpanded && (
+                      <div className="space-y-4 pt-3 border-t-2 border-[#0D0431] animate-in fade-in duration-200">
+                        {/* Green Flags vs Red Flags */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="p-3.5 bg-[#EEFAEA] border-2 border-[#0D0431] rounded-xl shadow-[2px_2px_0_0_#0D0431] space-y-1.5">
+                            <span className="text-[11px] font-heading font-black text-[#0D7A68] flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              Green Flags (Get Hired)
+                            </span>
+                            <ul className="text-[11px] text-[#0D0431]/90 space-y-1 font-medium">
+                              {pr.greenFlags.map((gf, i) => (
+                                <li key={i} className="flex items-start gap-1.5">
+                                  <span>•</span>
+                                  <span>{gf}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <div className="p-3.5 bg-[#FFE8E5] border-2 border-[#0D0431] rounded-xl shadow-[2px_2px_0_0_#0D0431] space-y-1.5">
+                            <span className="text-[11px] font-heading font-black text-[#C7382B] flex items-center gap-1">
+                              <AlertTriangle className="w-3.5 h-3.5" />
+                              Red Flags (Disqualifiers)
+                            </span>
+                            <ul className="text-[11px] text-[#0D0431]/90 space-y-1 font-medium">
+                              {pr.redFlags.map((rf, i) => (
+                                <li key={i} className="flex items-start gap-1.5">
+                                  <span>•</span>
+                                  <span>{rf}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+
+                        {/* Sample Questions */}
+                        {pr.sampleQuestions && (
+                          <div className="p-3.5 bg-white border-2 border-[#0D0431] rounded-xl shadow-[2px_2px_0_0_#0D0431] space-y-2">
+                            <span className="text-[11px] font-heading font-black text-[#0D0431] uppercase tracking-wider block">
+                              Recruiter Prompts for this Principle:
+                            </span>
+                            <ul className="space-y-1.5">
+                              {pr.sampleQuestions.map((sq, i) => (
+                                <li
+                                  key={i}
+                                  className="text-xs font-sans font-semibold text-[#0D0431] flex items-start gap-2 bg-[#FEF9CF] p-2 rounded-lg border border-[#0D0431]"
+                                >
+                                  <ChevronRight className="w-3.5 h-3.5 text-[#896EE2] shrink-0 mt-0.5" />
+                                  <span>"{sq}"</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Bottom CTA to practice this principle */}
+                    <div className="pt-2 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => togglePrincipleExpand(pr.id)}
+                        className="text-xs font-bold text-[#896EE2] hover:text-[#0D0431] flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>{isExpanded ? "Show Less" : "View Green/Red Flags & Prompts"}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedCompany(
+                            COMPANY_FILTERS.find((c) =>
+                              c.toLowerCase().includes(selectedFrameworkData.id)
+                            ) || selectedFrameworkData.name
+                          );
+                          setSearchQuery(pr.name);
+                          setActiveTab("practice");
+                        }}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431] rounded-lg border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-xs font-bold transition-all cursor-pointer"
+                      >
+                        <span>Practice This</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 3: STAR STORY MATRIX VAULT                                           */}
+        {/* ========================================================================= */}
+        {activeTab === "story-matrix" && (
+          <div className="space-y-6">
+            {/* Story Matrix Banner */}
+            <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 md:p-8 shadow-[6px_6px_0_0_#0D0431] space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#0D0431] pb-4">
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1">
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#E4CDFB] border border-[#0D0431]" />
+                    <h2 className="text-2xl font-heading font-black text-[#0D0431]">
+                      My STAR Story Matrix Vault
+                    </h2>
+                  </div>
+                  <p className="text-xs font-mono font-bold text-[#896EE2]">
+                    FAANG Bar Raiser Strategy: Prepare 4–6 Master Stories to cover all 50+ Behavioral Prompts
+                  </p>
+                </div>
 
                 <GpButton
-                  onClick={() => {
-                    setActiveQuestion(q);
-                    setPracticeAnswer("");
-                    setEvaluationResult(null);
-                  }}
+                  onClick={() => handleOpenNewStoryModal()}
                   variant="stacked-yellow"
                   size="sm"
                 >
-                  Practice Response
+                  <Plus className="w-4 h-4" />
+                  <span>Draft New Master Story</span>
                 </GpButton>
               </div>
-            </div>
-          ))}
-        </div>
 
-        {/* PRACTICE & AI EVALUATION MODAL */}
+              <p className="text-xs md:text-sm text-[#0D0431]/80 leading-relaxed font-sans font-medium">
+                Top interview candidates do not memorize answers to 100 questions. Instead, they polish <strong>4–6 deep engineering stories</strong> covering: (1) Technical Scalability, (2) Production Incident / Mistake, (3) Disagreement / Conflict, (4) Ambiguity / Tight Deadline, and (5) Customer Advocacy.
+              </p>
+            </div>
+
+            {/* Grid of Saved Master Stories */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {savedStories.map((story) => (
+                <div
+                  key={story.id}
+                  className="gsap-bento-card bg-white border-2 border-[#0D0431] rounded-3xl p-6 shadow-[4px_4px_0_0_#0D0431] hover:shadow-[6px_6px_0_0_#0D0431] transition-all flex flex-col justify-between space-y-4"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-[#FEF9CF] px-2.5 py-1 rounded-full border border-[#0D0431]">
+                        {story.project || "Master Project"}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenNewStoryModal(story)}
+                          className="p-1 rounded-lg border border-[#0D0431] bg-white hover:bg-[#FEF9CF] text-[#0D0431] cursor-pointer"
+                          title="Edit Story"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteStory(story.id)}
+                          className="p-1 rounded-lg border border-[#0D0431] bg-white hover:bg-[#FFC5B7] text-[#0D0431] cursor-pointer"
+                          title="Delete Story"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-[#C7382B]" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <h3 className="font-heading font-bold text-base text-[#0D0431] leading-snug">
+                      {story.title}
+                    </h3>
+
+                    {story.techStack && (
+                      <p className="text-[11px] font-mono text-[#896EE2] font-semibold">
+                        Stack: {story.techStack}
+                      </p>
+                    )}
+
+                    {/* Competency tags */}
+                    {story.competencies && story.competencies.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {story.competencies.map((tag, i) => (
+                          <span
+                            key={i}
+                            className="text-[10px] font-mono font-bold bg-[#D4FDF7] text-[#0D0431] px-2 py-0.5 rounded-md border border-[#0D0431]"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Collapsible/Snippet preview of STAR */}
+                    <div className="space-y-2 pt-2 border-t border-[#0D0431]/10 text-xs">
+                      <div className="bg-[#FEF9CF] p-2.5 rounded-xl border border-[#0D0431] space-y-0.5">
+                        <span className="font-heading font-black text-[10px] uppercase text-[#0D0431]">
+                          SITUATION:
+                        </span>
+                        <p className="text-[#0D0431]/80 line-clamp-2">{story.situation}</p>
+                      </div>
+                      <div className="bg-[#FEDF6A]/50 p-2.5 rounded-xl border border-[#0D0431] space-y-0.5">
+                        <span className="font-heading font-black text-[10px] uppercase text-[#0D0431]">
+                          ACTION:
+                        </span>
+                        <p className="text-[#0D0431]/80 line-clamp-2">{story.action}</p>
+                      </div>
+                      <div className="bg-[#E4CDFB]/60 p-2.5 rounded-xl border border-[#0D0431] space-y-0.5">
+                        <span className="font-heading font-black text-[10px] uppercase text-[#0D0431]">
+                          RESULT:
+                        </span>
+                        <p className="text-[#0D0431]/80 line-clamp-2">{story.result}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="pt-3 border-t-2 border-[#0D0431] flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleCopyText(
+                          `Situation: ${story.situation}\nTask: ${story.task}\nAction: ${story.action}\nResult: ${story.result}`,
+                          story.id
+                        )
+                      }
+                      className="text-xs font-mono font-bold text-[#0D0431] bg-white hover:bg-[#FEF9CF] px-3 py-1.5 rounded-lg border border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1 cursor-pointer"
+                    >
+                      {copiedId === story.id ? (
+                        <>
+                          <Check className="w-3 h-3 text-[#0D0431]" />
+                          <span>Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3 text-[#896EE2]" />
+                          <span>Copy STAR</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTab("practice");
+                        // pre-select practice with this story
+                        if (questions.length > 0) {
+                          setActiveQuestion(questions[0]);
+                          setGuidedStar({
+                            situation: story.situation || "",
+                            task: story.task || "",
+                            action: story.action || "",
+                            result: story.result || "",
+                          });
+                          setPracticeMode("guided");
+                        }
+                      }}
+                      className="text-xs font-bold text-[#0D0431] bg-[#FEDF6A] hover:bg-[#FFE995] px-3 py-1.5 rounded-lg border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>Practice Story</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 4: STAR MASTERCLASS & BEHAVIORAL CHEAT SHEET                          */}
+        {/* ========================================================================= */}
+        {activeTab === "masterclass" && (
+          <div className="space-y-6">
+            {/* Masterclass Hero */}
+            <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 md:p-8 shadow-[6px_6px_0_0_#0D0431] space-y-4">
+              <div className="flex items-center gap-2.5">
+                <span className="w-3.5 h-3.5 rounded-full bg-[#FFC5B7] border border-[#0D0431]" />
+                <h2 className="text-2xl font-heading font-black text-[#0D0431]">
+                  FAANG Behavioral Interview Masterclass
+                </h2>
+              </div>
+              <p className="text-sm text-[#0D0431]/80 leading-relaxed font-sans font-medium">
+                The definitive playbook on crafting executive-level STAR responses, eliminating verbal filler crutches, demonstrating radical accountability, and clearing the Bar Raiser threshold.
+              </p>
+            </div>
+
+            {/* 3 Master Rules Bento */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 shadow-[4px_4px_0_0_#0D0431] space-y-3">
+                <div className="flex items-center gap-2 text-[#896EE2]">
+                  <Target className="w-5 h-5" />
+                  <h3 className="font-heading font-black text-sm uppercase text-[#0D0431]">
+                    The "I vs. We" Principle
+                  </h3>
+                </div>
+                <p className="text-xs text-[#0D0431]/80 leading-relaxed font-medium">
+                  Recruiters hate candidates who only say "We built..." because they cannot determine your individual contribution. Use "We" only for team context (Situation); use <strong>"I architected", "I benchmarked", "I refactored"</strong> in Action.
+                </p>
+              </div>
+
+              <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 shadow-[4px_4px_0_0_#0D0431] space-y-3">
+                <div className="flex items-center gap-2 text-[#896EE2]">
+                  <Clock className="w-5 h-5" />
+                  <h3 className="font-heading font-black text-sm uppercase text-[#0D0431]">
+                    The 2-Minute Window
+                  </h3>
+                </div>
+                <p className="text-xs text-[#0D0431]/80 leading-relaxed font-medium">
+                  Optimal behavioral answers last between <strong>90 to 150 seconds</strong> (~180–300 words). Spending 4 minutes will bore the interviewer and leave no time for follow-up questions.
+                </p>
+              </div>
+
+              <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 shadow-[4px_4px_0_0_#0D0431] space-y-3">
+                <div className="flex items-center gap-2 text-[#896EE2]">
+                  <TrendingUp className="w-5 h-5" />
+                  <h3 className="font-heading font-black text-sm uppercase text-[#0D0431]">
+                    The Metrics Law
+                  </h3>
+                </div>
+                <p className="text-xs text-[#0D0431]/80 leading-relaxed font-medium">
+                  Never end an answer with "and the users liked it." Always attach at least one concrete metric: <strong>Latency (ms), Availability (%), Memory (MB), Revenue ($), or Time saved (hours/week)</strong>.
+                </p>
+              </div>
+            </div>
+
+            {/* Power Verbs vs Weak Phrases */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Power Verbs */}
+              <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 shadow-[4px_4px_0_0_#0D0431] space-y-4">
+                <div className="flex items-center gap-2 border-b-2 border-[#0D0431] pb-3">
+                  <Sparkles className="w-4 h-4 text-[#896EE2]" />
+                  <h4 className="font-heading font-black text-sm uppercase text-[#0D0431]">
+                    High-Impact Power Verbs
+                  </h4>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {[
+                    "Spearheaded",
+                    "Architected",
+                    "Orchestrated",
+                    "Streamlined",
+                    "Benchmark",
+                    "Decoupled",
+                    "Automated",
+                    "Optimized",
+                    "Championed",
+                    "Pioneered",
+                    "Triaged",
+                    "Consolidated",
+                  ].map((verb) => (
+                    <span
+                      key={verb}
+                      className="px-2.5 py-1.5 bg-[#D4FDF7] border border-[#0D0431] rounded-xl text-center text-xs font-mono font-bold shadow-[2px_2px_0_0_#0D0431]"
+                    >
+                      {verb}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Weak Hedging Phrases */}
+              <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 shadow-[4px_4px_0_0_#0D0431] space-y-4">
+                <div className="flex items-center gap-2 border-b-2 border-[#0D0431] pb-3">
+                  <AlertTriangle className="w-4 h-4 text-[#C7382B]" />
+                  <h4 className="font-heading font-black text-sm uppercase text-[#0D0431]">
+                    Hedging Phrases to Eliminate
+                  </h4>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { bad: '"I think maybe..."', good: '"In my experience / Based on benchmarks..."' },
+                    { bad: '"We sort of tried to..."', good: '"I executed / I implemented..."' },
+                    { bad: '"It was basically just..."', good: '"[State direct architectural action]"' },
+                    { bad: '"Hopefully it works..."', good: '"With rigorous automated test coverage..."' },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-2.5 bg-[#FFE8E5] border border-[#0D0431] rounded-xl flex items-center justify-between text-xs font-mono font-medium"
+                    >
+                      <span className="text-[#C7382B] line-through">{item.bad}</span>
+                      <span className="text-[#0D0431] font-bold">→ {item.good}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* ACTIVE QUESTION PRACTICE & EVALUATION MODAL                              */}
+        {/* ========================================================================= */}
         {activeQuestion && (
           <GpModal
             isOpen={!!activeQuestion}
-            onClose={() => setActiveQuestion(null)}
+            onClose={() => {
+              setActiveQuestion(null);
+              if (isRecording && recognitionRef.current) {
+                recognitionRef.current.stop();
+                setIsRecording(false);
+              }
+              if (timerRef.current) clearInterval(timerRef.current);
+            }}
             title="Practice Behavioral Response"
-            subtitle={activeQuestion.category}
-            maxWidth="max-w-2xl"
+            subtitle={activeQuestion.category || "Behavioral Screening"}
+            maxWidth="max-w-3xl"
           >
-            <div className="space-y-5">
-              {/* Question Context */}
-              <div className="p-4 bg-[#FEF9CF] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-1">
-                <span className="text-[10px] uppercase font-mono text-[#0D0431] font-bold">
-                  Target Competency: {activeQuestion.category}
-                </span>
-                <h4 className="text-sm md:text-base font-heading font-bold text-[#0D0431] leading-snug">
+            <div className="space-y-6">
+              {/* Question Context Bento */}
+              <div className="p-4 md:p-5 bg-[#FEF9CF] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-2">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="text-[10px] uppercase font-mono text-[#0D0431] font-bold bg-white px-2.5 py-0.5 rounded-full border border-[#0D0431]">
+                    {activeQuestion.principle || "Target Competency"}
+                  </span>
+                  <span className="text-[11px] font-mono font-bold text-[#896EE2]">
+                    Company Bar: {selectedCompany.split(" ")[0]}
+                  </span>
+                </div>
+                <h4 className="text-base md:text-lg font-heading font-black text-[#0D0431] leading-snug">
                   "{activeQuestion.question}"
                 </h4>
               </div>
 
-              {/* Input Area */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs uppercase font-bold tracking-wider font-sans text-[#0D0431]">
-                    Your Response
-                  </label>
+              {/* Mode Switcher: Guided STAR vs Freeform Speech/Text */}
+              <div className="flex items-center justify-between flex-wrap gap-3 border-b-2 border-[#0D0431] pb-3">
+                <div className="flex items-center gap-1.5 bg-[#FEF9CF] p-1 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                   <button
                     type="button"
-                    onClick={handleToggleVoice}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer ${
-                      isRecording
-                        ? "bg-[#F85B52] text-white"
-                        : "bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431]"
+                    onClick={() => setPracticeMode("guided")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-heading font-bold uppercase transition-all cursor-pointer ${
+                      practiceMode === "guided"
+                        ? "bg-[#FEDF6A] text-[#0D0431] shadow-[1px_1px_0_0_#0D0431]"
+                        : "text-[#0D0431]/70 hover:text-[#0D0431]"
                     }`}
                   >
-                    {isRecording ? (
-                      <>
-                        <Square className="w-3 h-3 fill-current" />
-                        Stop Recording
-                      </>
-                    ) : (
-                      <>
-                        <Mic className="w-3 h-3 text-[#0D0431]" />
-                        Record Voice
-                      </>
-                    )}
+                    Guided STAR Builder
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPracticeMode("freeform")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-heading font-bold uppercase transition-all cursor-pointer ${
+                      practiceMode === "freeform"
+                        ? "bg-[#FEDF6A] text-[#0D0431] shadow-[1px_1px_0_0_#0D0431]"
+                        : "text-[#0D0431]/70 hover:text-[#0D0431]"
+                    }`}
+                  >
+                    Freeform & Speech
                   </button>
                 </div>
 
-                <textarea
-                  rows={5}
-                  value={practiceAnswer}
-                  onChange={(e) => setPracticeAnswer(e.target.value)}
-                  placeholder="Type or record your STAR response (Situation, Task, Action, Result)..."
-                  className="w-full p-4 bg-white text-[#0D0431] placeholder-[#0D0431]/40 border-2 border-[#0D0431] rounded-xl text-sm font-sans font-medium shadow-[3px_3px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:shadow-[4px_4px_0_0_#0D0431] focus:outline-none transition-all resize-none leading-relaxed"
-                />
-
-                <GpButton
-                  onClick={handleEvaluatePractice}
-                  disabled={evaluating || !practiceAnswer.trim()}
-                  variant="stacked"
-                  size="md"
-                  fullWidth
-                >
-                  {evaluating ? "Evaluating Answer..." : "Evaluate Response with AI"}
-                </GpButton>
+                {/* Import from Story Matrix Dropdown if stories exist */}
+                {savedStories.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-[#0D0431]/70 font-bold hidden sm:inline">
+                      Insert Story:
+                    </span>
+                    <select
+                      onChange={(e) => {
+                        const s = savedStories.find((item) => item.id === e.target.value);
+                        if (s) handleImportStoryToGuided(s);
+                      }}
+                      defaultValue=""
+                      className="px-2.5 py-1.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold shadow-[2px_2px_0_0_#0D0431] cursor-pointer"
+                    >
+                      <option value="" disabled>
+                        Choose from Story Matrix...
+                      </option>
+                      {savedStories.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
-              {/* Evaluation Results */}
+              {/* INPUT AREA MODE 1: GUIDED STAR BUILDER */}
+              {practiceMode === "guided" && (
+                <div className="space-y-4">
+                  {/* Situation */}
+                  <div className="p-3.5 bg-[#FEF9CF] border-2 border-[#0D0431] rounded-2xl space-y-1.5 shadow-[2px_2px_0_0_#0D0431]">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-heading font-black text-[#0D0431] uppercase">
+                        1. Situation (20% Weight ~ 40-60 words)
+                      </label>
+                      <span className="text-[10px] font-mono text-[#0D0431]/70 font-bold">
+                        {guidedStar.situation.split(/\s+/).filter(Boolean).length} words
+                      </span>
+                    </div>
+                    <textarea
+                      rows={2}
+                      value={guidedStar.situation}
+                      onChange={(e) =>
+                        setGuidedStar({ ...guidedStar, situation: e.target.value })
+                      }
+                      placeholder="What was the business problem, system constraint, or critical scale challenge?..."
+                      className="w-full p-3 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-medium focus:outline-none transition-all resize-none"
+                    />
+                  </div>
+
+                  {/* Task */}
+                  <div className="p-3.5 bg-[#D4FDF7] border-2 border-[#0D0431] rounded-2xl space-y-1.5 shadow-[2px_2px_0_0_#0D0431]">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-heading font-black text-[#0D0431] uppercase">
+                        2. Task (10% Weight ~ 20-30 words)
+                      </label>
+                      <span className="text-[10px] font-mono text-[#0D0431]/70 font-bold">
+                        {guidedStar.task.split(/\s+/).filter(Boolean).length} words
+                      </span>
+                    </div>
+                    <textarea
+                      rows={2}
+                      value={guidedStar.task}
+                      onChange={(e) =>
+                        setGuidedStar({ ...guidedStar, task: e.target.value })
+                      }
+                      placeholder="What was your specific individual responsibility or technical mandate?..."
+                      className="w-full p-3 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-medium focus:outline-none transition-all resize-none"
+                    />
+                  </div>
+
+                  {/* Action */}
+                  <div className="p-3.5 bg-[#FEDF6A]/60 border-2 border-[#0D0431] rounded-2xl space-y-1.5 shadow-[2px_2px_0_0_#0D0431]">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-heading font-black text-[#0D0431] uppercase">
+                        3. Action (50% Weight ~ 100-150 words)
+                      </label>
+                      <span className="text-[10px] font-mono text-[#0D0431]/70 font-bold">
+                        {guidedStar.action.split(/\s+/).filter(Boolean).length} words
+                      </span>
+                    </div>
+                    <textarea
+                      rows={4}
+                      value={guidedStar.action}
+                      onChange={(e) =>
+                        setGuidedStar({ ...guidedStar, action: e.target.value })
+                      }
+                      placeholder="What exact technical decisions, tools, architecture, and trade-offs did YOU execute? (Use 'I', not 'We')..."
+                      className="w-full p-3 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-medium focus:outline-none transition-all resize-none leading-relaxed"
+                    />
+                  </div>
+
+                  {/* Result */}
+                  <div className="p-3.5 bg-[#E4CDFB]/60 border-2 border-[#0D0431] rounded-2xl space-y-1.5 shadow-[2px_2px_0_0_#0D0431]">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-heading font-black text-[#0D0431] uppercase">
+                        4. Result (20% Weight ~ 40-60 words)
+                      </label>
+                      <span className="text-[10px] font-mono text-[#0D0431]/70 font-bold">
+                        {guidedStar.result.split(/\s+/).filter(Boolean).length} words
+                      </span>
+                    </div>
+                    <textarea
+                      rows={2}
+                      value={guidedStar.result}
+                      onChange={(e) =>
+                        setGuidedStar({ ...guidedStar, result: e.target.value })
+                      }
+                      placeholder="What were the quantifiable metrics (e.g. latency down 45%, revenue, uptime) and learnings?..."
+                      className="w-full p-3 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-medium focus:outline-none transition-all resize-none"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={handleCompileGuidedStar}
+                      className="text-xs font-mono font-bold text-[#896EE2] hover:text-[#0D0431] underline cursor-pointer"
+                    >
+                      Preview Full Compiled Response →
+                    </button>
+
+                    <GpButton
+                      onClick={handleEvaluatePractice}
+                      disabled={evaluating || !guidedStar.action.trim()}
+                      variant="stacked"
+                      size="md"
+                    >
+                      {evaluating ? "Evaluating STAR Answer..." : "Evaluate Response with AI"}
+                    </GpButton>
+                  </div>
+                </div>
+              )}
+
+              {/* INPUT AREA MODE 2: FREEFORM TEXT & SPEECH */}
+              {practiceMode === "freeform" && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs uppercase font-bold tracking-wider font-sans text-[#0D0431]">
+                        Your Answer
+                      </label>
+                      <span className="text-[11px] font-mono text-[#0D0431]/60">
+                        ({practiceAnswer.split(/\s+/).filter(Boolean).length} words)
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleToggleVoice}
+                      className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer ${
+                        isRecording
+                          ? "bg-[#F85B52] text-white animate-pulse"
+                          : "bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431]"
+                      }`}
+                    >
+                      {isRecording ? (
+                        <>
+                          <Square className="w-3 h-3 fill-current" />
+                          <span>Stop Recording ({recordDuration}s)</span>
+                        </>
+                      ) : (
+                        <>
+                          <Mic className="w-3.5 h-3.5 text-[#0D0431]" />
+                          <span>Record Voice (Mic)</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <textarea
+                    rows={6}
+                    value={practiceAnswer}
+                    onChange={(e) => setPracticeAnswer(e.target.value)}
+                    placeholder="Speak or type your complete STAR response (Situation, Task, Action, Result)..."
+                    className="w-full p-4 bg-white text-[#0D0431] placeholder-[#0D0431]/40 border-2 border-[#0D0431] rounded-2xl text-xs md:text-sm font-sans font-medium shadow-[3px_3px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:outline-none transition-all resize-none leading-relaxed"
+                  />
+
+                  <GpButton
+                    onClick={handleEvaluatePractice}
+                    disabled={evaluating || !practiceAnswer.trim()}
+                    variant="stacked"
+                    size="md"
+                    fullWidth
+                  >
+                    {evaluating ? "Evaluating Answer..." : "Evaluate Response with AI"}
+                  </GpButton>
+                </div>
+              )}
+
+              {/* EVALUATION RESULTS CARD */}
               {evaluationResult && (
-                <div className="space-y-4 pt-4 border-t-2 border-[#0D0431]">
-                  <div className="flex items-center justify-between bg-[#FEDF6A] p-4 rounded-2xl border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
-                    <span className="text-xs font-heading font-black text-[#0D0431]">
-                      Overall Score:
-                    </span>
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-xl font-heading font-black text-[#0D0431]">
+                <div className="space-y-5 pt-4 border-t-2 border-[#0D0431] animate-in fade-in duration-300">
+                  {/* Overall Score Banner */}
+                  <div className="flex items-center justify-between bg-[#FEDF6A] p-4 md:p-5 rounded-2xl border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431]">
+                    <div>
+                      <span className="text-[11px] font-heading font-black text-[#0D0431] uppercase tracking-wider block">
+                        Overall Performance Score:
+                      </span>
+                      <span className="text-2xl font-heading font-black text-[#0D0431]">
                         {evaluationResult.score} / 100
                       </span>
+                    </div>
+                    <div className="flex items-center gap-2">
                       <span
-                        className={`text-[11px] font-mono font-bold px-3 py-1 rounded-full border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] ${
+                        className={`text-xs font-mono font-bold px-3 py-1.5 rounded-full border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] ${
                           evaluationResult.score >= 80
                             ? "bg-[#D4FDF7] text-[#0D0431]"
                             : evaluationResult.score >= 60
@@ -513,21 +1698,22 @@ export default function HRPrep() {
                             : "bg-[#FFC5B7] text-[#0D0431]"
                         }`}
                       >
-                        {evaluationResult.score >= 80
-                          ? "Interview Ready"
-                          : evaluationResult.score >= 60
-                          ? "Developing"
-                          : "Needs Practice"}
+                        Verdict: {evaluationResult.overall_verdict || (evaluationResult.score >= 80 ? "Strong Hire" : "Passable")}
                       </span>
                     </div>
                   </div>
 
-                  {/* STAR Detection Badges */}
+                  {/* STAR Pillar Verification Grid */}
                   {evaluationResult.star_compliance && (
                     <div className="space-y-2">
-                      <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431] block">
-                        STAR Framework Compliance:
-                      </span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431] block">
+                          STAR Framework Pillar Compliance:
+                        </span>
+                        <span className="text-[11px] font-mono font-bold text-[#896EE2]">
+                          STAR Score: {evaluationResult.star_compliance.score || 75}%
+                        </span>
+                      </div>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         {["situation", "task", "action", "result"].map((k) => {
                           const detected =
@@ -535,73 +1721,139 @@ export default function HRPrep() {
                           return (
                             <div
                               key={k}
-                              className={`p-2 rounded-xl border-2 border-[#0D0431] text-center text-xs font-mono font-bold shadow-[2px_2px_0_0_#0D0431] ${
+                              className={`p-2.5 rounded-xl border-2 border-[#0D0431] text-center text-xs font-mono font-bold shadow-[2px_2px_0_0_#0D0431] ${
                                 detected
                                   ? "bg-[#D4FDF7] text-[#0D0431]"
                                   : "bg-[#FFC5B7] text-[#0D0431]"
                               }`}
                             >
-                              {k.toUpperCase()}: {detected ? "Verified" : "Missing"}
+                              <div className="uppercase">{k}</div>
+                              <div className="text-[10px] font-normal">
+                                {detected ? "✓ Verified" : "✗ Missing / Weak"}
+                              </div>
                             </div>
                           );
                         })}
                       </div>
+                      {evaluationResult.star_compliance.star_feedback && (
+                        <p className="text-xs text-[#0D0431]/80 font-mono bg-[#FEF9CF] p-3 rounded-xl border border-[#0D0431]">
+                          {evaluationResult.star_compliance.star_feedback}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Speech & Communication Intelligence Panel */}
+                  {evaluationResult.communication && (
+                    <div className="p-4 bg-white border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-3">
+                      <div className="flex items-center justify-between border-b border-[#0D0431]/15 pb-2">
+                        <span className="text-xs font-heading font-black text-[#0D0431] uppercase flex items-center gap-1.5">
+                          <Volume2 className="w-4 h-4 text-[#896EE2]" />
+                          Communication & Delivery Analytics
+                        </span>
+                        <span className="text-xs font-mono font-bold text-[#896EE2]">
+                          Comm Score: {evaluationResult.communication.overall_communication_score || 75}%
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        {/* Clarity */}
+                        <div className="p-2.5 bg-[#FEF9CF] rounded-xl border border-[#0D0431] space-y-1">
+                          <span className="font-heading font-bold text-[11px] block">
+                            Clarity ({evaluationResult.communication.clarity?.score || 80}/100)
+                          </span>
+                          <p className="text-[11px] text-[#0D0431]/80">
+                            {evaluationResult.communication.clarity?.feedback || "Structured progression."}
+                          </p>
+                        </div>
+
+                        {/* Fillers */}
+                        <div className="p-2.5 bg-[#FFE8E5] rounded-xl border border-[#0D0431] space-y-1">
+                          <span className="font-heading font-bold text-[11px] block">
+                            Filler Words: {evaluationResult.communication.filler_words?.total_count || 0}
+                          </span>
+                          <p className="text-[11px] text-[#0D0431]/80">
+                            Density: {evaluationResult.communication.filler_words?.density_percent || 0}% (
+                            {evaluationResult.communication.filler_words?.status || "Excellent"})
+                          </p>
+                        </div>
+
+                        {/* Pacing */}
+                        <div className="p-2.5 bg-[#D4FDF7] rounded-xl border border-[#0D0431] space-y-1">
+                          <span className="font-heading font-bold text-[11px] block">
+                            Pacing: {evaluationResult.communication.pacing?.wpm ? `${evaluationResult.communication.pacing.wpm} WPM` : "Natural Pace"}
+                          </span>
+                          <p className="text-[11px] text-[#0D0431]/80">
+                            {evaluationResult.communication.pacing?.feedback || "Well paced."}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Weak Hedging detected */}
+                      {evaluationResult.communication.weak_phrases_detected &&
+                        evaluationResult.communication.weak_phrases_detected.length > 0 && (
+                          <div className="text-xs p-2.5 bg-[#FFC5B7]/50 rounded-xl border border-[#0D0431] space-y-1">
+                            <span className="font-heading font-bold text-[11px] text-[#C7382B] block">
+                              Hedging Phrases Detected:
+                            </span>
+                            <div className="flex flex-wrap gap-2">
+                              {evaluationResult.communication.weak_phrases_detected.map((item, idx) => (
+                                <span
+                                  key={idx}
+                                  className="text-[10px] font-mono bg-white px-2 py-0.5 rounded border border-[#0D0431]"
+                                >
+                                  "{item.phrase}" → Use <strong>{item.suggestion}</strong>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                     </div>
                   )}
 
                   {/* Strengths & Improvement Bento */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="p-4 bg-[#D4FDF7] border-2 border-[#0D0431] rounded-xl shadow-[3px_3px_0_0_#0D0431] space-y-1.5">
+                    <div className="p-4 bg-[#D4FDF7] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-1.5">
                       <span className="text-xs font-heading font-black text-[#0D0431] flex items-center gap-1.5">
                         <CheckCircle2 className="w-4 h-4 text-[#0D0431]" />
-                        Strengths
+                        Key Strengths
                       </span>
                       <ul className="text-xs text-[#0D0431] space-y-1 font-medium">
-                        {(
-                          evaluationResult.strengths || [
-                            "Structured technical articulation",
-                            "Clear individual role identification",
-                          ]
-                        )
-                          .slice(0, 2)
-                          .map((s, i) => (
+                        {(evaluationResult.strengths || ["Clear individual role identification"]).map(
+                          (s, i) => (
                             <li key={i} className="flex items-start gap-1.5">
                               <span className="text-[#0D0431] font-bold">•</span>
-                              <span className="line-clamp-2">{s}</span>
+                              <span>{s}</span>
                             </li>
-                          ))}
+                          )
+                        )}
                       </ul>
                     </div>
 
-                    <div className="p-4 bg-[#FFC5B7] border-2 border-[#0D0431] rounded-xl shadow-[3px_3px_0_0_#0D0431] space-y-1.5">
+                    <div className="p-4 bg-[#FFC5B7] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-1.5">
                       <span className="text-xs font-heading font-black text-[#0D0431] flex items-center gap-1.5">
                         <AlertTriangle className="w-4 h-4 text-[#0D0431]" />
-                        Areas to Improve
+                        Areas for Improvement
                       </span>
                       <ul className="text-xs text-[#0D0431] space-y-1 font-medium">
-                        {(
-                          evaluationResult.areas_for_improvement || [
-                            "Add quantifiable business or latency metrics",
-                            "Elaborate on architectural trade-offs in Action phase",
-                          ]
-                        )
-                          .slice(0, 2)
-                          .map((a, i) => (
-                            <li key={i} className="flex items-start gap-1.5">
-                              <span className="text-[#0D0431] font-bold">•</span>
-                              <span className="line-clamp-2">{a}</span>
-                            </li>
-                          ))}
+                        {(evaluationResult.areas_for_improvement || [
+                          "Incorporate quantifiable metrics into Result phase",
+                        ]).map((a, i) => (
+                          <li key={i} className="flex items-start gap-1.5">
+                            <span className="text-[#0D0431] font-bold">•</span>
+                            <span>{a}</span>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </div>
 
-                  {/* One Tip */}
-                  <div className="p-4 bg-[#E4CDFB] border-2 border-[#0D0431] rounded-xl flex items-start gap-3 text-xs text-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
+                  {/* One Strategic Tip */}
+                  <div className="p-4 bg-[#E4CDFB] border-2 border-[#0D0431] rounded-2xl flex items-start gap-3 text-xs text-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
                     <Sparkles className="w-5 h-5 text-[#0D0431] shrink-0 mt-0.5" />
                     <div>
                       <span className="font-heading font-black text-[#0D0431] block text-[11px] uppercase tracking-wider mb-0.5">
-                        Key Strategic Tip:
+                        Strategic Coaching Tip:
                       </span>
                       <p className="text-[#0D0431]/90 font-sans font-medium leading-relaxed">
                         {evaluationResult.one_tip ||
@@ -611,7 +1863,7 @@ export default function HRPrep() {
                     </div>
                   </div>
 
-                  {/* Polished Exemplary Answer (Progressive Disclosure) */}
+                  {/* Polished Exemplary Answer */}
                   {evaluationResult.suggested_better_answer && (
                     <div className="pt-1">
                       <button
@@ -619,22 +1871,174 @@ export default function HRPrep() {
                         onClick={() => setShowModelAnswer(!showModelAnswer)}
                         className="text-xs font-bold font-sans text-[#896EE2] hover:text-[#0D0431] flex items-center gap-1 cursor-pointer"
                       >
-                        <span>{showModelAnswer ? "Hide Model Answer" : "Show Model Answer"}</span>
+                        <span>{showModelAnswer ? "Hide Polished Model Answer" : "Show Polished Model Answer"}</span>
                       </button>
                       {showModelAnswer && (
-                        <div className="mt-2 p-4 bg-white border-2 border-[#0D0431] rounded-xl space-y-1 shadow-[2px_2px_0_0_#0D0431]">
-                          <span className="text-xs font-heading font-bold text-[#0D0431] block">
-                            Model Answer:
+                        <div className="mt-2 p-4 bg-white border-2 border-[#0D0431] rounded-2xl space-y-1 shadow-[2px_2px_0_0_#0D0431]">
+                          <span className="text-xs font-heading font-bold text-[#0D0431] block uppercase tracking-wider">
+                            Polished STAR Rewrite:
                           </span>
-                          <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
+                          <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium whitespace-pre-line">
                             {evaluationResult.suggested_better_answer}
                           </p>
                         </div>
                       )}
                     </div>
                   )}
+
+                  {/* DYNAMIC FOLLOW-UP QUESTION PRACTICE */}
+                  {evaluationResult.follow_up_question && (
+                    <div className="p-4 md:p-5 bg-[#FEF9CF] border-2 border-[#0D0431] rounded-2xl shadow-[4px_4px_0_0_#0D0431] space-y-3">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4 text-[#896EE2]" />
+                        <span className="font-heading font-black text-xs uppercase tracking-wider text-[#0D0431]">
+                          Interviewer Follow-Up Probe:
+                        </span>
+                      </div>
+                      <h5 className="font-heading font-bold text-sm text-[#0D0431]">
+                        "{evaluationResult.follow_up_question}"
+                      </h5>
+
+                      {!followUpSubmitted ? (
+                        <div className="space-y-2 pt-2">
+                          <textarea
+                            rows={3}
+                            value={followUpAnswer}
+                            onChange={(e) => setFollowUpAnswer(e.target.value)}
+                            placeholder="Answer the interviewer's follow-up question directly with specifics..."
+                            className="w-full p-3 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-medium focus:outline-none transition-all resize-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setFollowUpSubmitted(true)}
+                            disabled={!followUpAnswer.trim()}
+                            className="px-4 py-2 bg-[#0D0431] hover:bg-[#24195A] text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                          >
+                            Submit Follow-Up Response
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-[#D4FDF7] border border-[#0D0431] rounded-xl text-xs font-medium space-y-1">
+                          <span className="font-bold text-[#0D7A68] block">✓ Follow-Up Response Recorded</span>
+                          <p className="text-[#0D0431]/80">{followUpAnswer}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
+            </div>
+          </GpModal>
+        )}
+
+        {/* ========================================================================= */}
+        {/* ADD/EDIT MASTER STORY MODAL                                              */}
+        {/* ========================================================================= */}
+        {isStoryModalOpen && (
+          <GpModal
+            isOpen={isStoryModalOpen}
+            onClose={() => setIsStoryModalOpen(false)}
+            title={editingStory ? "Edit Master STAR Story" : "Draft New Master STAR Story"}
+            subtitle="Save your core project narrative for instant reuse across behavioral rounds"
+            maxWidth="max-w-2xl"
+          >
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-heading font-black text-[#0D0431] uppercase">
+                    Story Title
+                  </label>
+                  <input
+                    type="text"
+                    value={storyForm.title}
+                    onChange={(e) => setStoryForm({ ...storyForm, title: e.target.value })}
+                    placeholder="e.g. Distributed Redis Caching Architecture"
+                    className="w-full p-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-heading font-black text-[#0D0431] uppercase">
+                    Project & Tech Stack
+                  </label>
+                  <input
+                    type="text"
+                    value={storyForm.techStack}
+                    onChange={(e) => setStoryForm({ ...storyForm, techStack: e.target.value })}
+                    placeholder="e.g. Go, PostgreSQL, Redis, Kubernetes"
+                    className="w-full p-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-heading font-black text-[#0D0431] uppercase">
+                  1. Situation (Context & Problem Stakes)
+                </label>
+                <textarea
+                  rows={2}
+                  value={storyForm.situation}
+                  onChange={(e) => setStoryForm({ ...storyForm, situation: e.target.value })}
+                  placeholder="What was the business context, constraints, and problem bottleneck?..."
+                  className="w-full p-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-medium focus:outline-none resize-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-heading font-black text-[#0D0431] uppercase">
+                  2. Task (Your Goal & Responsibility)
+                </label>
+                <textarea
+                  rows={2}
+                  value={storyForm.task}
+                  onChange={(e) => setStoryForm({ ...storyForm, task: e.target.value })}
+                  placeholder="What was your specific individual role and key objective?..."
+                  className="w-full p-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-medium focus:outline-none resize-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-heading font-black text-[#0D0431] uppercase">
+                  3. Action (Technical Decisions & Trade-Offs - Use "I")
+                </label>
+                <textarea
+                  rows={4}
+                  value={storyForm.action}
+                  onChange={(e) => setStoryForm({ ...storyForm, action: e.target.value })}
+                  placeholder="What exact engineering choices, algorithms, tools, and PRs did you implement?..."
+                  className="w-full p-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-medium focus:outline-none resize-none leading-relaxed"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-heading font-black text-[#0D0431] uppercase">
+                  4. Result (Quantified Metrics & Business Impact)
+                </label>
+                <textarea
+                  rows={2}
+                  value={storyForm.result}
+                  onChange={(e) => setStoryForm({ ...storyForm, result: e.target.value })}
+                  placeholder="What were the exact metrics achieved (latency down 50%, 99.99% uptime, $100k saved)?..."
+                  className="w-full p-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-medium focus:outline-none resize-none"
+                />
+              </div>
+
+              <div className="pt-3 border-t-2 border-[#0D0431] flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsStoryModalOpen(false)}
+                  className="px-4 py-2 bg-white hover:bg-[#FEF9CF] text-[#0D0431] rounded-xl text-xs font-bold border-2 border-[#0D0431] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <GpButton
+                  onClick={handleSaveStoryForm}
+                  variant="stacked-yellow"
+                  size="md"
+                >
+                  Save Master Story
+                </GpButton>
+              </div>
             </div>
           </GpModal>
         )}
