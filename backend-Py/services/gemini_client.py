@@ -2,9 +2,10 @@ import os
 import re
 import json
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Optional, Any
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 load_dotenv(override=True)
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"), override=True)
@@ -27,29 +28,30 @@ def get_configured_api_key() -> str:
 def query_gemini(prompt: str, system_instruction: Optional[str] = None, json_mode: bool = False) -> str:
     """
     Executes a prompt against Gemini with model fallback cascade.
+    Uses the new google-genai SDK (stable v1 API).
     """
     api_key = get_configured_api_key()
     if not api_key:
         raise ValueError("GOOGLE_API_KEY environment variable is not configured.")
 
-    genai.configure(api_key=api_key)
+    client = genai.Client(api_key=api_key)
 
-    generation_config = {}
+    generate_config_kwargs = {}
     if json_mode:
-        generation_config["response_mime_type"] = "application/json"
+        generate_config_kwargs["response_mime_type"] = "application/json"
+    if system_instruction:
+        generate_config_kwargs["system_instruction"] = system_instruction
+
+    config = types.GenerateContentConfig(**generate_config_kwargs) if generate_config_kwargs else None
 
     last_error = None
     for model_name in MODELS_PRIORITY:
         try:
-            model_kwargs = {"model_name": model_name}
-            if system_instruction:
-                model_kwargs["system_instruction"] = system_instruction
+            kwargs = {"model": model_name, "contents": prompt}
+            if config:
+                kwargs["config"] = config
 
-            model = genai.GenerativeModel(**model_kwargs)
-            response = model.generate_content(
-                prompt,
-                generation_config=generation_config if json_mode else None
-            )
+            response = client.models.generate_content(**kwargs)
 
             text_content = ""
             if hasattr(response, "text") and response.text:

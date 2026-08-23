@@ -3,7 +3,8 @@ import re
 import json
 from typing import Optional, Dict, Any, Generator
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 load_dotenv(override=True)
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"), override=True)
@@ -34,7 +35,7 @@ def stream_ai_code_assistance(
     if not api_key:
         raise ValueError("GOOGLE_API_KEY environment variable is not configured.")
 
-    genai.configure(api_key=api_key)
+    client = genai.Client(api_key=api_key)
 
     if query_type == "hint":
         prompt = f"""
@@ -119,8 +120,10 @@ Provide helpful guidance on how to solve or improve this problem.
     last_err = None
     for m in models_to_try:
         try:
-            model = genai.GenerativeModel(m)
-            response = model.generate_content(prompt, stream=True)
+            response = client.models.generate_content_stream(
+                model=m,
+                contents=prompt,
+            )
             for chunk in response:
                 if hasattr(chunk, "text") and chunk.text:
                     yield chunk.text
@@ -158,7 +161,7 @@ def get_ai_code_assistance(
     if not api_key:
         raise ValueError("GOOGLE_API_KEY environment variable is not configured.")
 
-    genai.configure(api_key=api_key)
+    client = genai.Client(api_key=api_key)
 
     system_instruction = "You are an elite DSA interviewer and coding mentor at a top tech company."
     
@@ -245,8 +248,12 @@ Provide helpful guidance on how to solve or improve this problem.
     last_err = None
     for m in models_to_try:
         try:
-            model = genai.GenerativeModel(m)
-            resp = model.generate_content(prompt)
+            config = types.GenerateContentConfig(system_instruction=system_instruction)
+            resp = client.models.generate_content(
+                model=m,
+                contents=prompt,
+                config=config,
+            )
             if hasattr(resp, "text") and resp.text:
                 return clean_ai_text(resp.text)
             elif hasattr(resp, "candidates") and resp.candidates:
