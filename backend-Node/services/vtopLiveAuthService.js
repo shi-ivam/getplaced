@@ -1,3 +1,4 @@
+import https from "https";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import VtopProfile from "../models/vtopProfileModel.js";
@@ -5,15 +6,35 @@ import AcademicProfile from "../models/academicProfileModel.js";
 import User from "../models/userModel.js";
 import { computeVtopPlacementImpact } from "./vtopService.js";
 
-// Bypass self-signed / internal SSL certificate errors for VTOP
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 const VTOP_BASE_URL = "https://vtopcc.vit.ac.in/vtop";
 const DEFAULT_USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 
+// Dedicated HTTPS Agent scoping self-signed SSL tolerance exclusively to VTOP portal requests
+const vtopHttpsAgent = new https.Agent({
+  rejectUnauthorized: false,
+});
+
 // In-memory session store for multi-step handshake (keyed by sessionId or userId)
 const activeSessions = new Map();
+
+// Session TTL (10 minutes) & Cleanup interval (every 5 minutes) to prevent memory leaks
+const SESSION_TTL_MS = 10 * 60 * 1000;
+const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
+
+const sessionCleanupTimer = setInterval(() => {
+  const now = Date.now();
+  for (const [sessionId, session] of activeSessions.entries()) {
+    const sessionTime = session.createdAt || session.lastAccessedAt || 0;
+    if (now - sessionTime > SESSION_TTL_MS) {
+      activeSessions.delete(sessionId);
+    }
+  }
+}, CLEANUP_INTERVAL_MS);
+
+if (sessionCleanupTimer.unref) {
+  sessionCleanupTimer.unref();
+}
 
 /**
  * Creates an Axios client instance with cookie header tracker
@@ -25,6 +46,7 @@ function createVtopClient(initialCookies = "") {
     baseURL: VTOP_BASE_URL,
     timeout: 15000,
     maxRedirects: 0, // Manual redirect handling to preserve updated Set-Cookie headers
+    httpsAgent: vtopHttpsAgent,
     headers: {
       "User-Agent": DEFAULT_USER_AGENT,
       Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
@@ -282,8 +304,6 @@ export async function authenticateAndScrapeVtop(userId, credentials) {
           }
         }
 
-        console.log(`[VTOP Auth] Cookies before fetching init/page: ${sessionWrapper.getCookies()}`);
-        
         let currentPageRes = null;
         let currentUrl = targetUrl;
         for (let i = 0; i < 5; i++) {

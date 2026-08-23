@@ -4,9 +4,88 @@ import json
 import subprocess
 import os
 import re
+import ast
 from typing import Dict, Any, List, Optional
 
 EXECUTION_TIMEOUT = 4.0  # seconds
+
+# Restricted modules that cannot be imported or accessed by user code
+RESTRICTED_MODULES = {
+    "shutil",
+    "socket",
+    "pty",
+    "subprocess",
+    "multiprocessing",
+    "ctypes",
+    "posix",
+    "http",
+    "urllib",
+    "requests",
+    "webbrowser",
+    "ftplib",
+    "smtplib",
+    "telnetlib",
+    "importlib",
+    "signal",
+}
+
+# Dangerous method/function names to block in AST analysis
+DANGEROUS_ATTRIBUTES = {
+    "system", "popen", "remove", "unlink", "rmdir", "removedirs",
+    "spawn", "fork", "kill", "chmod", "chown", "execv", "execve"
+}
+
+def set_resource_limits():
+    """
+    Applies strict resource sandboxing to child process on Unix/Linux systems:
+    - RLIMIT_AS: 256MB memory cap
+    - RLIMIT_NPROC: 64 processes/threads cap
+    - RLIMIT_FSIZE: 10MB max file write cap
+    - RLIMIT_CPU: 5 seconds max CPU time
+    """
+    try:
+        import resource
+        if hasattr(resource, "RLIMIT_AS"):
+            resource.setrlimit(resource.RLIMIT_AS, (256 * 1024 * 1024, 256 * 1024 * 1024))
+        if hasattr(resource, "RLIMIT_NPROC"):
+            resource.setrlimit(resource.RLIMIT_NPROC, (64, 64))
+        if hasattr(resource, "RLIMIT_FSIZE"):
+            resource.setrlimit(resource.RLIMIT_FSIZE, (10 * 1024 * 1024, 10 * 1024 * 1024))
+        if hasattr(resource, "RLIMIT_CPU"):
+            resource.setrlimit(resource.RLIMIT_CPU, (5, 5))
+    except Exception:
+        pass
+
+def validate_user_code(user_code: str) -> Optional[str]:
+    """
+    Analyzes user-submitted code AST to prevent execution of destructive code
+    or loading restricted modules (shutil, socket, pty, subprocess, etc.).
+    Returns error message if prohibited code is detected, None if safe.
+    """
+    try:
+        tree = ast.parse(user_code)
+    except SyntaxError:
+        return None  # Syntax errors will be captured and reported during execution
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                mod_base = alias.name.split(".")[0]
+                if mod_base in RESTRICTED_MODULES:
+                    return f"Security Restriction: Importing module '{alias.name}' is not permitted."
+        elif isinstance(node, ast.ImportFrom):
+            if node.module:
+                mod_base = node.module.split(".")[0]
+                if mod_base in RESTRICTED_MODULES:
+                    return f"Security Restriction: Importing from module '{node.module}' is not permitted."
+        elif isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name):
+                if node.func.id in ("__import__", "exec", "eval", "compile"):
+                    return f"Security Restriction: Call to '{node.func.id}' is not permitted."
+            elif isinstance(node.func, ast.Attribute):
+                if node.func.attr in DANGEROUS_ATTRIBUTES:
+                    return f"Security Restriction: Call to '{node.func.attr}' is not permitted."
+    return None
 
 def extract_syntax_error(stderr_str: str) -> str:
     """Extracts concise syntax or runtime error message."""
@@ -42,6 +121,18 @@ def run_sample_tests(
             "message": "No sample test cases available to run."
         }
 
+    security_err = validate_user_code(user_code)
+    if security_err:
+        return {
+            "status": "Compile / Runtime Error",
+            "all_passed": False,
+            "passed_count": 0,
+            "total_count": len(test_cases_to_run),
+            "total_time_ms": 0,
+            "error": security_err,
+            "results": []
+        }
+
     is_list_node = "ListNode" in starter_code
     is_tree_node = "TreeNode" in starter_code
 
@@ -65,8 +156,11 @@ def run_sample_tests(
     cases_json = json.dumps(processed_cases)
 
     script_content = f"""
-import sys, io, time, json, traceback
+import sys, io, time, json, ast, traceback
 from collections import deque
+
+for _mod in ["shutil", "socket", "pty", "subprocess", "multiprocessing", "ctypes", "http", "urllib", "requests"]:
+    sys.modules[_mod] = None
 
 null = None
 true = True
@@ -113,8 +207,25 @@ def serialize_result(val):
         return str(list(val))
     return str(val)
 
+def safe_parse_literal(val_str):
+    if not isinstance(val_str, str):
+        return val_str
+    val_str = val_str.strip()
+    if not val_str:
+        return ""
+    try:
+        return json.loads(val_str)
+    except Exception:
+        pass
+    try:
+        normalized = val_str.replace("null", "None").replace("true", "True").replace("false", "False")
+        return ast.literal_eval(normalized)
+    except Exception:
+        pass
+    return val_str
+
 def normalize_compare(actual_val, expected_str, formatted_actual):
-    exp_clean = expected_str.strip()
+    exp_clean = expected_str.strip() if isinstance(expected_str, str) else str(expected_str).strip()
     if exp_clean in ["None", "null", "none"]:
         return actual_val is None or actual_val == [] or formatted_actual in ["None", "[]", "null"]
     if exp_clean == "[]" and (actual_val == [] or actual_val is None or formatted_actual in ["[]", "None"]):
@@ -126,17 +237,12 @@ def normalize_compare(actual_val, expected_str, formatted_actual):
     if act_str == exp_clean or act_str.replace(" ", "") == exp_clean.replace(" ", ""):
         return True
     try:
-        exp_eval_str = exp_clean.replace("null", "None").replace("true", "True").replace("false", "False")
-        act_eval_str = act_str.replace("null", "None").replace("true", "True").replace("false", "False")
-        exp_eval = eval(exp_eval_str)
-        act_eval = eval(act_eval_str)
+        exp_eval = safe_parse_literal(exp_clean)
+        act_eval = actual_val if (actual_val is not None and not isinstance(actual_val, str)) else safe_parse_literal(act_str)
         if act_eval == exp_eval:
             return True
         if isinstance(act_eval, (float, int)) and isinstance(exp_eval, (float, int)):
             if abs(float(act_eval) - float(exp_eval)) < 1e-5:
-                return True
-        if isinstance(act_eval, list) and isinstance(exp_eval, list):
-            if sorted(str(x) for x in act_eval) == sorted(str(x) for x in exp_eval):
                 return True
     except Exception:
         pass
@@ -215,7 +321,8 @@ print("__TEST_RESULTS_JSON_END__")
             [sys.executable, "-c", script_content],
             capture_output=True,
             text=True,
-            timeout=EXECUTION_TIMEOUT
+            timeout=EXECUTION_TIMEOUT,
+            preexec_fn=set_resource_limits if os.name != "nt" else None
         )
         total_time_ms = round((time.time() - t_start) * 1000, 2)
 
@@ -278,8 +385,21 @@ def submit_solution(
     assert_lines = [l for l in test_code.split("\n") if l.strip().startswith("assert ")]
     total_assertions = len(assert_lines) if assert_lines else 1
 
+    security_err = validate_user_code(user_code)
+    if security_err:
+        return {
+            "status": "Compile / Runtime Error",
+            "passed_count": 0,
+            "total_count": total_assertions,
+            "runtime_ms": 0,
+            "error": security_err
+        }
+
     script_content = f"""
 import sys, io, time, traceback, resource
+
+for _mod in ["shutil", "socket", "pty", "subprocess", "multiprocessing", "ctypes", "http", "urllib", "requests"]:
+    sys.modules[_mod] = None
 
 null = None
 true = True
@@ -320,7 +440,8 @@ except Exception as e:
             [sys.executable, "-c", script_content],
             capture_output=True,
             text=True,
-            timeout=EXECUTION_TIMEOUT
+            timeout=EXECUTION_TIMEOUT,
+            preexec_fn=set_resource_limits if os.name != "nt" else None
         )
         total_time_ms = round((time.time() - t_start) * 1000, 2)
 
