@@ -48,14 +48,53 @@ export default function JobDetailModal({
 
   if (!job) return null;
 
-  const employerName = job.company || "Enterprise Technology";
+  const employerName = job.company || job.employer_name || "Enterprise Technology";
+  const title = job.title || job.job_title || "Software Engineer";
+  const companyLogo = job.companyLogo || job.employer_logo || "";
   const initial = employerName.charAt(0).toUpperCase();
+  const city = job.city || job.job_city || job.location || "Bengaluru";
   const isRemote =
-    job.workMode === "Remote" || (job.city || "").toLowerCase().includes("remote");
+    job.workMode === "Remote" ||
+    job.job_is_remote === true ||
+    (city || "").toLowerCase().includes("remote");
+  const workMode = isRemote ? "Remote" : (job.workMode || "Hybrid");
+  const employmentType = job.employmentType || job.job_employment_type || "Full-time";
   const isDemo = job.sourceType === "DEMO";
 
-  const postedDate = job.postedDate
-    ? new Date(job.postedDate).toLocaleDateString("en-US", {
+  const applyUrl =
+    job.applicationUrl ||
+    job.applyUrl ||
+    job.job_apply_link ||
+    job.job_google_link ||
+    "#";
+
+  const rawSkills = job.skills || job.job_required_skills || [];
+  const skillsList = Array.isArray(rawSkills)
+    ? rawSkills
+    : typeof rawSkills === "string"
+    ? rawSkills.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  const rawPrefSkills = job.preferredSkills || [];
+  const preferredSkillsList = Array.isArray(rawPrefSkills)
+    ? rawPrefSkills
+    : typeof rawPrefSkills === "string"
+    ? rawPrefSkills.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  const responsibilities =
+    job.responsibilities || job.job_highlights?.Responsibilities || [];
+  const requirements =
+    job.requirements || job.job_highlights?.Qualifications || [];
+
+  const salary =
+    job.salary ||
+    (job.minSalary && job.maxSalary
+      ? `₹${Number(job.minSalary).toLocaleString()} - ₹${Number(job.maxSalary).toLocaleString()}`
+      : "Competitive Market Standard");
+
+  const postedDate = job.postedDate || job.job_posted_at_datetime_utc
+    ? new Date(job.postedDate || job.job_posted_at_datetime_utc).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -83,7 +122,7 @@ export default function JobDetailModal({
 
   const handleTailorResume = () => {
     onClose();
-    navigate(`/app/resume?targetRole=${encodeURIComponent(job.title)}&company=${encodeURIComponent(employerName)}`);
+    navigate(`/app/resume?targetRole=${encodeURIComponent(title)}&company=${encodeURIComponent(employerName)}`);
   };
 
   const handlePracticeDsa = () => {
@@ -98,7 +137,7 @@ export default function JobDetailModal({
 
   const handleCanIApply = () => {
     onClose();
-    navigate(`/app/can-i-apply?company=${encodeURIComponent(employerName)}&role=${encodeURIComponent(job.title)}`);
+    navigate(`/app/can-i-apply?company=${encodeURIComponent(employerName)}&role=${encodeURIComponent(title)}`);
   };
 
   return (
@@ -115,9 +154,9 @@ export default function JobDetailModal({
         <div className="p-6 pb-4 border-b-2 border-[#0D0431] bg-[#FEF9CF] flex items-start justify-between gap-4">
           <div className="flex items-start gap-4 min-w-0">
             <div className="w-14 h-14 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] flex items-center justify-center font-heading font-black text-xl text-[#0D0431] overflow-hidden shrink-0">
-              {job.companyLogo ? (
+              {companyLogo ? (
                 <img
-                  src={job.companyLogo}
+                  src={companyLogo}
                   alt={employerName}
                   className="w-full h-full object-contain p-2"
                   onError={(e) => {
@@ -152,25 +191,25 @@ export default function JobDetailModal({
               </div>
 
               <h1 className="text-xl sm:text-2xl font-heading font-black text-[#0D0431] tracking-tight leading-tight">
-                {job.title}
+                {title}
               </h1>
 
               <div className="flex flex-wrap items-center gap-2.5 text-xs font-semibold text-[#0D0431]/70 pt-0.5">
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-[#0D0431]" />
-                  {isRemote ? "Remote / Distributed" : `${job.city || "Bengaluru"}, India`}
+                  {isRemote ? "Remote / Distributed" : `${city}, India`}
                 </span>
                 <span>•</span>
                 <span className="px-2.5 py-0.5 rounded-full bg-white border border-[#0D0431] text-[11px] font-bold">
-                  {job.workMode || "Hybrid"}
+                  {workMode}
                 </span>
                 <span>•</span>
                 <span className="px-2.5 py-0.5 rounded-full bg-white border border-[#0D0431] text-[11px] font-bold">
-                  {job.employmentType || "Full-time"}
+                  {employmentType}
                 </span>
                 <span>•</span>
                 <span className="font-heading font-black text-xs text-[#0D0431] px-2.5 py-0.5 rounded-lg bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
-                  {job.salary || "Competitive Market Standard"}
+                  {salary}
                 </span>
               </div>
             </div>
@@ -297,7 +336,7 @@ export default function JobDetailModal({
                     Work Location
                   </div>
                   <div className="text-xs font-bold text-[#0D0431] mt-1 truncate">
-                    {isRemote ? "Remote" : `${job.city || "Bengaluru"}`}
+                    {isRemote ? "Remote" : `${city}`}
                   </div>
                 </div>
 
@@ -317,18 +356,18 @@ export default function JobDetailModal({
                   About The Role
                 </h3>
                 <p className="text-sm text-[#0D0431]/90 leading-relaxed whitespace-pre-line font-medium">
-                  {job.description}
+                  {job.description || "Exciting opportunity to build scalable systems with modern technologies."}
                 </p>
               </div>
 
               {/* Key Responsibilities */}
-              {job.responsibilities && job.responsibilities.length > 0 && (
+              {responsibilities && responsibilities.length > 0 && (
                 <div className="space-y-2">
                   <h3 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
                     Key Responsibilities
                   </h3>
                   <ul className="space-y-2">
-                    {job.responsibilities.map((resp, rIdx) => (
+                    {responsibilities.map((resp, rIdx) => (
                       <li key={rIdx} className="text-xs text-[#0D0431] flex items-start gap-2.5 font-medium">
                         <span className="w-2 h-2 rounded-full bg-[#896EE2] border border-[#0D0431] mt-1 shrink-0" />
                         <span className="leading-relaxed">{resp}</span>
@@ -339,13 +378,13 @@ export default function JobDetailModal({
               )}
 
               {/* Requirements & Qualifications */}
-              {job.requirements && job.requirements.length > 0 && (
+              {requirements && requirements.length > 0 && (
                 <div className="space-y-2">
                   <h3 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
                     Candidate Requirements
                   </h3>
                   <ul className="space-y-2">
-                    {job.requirements.map((req, reqIdx) => (
+                    {requirements.map((req, reqIdx) => (
                       <li key={reqIdx} className="text-xs text-[#0D0431] flex items-start gap-2.5 font-medium">
                         <CheckCircle2 className="w-3.5 h-3.5 text-[#0D0431] mt-0.5 shrink-0" />
                         <span className="leading-relaxed">{req}</span>
@@ -356,42 +395,44 @@ export default function JobDetailModal({
               )}
 
               {/* Required Skills & Tech Stack */}
-              <div className="space-y-3">
-                <h3 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
-                  Required Technologies
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {(job.skills || []).map((skill, sIdx) => {
-                    const isMatched = job.matchedSkills?.includes(skill);
-                    return (
-                      <span
-                        key={sIdx}
-                        className={`text-xs font-mono font-bold px-3 py-1 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1.5 ${
-                          isMatched
-                            ? "bg-[#E4CDFB] text-[#0D0431]"
-                            : "bg-[#FFC5B7] text-[#0D0431]"
-                        }`}
-                      >
-                        {isMatched ? (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#0D0431]" />
-                        ) : (
-                          <AlertTriangle className="w-3.5 h-3.5 text-[#0D0431]" />
-                        )}
-                        <span>{skill}</span>
-                      </span>
-                    );
-                  })}
+              {skillsList.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
+                    Required Technologies
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {skillsList.map((skill, sIdx) => {
+                      const isMatched = job.matchedSkills?.includes(skill);
+                      return (
+                        <span
+                          key={sIdx}
+                          className={`text-xs font-mono font-bold px-3 py-1 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1.5 ${
+                            isMatched
+                              ? "bg-[#E4CDFB] text-[#0D0431]"
+                              : "bg-[#FFC5B7] text-[#0D0431]"
+                          }`}
+                        >
+                          {isMatched ? (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#0D0431]" />
+                          ) : (
+                            <AlertTriangle className="w-3.5 h-3.5 text-[#0D0431]" />
+                          )}
+                          <span>{skill}</span>
+                        </span>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Preferred Skills */}
-              {job.preferredSkills && job.preferredSkills.length > 0 && (
+              {preferredSkillsList.length > 0 && (
                 <div className="space-y-2">
                   <h3 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
                     Preferred / Bonus Skills
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {job.preferredSkills.map((ps, psIdx) => (
+                    {preferredSkillsList.map((ps, psIdx) => (
                       <span
                         key={psIdx}
                         className="text-xs font-mono font-bold px-2.5 py-1 rounded-xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-[#0D0431]"
@@ -723,7 +764,7 @@ export default function JobDetailModal({
 
           <div className="w-full sm:w-auto flex items-center gap-2">
             <a
-              href={job.applicationUrl || "#"}
+              href={applyUrl || "#"}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431] border-2 border-[#0D0431] text-xs font-heading font-black uppercase tracking-wider shadow-[4px_4px_0_0_#0D0431] transition-all flex items-center justify-center gap-2 cursor-pointer active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0_0_#0D0431]"

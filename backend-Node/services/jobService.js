@@ -251,7 +251,8 @@ export const queryJobs = async (queryParams, user = null, userReadiness = null) 
     workMode = "ALL",
     experience = "ALL",
     employmentType = "ALL",
-    skills = "ALL",
+    skills,
+    skill,
     minSalary = 0,
     sort = "recommended",
     category = "all",
@@ -259,70 +260,65 @@ export const queryJobs = async (queryParams, user = null, userReadiness = null) 
     limit = 50,
   } = queryParams;
 
-  const filterQuery = { isExpired: false };
+  const andClauses = [{ isExpired: false }];
 
-  // Role Category filter
-  if (role && role !== "ALL") {
-    if (role === "Internship") {
-      filterQuery.$or = [{ employmentType: "Internship" }, { roleCategory: "Internship" }];
-    } else {
-      filterQuery.roleCategory = role;
-    }
+  // role filter
+  if (role === "Internship") {
+    andClauses.push({ $or: [{ employmentType: "Internship" }, { roleCategory: "Internship" }] });
+  } else if (role && role !== "ALL") {
+    andClauses.push({ roleCategory: role });
   }
 
-  // Work Mode filter
+  // workMode filter
   if (workMode && workMode !== "ALL") {
-    filterQuery.workMode = workMode;
+    andClauses.push({ workMode });
   }
 
-  // Employment Type filter
+  // employmentType filter
   if (employmentType && employmentType !== "ALL") {
-    filterQuery.employmentType = employmentType;
+    andClauses.push({ employmentType });
   }
 
-  // Experience Level filter
+  // experienceLevel filter
   if (experience && experience !== "ALL") {
-    filterQuery.experienceLevel = experience;
+    andClauses.push({ experienceLevel: experience });
   }
 
-  // Skills filter
-  if (skills && skills !== "ALL") {
-    const skillList = (Array.isArray(skills) ? skills : skills.split(","))
-      .map((s) => s.trim())
-      .filter(Boolean);
-    if (skillList.length > 0) {
-      filterQuery.skills = { $in: skillList.map((s) => new RegExp(`^${s}$`, "i")) };
-    }
+  // location filter
+  if (location === "Remote") {
+    andClauses.push({ $or: [{ workMode: "Remote" }, { city: "Remote" }] });
+  } else if (location && location !== "ALL") {
+    andClauses.push({ city: new RegExp(location, "i") });
   }
 
-  // Location filter
-  if (location && location !== "ALL") {
-    if (location === "Remote") {
-      filterQuery.$or = [{ workMode: "Remote" }, { city: "Remote" }];
-    } else {
-      filterQuery.city = new RegExp(location, "i");
-    }
-  }
-
-  // Min Salary filter
+  // minSalary filter
   const parsedMinSalary = Number(minSalary);
   if (!isNaN(parsedMinSalary) && parsedMinSalary > 0) {
-    filterQuery.maxSalary = { $gte: parsedMinSalary };
+    andClauses.push({ maxSalary: { $gte: parsedMinSalary } });
   }
 
-  // Text/Keyword Search across multiple fields
+  // search filter
   if (search && search.trim()) {
-    const q = search.trim();
-    const regex = new RegExp(q, "i");
-    filterQuery.$or = [
-      { title: regex },
-      { company: regex },
-      { skills: regex },
-      { city: regex },
-      { description: regex },
-      { tags: regex },
-    ];
+    const regex = new RegExp(search.trim(), "i");
+    andClauses.push({
+      $or: [
+        { title: regex },
+        { company: regex },
+        { skills: regex },
+        { city: regex },
+        { description: regex },
+        { tags: regex },
+      ],
+    });
   }
+
+  // skills filter
+  const skillParam = skills || skill;
+  if (skillParam && skillParam !== "ALL") {
+    andClauses.push({ skills: new RegExp(skillParam.trim(), "i") });
+  }
+
+  const filterQuery = andClauses.length > 1 ? { $and: andClauses } : andClauses[0];
 
   // Fetch candidate jobs from MongoDB (or memory fallback)
   let rawJobs = [];
@@ -354,8 +350,8 @@ export const queryJobs = async (queryParams, user = null, userReadiness = null) 
     if (experience && experience !== "ALL") {
       memoryJobs = memoryJobs.filter((j) => j.experienceLevel === experience);
     }
-    if (skills && skills !== "ALL") {
-      const skillList = (Array.isArray(skills) ? skills : skills.split(",")).map((s) =>
+    if (skillParam && skillParam !== "ALL") {
+      const skillList = (Array.isArray(skillParam) ? skillParam : skillParam.split(",")).map((s) =>
         s.trim().toLowerCase()
       );
       memoryJobs = memoryJobs.filter((j) =>
@@ -562,5 +558,163 @@ export const toggleUserSavedJob = async (userId, jobId) => {
     isSaved,
     savedJobIds: user.savedJobs,
     savedCount: user.savedJobs.length,
+  };
+};
+
+/**
+ * Normalizes a raw job object from RapidAPI JSearch or third-party APIs into the standard GetPlaced job format.
+ *
+ * @param {Object} raw - Raw API response object
+ * @returns {Object} Normalized job listing
+ */
+export const normalizeRapidApiJob = (raw = {}) => {
+  if (!raw) return null;
+
+  const jobId =
+    raw.job_id ||
+    raw.jobId ||
+    raw.id ||
+    raw._id ||
+    `rapid-${Math.random().toString(36).substring(2, 9)}`;
+
+  const title = raw.job_title || raw.title || "Software Engineer";
+  const company = raw.employer_name || raw.company || "Technology Company";
+  const companyLogo = raw.employer_logo || raw.companyLogo || "";
+  const city = raw.job_city || raw.city || (raw.job_is_remote ? "Remote" : "Bengaluru");
+  const country = raw.job_country || raw.country || "India";
+  const location = raw.job_location || raw.location || `${city}, ${country}`;
+  const isRemote = Boolean(
+    raw.job_is_remote ||
+    raw.workMode === "Remote" ||
+    String(city).toLowerCase().includes("remote")
+  );
+  const workMode = isRemote ? "Remote" : (raw.workMode || "Hybrid");
+
+  let employmentType = raw.job_employment_type || raw.employmentType || "Full-time";
+  if (typeof employmentType === "string") {
+    const empUpper = employmentType.toUpperCase();
+    if (empUpper === "FULLTIME") employmentType = "Full-time";
+    else if (empUpper === "INTERN" || empUpper === "INTERNSHIP") employmentType = "Internship";
+    else if (empUpper === "CONTRACTOR") employmentType = "Contract";
+    else if (empUpper === "PARTTIME") employmentType = "Part-time";
+  }
+
+  const description =
+    raw.job_description ||
+    raw.description ||
+    "Exciting engineering role building high-impact technology.";
+
+  const applyUrl =
+    raw.job_apply_link ||
+    raw.job_google_link ||
+    raw.applyUrl ||
+    raw.applicationUrl ||
+    "";
+
+  // Skills parsing
+  let skills = [];
+  if (Array.isArray(raw.job_required_skills) && raw.job_required_skills.length > 0) {
+    skills = raw.job_required_skills;
+  } else if (Array.isArray(raw.skills) && raw.skills.length > 0) {
+    skills = raw.skills;
+  } else if (typeof raw.skills === "string") {
+    skills = raw.skills.split(",").map((s) => s.trim()).filter(Boolean);
+  } else {
+    const textToScan = `${title} ${description}`.toLowerCase();
+    const commonSkills = [
+      "React",
+      "Node.js",
+      "Python",
+      "Java",
+      "C++",
+      "Go",
+      "TypeScript",
+      "JavaScript",
+      "SQL",
+      "AWS",
+      "Docker",
+      "Kubernetes",
+      "MongoDB",
+      "Git",
+      "REST APIs",
+      "GraphQL",
+    ];
+    skills = commonSkills.filter((skill) => textToScan.includes(skill.toLowerCase()));
+    if (skills.length === 0) {
+      skills = ["Software Engineering", "Problem Solving", "Git"];
+    }
+  }
+
+  const responsibilities =
+    raw.job_highlights?.Responsibilities || raw.responsibilities || [];
+  const requirements =
+    raw.job_highlights?.Qualifications || raw.requirements || [];
+
+  let salary = raw.salary || "Competitive CTC";
+  if (raw.job_min_salary && raw.job_max_salary) {
+    const curr = raw.job_salary_currency || "₹";
+    salary = `${curr} ${Number(raw.job_min_salary).toLocaleString()} - ${Number(raw.job_max_salary).toLocaleString()}`;
+  }
+
+  let postedDate = raw.job_posted_at_datetime_utc
+    ? new Date(raw.job_posted_at_datetime_utc)
+    : raw.postedDate
+    ? new Date(raw.postedDate)
+    : new Date();
+
+  return {
+    _id: jobId,
+    jobId,
+    id: jobId,
+    title,
+    company,
+    companyNormalized: normalizeIdentifier(company),
+    companyLogo,
+    location,
+    city,
+    country,
+    workMode,
+    employmentType,
+    experience:
+      raw.experience || (employmentType === "Internship" ? "Internship" : "0-2 years"),
+    experienceLevel:
+      raw.experienceLevel ||
+      (employmentType === "Internship" ? "Internship" : "Entry Level"),
+    minExperienceYears:
+      raw.minExperienceYears ?? (employmentType === "Internship" ? 0 : 0),
+    maxExperienceYears: raw.maxExperienceYears ?? 2,
+    roleCategory:
+      raw.roleCategory ||
+      (employmentType === "Internship" ? "Internship" : "Software Engineer"),
+    description,
+    responsibilities,
+    requirements,
+    skills,
+    preferredSkills: raw.preferredSkills || [],
+    education:
+      raw.education ||
+      "Bachelor's degree in Computer Science, Engineering, or related field",
+    cgpaCutoff: raw.cgpaCutoff || 7.0,
+    salary,
+    minSalary: raw.job_min_salary || raw.minSalary || null,
+    maxSalary: raw.job_max_salary || raw.maxSalary || null,
+    salaryCurrency: raw.job_salary_currency || raw.salaryCurrency || "INR",
+    postedDate,
+    lastVerifiedAt: new Date(),
+    applicationUrl: applyUrl,
+    applyUrl,
+    source: raw.source || "RapidAPI JSearch",
+    sourceType: raw.sourceType || "VERIFIED",
+    isVerified: true,
+    isExpired: false,
+    tags: raw.tags || [workMode, employmentType, "RapidAPI"],
+    companyDetails: raw.companyDetails || {
+      about: `${company} hiring tech talent via official listings.`,
+      industry: "Information Technology & Software",
+      website: raw.employer_website || "",
+      size: "Enterprise",
+      headquarters: location,
+      openPositionsCount: 1,
+    },
   };
 };

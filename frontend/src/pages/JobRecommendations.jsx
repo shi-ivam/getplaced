@@ -89,7 +89,10 @@ export default function JobRecommendations() {
       if (location !== "ALL") params.set("location", location);
       if (workMode !== "ALL") params.set("workMode", workMode);
       if (experience !== "ALL") params.set("experience", experience);
-      if (selectedSkill !== "ALL") params.set("skill", selectedSkill);
+      if (selectedSkill !== "ALL") {
+        params.set("skills", selectedSkill);
+        params.set("skill", selectedSkill);
+      }
       if (minSalary > 0) params.set("minSalary", minSalary);
       if (sort) params.set("sort", sort);
       if (activeCategory !== "all") params.set("category", activeCategory);
@@ -103,10 +106,10 @@ export default function JobRecommendations() {
         setRecommendedJobs(res.data.recommendedJobs || []);
         setTargetCompanyJobs(res.data.targetCompanyJobs || []);
         setMeta({
-          targetCompany: res.data.targetCompany || "",
-          targetRole: res.data.targetRole || "",
-          savedCount: res.data.savedCount || 0,
-          userReadiness: res.data.userReadiness || null,
+          targetCompany: res.data.meta?.targetCompany ?? res.data.targetCompany ?? "",
+          targetRole: res.data.meta?.targetRole ?? res.data.targetRole ?? "",
+          savedCount: res.data.meta?.savedCount ?? res.data.savedCount ?? 0,
+          userReadiness: res.data.meta?.userReadiness ?? res.data.userReadiness ?? null,
         });
       }
     } catch (err) {
@@ -122,19 +125,20 @@ export default function JobRecommendations() {
   }, [search, role, location, workMode, experience, selectedSkill, minSalary, sort, activeCategory]);
 
   const handleToggleSave = async (jobToToggle) => {
+    const targetId = jobToToggle._id || jobToToggle.jobId || jobToToggle.id;
     const updatedIsSaved = !jobToToggle.isSaved;
 
     setJobs((prev) =>
-      prev.map((j) => (j.id === jobToToggle.id ? { ...j, isSaved: updatedIsSaved } : j))
+      prev.map((j) => ((j._id || j.jobId || j.id) === targetId ? { ...j, isSaved: updatedIsSaved } : j))
     );
 
-    if (selectedJob && selectedJob.id === jobToToggle.id) {
+    if (selectedJob && (selectedJob._id || selectedJob.jobId || selectedJob.id) === targetId) {
       setSelectedJob((prev) => ({ ...prev, isSaved: updatedIsSaved }));
     }
 
     try {
       await axios.post(
-        `${NODE_API_URL}/api/jobs/saved/${jobToToggle.id || jobToToggle._id}`,
+        `${NODE_API_URL}/api/jobs/saved/${targetId}`,
         {},
         { withCredentials: true }
       );
@@ -247,6 +251,7 @@ export default function JobRecommendations() {
         experience={experience}
         onExperienceChange={setExperience}
         selectedSkill={selectedSkill}
+        onSelectSkill={setSelectedSkill}
         onSkillChange={setSelectedSkill}
         minSalary={minSalary}
         onMinSalaryChange={setMinSalary}
@@ -289,7 +294,7 @@ export default function JobRecommendations() {
         >
           {jobs.map((job) => (
             <JobCard
-              key={job.id || job._id}
+              key={job._id || job.jobId || job.id}
               job={job}
               viewMode={viewMode}
               onSelect={setSelectedJob}

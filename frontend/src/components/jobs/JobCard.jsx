@@ -17,24 +17,44 @@ import {
 import GpBadge from "@/components/gp/GpBadge";
 
 export default function JobCard({
-  job,
+  job = {},
   onSelect,
   onToggleSave,
   onLearnSkill,
   viewMode = "grid",
 }) {
-  const employerName = job.company || "Technology Company";
+  const employerName = job.company || job.employer_name || "Technology Company";
+  const title = job.title || job.job_title || "Software Engineer";
+  const companyLogo = job.companyLogo || job.employer_logo || "";
   const initial = employerName.charAt(0).toUpperCase();
+  const city = job.city || job.job_city || job.location || "Bengaluru";
   const isRemote =
-    job.workMode === "Remote" || (job.city || "").toLowerCase().includes("remote");
+    job.workMode === "Remote" ||
+    job.job_is_remote === true ||
+    (city || "").toLowerCase().includes("remote");
 
-  const postedDate = job.postedDate
-    ? new Date(job.postedDate).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      })
-    : "Recently";
+  const postedDate =
+    job.postedDate || job.job_posted_at_datetime_utc
+      ? new Date(job.postedDate || job.job_posted_at_datetime_utc).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        })
+      : "Recently";
 
+  const rawSkills = job.skills || job.job_required_skills || [];
+  const skillsList = Array.isArray(rawSkills)
+    ? rawSkills
+    : typeof rawSkills === "string"
+    ? rawSkills.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  const salary =
+    job.salary ||
+    (job.minSalary && job.maxSalary
+      ? `₹${Number(job.minSalary).toLocaleString()} - ₹${Number(job.maxSalary).toLocaleString()}`
+      : "Competitive CTC");
+
+  const employmentType = job.employmentType || job.job_employment_type || "Full-time";
   const matchScore = job.matchScore != null ? job.matchScore : null;
 
   const getScoreBadgeTheme = (score) => {
@@ -53,9 +73,9 @@ export default function JobCard({
       >
         <div className="flex items-start gap-3.5 flex-1 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-[#F8F8F5] border border-[#E2DEEC] flex items-center justify-center font-bold text-sm text-[#17103D] shrink-0">
-            {job.companyLogo ? (
+            {companyLogo ? (
               <img
-                src={job.companyLogo}
+                src={companyLogo}
                 alt={employerName}
                 className="w-full h-full object-contain p-1 rounded-xl"
                 onError={(e) => {
@@ -70,7 +90,7 @@ export default function JobCard({
           <div className="space-y-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-sm font-bold text-[#17103D] group-hover:text-[#6E44FF] transition-colors truncate">
-                {job.title}
+                {title}
               </h3>
               {matchScore != null && (
                 <GpBadge theme={getScoreBadgeTheme(matchScore)} size="sm">
@@ -84,10 +104,10 @@ export default function JobCard({
               <span>•</span>
               <span className="flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
-                {job.city || "Bangalore"}
+                {city}
               </span>
               <span>•</span>
-              <span className="font-mono">{job.salary || "Competitive CTC"}</span>
+              <span className="font-mono">{salary}</span>
             </div>
           </div>
         </div>
@@ -125,9 +145,9 @@ export default function JobCard({
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#F8F8F5] border border-[#E2DEEC] flex items-center justify-center font-bold text-sm text-[#17103D] shrink-0">
-              {job.companyLogo ? (
+              {companyLogo ? (
                 <img
-                  src={job.companyLogo}
+                  src={companyLogo}
                   alt={employerName}
                   className="w-full h-full object-contain p-1 rounded-xl"
                   onError={(e) => {
@@ -143,7 +163,7 @@ export default function JobCard({
               <div className="text-xs font-bold text-[#17103D] truncate">{employerName}</div>
               <div className="text-[11px] text-[#6F6A80] flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
-                <span>{job.city || "Bangalore"}</span>
+                <span>{city}</span>
               </div>
             </div>
           </div>
@@ -161,7 +181,7 @@ export default function JobCard({
 
         <div className="space-y-1">
           <h3 className="text-sm font-bold text-[#17103D] group-hover:text-[#6E44FF] transition-colors line-clamp-1">
-            {job.title}
+            {title}
           </h3>
           <p className="text-xs text-[#6F6A80] line-clamp-2 leading-relaxed">
             {job.description || "Exciting opportunity to build scalable systems with modern technologies."}
@@ -169,9 +189,9 @@ export default function JobCard({
         </div>
 
         {/* Skills Tag Pills */}
-        {job.skills && job.skills.length > 0 && (
+        {skillsList.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {job.skills.slice(0, 3).map((skill, i) => (
+            {skillsList.slice(0, 3).map((skill, i) => (
               <span
                 key={i}
                 className="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-[#F8F8F5] border border-[#E2DEEC] text-[#6F6A80]"
@@ -179,9 +199,9 @@ export default function JobCard({
                 {skill}
               </span>
             ))}
-            {job.skills.length > 3 && (
+            {skillsList.length > 3 && (
               <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-lg text-[#6F6A80]">
-                +{job.skills.length - 3}
+                +{skillsList.length - 3}
               </span>
             )}
           </div>
@@ -192,9 +212,9 @@ export default function JobCard({
       <div className="pt-3 border-t border-[#E2DEEC] flex items-center justify-between text-xs">
         <div>
           <span className="font-mono font-bold text-[#17103D] block text-xs">
-            {job.salary || "Competitive CTC"}
+            {salary}
           </span>
-          <span className="text-[10px] text-[#6F6A80]">{job.employmentType || "Full-time"}</span>
+          <span className="text-[10px] text-[#6F6A80]">{employmentType}</span>
         </div>
 
         {matchScore != null ? (

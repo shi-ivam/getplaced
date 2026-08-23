@@ -48,6 +48,7 @@ import {
 import { CURATED_STUDY_VIDEOS } from "./services/studyLibraryService.js";
 import { MASTER_MILESTONES } from "./services/milestoneService.js";
 import { ACTIVE_WEEKLY_CHALLENGES, getArenaLeaderboard } from "./services/arenaService.js";
+import { queryJobs, normalizeRapidApiJob, calculateJobMatch } from "./services/jobService.js";
 
 console.log("==========================================");
 console.log("RUNNING GETPLACED BACKEND TEST SUITE");
@@ -398,6 +399,56 @@ async function runAllTests() {
     assert.ok(ACTIVE_WEEKLY_CHALLENGES.length >= 3);
     const leaderboard = await getArenaLeaderboard("user123");
     assert.ok(Array.isArray(leaderboard.topRankers));
+  });
+
+  // 7. Group D Feature Tests: Jobs Market & RapidAPI Normalization (#72)
+  console.log("\n[7] Group D: Jobs Market & RapidAPI Normalization Tests (#72)");
+
+  await test("normalizeRapidApiJob accurately maps raw RapidAPI JSearch payloads", () => {
+    const rawRapidJob = {
+      job_id: "jsearch-123",
+      job_title: "Senior Full Stack Engineer",
+      employer_name: "Amazon",
+      employer_logo: "https://example.com/amazon.png",
+      job_city: "Bengaluru",
+      job_country: "India",
+      job_is_remote: false,
+      job_employment_type: "FULLTIME",
+      job_description: "Build high performance web applications using React, Node.js and AWS.",
+      job_apply_link: "https://amazon.jobs/123",
+      job_required_skills: ["React", "Node.js", "AWS", "TypeScript"],
+      job_min_salary: 2000000,
+      job_max_salary: 3500000,
+      job_salary_currency: "INR",
+    };
+
+    const normalized = normalizeRapidApiJob(rawRapidJob);
+    assert.equal(normalized.jobId, "jsearch-123");
+    assert.equal(normalized.title, "Senior Full Stack Engineer");
+    assert.equal(normalized.company, "Amazon");
+    assert.equal(normalized.companyLogo, "https://example.com/amazon.png");
+    assert.equal(normalized.workMode, "Hybrid");
+    assert.equal(normalized.employmentType, "Full-time");
+    assert.equal(normalized.applicationUrl, "https://amazon.jobs/123");
+    assert.equal(normalized.applyUrl, "https://amazon.jobs/123");
+    assert.deepEqual(normalized.skills, ["React", "Node.js", "AWS", "TypeScript"]);
+    assert.equal(normalized.isVerified, true);
+    assert.equal(normalized.isExpired, false);
+  });
+
+  await test("queryJobs applies combined filters (role, location, skills, search) properly", async () => {
+    const resRoleInternship = await queryJobs({ role: "Internship" });
+    assert.ok(resRoleInternship.success);
+    assert.ok(resRoleInternship.jobs.length > 0);
+    assert.ok(
+      resRoleInternship.jobs.every(
+        (j) => j.employmentType === "Internship" || j.roleCategory === "Internship"
+      )
+    );
+
+    const resSkillSearch = await queryJobs({ skills: "React", search: "Engineer" });
+    assert.ok(resSkillSearch.success);
+    assert.ok(resSkillSearch.jobs.length > 0);
   });
 
   console.log("\n==========================================");

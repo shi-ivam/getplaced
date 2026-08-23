@@ -16,7 +16,7 @@ import coachRoutes from "./routes/coachRoutes.js"
 import vtopRoutes from "./routes/vtopRoutes.js"
 import jobRoutes from "./routes/jobRoutes.js"
 import Job from "./models/jobModel.js"
-import { seedJobsIfNeeded } from "./services/jobService.js"
+import { seedJobsIfNeeded, normalizeRapidApiJob } from "./services/jobService.js"
 
 import cookieParser from "cookie-parser"
 import cors from "cors"
@@ -116,7 +116,8 @@ const handleJobRecommendations = async (req, res) => {
       });
 
       if (response.data?.data && response.data.data.length > 0) {
-        return res.json({ jobs: response.data.data, source: "live_rapidapi" });
+        const normalizedJobs = response.data.data.map(normalizeRapidApiJob);
+        return res.json({ jobs: normalizedJobs, source: "live_rapidapi" });
       }
     } catch (error) {
       console.warn("RapidAPI lookup failed or rate limited, falling back to MongoDB Job queries:", error.message);
