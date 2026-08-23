@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
 import { FileCheck, Sparkles, CheckCircle2, TrendingUp, Zap, ArrowUpRight, UploadCloud, Loader2, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { NODE_API_URL, PY_API_URL } from "@/config/api";
+import CaideBadge from "@/components/caide/CaideBadge";
+import CaideCard from "@/components/caide/CaideCard";
+import CaideButton from "@/components/caide/CaideButton";
 
 const DEFAULT_DEMO_DATA = {
   name: "Richard Gomez",
@@ -65,7 +67,6 @@ const ResumeAnalyzer = () => {
           }
         }
       } catch (err) {
-        // Unauthenticated or error -> remain in interactive demo mode
         setIsLoggedIn(false);
       }
     };
@@ -82,11 +83,10 @@ const ResumeAnalyzer = () => {
     setUploadSuccess("");
 
     try {
-      // 1. Send to FastAPI /analyze-resume if available or simulate parsing
       const formData = new FormData();
       formData.append("file", file);
 
-      let parsedScore = 85;
+      let parsedScore = 88;
       let parsedKeywords = ["React.js", "Node.js", "Python", "PostgreSQL", "Docker"];
       let parsedInsights = [
         { skill: "System Design", score: 86 },
@@ -111,12 +111,10 @@ const ResumeAnalyzer = () => {
           if (pyRes.data.skills) parsedInsights = pyRes.data.skills;
         }
       } catch (pyErr) {
-        // Fallback file parsing score calculation based on text size / filename
         const nameLen = file.name.length;
         parsedScore = Math.min(96, Math.max(72, 75 + (nameLen % 20)));
       }
 
-      // Save to logged in backend if authenticated
       if (isLoggedIn) {
         try {
           await axios.post(
@@ -134,7 +132,7 @@ const ResumeAnalyzer = () => {
             { withCredentials: true }
           );
         } catch (saveErr) {
-          console.warn("Could not save resume score to user profile:", saveErr);
+          console.warn("Could not save resume score:", saveErr);
         }
       }
 
@@ -147,7 +145,7 @@ const ResumeAnalyzer = () => {
         isDemo: false,
       });
 
-      setUploadSuccess(`Successfully analyzed ${file.name}! ATS Score updated.`);
+      setUploadSuccess(`Successfully parsed ${file.name}! ATS Score updated.`);
     } catch (err) {
       console.error("Resume upload error:", err);
       setUploadError("Failed to parse resume file. Please try again.");
@@ -157,168 +155,172 @@ const ResumeAnalyzer = () => {
   };
 
   return (
-    <section id="resume" className="py-20 md:py-32 bg-[#09090b] text-zinc-100 relative overflow-hidden">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-10">
+    <section id="resume" className="py-24 md:py-32 bg-[#E4FFDA] u-background-grid-green text-[#0D0431] relative overflow-hidden border-b-2 border-[#0D0431]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
         
         {/* Section Header */}
-        <div className="flex flex-col items-center text-center max-w-2xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono uppercase tracking-wider">
-            <FileCheck className="w-3.5 h-3.5 text-emerald-400" /> ATS Resume Scoring
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
-            Resume Analysis & Skill Matrix
+        <div className="flex flex-col items-center text-center max-w-3xl mx-auto space-y-4">
+          <CaideBadge theme="light-purple">
+            100% Recruiter-Proof
+          </CaideBadge>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-black tracking-tight text-[#0D0431]">
+            Resume Analysis & Competency Matrix
           </h2>
-          <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
-            Keyword verification, skill mapping, and match scoring against role requirements.
+          <p className="text-[#0D0431]/80 text-sm sm:text-base md:text-lg leading-relaxed font-sans">
+            Automated keyword extraction, radar skill mapping, and ATS match scoring engineered to beat automated screening algorithms.
           </p>
         </div>
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           
           {/* Left ATS Score Card (5 Cols) */}
-          <motion.div 
-            whileHover={{ y: -2 }}
-            transition={{ duration: 0.2 }}
-            className="lg:col-span-5 rounded-2xl bg-zinc-900/50 p-5 sm:p-7 border border-zinc-800 flex flex-col justify-between h-auto min-h-[400px]"
-          >
-            <div className="space-y-5">
-              <div className="flex items-center justify-between pb-3.5 border-b border-zinc-800 flex-wrap gap-2">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 shrink-0">
-                    <Sparkles className="w-4 h-4 text-purple-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="font-semibold text-white text-sm truncate">{resumeData.name}</h3>
-                    <p className="text-xs text-zinc-400 truncate">{resumeData.role}</p>
-                  </div>
-                </div>
-                {resumeData.isDemo ? (
-                  <span className="text-[10px] font-mono bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded-md border border-amber-500/20 font-medium shrink-0">
-                    DEMO
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-md border border-emerald-500/20 font-medium shrink-0">
-                    VERIFIED
-                  </span>
-                )}
-              </div>
-
-              {/* Score Display */}
-              <div className="text-center py-2 space-y-1">
-                <div className="text-5xl sm:text-6xl font-bold font-mono text-emerald-400">
-                  {resumeData.atsScore}%
-                </div>
-                <p className="text-xs uppercase tracking-wider text-zinc-400 font-medium font-mono">
-                  ATS Match Score
-                </p>
-              </div>
-
-              {/* File Uploader */}
-              <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-2.5">
-                <div className="flex items-center justify-between text-xs font-medium text-zinc-300">
-                  <span>Upload Resume</span>
-                  <UploadCloud className="w-4 h-4 text-zinc-400" />
-                </div>
-                <label className="flex flex-col items-center justify-center p-3 border border-dashed border-zinc-700 hover:border-zinc-500 rounded-lg bg-zinc-900/40 cursor-pointer transition text-center group">
-                  {uploading ? (
-                    <div className="flex items-center gap-2 text-xs text-zinc-300 font-mono">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Parsing resume...
+          <div className="lg:col-span-5">
+            <CaideCard
+              theme="white"
+              shadow="lg"
+              className="p-6 sm:p-8 flex flex-col justify-between h-full space-y-6"
+            >
+              <div className="space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b-2 border-[#0D0431] flex-wrap gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-[#FEF9CF] border-2 border-[#0D0431] flex items-center justify-center text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] shrink-0">
+                      <Sparkles className="w-5 h-5 text-[#896EE2]" />
                     </div>
+                    <div className="min-w-0">
+                      <h3 className="font-heading font-bold text-[#0D0431] text-base truncate">{resumeData.name}</h3>
+                      <p className="text-xs text-[#0D0431]/70 truncate font-semibold">{resumeData.role}</p>
+                    </div>
+                  </div>
+                  {resumeData.isDemo ? (
+                    <span className="text-[11px] font-mono bg-[#FEDF6A] text-[#0D0431] px-3 py-1 rounded-full border-2 border-[#0D0431] font-bold shadow-[2px_2px_0_0_#0D0431] shrink-0">
+                      DEMO MODE
+                    </span>
                   ) : (
-                    <>
-                      <span className="text-xs text-zinc-300 font-medium group-hover:text-white">
-                        Select PDF or DOCX file
-                      </span>
-                      <span className="text-[10px] text-zinc-500 mt-0.5">Automated parsing and keyword matching</span>
-                    </>
+                    <span className="text-[11px] font-mono bg-[#D4FDF7] text-[#0D0431] px-3 py-1 rounded-full border-2 border-[#0D0431] font-bold shadow-[2px_2px_0_0_#0D0431] shrink-0">
+                      VERIFIED ATS
+                    </span>
                   )}
-                  <input
-                    type="file"
-                    accept=".pdf,.docx,.doc,.txt"
-                    onChange={handleFileUpload}
-                    disabled={uploading}
-                    className="hidden"
-                  />
-                </label>
-                {uploadSuccess && (
-                  <div className="text-xs text-emerald-400 font-mono bg-emerald-500/10 p-2 rounded border border-emerald-500/20">
-                    {uploadSuccess}
+                </div>
+
+                {/* Massive Score Display */}
+                <div className="text-center py-2 space-y-1">
+                  <div className="text-7xl font-heading font-black text-[#0D0431]">
+                    {resumeData.atsScore}%
                   </div>
-                )}
-                {uploadError && (
-                  <div className="text-xs text-rose-300 font-mono bg-rose-950/40 p-2 rounded border border-rose-800/40 flex items-center gap-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-400" />
-                    <span>{uploadError}</span>
+                  <p className="text-xs uppercase tracking-widest text-[#0D0431]/70 font-bold">
+                    ATS Score vs Tier-1 Industry Benchmarks
+                  </p>
+                </div>
+
+                {/* File Uploader */}
+                <div className="p-4 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] space-y-3">
+                  <div className="flex items-center justify-between text-xs font-bold text-[#0D0431]">
+                    <span>Upload Your Resume</span>
+                    <UploadCloud className="w-4 h-4 text-[#896EE2]" />
                   </div>
-                )}
+                  <label className="flex flex-col items-center justify-center p-3 border-2 border-dashed border-[#0D0431] hover:bg-white rounded-xl bg-white/70 cursor-pointer transition text-center group">
+                    {uploading ? (
+                      <div className="flex items-center gap-2 text-xs text-[#0D0431] font-mono font-bold">
+                        <Loader2 className="w-4 h-4 animate-spin text-[#896EE2]" /> Parsing document...
+                      </div>
+                    ) : (
+                      <>
+                        <span className="text-xs text-[#0D0431] font-bold">
+                          Select PDF or DOCX file
+                        </span>
+                        <span className="text-[10px] text-[#0D0431]/60 mt-0.5">Instant ATS scoring and radar extraction</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept=".pdf,.docx,.doc,.txt"
+                      onChange={handleFileUpload}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                  </label>
+                  {uploadSuccess && (
+                    <div className="text-xs text-[#0D0431] font-bold bg-[#D4FDF7] p-2 rounded-lg border-2 border-[#0D0431]">
+                      {uploadSuccess}
+                    </div>
+                  )}
+                  {uploadError && (
+                    <div className="text-xs text-[#0D0431] font-bold bg-[#FFC5B7] p-2 rounded-lg border-2 border-[#0D0431] flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0 text-[#F85B52]" />
+                      <span>{uploadError}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Keywords Found Pills */}
+                <div className="pt-4 border-t-2 border-[#0D0431] space-y-3">
+                  <div className="text-xs font-bold text-[#0D0431] uppercase tracking-wider">
+                    Detected Keywords
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {resumeData.keywordsFound.map((kw, idx) => {
+                      const kwText = typeof kw === "string" ? kw : kw?.keyword || `keyword-${idx}`;
+                      return (
+                        <span key={`${kwText}-${idx}`} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#E4CDFB] border-2 border-[#0D0431] text-xs text-[#0D0431] font-mono font-bold shadow-[2px_2px_0_0_#0D0431]">
+                          <CheckCircle2 className="w-3 h-3 text-[#0D0431] shrink-0" />
+                          <span className="truncate">{kwText}</span>
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
-              {/* Keywords Found */}
-              <div className="pt-3 border-t border-zinc-800 space-y-2">
-                <div className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
-                  Verified Keywords
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {resumeData.keywordsFound.map((kw, idx) => {
-                    const kwText = typeof kw === "string" ? kw : kw?.keyword || `keyword-${idx}`;
-                    return (
-                      <span key={`${kwText}-${idx}`} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 font-mono">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
-                        <span className="truncate">{kwText}</span>
-                      </span>
-                    );
-                  })}
-                </div>
+              <div className="pt-6 border-t-2 border-[#0D0431]">
+                <Link
+                  to="/resume"
+                  className="btn_secondary_wrap w-full flex items-center justify-center gap-2"
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                  <span>Open Full Resume Suite</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
-            </div>
-
-            <div className="pt-4 mt-4 border-t border-zinc-800">
-              <Link
-                to="/resume"
-                className="flex items-center justify-center gap-1.5 w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs font-medium text-zinc-200 hover:text-white transition"
-              >
-                <Zap className="w-3.5 h-3.5 text-purple-400" />
-                Detailed Resume Workspace
-                <ArrowUpRight className="w-3.5 h-3.5 text-zinc-400" />
-              </Link>
-            </div>
-          </motion.div>
+            </CaideCard>
+          </div>
 
           {/* Right Radar Chart Analysis (7 Cols) */}
-          <motion.div 
-            whileHover={{ y: -2 }}
-            transition={{ duration: 0.2 }}
-            className="lg:col-span-7 rounded-2xl bg-zinc-900/50 p-5 sm:p-7 border border-zinc-800 flex flex-col justify-between h-auto min-h-[400px]"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
-                <span>Competency Radar</span>
+          <div className="lg:col-span-7">
+            <CaideCard
+              theme="white"
+              shadow="lg"
+              className="p-6 sm:p-8 flex flex-col justify-between h-full space-y-4"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b-2 border-[#0D0431]">
+                <div className="flex items-center gap-2 font-heading font-bold text-sm text-[#0D0431]">
+                  <TrendingUp className="w-4 h-4 text-[#896EE2]" />
+                  <span>Skill Competency Matrix</span>
+                </div>
+                <span className="font-mono text-xs font-bold text-[#0D0431] bg-[#FEDF6A] px-3 py-1 rounded-full border border-[#0D0431]">
+                  {resumeData.isDemo ? "BENCHMARK: DEMO" : `CANDIDATE: ${resumeData.name.toUpperCase()}`}
+                </span>
               </div>
-              <span className="text-xs font-mono text-zinc-400">
-                {resumeData.isDemo ? "BENCHMARK: DEMO PROFILE" : `USER: ${resumeData.name.toUpperCase()}`}
-              </span>
-            </div>
 
-            <div className="w-full h-[280px] sm:h-[320px] flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={resumeData.insights}>
-                  <PolarGrid stroke="rgba(255, 255, 255, 0.08)" />
-                  <PolarAngleAxis dataKey="skill" stroke="#71717a" tick={{ fill: '#d4d4d8', fontSize: 11 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="rgba(255, 255, 255, 0.06)" />
-                  <Radar name="Candidate Score" dataKey="score" stroke="#10b981" fill="#10b981" fillOpacity={0.25} />
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
+              <div className="w-full h-[320px] sm:h-[360px] flex items-center justify-center bg-[#FEF9CF]/30 rounded-2xl border-2 border-[#0D0431] p-4 shadow-[3px_3px_0_0_#0D0431]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={resumeData.insights}>
+                    <PolarGrid stroke="#0D0431" strokeDasharray="3 3" />
+                    <PolarAngleAxis dataKey="skill" stroke="#0D0431" tick={{ fill: '#0D0431', fontSize: 11, fontWeight: 700 }} />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#0D0431" />
+                    <Radar name="Candidate Score" dataKey="score" stroke="#0D0431" strokeWidth={2} fill="#896EE2" fillOpacity={0.6} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-zinc-800 text-xs text-zinc-400 font-mono">
-              <span>Standard ATS Benchmark</span>
-              <span className="text-emerald-400 font-medium">
-                {resumeData.isDemo ? "Upload resume to recalculate" : "Verified profile active"}
-              </span>
-            </div>
-          </motion.div>
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t-2 border-[#0D0431] text-xs text-[#0D0431]/80 font-mono font-bold">
+                <span>ATS Competency Framework</span>
+                <span className="text-[#896EE2]">
+                  {resumeData.isDemo ? "Upload file to analyze custom profile" : "Custom candidate profile loaded"}
+                </span>
+              </div>
+            </CaideCard>
+          </div>
 
         </div>
       </div>

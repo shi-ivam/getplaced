@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import LandingPage from '../pages/LandingPage'
 import Layout from './Layout'
 import AnalyzeResume from '@/pages/AnalyzeResume'
@@ -28,7 +28,93 @@ import VtopDetails from '@/pages/VtopDetails'
 import PrivacyProtection from '@/pages/PrivacyProtection'
 import CanIApply from '@/pages/CanIApply'
 import WhichRoleFitsMe from '@/pages/WhichRoleFitsMe'
+import CaideBadge from '@/components/caide/CaideBadge'
+import CaideButton, { CaideArrow } from '@/components/caide/CaideButton'
 
+function TermsPage() {
+  return (
+    <div className="min-h-screen bg-[#FEF9CF] u-background-grid-yellow text-[#0D0431] font-sans selection:bg-[#FEDF6A] selection:text-[#0D0431] p-4 sm:p-8 md:p-12">
+      <div className="max-w-4xl mx-auto space-y-6 pt-8 pb-16">
+        <div className="flex items-center justify-between">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border-2 border-[#0D0431] text-xs font-mono font-bold text-[#0D0431] shadow-[3px_3px_0_0_#0D0431] hover:bg-[#FEDF6A] transition-all"
+          >
+            <CaideArrow className="w-3.5 h-3.5 rotate-180" />
+            <span>Return to Home</span>
+          </Link>
+
+          <CaideBadge theme="light-purple">
+            Platform Policies
+          </CaideBadge>
+        </div>
+
+        <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 sm:p-10 md:p-12 shadow-[8px_8px_0_0_#0D0431] space-y-8">
+          <div className="space-y-3 border-b-2 border-[#0D0431] pb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black text-[#0D0431] tracking-tight">
+              Terms of Service
+            </h1>
+            <p className="text-sm text-[#0D0431]/80 leading-relaxed font-medium">
+              Welcome to getPlaced. By accessing or using the platform, interview simulation tools, resume analysis, and preparation resources, you agree to these terms.
+            </p>
+          </div>
+
+          <div className="space-y-6 text-[#0D0431]">
+            <section className="p-5 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] space-y-2">
+              <h2 className="text-lg font-heading font-bold text-[#0D0431] flex items-center gap-2">
+                <span>1. User Account & Security</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-[#0D0431]/90 leading-relaxed font-sans font-medium">
+                Users are responsible for maintaining credential confidentiality. Session telemetry and simulation data are protected under standard encryption protocols. You agree to notify us immediately of any unauthorized access to your account.
+              </p>
+            </section>
+
+            <section className="p-5 rounded-2xl bg-[#E4CDFB] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] space-y-2">
+              <h2 className="text-lg font-heading font-bold text-[#0D0431] flex items-center gap-2">
+                <span>2. Platform Usage & AI Telemetry</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-[#0D0431]/90 leading-relaxed font-sans font-medium">
+                The platform provides interview practice, speech analysis, LeetCode performance synchronization, and coding environments for placement preparation. User data is strictly isolated and never utilized for public model training.
+              </p>
+            </section>
+
+            <section className="p-5 rounded-2xl bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] space-y-2">
+              <h2 className="text-lg font-heading font-bold text-[#0D0431] flex items-center gap-2">
+                <span>3. Code Sandbox & Contest Rules</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-[#0D0431]/90 leading-relaxed font-sans font-medium">
+                All code submissions, challenge solutions, and squad competitions must adhere to fair-play guidelines. Automated exploitation of code execution sandboxes or submission fraud is strictly prohibited.
+              </p>
+            </section>
+
+            <section className="p-5 rounded-2xl bg-[#FFC5B7] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] space-y-2">
+              <h2 className="text-lg font-heading font-bold text-[#0D0431] flex items-center gap-2">
+                <span>4. Privacy & Third-Party Integrations</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-[#0D0431]/90 leading-relaxed font-sans font-medium">
+                Public profile data retrieved from GitHub and LeetCode is processed in read-only mode to calculate candidate readiness scores. You can disconnect linked accounts anytime from your profile settings.
+              </p>
+            </section>
+          </div>
+
+          <div className="pt-6 border-t-2 border-[#0D0431] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span className="text-xs font-mono font-bold text-[#0D0431]/70">
+              Last Updated: August 2026 • getPlaced Platform
+            </span>
+
+            <CaideButton
+              to="/app"
+              variant="stacked"
+              size="md"
+            >
+              Enter Dashboard
+            </CaideButton>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function Routings() {
   return (
@@ -57,24 +143,8 @@ function Routings() {
           <Route path="/can-i-apply" element={<CanIApply />} />
           <Route path="/onboarding" element={<CareerCoach />} />
           <Route path="/onboarding/coach" element={<CareerCoach />} />
-          <Route path="/privacy" element={<div className="min-h-screen bg-[#09090b] text-zinc-100"><PrivacyProtection /></div>} />
-          <Route path="/terms" element={
-            <div className="min-h-screen bg-[#09090b] text-zinc-100 p-8 max-w-4xl mx-auto space-y-6 pt-24">
-              <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Terms of Service</h1>
-              <p className="text-zinc-400 leading-relaxed text-sm">
-                Welcome to getPlaced. By accessing or using the platform, interview simulation tools, resume analysis, and preparation resources, you agree to these terms.
-              </p>
-              <h2 className="text-lg font-semibold text-zinc-200">1. User Account & Security</h2>
-              <p className="text-zinc-400 text-sm">
-                Users are responsible for maintaining credential confidentiality. Session telemetry and simulation data are protected under standard encryption protocols.
-              </p>
-              <h2 className="text-lg font-semibold text-zinc-200">2. Platform Usage & AI Telemetry</h2>
-              <p className="text-zinc-400 text-sm">
-                The platform provides interview practice, speech analysis, and coding environments for placement preparation. User data is isolated and never used for public model training.
-              </p>
-            </div>
-          } />
-
+          <Route path="/privacy" element={<div className="min-h-screen bg-[#1A312C] text-[#FFF4E1]"><PrivacyProtection /></div>} />
+          <Route path="/terms" element={<TermsPage />} />
 
           {/* Authenticated Dashboard App Shell */}
           <Route path="/app" element={<Layout />}>

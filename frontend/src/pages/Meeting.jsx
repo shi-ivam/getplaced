@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { motion } from "framer-motion";
-import { Calendar as CalendarIcon, CheckCircle, Sparkles, BookOpen, Download, ExternalLink, Check } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, CheckCircle2, Sparkles, BookOpen, Download, ExternalLink, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import CaideBadge from "@/components/caide/CaideBadge";
+import CaideCard from "@/components/caide/CaideCard";
+import CaideButton from "@/components/caide/CaideButton";
 import "./customCalendar.css";
 
 const upcomingModules = [
@@ -19,7 +22,6 @@ const CrazyCalendar = () => {
   const [syncNotice, setSyncNotice] = useState("");
 
   const handleConnectSync = () => {
-    // Generate .ics event data for calendar export
     const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//getPlaced Platform//Placement Roadmap Calendar//EN
@@ -45,118 +47,135 @@ END:VCALENDAR`;
     setTimeout(() => setSyncNotice(""), 4000);
   };
 
-  const handleTileSelect = (selectedDate) => {
-    setDate(selectedDate);
-  };
-
   return (
-    <section id="calendar" className="py-20 md:py-32 bg-[#09090b] text-zinc-100 relative overflow-hidden">
-      <div className="max-w-6xl mx-auto px-4 md:px-6 relative z-10">
+    <section id="calendar" className="py-24 md:py-32 bg-[#CDE1FF] u-background-grid-dark-4 text-[#0D0431] relative overflow-hidden border-b-2 border-[#0D0431]">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="flex flex-col items-center text-center mb-14 md:mb-18">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono uppercase tracking-wider mb-3">
-            <CalendarIcon className="w-3.5 h-3.5 text-purple-400" /> Milestone Schedule
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight max-w-3xl text-white">
-            Preparation Timeline & Milestones
+        <div className="flex flex-col items-center text-center mb-16">
+          <CaideBadge theme="light-purple">
+            Effortless Milestones
+          </CaideBadge>
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading font-black tracking-tight max-w-4xl text-[#0D0431] mt-4">
+            Structured Preparation Calendar
           </h2>
-          <p className="mt-3 text-zinc-400 text-sm md:text-base max-w-xl">
-            Track daily problem sets, mock interviews, and milestones in a unified schedule.
+          <p className="mt-4 text-[#0D0431]/80 text-base md:text-lg max-w-2xl font-sans">
+            Never miss a practice round or contest deadline. Coordinate daily problem targets, mock interviews, and company application timelines in one place.
           </p>
         </div>
 
         {/* Content Container */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           
-          {/* Calendar Card (6 Cols) */}
-          <motion.div 
-            whileHover={{ y: -2 }}
-            transition={{ duration: 0.2 }}
-            className="lg:col-span-6 rounded-2xl bg-zinc-900/50 p-6 md:p-7 border border-zinc-800 flex flex-col items-center justify-center"
-          >
-            <div className="flex items-center gap-2 text-zinc-300 mb-5 text-xs font-mono font-semibold uppercase tracking-wider">
-              <CalendarIcon className="w-3.5 h-3.5 text-purple-400" /> Calendar
-            </div>
-            
-            <div className="w-full flex justify-center">
-              <Calendar
-                onChange={handleTileSelect}
-                value={date}
-                className="crazy-calendar"
-                tileClassName="crazy-tile"
-              />
-            </div>
-
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
-              <div className="inline-flex items-center gap-1.5 bg-zinc-950 px-3.5 py-1.5 rounded-lg border border-zinc-800 text-xs text-zinc-400 font-mono">
-                <span>Selected:</span>
-                <span className="font-semibold text-zinc-200">{date.toDateString()}</span>
+          {/* Calendar Bento Card (6 Cols) */}
+          <div className="lg:col-span-6">
+            <CaideCard
+              theme="white"
+              shadow="lg"
+              className="p-6 md:p-8 flex flex-col items-center justify-between h-full"
+            >
+              <div className="w-full flex items-center justify-between pb-4 mb-4 border-b-2 border-[#0D0431]">
+                <div className="flex items-center gap-2 font-heading font-bold text-sm text-[#0D0431]">
+                  <CalendarIcon className="w-4 h-4 text-[#896EE2]" />
+                  <span>Milestone Calendar</span>
+                </div>
+                <span className="font-mono text-xs font-bold text-[#0D0431] bg-[#FEDF6A] px-3 py-0.5 rounded-full border border-[#0D0431]">
+                  SYNCED
+                </span>
               </div>
-              <button
-                onClick={() => navigate("/app/roadmap")}
-                className="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs text-zinc-200 font-medium flex items-center gap-1.5 transition cursor-pointer"
-              >
-                <span>Full Roadmap</span>
-                <ExternalLink className="w-3 h-3 text-zinc-400" />
-              </button>
-            </div>
-          </motion.div>
+              
+              <div className="w-full flex justify-center py-2">
+                <Calendar
+                  onChange={(d) => setDate(d)}
+                  value={date}
+                  className="crazy-calendar border-2 border-[#0D0431] rounded-2xl p-4 shadow-[4px_4px_0_0_#0D0431]"
+                  tileClassName="crazy-tile"
+                />
+              </div>
+
+              <div className="mt-6 w-full flex flex-wrap items-center justify-between gap-3 pt-4 border-t-2 border-[#0D0431]">
+                <div className="inline-flex items-center gap-2 bg-[#FEF9CF] px-4 py-2 rounded-xl border-2 border-[#0D0431] text-xs text-[#0D0431] font-mono shadow-[2px_2px_0_0_#0D0431]">
+                  <span className="font-bold">Selected:</span>
+                  <span className="font-semibold">{date.toDateString()}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate("/app/roadmap")}
+                  className="btn_secondary_wrap is-small"
+                >
+                  <span>Full Roadmap</span>
+                  <ExternalLink className="w-3.5 h-3.5 ml-1" />
+                </button>
+              </div>
+            </CaideCard>
+          </div>
 
           {/* Daily Milestone Cards (6 Cols) */}
-          <div className="lg:col-span-6 space-y-3">
-            <div className="text-xs font-mono text-zinc-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-              <span>SCHEDULED MODULES</span>
-              <span className="text-emerald-400 font-medium flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-purple-400" /> Active Session
+          <div className="lg:col-span-6 flex flex-col justify-between space-y-4">
+            <div className="flex items-center justify-between text-xs font-bold font-mono uppercase tracking-wider text-[#0D0431]">
+              <span>DAILY ITINERARY</span>
+              <span className="text-[#0D0431] flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-[#896EE2]" /> 3 Tasks Scheduled
               </span>
             </div>
 
-            {upcomingModules.map((item, idx) => (
-              <motion.div
-                key={idx}
-                whileHover={{ x: 2 }}
-                transition={{ duration: 0.15 }}
-                onClick={() => navigate(item.route)}
-                className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 flex items-center justify-between cursor-pointer group transition-all"
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-300 group-hover:text-white transition-colors">
-                    <BookOpen className="w-4 h-4" />
+            <div className="space-y-3">
+              {upcomingModules.map((item, idx) => (
+                <CaideCard
+                  key={idx}
+                  theme="white"
+                  shadow="sm"
+                  hoverEffect={true}
+                  onClick={() => navigate(item.route)}
+                  className="p-5 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-[#FEF9CF] border-2 border-[#0D0431] flex items-center justify-center text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] shrink-0">
+                      <BookOpen className="w-5 h-5 text-[#896EE2]" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-mono font-bold text-[#896EE2] mb-0.5">{item.time} • {item.type}</div>
+                      <div className="font-heading font-bold text-[#0D0431] text-sm md:text-base">{item.title}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-[11px] font-mono text-zinc-400 mb-0.5">{item.time} · {item.type}</div>
-                    <div className="font-semibold text-white text-xs md:text-sm group-hover:text-purple-300 transition-colors">{item.title}</div>
+
+                  <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-[#0D0431] bg-[#D4FDF7] px-3 py-1 rounded-full border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0D0431]" />
+                    <span>{item.status}</span>
                   </div>
-                </div>
+                </CaideCard>
+              ))}
+            </div>
 
-                <div className="hidden sm:flex items-center gap-1 text-[11px] text-emerald-400 font-mono bg-emerald-500/10 px-2.5 py-0.5 rounded-md border border-emerald-500/20">
-                  <CheckCircle className="w-3 h-3 text-emerald-400" />
-                  <span>{item.status}</span>
-                </div>
-              </motion.div>
-            ))}
-
-            <div className="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800 mt-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-zinc-300">
+            <CaideCard
+              theme="light-yellow"
+              shadow="default"
+              className="p-6 mt-4"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <span className="font-semibold block text-white">Calendar Synchronization</span>
-                  <span className="text-xs text-zinc-400">Export milestones to iCal, Google, or Outlook.</span>
+                  <h4 className="font-heading font-bold text-sm text-[#0D0431]">
+                    Calendar Sync & Export
+                  </h4>
+                  <p className="text-xs text-[#0D0431]/75 font-medium mt-0.5">
+                    Export your custom interview schedule to Apple Calendar, Google Calendar, or Outlook.
+                  </p>
                 </div>
                 <button
+                  type="button"
                   onClick={handleConnectSync}
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-zinc-100 text-zinc-950 hover:bg-white font-semibold text-xs transition cursor-pointer shrink-0"
+                  className="btn_secondary_wrap is-small shrink-0"
                 >
-                  {synced ? <Check className="w-3.5 h-3.5" /> : <Download className="w-3.5 h-3.5" />}
+                  {synced ? <Check className="w-3.5 h-3.5 mr-1" /> : <Download className="w-3.5 h-3.5 mr-1" />}
                   <span>{synced ? "Exported (.ics)" : "Export (.ics)"}</span>
                 </button>
               </div>
               {syncNotice && (
-                <div className="mt-3 text-xs text-emerald-400 font-mono bg-emerald-500/10 p-2 rounded border border-emerald-500/20">
+                <div className="mt-3 text-xs font-bold text-[#0D0431] bg-white p-2.5 rounded-lg border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                   {syncNotice}
                 </div>
               )}
-            </div>
+            </CaideCard>
           </div>
 
         </div>

@@ -23,6 +23,8 @@ import {
   Layers,
   GraduationCap,
 } from "lucide-react";
+import CaideBadge from "@/components/caide/CaideBadge";
+import CaideButton, { CaideArrow } from "@/components/caide/CaideButton";
 
 export default function JobDetailModal({
   job,
@@ -100,19 +102,19 @@ export default function JobDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0D0431]/75 backdrop-blur-sm animate-in fade-in duration-200">
       {/* Click outside backdrop */}
       <div className="fixed inset-0" onClick={onClose} />
 
       {/* Main Modal Container */}
       <div
-        className="relative z-10 w-full max-w-4xl max-h-[92vh] bg-[#11110F] border border-[#3A3831] rounded-3xl shadow-2xl flex flex-col overflow-hidden text-[#FAF8F2] font-sans"
+        className="relative z-10 w-full max-w-4xl max-h-[92vh] bg-white border-2 border-[#0D0431] rounded-3xl shadow-[8px_8px_0_0_#0D0431] flex flex-col overflow-hidden text-[#0D0431] font-sans animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header Ribbon */}
-        <div className="p-6 pb-4 border-b border-[#3A3831] bg-[#24231F] flex items-start justify-between gap-4">
+        {/* Header Ribbon / Titlebar */}
+        <div className="p-6 pb-4 border-b-2 border-[#0D0431] bg-[#FEF9CF] flex items-start justify-between gap-4">
           <div className="flex items-start gap-4 min-w-0">
-            <div className="w-14 h-14 rounded-2xl bg-[#11110F] border border-[#3A3831] flex items-center justify-center text-[#FAF8F2] font-bold text-xl overflow-hidden shrink-0 shadow-md">
+            <div className="w-14 h-14 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] flex items-center justify-center font-heading font-black text-xl text-[#0D0431] overflow-hidden shrink-0">
               {job.companyLogo ? (
                 <img
                   src={job.companyLogo}
@@ -127,41 +129,47 @@ export default function JobDetailModal({
               )}
             </div>
 
-            <div className="space-y-1 min-w-0">
+            <div className="space-y-1.5 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-mono font-bold text-[#A8A59C] tracking-wider uppercase">
+                <span className="text-xs font-mono font-bold text-[#0D0431]/80 tracking-wider uppercase">
                   {employerName}
                 </span>
+                {isDemo ? (
+                  <CaideBadge theme="light-purple" size="sm">
+                    Demo Listing
+                  </CaideBadge>
+                ) : (
+                  <CaideBadge theme="mint" size="sm">
+                    <ShieldCheck className="w-3 h-3 mr-0.5" />
+                    Verified Official
+                  </CaideBadge>
+                )}
                 {job.fitStatus && (
-                  <span
-                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border ${
-                      job.fitBadgeClass || "bg-[#11110F] text-[#FAF8F2] border-[#3A3831]"
-                    }`}
-                  >
+                  <CaideBadge theme="yellow" size="sm">
                     {job.fitStatus}
-                  </span>
+                  </CaideBadge>
                 )}
               </div>
 
-              <h1 className="text-xl sm:text-2xl font-black text-[#FAF8F2] tracking-tight leading-tight">
+              <h1 className="text-xl sm:text-2xl font-heading font-black text-[#0D0431] tracking-tight leading-tight">
                 {job.title}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-3 text-xs text-[#A8A59C] pt-0.5">
+              <div className="flex flex-wrap items-center gap-2.5 text-xs font-semibold text-[#0D0431]/70 pt-0.5">
                 <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-[#8C8980]" />
+                  <MapPin className="w-3.5 h-3.5 text-[#0D0431]" />
                   {isRemote ? "Remote / Distributed" : `${job.city || "Bengaluru"}, India`}
                 </span>
-                <span className="text-[#3A3831]">•</span>
-                <span className="px-2 py-0.5 rounded bg-[#11110F] border border-[#3A3831] text-[#FAF8F2] text-[11px]">
+                <span>•</span>
+                <span className="px-2.5 py-0.5 rounded-full bg-white border border-[#0D0431] text-[11px] font-bold">
                   {job.workMode || "Hybrid"}
                 </span>
-                <span className="text-[#3A3831]">•</span>
-                <span className="px-2 py-0.5 rounded bg-[#11110F] border border-[#3A3831] text-[#FAF8F2] text-[11px]">
+                <span>•</span>
+                <span className="px-2.5 py-0.5 rounded-full bg-white border border-[#0D0431] text-[11px] font-bold">
                   {job.employmentType || "Full-time"}
                 </span>
-                <span className="text-[#3A3831]">•</span>
-                <span className="text-emerald-400 font-mono font-semibold">
+                <span>•</span>
+                <span className="font-heading font-black text-xs text-[#0D0431] px-2.5 py-0.5 rounded-lg bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                   {job.salary || "Competitive Market Standard"}
                 </span>
               </div>
@@ -173,19 +181,19 @@ export default function JobDetailModal({
               type="button"
               onClick={handleShare}
               title="Share job link"
-              className="p-2.5 rounded-xl bg-[#11110F] hover:bg-[#1A1916] text-[#A8A59C] hover:text-[#FAF8F2] border border-[#3A3831] transition-colors"
+              className="p-2.5 rounded-xl bg-white hover:bg-[#FEF9CF] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
             >
-              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
+              {copied ? <Check className="w-4 h-4 text-[#896EE2]" /> : <Share2 className="w-4 h-4" />}
             </button>
 
             <button
               type="button"
               onClick={() => onToggleSave(job)}
               title={job.isSaved ? "Saved to your list" : "Save job"}
-              className={`p-2.5 rounded-xl border transition-all ${
+              className={`p-2.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer ${
                 job.isSaved
-                  ? "bg-purple-500 text-white border-purple-500 font-bold"
-                  : "bg-[#11110F] hover:bg-[#1A1916] text-[#A8A59C] hover:text-[#FAF8F2] border-[#3A3831]"
+                  ? "bg-[#FEDF6A] text-[#0D0431]"
+                  : "bg-white hover:bg-[#FEF9CF] text-[#0D0431]"
               }`}
             >
               <Bookmark className={`w-4 h-4 ${job.isSaved ? "fill-current" : ""}`} />
@@ -194,7 +202,7 @@ export default function JobDetailModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-2.5 rounded-xl bg-[#11110F] hover:bg-[#1A1916] text-[#A8A59C] hover:text-[#FAF8F2] border border-[#3A3831] transition-colors"
+              className="p-2.5 rounded-xl bg-white hover:bg-[#F85B52] hover:text-white text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -202,7 +210,7 @@ export default function JobDetailModal({
         </div>
 
         {/* Tab Navigation */}
-        <div className="px-6 border-b border-[#3A3831] bg-[#24231F]/60 flex items-center gap-1 overflow-x-auto">
+        <div className="px-6 border-b-2 border-[#0D0431] bg-white flex items-center gap-2 overflow-x-auto pt-2">
           {[
             { id: "overview", label: "Job Details & Specs" },
             { id: "match", label: `Fit Analysis (${matchScore != null ? `${matchScore}%` : "Unassessed"})` },
@@ -213,10 +221,10 @@ export default function JobDetailModal({
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 text-xs font-semibold tracking-wide border-b-2 transition-all shrink-0 ${
+              className={`px-4 py-2.5 text-xs font-bold tracking-wide rounded-t-xl transition-all shrink-0 cursor-pointer ${
                 activeTab === tab.id
-                  ? "text-purple-300 border-purple-400 font-bold bg-purple-500/10"
-                  : "text-[#A8A59C] border-transparent hover:text-[#FAF8F2]"
+                  ? "bg-[#FEDF6A] text-[#0D0431] border-2 border-b-0 border-[#0D0431] shadow-none"
+                  : "text-[#0D0431]/70 hover:text-[#0D0431] hover:bg-[#FEF9CF]"
               }`}
             >
               {tab.label}
@@ -225,19 +233,19 @@ export default function JobDetailModal({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#11110F]">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
           {activeTab === "overview" && (
             <div className="space-y-6">
               {/* Highlight Match Bar */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-[#24231F] via-[#1A1916] to-[#24231F] border border-[#3A3831] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="p-4 rounded-2xl bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-400" />
-                    <span className="text-xs font-mono uppercase font-bold text-purple-300">
+                    <Sparkles className="w-4 h-4 text-[#0D0431]" />
+                    <span className="text-xs font-heading font-black text-[#0D0431] uppercase">
                       GetPlaced Match Score: {matchScore != null ? `${matchScore}%` : "Unassessed"}
                     </span>
                   </div>
-                  <p className="text-xs text-[#FAF8F2]">
+                  <p className="text-xs text-[#0D0431]/80 font-medium">
                     {job.readinessComparison?.summaryNote ||
                       `Calibrated fit for your target role and skill profile.`}
                   </p>
@@ -247,16 +255,16 @@ export default function JobDetailModal({
                   <button
                     type="button"
                     onClick={handleCanIApply}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#11110F] hover:bg-[#1A1916] border border-[#3A3831] hover:border-purple-500/40 text-[#FAF8F2] text-xs font-semibold transition-all flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-[#FEF9CF] border-2 border-[#0D0431] text-[#0D0431] text-xs font-bold shadow-[2px_2px_0_0_#0D0431] transition-all flex items-center gap-1.5 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
                   >
-                    <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#0D0431]" />
                     <span>Can I Apply?</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setActiveTab("match")}
-                    className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-bold transition-all flex items-center gap-1 shrink-0 shadow-md"
+                    className="px-3.5 py-1.5 rounded-xl bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431] border-2 border-[#0D0431] text-xs font-bold transition-all flex items-center gap-1 shrink-0 shadow-[2px_2px_0_0_#0D0431] cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
                   >
                     <span>View Breakdown</span>
                     <ChevronRight className="w-3.5 h-3.5" />
@@ -266,38 +274,38 @@ export default function JobDetailModal({
 
               {/* Quick Specs Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3.5 rounded-xl bg-[#24231F] border border-[#3A3831]">
-                  <div className="text-[10px] font-mono text-[#8C8980] uppercase font-semibold">
+                <div className="p-3.5 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
+                  <div className="text-[10px] font-heading font-bold text-[#0D0431]/70 uppercase">
                     Experience
                   </div>
-                  <div className="text-xs font-bold text-[#FAF8F2] mt-1">
+                  <div className="text-xs font-bold text-[#0D0431] mt-1">
                     {job.experience || "0-2 years"}
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-[#24231F] border border-[#3A3831]">
-                  <div className="text-[10px] font-mono text-[#8C8980] uppercase font-semibold">
+                <div className="p-3.5 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
+                  <div className="text-[10px] font-heading font-bold text-[#0D0431]/70 uppercase">
                     Education Cutoff
                   </div>
-                  <div className="text-xs font-bold text-[#FAF8F2] mt-1">
+                  <div className="text-xs font-bold text-[#0D0431] mt-1">
                     CGPA {job.cgpaCutoff || "7.0"}+ / B.Tech
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-[#24231F] border border-[#3A3831]">
-                  <div className="text-[10px] font-mono text-[#8C8980] uppercase font-semibold">
+                <div className="p-3.5 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
+                  <div className="text-[10px] font-heading font-bold text-[#0D0431]/70 uppercase">
                     Work Location
                   </div>
-                  <div className="text-xs font-bold text-[#FAF8F2] mt-1 truncate">
+                  <div className="text-xs font-bold text-[#0D0431] mt-1 truncate">
                     {isRemote ? "Remote" : `${job.city || "Bengaluru"}`}
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-[#24231F] border border-[#3A3831]">
-                  <div className="text-[10px] font-mono text-[#8C8980] uppercase font-semibold">
+                <div className="p-3.5 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
+                  <div className="text-[10px] font-heading font-bold text-[#0D0431]/70 uppercase">
                     Posted Date
                   </div>
-                  <div className="text-xs font-bold text-[#FAF8F2] mt-1">
+                  <div className="text-xs font-bold text-[#0D0431] mt-1">
                     {postedDate}
                   </div>
                 </div>
@@ -305,10 +313,10 @@ export default function JobDetailModal({
 
               {/* About Role */}
               <div className="space-y-2">
-                <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-[#A8A59C]">
+                <h3 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
                   About The Role
                 </h3>
-                <p className="text-sm text-[#FAF8F2] leading-relaxed whitespace-pre-line">
+                <p className="text-sm text-[#0D0431]/90 leading-relaxed whitespace-pre-line font-medium">
                   {job.description}
                 </p>
               </div>
@@ -316,13 +324,13 @@ export default function JobDetailModal({
               {/* Key Responsibilities */}
               {job.responsibilities && job.responsibilities.length > 0 && (
                 <div className="space-y-2">
-                  <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-[#A8A59C]">
+                  <h3 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
                     Key Responsibilities
                   </h3>
                   <ul className="space-y-2">
                     {job.responsibilities.map((resp, rIdx) => (
-                      <li key={rIdx} className="text-xs text-[#FAF8F2] flex items-start gap-2.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5 shrink-0" />
+                      <li key={rIdx} className="text-xs text-[#0D0431] flex items-start gap-2.5 font-medium">
+                        <span className="w-2 h-2 rounded-full bg-[#896EE2] border border-[#0D0431] mt-1 shrink-0" />
                         <span className="leading-relaxed">{resp}</span>
                       </li>
                     ))}
@@ -333,13 +341,13 @@ export default function JobDetailModal({
               {/* Requirements & Qualifications */}
               {job.requirements && job.requirements.length > 0 && (
                 <div className="space-y-2">
-                  <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-[#A8A59C]">
+                  <h3 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
                     Candidate Requirements
                   </h3>
                   <ul className="space-y-2">
                     {job.requirements.map((req, reqIdx) => (
-                      <li key={reqIdx} className="text-xs text-[#FAF8F2] flex items-start gap-2.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+                      <li key={reqIdx} className="text-xs text-[#0D0431] flex items-start gap-2.5 font-medium">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0D0431] mt-0.5 shrink-0" />
                         <span className="leading-relaxed">{req}</span>
                       </li>
                     ))}
@@ -349,7 +357,7 @@ export default function JobDetailModal({
 
               {/* Required Skills & Tech Stack */}
               <div className="space-y-3">
-                <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-[#A8A59C]">
+                <h3 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
                   Required Technologies
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -358,16 +366,16 @@ export default function JobDetailModal({
                     return (
                       <span
                         key={sIdx}
-                        className={`text-xs font-mono px-3 py-1 rounded-xl border flex items-center gap-1.5 ${
+                        className={`text-xs font-mono font-bold px-3 py-1 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1.5 ${
                           isMatched
-                            ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
-                            : "bg-amber-500/10 text-amber-300 border-amber-500/30"
+                            ? "bg-[#E4CDFB] text-[#0D0431]"
+                            : "bg-[#FFC5B7] text-[#0D0431]"
                         }`}
                       >
                         {isMatched ? (
-                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#0D0431]" />
                         ) : (
-                          <AlertTriangle className="w-3 h-3 text-amber-400" />
+                          <AlertTriangle className="w-3.5 h-3.5 text-[#0D0431]" />
                         )}
                         <span>{skill}</span>
                       </span>
@@ -379,14 +387,14 @@ export default function JobDetailModal({
               {/* Preferred Skills */}
               {job.preferredSkills && job.preferredSkills.length > 0 && (
                 <div className="space-y-2">
-                  <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-[#A8A59C]">
+                  <h3 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
                     Preferred / Bonus Skills
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {job.preferredSkills.map((ps, psIdx) => (
                       <span
                         key={psIdx}
-                        className="text-xs font-mono px-2.5 py-1 rounded-xl bg-[#24231F] border border-[#3A3831] text-[#A8A59C]"
+                        className="text-xs font-mono font-bold px-2.5 py-1 rounded-xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-[#0D0431]"
                       >
                         {ps}
                       </span>
@@ -401,42 +409,42 @@ export default function JobDetailModal({
             <div className="space-y-6">
               {/* Score Dual Gauges: Match vs Readiness */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-5 rounded-2xl bg-[#24231F] border border-[#3A3831] space-y-2">
+                <div className="p-5 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono uppercase text-[#A8A59C] font-bold">
+                    <span className="text-xs font-heading font-bold uppercase text-[#0D0431]">
                       Job Match Score
                     </span>
-                    <span className="text-2xl font-black font-mono text-emerald-400">
+                    <span className="text-2xl font-heading font-black text-[#0D0431]">
                       {matchScore != null ? `${matchScore}%` : "Unassessed"}
                     </span>
                   </div>
-                  <div className="w-full h-2 bg-[#11110F] rounded-full overflow-hidden border border-[#3A3831]">
+                  <div className="w-full h-3 bg-white rounded-full overflow-hidden border-2 border-[#0D0431]">
                     <div
-                      className="h-full bg-emerald-400 rounded-full transition-all duration-500"
+                      className="h-full bg-[#896EE2] transition-all duration-500"
                       style={{ width: `${matchScore != null ? matchScore : 0}%` }}
                     />
                   </div>
-                  <p className="text-[11px] text-[#A8A59C] pt-1">
+                  <p className="text-[11px] text-[#0D0431]/70 font-medium pt-1">
                     Evaluates how your current skills, target role, education, and experience align with this position.
                   </p>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-[#24231F] border border-[#3A3831] space-y-2">
+                <div className="p-5 rounded-2xl bg-[#CDE1FF] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono uppercase text-[#A8A59C] font-bold">
+                    <span className="text-xs font-heading font-bold uppercase text-[#0D0431]">
                       Your Interview Readiness
                     </span>
-                    <span className="text-2xl font-black font-mono text-purple-300">
+                    <span className="text-2xl font-heading font-black text-[#0D0431]">
                       {readinessScore != null ? `${readinessScore}%` : "Unassessed"}
                     </span>
                   </div>
-                  <div className="w-full h-2 bg-[#11110F] rounded-full overflow-hidden border border-[#3A3831]">
+                  <div className="w-full h-3 bg-white rounded-full overflow-hidden border-2 border-[#0D0431]">
                     <div
-                      className="h-full bg-purple-400 rounded-full transition-all duration-500"
+                      className="h-full bg-[#63A0F8] transition-all duration-500"
                       style={{ width: `${readinessScore != null ? readinessScore : 0}%` }}
                     />
                   </div>
-                  <p className="text-[11px] text-[#A8A59C] pt-1">
+                  <p className="text-[11px] text-[#0D0431]/70 font-medium pt-1">
                     Your overall multi-dimensional benchmark across DSA, System Design, Academics, and Projects.
                   </p>
                 </div>
@@ -444,8 +452,8 @@ export default function JobDetailModal({
 
               {/* Match Dimension Breakdown */}
               {job.matchBreakdown && (
-                <div className="p-5 rounded-2xl bg-[#24231F] border border-[#3A3831] space-y-4">
-                  <h3 className="text-xs font-mono uppercase font-bold text-[#FAF8F2]">
+                <div className="p-5 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-4">
+                  <h3 className="text-xs font-heading font-black uppercase text-[#0D0431]">
                     Match Dimension Breakdown
                   </h3>
                   <div className="space-y-3">
@@ -458,14 +466,14 @@ export default function JobDetailModal({
                     ].map((item, idx) => (
                       <div key={idx} className="space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-[#FAF8F2]">{item.label}</span>
-                          <span className="font-mono font-bold text-purple-300">
+                          <span className="text-[#0D0431] font-semibold">{item.label}</span>
+                          <span className="font-heading font-black text-[#0D0431]">
                             {item.score != null ? `${item.score}%` : "Unassessed"}
                           </span>
                         </div>
-                        <div className="w-full h-1.5 bg-[#11110F] rounded-full overflow-hidden border border-[#3A3831]/60">
+                        <div className="w-full h-2.5 bg-[#FEF9CF] rounded-full overflow-hidden border-2 border-[#0D0431]">
                           <div
-                            className="h-full bg-purple-400 rounded-full"
+                            className="h-full bg-[#896EE2]"
                             style={{ width: `${item.score != null ? item.score : 0}%` }}
                           />
                         </div>
@@ -477,8 +485,8 @@ export default function JobDetailModal({
 
               {/* Matching Skills vs Gaps Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-[#24231F] border border-[#3A3831] space-y-3">
-                  <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400 uppercase">
+                <div className="p-4 rounded-2xl bg-[#E4CDFB] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-3">
+                  <div className="flex items-center gap-1.5 text-xs font-heading font-black text-[#0D0431] uppercase">
                     <CheckCircle2 className="w-4 h-4" />
                     <span>Matching Skills ({job.matchedSkills?.length || 0})</span>
                   </div>
@@ -486,17 +494,17 @@ export default function JobDetailModal({
                     {(job.matchedSkills || []).map((s, idx) => (
                       <span
                         key={idx}
-                        className="text-xs font-mono px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 flex items-center gap-1"
+                        className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-white text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1"
                       >
-                        <Check className="w-3 h-3 text-emerald-400" />
+                        <Check className="w-3 h-3 text-[#0D0431]" />
                         <span>{s}</span>
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[#24231F] border border-[#3A3831] space-y-3">
-                  <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-400 uppercase">
+                <div className="p-4 rounded-2xl bg-[#FFC5B7] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-3">
+                  <div className="flex items-center gap-1.5 text-xs font-heading font-black text-[#0D0431] uppercase">
                     <AlertTriangle className="w-4 h-4" />
                     <span>Identified Skill Gaps ({job.missingSkills?.length || 0})</span>
                   </div>
@@ -507,10 +515,10 @@ export default function JobDetailModal({
                         type="button"
                         onClick={() => handleLearnSkill(s)}
                         title={`Learn ${s} in Study Library`}
-                        className="text-xs font-mono px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-all flex items-center gap-1"
+                        className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-white hover:bg-[#FEF9CF] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all flex items-center gap-1 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
                       >
                         <span>{s}</span>
-                        <BookOpen className="w-3 h-3 text-amber-400" />
+                        <BookOpen className="w-3 h-3 text-[#0D0431]" />
                       </button>
                     ))}
                   </div>
@@ -519,15 +527,15 @@ export default function JobDetailModal({
 
               {/* "Why This Job?" Section */}
               {job.whyThisJob && job.whyThisJob.length > 0 && (
-                <div className="p-5 rounded-2xl bg-[#24231F] border border-[#3A3831] space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-purple-300 uppercase">
-                    <Sparkles className="w-4 h-4" />
+                <div className="p-5 rounded-2xl bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-heading font-black text-[#0D0431] uppercase">
+                    <Sparkles className="w-4 h-4 text-[#896EE2]" />
                     <span>Why GetPlaced Recommends This Position?</span>
                   </div>
                   <ul className="space-y-2">
                     {job.whyThisJob.map((reason, rIdx) => (
-                      <li key={rIdx} className="text-xs text-[#FAF8F2] flex items-start gap-2.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+                      <li key={rIdx} className="text-xs text-[#0D0431] font-medium flex items-start gap-2.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0D0431] mt-0.5 shrink-0" />
                         <span className="leading-relaxed">{reason}</span>
                       </li>
                     ))}
@@ -539,19 +547,19 @@ export default function JobDetailModal({
 
           {activeTab === "preparation" && (
             <div className="space-y-6">
-              <div className="p-4 rounded-2xl bg-[#24231F] border border-[#3A3831] flex items-center justify-between gap-4">
+              <div className="p-5 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="space-y-0.5">
-                  <h4 className="text-xs font-bold text-[#FAF8F2]">
+                  <h4 className="text-sm font-heading font-black text-[#0D0431]">
                     4-Week Placement Prep Schedule
                   </h4>
-                  <p className="text-xs text-[#A8A59C]">
+                  <p className="text-xs text-[#0D0431]/80 font-medium">
                     A customized study plan targeting this job's exact requirements and your skill gaps.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={handlePrepareJob}
-                  className="px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-bold shadow-md transition-all shrink-0"
+                  className="px-4 py-2 rounded-xl bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431] border-2 border-[#0D0431] text-xs font-bold shadow-[2px_2px_0_0_#0D0431] transition-all shrink-0 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
                 >
                   Open Full Roadmap
                 </button>
@@ -561,20 +569,20 @@ export default function JobDetailModal({
                 {(job.preparationPlan || []).map((week, wIdx) => (
                   <div
                     key={wIdx}
-                    className="p-4 rounded-2xl bg-[#24231F] border border-[#3A3831] space-y-2"
+                    className="p-4 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] space-y-2"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono font-bold text-purple-300">
+                      <span className="text-xs font-mono font-bold text-[#896EE2]">
                         {week.phase}
                       </span>
-                      <span className="text-xs font-semibold text-[#FAF8F2]">
+                      <span className="text-xs font-heading font-black text-[#0D0431]">
                         {week.focus}
                       </span>
                     </div>
                     <ul className="space-y-1.5 pt-1">
                       {week.tasks.map((task, tIdx) => (
-                         <li key={task} className="text-xs text-[#A8A59C] flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#8C8980] mt-1.5 shrink-0" />
+                        <li key={tIdx} className="text-xs text-[#0D0431]/80 font-medium flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#0D0431] mt-1.5 shrink-0" />
                           <span>{task}</span>
                         </li>
                       ))}
@@ -588,31 +596,31 @@ export default function JobDetailModal({
                 <button
                   type="button"
                   onClick={handleTailorResume}
-                  className="p-3.5 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] hover:border-purple-500/40 text-left transition-all group flex items-center justify-between"
+                  className="p-4 rounded-2xl bg-[#E4CDFB] hover:bg-[#d6baf5] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-left transition-all group flex items-center justify-between cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
                 >
                   <div className="flex items-center gap-3">
-                    <FileText className="w-4 h-4 text-purple-400" />
+                    <FileText className="w-4 h-4 text-[#0D0431]" />
                     <div>
-                      <div className="text-xs font-bold text-[#FAF8F2]">Tailor Resume ATS</div>
-                      <div className="text-[10px] text-[#A8A59C]">Align with job keywords</div>
+                      <div className="text-xs font-heading font-black text-[#0D0431]">Tailor Resume ATS</div>
+                      <div className="text-[10px] text-[#0D0431]/70 font-semibold">Align with job keywords</div>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-[#8C8980] group-hover:translate-x-0.5 transition-transform" />
+                  <ChevronRight className="w-4 h-4 text-[#0D0431] group-hover:translate-x-0.5 transition-transform" />
                 </button>
 
                 <button
                   type="button"
                   onClick={handlePracticeDsa}
-                  className="p-3.5 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] hover:border-purple-500/40 text-left transition-all group flex items-center justify-between"
+                  className="p-4 rounded-2xl bg-[#D4FDF7] hover:bg-[#c2fbf3] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-left transition-all group flex items-center justify-between cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
                 >
                   <div className="flex items-center gap-3">
-                    <Code2 className="w-4 h-4 text-purple-400" />
+                    <Code2 className="w-4 h-4 text-[#0D0431]" />
                     <div>
-                      <div className="text-xs font-bold text-[#FAF8F2]">Practice Relevant DSA</div>
-                      <div className="text-[10px] text-[#A8A59C]">Algorithms & Coding Arena</div>
+                      <div className="text-xs font-heading font-black text-[#0D0431]">Practice Relevant DSA</div>
+                      <div className="text-[10px] text-[#0D0431]/70 font-semibold">Algorithms & Coding Arena</div>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-[#8C8980] group-hover:translate-x-0.5 transition-transform" />
+                  <ChevronRight className="w-4 h-4 text-[#0D0431] group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </div>
             </div>
@@ -620,42 +628,42 @@ export default function JobDetailModal({
 
           {activeTab === "company" && (
             <div className="space-y-6">
-              <div className="p-5 rounded-2xl bg-[#24231F] border border-[#3A3831] space-y-4">
+              <div className="p-5 rounded-2xl bg-[#CDE1FF] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-base font-bold text-[#FAF8F2]">{employerName}</h3>
-                    <p className="text-xs text-[#A8A59C]">{job.companyDetails?.industry || "Enterprise Tech"}</p>
+                    <h3 className="text-base font-heading font-black text-[#0D0431]">{employerName}</h3>
+                    <p className="text-xs font-bold text-[#0D0431]/70">{job.companyDetails?.industry || "Enterprise Tech"}</p>
                   </div>
                   <button
                     type="button"
                     onClick={handleCompanyIntel}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#11110F] hover:bg-[#1A1916] text-[#FAF8F2] border border-[#3A3831] text-xs font-semibold transition-all flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-[#FEF9CF] text-[#0D0431] border-2 border-[#0D0431] text-xs font-bold shadow-[2px_2px_0_0_#0D0431] transition-all flex items-center gap-1.5 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
                   >
-                    <Building2 className="w-3.5 h-3.5 text-purple-400" />
-                    <span>Company Intelligence Dossier</span>
+                    <Building2 className="w-3.5 h-3.5 text-[#0D0431]" />
+                    <span>Company Dossier</span>
                   </button>
                 </div>
 
-                <p className="text-xs text-[#FAF8F2] leading-relaxed">
+                <p className="text-xs text-[#0D0431]/90 font-medium leading-relaxed">
                   {job.companyDetails?.about || `${employerName} is a global leader in software technology, hiring top engineering talent.`}
                 </p>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
-                  <div className="p-3 rounded-xl bg-[#11110F] border border-[#3A3831]">
-                    <div className="text-[10px] font-mono text-[#8C8980] uppercase">Headquarters</div>
-                    <div className="text-xs font-bold text-[#FAF8F2] mt-0.5">
+                  <div className="p-3 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                    <div className="text-[10px] font-heading font-bold text-[#0D0431]/70 uppercase">Headquarters</div>
+                    <div className="text-xs font-bold text-[#0D0431] mt-0.5">
                       {job.companyDetails?.headquarters || "Global HQ"}
                     </div>
                   </div>
-                  <div className="p-3 rounded-xl bg-[#11110F] border border-[#3A3831]">
-                    <div className="text-[10px] font-mono text-[#8C8980] uppercase">Company Size</div>
-                    <div className="text-xs font-bold text-[#FAF8F2] mt-0.5">
+                  <div className="p-3 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                    <div className="text-[10px] font-heading font-bold text-[#0D0431]/70 uppercase">Company Size</div>
+                    <div className="text-xs font-bold text-[#0D0431] mt-0.5">
                       {job.companyDetails?.size || "10,000+ Employees"}
                     </div>
                   </div>
-                  <div className="p-3 rounded-xl bg-[#11110F] border border-[#3A3831]">
-                    <div className="text-[10px] font-mono text-[#8C8980] uppercase">Open Roles Tracked</div>
-                    <div className="text-xs font-bold text-purple-300 mt-0.5">
+                  <div className="p-3 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                    <div className="text-[10px] font-heading font-bold text-[#0D0431]/70 uppercase">Open Roles Tracked</div>
+                    <div className="text-xs font-heading font-black text-[#0D0431] mt-0.5">
                       {job.companyDetails?.openPositionsCount || 10} Positions
                     </div>
                   </div>
@@ -663,12 +671,12 @@ export default function JobDetailModal({
               </div>
 
               {/* Source Transparency Note */}
-              <div className="p-4 rounded-2xl bg-[#24231F]/50 border border-[#3A3831] text-xs text-[#A8A59C] space-y-1">
-                <div className="font-semibold text-[#FAF8F2] flex items-center gap-1.5 font-mono text-[11px]">
-                  <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
+              <div className="p-4 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-xs text-[#0D0431] space-y-1">
+                <div className="font-heading font-bold text-[#0D0431] flex items-center gap-1.5 text-xs">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#0D0431]" />
                   Listing Source & Verification Transparency
                 </div>
-                <p className="text-[11px] leading-relaxed">
+                <p className="text-[11px] font-medium text-[#0D0431]/80 leading-relaxed">
                   {isDemo
                     ? "This opening is part of the GetPlaced verified demo dataset calibrated for engineering career benchmarking and preparation."
                     : `Verified directly from ${employerName} careers pipeline and last benchmarked on ${postedDate}.`}
@@ -679,15 +687,15 @@ export default function JobDetailModal({
         </div>
 
         {/* Modal Sticky Bottom Action Footer */}
-        <div className="p-4 sm:p-6 border-t border-[#3A3831] bg-[#24231F] flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="p-4 sm:p-6 border-t-2 border-[#0D0431] bg-[#FEF9CF] flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => onToggleSave(job)}
-              className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-2 ${
+              className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border-2 border-[#0D0431] text-xs font-bold transition-all shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center gap-2 cursor-pointer active:translate-x-0.5 active:translate-y-0.5 ${
                 job.isSaved
-                  ? "bg-purple-500 text-white border-purple-500 font-bold"
-                  : "bg-[#11110F] hover:bg-[#1A1916] text-[#FAF8F2] border-[#3A3831]"
+                  ? "bg-[#FEDF6A] text-[#0D0431]"
+                  : "bg-white hover:bg-[#FEF9CF] text-[#0D0431]"
               }`}
             >
               <Bookmark className={`w-4 h-4 ${job.isSaved ? "fill-current" : ""}`} />
@@ -697,18 +705,18 @@ export default function JobDetailModal({
             <button
               type="button"
               onClick={handleTailorResume}
-              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-[#11110F] hover:bg-[#1A1916] text-[#FAF8F2] border border-[#3A3831] text-xs font-semibold transition-all flex items-center justify-center gap-2"
+              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-white hover:bg-[#FEF9CF] text-[#0D0431] border-2 border-[#0D0431] text-xs font-bold transition-all shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center gap-2 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
             >
-              <FileText className="w-4 h-4 text-purple-400" />
+              <FileText className="w-4 h-4 text-[#0D0431]" />
               <span>Tailor Resume</span>
             </button>
 
             <button
               type="button"
               onClick={handleCanIApply}
-              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-[#11110F] hover:bg-[#1A1916] text-[#FAF8F2] border border-[#3A3831] hover:border-purple-500/40 text-xs font-semibold transition-all flex items-center justify-center gap-2"
+              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-white hover:bg-[#FEF9CF] text-[#0D0431] border-2 border-[#0D0431] text-xs font-bold transition-all shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center gap-2 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
             >
-              <ShieldCheck className="w-4 h-4 text-purple-400" />
+              <ShieldCheck className="w-4 h-4 text-[#0D0431]" />
               <span>Can I Apply?</span>
             </button>
           </div>
@@ -718,7 +726,7 @@ export default function JobDetailModal({
               href={job.applicationUrl || "#"}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-bold uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431] border-2 border-[#0D0431] text-xs font-heading font-black uppercase tracking-wider shadow-[4px_4px_0_0_#0D0431] transition-all flex items-center justify-center gap-2 cursor-pointer active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0_0_#0D0431]"
             >
               <span>Apply on Original Site</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -729,3 +737,4 @@ export default function JobDetailModal({
     </div>
   );
 }
+

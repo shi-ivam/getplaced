@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { FileSearch, Code2, BarChart3, Bot, Zap } from "lucide-react";
+import { Cpu, FileSearch, Code2, Sparkles, Target, BarChart3, Bot, Zap, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
 import axios from "axios";
 import { NODE_API_URL } from "@/config/api";
+import CaideBadge from "@/components/caide/CaideBadge";
+import CaideCard from "@/components/caide/CaideCard";
+import CaideButton from "@/components/caide/CaideButton";
 
 const FeaturesGrid = () => {
   const [telemetryData, setTelemetryData] = useState({
     accuracy: "99.4%",
     pacingWpm: 142,
-    tone: "Confident",
-    fillerWords: "0%",
-    atsScore: 86,
+    tone: "Articulate",
+    fillerWords: "0.2%",
+    atsScore: 92,
     problemCount: 2800,
-    readinessScore: 82,
-    loading: true,
+    readinessScore: 88,
   });
 
   useEffect(() => {
@@ -25,11 +27,10 @@ const FeaturesGrid = () => {
           axios.get(`${NODE_API_URL}/api/dsa/topics`, { withCredentials: true }),
         ]);
 
-        let calculatedAts = 86;
-        let calculatedReadiness = 82;
+        let calculatedAts = 92;
+        let calculatedReadiness = 88;
         let pacing = 142;
-        let tone = "Confident";
-        let filler = "0%";
+        let tone = "Articulate";
         let totalProblems = 2800;
 
         if (readinessRes.status === "fulfilled" && readinessRes.value.data) {
@@ -39,9 +40,6 @@ const FeaturesGrid = () => {
           }
           if (data.overallReadiness !== undefined) {
             calculatedReadiness = Math.round(data.overallReadiness);
-          }
-          if (data.breakdown?.interview?.score) {
-            tone = data.breakdown.interview.score > 80 ? "Articulate & Poised" : "Clear & Structured";
           }
         }
 
@@ -53,23 +51,19 @@ const FeaturesGrid = () => {
           }
         }
 
-        // Measure live screen accuracy / device pixel rendering
-        const dpiAcc = (Math.min(100, 98 + (window.devicePixelRatio || 1) * 0.7)).toFixed(1);
-
         if (isMounted) {
           setTelemetryData({
-            accuracy: `${dpiAcc}%`,
+            accuracy: "99.4%",
             pacingWpm: pacing,
             tone: tone,
-            fillerWords: filler,
+            fillerWords: "0.2%",
             atsScore: calculatedAts,
             problemCount: totalProblems,
             readinessScore: calculatedReadiness,
-            loading: false,
           });
         }
       } catch (err) {
-        console.warn("Feature telemetry grounded fetch info:", err);
+        console.warn("Telemetry fetch error:", err);
       }
     };
 
@@ -80,129 +74,247 @@ const FeaturesGrid = () => {
   }, []);
 
   return (
-    <section id="features" className="py-20 md:py-32 bg-[#09090b] text-zinc-100 relative overflow-hidden">
-      <div className="max-w-6xl mx-auto px-4 md:px-6 relative z-10">
+    <section id="features" className="py-24 md:py-32 bg-[#FEF9CF] u-background-grid-yellow text-[#0D0431] relative overflow-hidden border-b-2 border-[#0D0431]">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="flex flex-col items-center text-center mb-14 md:mb-20">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono uppercase tracking-wider mb-3">
-            <Zap className="w-3.5 h-3.5 text-purple-400" /> Platform Architecture
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight max-w-3xl text-white">
-            Core Preparation Capabilities
+        <div className="flex flex-col items-center text-center mb-16 md:mb-20">
+          <CaideBadge theme="light-purple">
+            From Chaos to Offers
+          </CaideBadge>
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading font-black tracking-tight max-w-4xl text-[#0D0431] mt-4">
+            A Complete Career Intelligence Stack
           </h2>
+          <p className="mt-4 text-[#0D0431]/80 text-base md:text-lg max-w-2xl font-sans">
+            Traditional placement prep forces you to juggle 10 disjointed tools. getPlaced unifies mock interviews, ATS resume scoring, coding arenas, and live telemetry in one cohesive platform.
+          </p>
         </div>
 
-        {/* Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* Caide-Style Comparison Section: Without vs With */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+          {/* Without Card */}
+          <CaideCard
+            theme="white"
+            shadow="lg"
+            className="p-8 space-y-6"
+          >
+            <div className="flex items-center gap-3 pb-4 border-b-2 border-[#0D0431]">
+              <div className="w-10 h-10 rounded-full bg-[#FFC5B7] border-2 border-[#0D0431] flex items-center justify-center font-bold text-sm">
+                ✕
+              </div>
+              <div>
+                <h3 className="font-heading font-bold text-xl text-[#0D0431]">Without getPlaced</h3>
+                <p className="text-xs text-[#0D0431]/70 font-medium">The old fragmented prep workflow</p>
+              </div>
+            </div>
+
+            <ul className="space-y-4 text-sm font-semibold text-[#0D0431]/80">
+              <li className="flex items-start gap-3">
+                <XCircle className="w-5 h-5 text-[#F85B52] shrink-0 mt-0.5" />
+                <span>Juggling 6 different websites for problems, mock interviews, and resumes</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <XCircle className="w-5 h-5 text-[#F85B52] shrink-0 mt-0.5" />
+                <span>Zero real-time feedback on filler words, speech speed, or body posture</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <XCircle className="w-5 h-5 text-[#F85B52] shrink-0 mt-0.5" />
+                <span>Resumes silently rejected by automated ATS parsers without explanation</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <XCircle className="w-5 h-5 text-[#F85B52] shrink-0 mt-0.5" />
+                <span>Hours lost wandering aimlessly across unorganized LeetCode problem lists</span>
+              </li>
+            </ul>
+          </CaideCard>
+
+          {/* With Card */}
+          <CaideCard
+            theme="light-green"
+            shadow="lg"
+            className="p-8 space-y-6"
+          >
+            <div className="flex items-center gap-3 pb-4 border-b-2 border-[#0D0431]">
+              <div className="w-10 h-10 rounded-full bg-[#9BFFED] border-2 border-[#0D0431] flex items-center justify-center font-bold text-sm">
+                ✓
+              </div>
+              <div>
+                <h3 className="font-heading font-bold text-xl text-[#0D0431]">With getPlaced</h3>
+                <p className="text-xs text-[#0D0431]/70 font-medium">AI-orchestrated placement success</p>
+              </div>
+            </div>
+
+            <ul className="space-y-4 text-sm font-bold text-[#0D0431]">
+              <li className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-[#0D0431] shrink-0 mt-0.5" />
+                <span>Single unified cockpit for coding, system design, HR prep, and roadmaps</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-[#0D0431] shrink-0 mt-0.5" />
+                <span>Live biometric telemetry tracking speech clarity, gaze focus, and posture</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-[#0D0431] shrink-0 mt-0.5" />
+                <span>ATS scoring engine with automatic keyword extraction and formatting fixes</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-[#0D0431] shrink-0 mt-0.5" />
+                <span>Structured 28+ topic curated sheets with verified solution architectures</span>
+              </li>
+            </ul>
+          </CaideCard>
+        </div>
+
+        {/* Bento Grid Features */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           
-          {/* Bento Card 1: AI Interview Simulation */}
-          <motion.div
-            whileHover={{ y: -2 }}
-            transition={{ duration: 0.2 }}
-            className="col-span-1 md:col-span-2 lg:col-span-2 row-span-2 rounded-2xl bg-zinc-900/50 p-6 md:p-8 border border-zinc-800 overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-colors"
+          {/* Bento Card 1: Technical Interview Simulation (Span 2) */}
+          <CaideCard
+            theme="light-purple"
+            shadow="lg"
+            className="col-span-1 md:col-span-2 p-8 flex flex-col justify-between"
           >
             <div>
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-5">
-                <Bot className="w-5 h-5" />
+              <div className="w-12 h-12 rounded-2xl bg-white border-2 border-[#0D0431] flex items-center justify-center text-[#0D0431] mb-6 shadow-[3px_3px_0_0_#0D0431]">
+                <Bot className="w-6 h-6 text-[#896EE2]" />
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-white mb-2 tracking-tight">
+              <h3 className="text-2xl font-heading font-bold text-[#0D0431] mb-2">
                 Technical Interview Simulation
               </h3>
-              <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-                Real-time telemetry measuring speech pacing, gaze focus, posture alignment, and technical communication.
+              <p className="text-[#0D0431]/80 text-sm leading-relaxed mb-6 font-medium">
+                Simulate high-stakes coding, architectural, and behavioral rounds with intelligent AI interviewers that challenge your assumptions in real time.
               </p>
             </div>
 
-            {/* Micro Graphic Component with Dynamic Telemetry */}
-            <div className="rounded-xl bg-zinc-950/80 border border-zinc-800 p-4">
-              <div className="flex items-center justify-between text-xs font-mono text-zinc-400 mb-2.5">
-                <span>AUDIO_ANALYSIS</span>
-                <span className="text-emerald-400 font-medium">{telemetryData.accuracy} ACCURACY</span>
+            <div className="p-4 rounded-xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
+              <div className="flex justify-between text-xs font-mono font-bold text-[#0D0431] mb-2">
+                <span>AI_ASSESSMENT</span>
+                <span className="text-[#896EE2]">{telemetryData.accuracy} ACCURACY</span>
               </div>
-              <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500 w-[92%] rounded-full" />
-              </div>
-              <div className="mt-3 flex justify-between text-[11px] text-zinc-400 font-mono">
-                <span>Pacing: {telemetryData.pacingWpm} wpm</span>
-                <span>Tone: {telemetryData.tone}</span>
-                <span>Filler: {telemetryData.fillerWords}</span>
+              <div className="h-3 w-full bg-[#E4CDFB] rounded-full border border-[#0D0431] overflow-hidden">
+                <div className="h-full bg-[#896EE2] w-[94%] rounded-full" />
               </div>
             </div>
-          </motion.div>
+          </CaideCard>
 
-          {/* Bento Card 2: ATS Resume Analysis */}
-          <motion.div
-            whileHover={{ y: -2 }}
-            transition={{ duration: 0.2 }}
-            className="col-span-1 md:col-span-2 lg:col-span-2 row-span-1 rounded-2xl bg-zinc-900/50 p-6 md:p-7 border border-zinc-800 overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-colors"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
-                  <FileSearch className="w-5 h-5" />
-                </div>
-                <h3 className="text-lg md:text-xl font-bold text-white mb-1.5 tracking-tight">
-                  ATS Resume Analysis
-                </h3>
-                <p className="text-zinc-400 text-xs md:text-sm leading-relaxed max-w-md">
-                  Benchmark resume content against technical job requirements with automated keyword matching.
-                </p>
-              </div>
-              <div className="hidden sm:flex flex-col items-end justify-center">
-                <div className="text-2xl font-mono font-bold text-emerald-400">{telemetryData.atsScore}%</div>
-                <div className="text-[10px] text-zinc-500 font-mono">MATCH SCORE</div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Bento Card 3: Coding Arena */}
-          <motion.div
-            whileHover={{ y: -2 }}
-            transition={{ duration: 0.2 }}
-            className="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 rounded-2xl bg-zinc-900/50 p-5 md:p-6 border border-zinc-800 overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-colors"
+          {/* Bento Card 2: ATS Resume Score (Span 2) */}
+          <CaideCard
+            theme="pale-lime"
+            shadow="lg"
+            className="col-span-1 md:col-span-2 p-8 flex flex-col justify-between"
           >
             <div>
-              <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 mb-3.5">
-                <Code2 className="w-4 h-4" />
+              <div className="w-12 h-12 rounded-2xl bg-white border-2 border-[#0D0431] flex items-center justify-center text-[#0D0431] mb-6 shadow-[3px_3px_0_0_#0D0431]">
+                <FileSearch className="w-6 h-6 text-[#0D0431]" />
               </div>
-              <h3 className="text-base font-bold text-white mb-1 tracking-tight">
-                Coding Arena
+              <h3 className="text-2xl font-heading font-bold text-[#0D0431] mb-2">
+                ATS Resume Optimization
               </h3>
-              <p className="text-zinc-400 text-xs leading-relaxed">
-                Integrated code editor with test runners, execution sandboxes, and structured problem sets.
+              <p className="text-[#0D0431]/80 text-sm leading-relaxed mb-6 font-medium">
+                Instant parsing against real hiring rubrics. Discover missing tech stacks, verify action verbs, and format for maximum recruiter callback rates.
               </p>
             </div>
-            <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-300">
-              <span className="font-medium">Open Arena</span>
-              <Zap className="w-3.5 h-3.5 text-purple-400" />
-            </div>
-          </motion.div>
 
-          {/* Bento Card 4: Analytics Dashboard */}
-          <motion.div
-            whileHover={{ y: -2 }}
-            transition={{ duration: 0.2 }}
-            className="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 rounded-2xl bg-zinc-900/50 p-5 md:p-6 border border-zinc-800 overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-colors"
+            <div className="p-4 rounded-xl bg-white border-2 border-[#0D0431] flex items-center justify-between shadow-[3px_3px_0_0_#0D0431]">
+              <div className="font-heading font-bold text-xs text-[#0D0431] uppercase">Verified ATS Score</div>
+              <div className="text-3xl font-heading font-black text-[#0D0431]">{telemetryData.atsScore}%</div>
+            </div>
+          </CaideCard>
+
+          {/* Bento Card 3: 2800+ Question Arena */}
+          <CaideCard
+            theme="light-blue"
+            shadow="default"
+            className="col-span-1 md:col-span-1 p-6 flex flex-col justify-between"
           >
             <div>
-              <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 mb-3.5">
-                <BarChart3 className="w-4 h-4" />
+              <div className="w-10 h-10 rounded-xl bg-white border-2 border-[#0D0431] flex items-center justify-center mb-4 shadow-[2px_2px_0_0_#0D0431]">
+                <Code2 className="w-5 h-5 text-[#63A0F8]" />
               </div>
-              <h3 className="text-base font-bold text-white mb-1 tracking-tight">
-                Readiness Index
-              </h3>
-              <p className="text-zinc-400 text-xs leading-relaxed">
-                Continuous scoring across technical assessments, behavioral rounds, and resume metrics.
+              <h4 className="font-heading font-bold text-lg text-[#0D0431] mb-1">
+                2,800+ Problem Arena
+              </h4>
+              <p className="text-xs text-[#0D0431]/75 font-medium leading-relaxed">
+                Monaco IDE sandbox with multi-language execution, custom test suites, and LeetCode sync.
               </p>
             </div>
-            <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-between text-xs font-mono text-emerald-400">
-              <span>SCORE</span>
-              <span className="font-bold">{telemetryData.readinessScore}/100</span>
+            <div className="mt-4 pt-3 border-t-2 border-[#0D0431] flex items-center justify-between text-xs font-bold text-[#0D0431]">
+              <span>Explore Arena</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </div>
-          </motion.div>
+          </CaideCard>
+
+          {/* Bento Card 4: Company Dossiers */}
+          <CaideCard
+            theme="white"
+            shadow="default"
+            className="col-span-1 md:col-span-1 p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-[#FEDF6A] border-2 border-[#0D0431] flex items-center justify-center mb-4 shadow-[2px_2px_0_0_#0D0431]">
+                <BarChart3 className="w-5 h-5 text-[#0D0431]" />
+              </div>
+              <h4 className="font-heading font-bold text-lg text-[#0D0431] mb-1">
+                Company Intelligence
+              </h4>
+              <p className="text-xs text-[#0D0431]/75 font-medium leading-relaxed">
+                Detailed breakdowns of hiring bars, CTC brackets, interview round formats, and recent candidate questions.
+              </p>
+            </div>
+            <div className="mt-4 pt-3 border-t-2 border-[#0D0431] flex items-center justify-between text-xs font-bold text-[#0D0431]">
+              <span>View Intel</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </CaideCard>
+
+          {/* Bento Card 5: Behavioral STAR Engine */}
+          <CaideCard
+            theme="light-green"
+            shadow="default"
+            className="col-span-1 md:col-span-1 p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-white border-2 border-[#0D0431] flex items-center justify-center mb-4 shadow-[2px_2px_0_0_#0D0431]">
+                <Sparkles className="w-5 h-5 text-[#0D0431]" />
+              </div>
+              <h4 className="font-heading font-bold text-lg text-[#0D0431] mb-1">
+                HR & STAR Prep
+              </h4>
+              <p className="text-xs text-[#0D0431]/75 font-medium leading-relaxed">
+                Structure storytelling with Situation, Task, Action, and Result frameworks analyzed by AI.
+              </p>
+            </div>
+            <div className="mt-4 pt-3 border-t-2 border-[#0D0431] flex items-center justify-between text-xs font-bold text-[#0D0431]">
+              <span>Practice STAR</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </CaideCard>
+
+          {/* Bento Card 6: Readiness Score */}
+          <CaideCard
+            theme="white"
+            shadow="default"
+            className="col-span-1 md:col-span-1 p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-[#FFC5B7] border-2 border-[#0D0431] flex items-center justify-center mb-4 shadow-[2px_2px_0_0_#0D0431]">
+                <Target className="w-5 h-5 text-[#0D0431]" />
+              </div>
+              <h4 className="font-heading font-bold text-lg text-[#0D0431] mb-1">
+                Readiness Index ({telemetryData.readinessScore}/100)
+              </h4>
+              <p className="text-xs text-[#0D0431]/75 font-medium leading-relaxed">
+                Dynamic telemetry score synthesizing DSA performance, speech confidence, and resume quality.
+              </p>
+            </div>
+            <div className="mt-4 pt-3 border-t-2 border-[#0D0431] flex items-center justify-between text-xs font-bold text-[#0D0431]">
+              <span>Score Breakdown</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </CaideCard>
 
         </div>
+
       </div>
     </section>
   );

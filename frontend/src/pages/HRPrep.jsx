@@ -10,16 +10,27 @@ import {
   AlertTriangle,
   HelpCircle,
   Building,
+  Target,
   Layers,
   Mic,
   Square,
+  ChevronRight,
+  BookOpen,
+  Zap,
   RotateCcw,
   Check,
   Copy,
+  SlidersHorizontal,
   X,
+  Award,
+  Lightbulb,
 } from "lucide-react";
 import { PY_API_URL } from "@/config/api";
 import { getInterviewMentorCopy } from "@/utils/dynamicCopy";
+import CaideBadge from "@/components/caide/CaideBadge";
+import CaideCard from "@/components/caide/CaideCard";
+import CaideButton from "@/components/caide/CaideButton";
+import CaideModal from "@/components/caide/CaideModal";
 
 const COMPANY_FILTERS = [
   "All Companies",
@@ -28,7 +39,7 @@ const COMPANY_FILTERS = [
   "Meta (Move Fast & Impact)",
   "Microsoft (Growth Mindset)",
   "Netflix (Freedom & Responsibility)",
-  "Uber (Customer Obsession)"
+  "Uber (Customer Obsession)",
 ];
 
 const CATEGORY_FILTERS = [
@@ -37,7 +48,7 @@ const CATEGORY_FILTERS = [
   "Technical Execution & Problem Solving",
   "Accountability & Growth Mindset",
   "Culture Fit & Motivation",
-  "Navigating Ambiguity & Bias for Action"
+  "Navigating Ambiguity & Bias for Action",
 ];
 
 export default function HRPrep() {
@@ -63,10 +74,10 @@ export default function HRPrep() {
     () => {
       gsap.from(".gsap-bento-card", {
         opacity: 0,
-        y: 20,
+        y: 18,
         duration: 0.45,
         stagger: 0.06,
-        ease: "power2.out"
+        ease: "power2.out",
       });
     },
     { dependencies: [questions, activeQuestion], scope: containerRef }
@@ -114,7 +125,7 @@ export default function HRPrep() {
         role: "Software Engineer",
         interview_type: "HR",
         difficulty: "Medium",
-        count: 6
+        count: 6,
       });
       setQuestions(res.data.questions || []);
     } catch (e) {
@@ -160,7 +171,7 @@ export default function HRPrep() {
         question: activeQuestion.question,
         answer: practiceAnswer,
         company: selectedCompany,
-        interview_type: "behavioral"
+        interview_type: "behavioral",
       });
       setEvaluationResult(res.data);
     } catch (e) {
@@ -179,98 +190,125 @@ export default function HRPrep() {
   return (
     <main
       ref={containerRef}
-      className="overflow-x-hidden w-full max-w-full bg-[#09090b] text-zinc-100 min-h-screen font-sans selection:bg-zinc-800 selection:text-white"
+      className="overflow-x-hidden w-full max-w-full bg-[#FEF9CF] u-background-grid-dark-2 text-[#0D0431] min-h-screen font-sans selection:bg-[#FEDF6A] selection:text-[#0D0431]"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-3">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-zinc-100 tracking-tight max-w-4xl mx-auto leading-tight">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8">
+        {/* Header Hero Section */}
+        <div className="text-center space-y-4">
+          <CaideBadge theme="light-purple" dot={true}>
+            Behavioral Strategy & Leadership Principles
+          </CaideBadge>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black text-[#0D0431] tracking-tight max-w-5xl mx-auto leading-tight">
             Behavioral & Leadership Preparation
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            Structured STAR response practice calibrated against company-specific leadership frameworks.
+          <p className="text-sm md:text-base text-[#0D0431]/80 max-w-3xl mx-auto leading-relaxed font-sans font-medium">
+            Structured STAR response practice calibrated against company-specific leadership frameworks and cultural competencies.
           </p>
         </div>
 
-        {/* Navigation Tabs */}
-        <nav className="flex items-center justify-center gap-2 overflow-x-auto pb-1 font-mono text-xs border-b border-zinc-800 pb-4">
+        {/* Retro Interview Navigation Tabs */}
+        <nav className="flex items-center justify-center gap-3 overflow-x-auto pb-2 font-sans text-xs">
           <Link
             to="/app/interview"
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-[#121215] hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold whitespace-nowrap bg-white text-[#0D0431] hover:bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] transition-all"
           >
-            <BrainCog className="w-3.5 h-3.5 text-zinc-400" />
+            <BrainCog className="w-4 h-4 text-[#896EE2]" />
             <span>Mock Interview</span>
           </Link>
           <Link
             to="/app/hr-prep"
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-zinc-100 text-zinc-950 font-semibold shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold whitespace-nowrap bg-[#0D0431] text-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]"
           >
-            <Building className="w-3.5 h-3.5" />
-            <span>HR & Leadership</span>
+            <Building className="w-4 h-4 text-[#FEDF6A]" />
+            <span>HR & Leadership Prep</span>
           </Link>
           <Link
             to="/app/company-intel"
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap bg-[#121215] hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold whitespace-nowrap bg-white text-[#0D0431] hover:bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] transition-all"
           >
-            <Layers className="w-3.5 h-3.5 text-zinc-400" />
+            <Layers className="w-4 h-4 text-[#896EE2]" />
             <span>Company Intelligence</span>
           </Link>
         </nav>
 
-        {/* STAR Framework & Filters */}
-        <div className="space-y-4">
-          {/* STAR Framework Blueprint */}
-          <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-5 md:p-6 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <h3 className="text-xs uppercase font-mono font-bold text-white tracking-wider">
-                  STAR Response Framework
+        {/* STAR Formula Blueprint Banner & Filter Bar */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 grid-flow-dense">
+          {/* STAR Framework Blueprint Bento Card */}
+          <div className="col-span-12 bg-white border-2 border-[#0D0431] rounded-3xl p-6 md:p-8 shadow-[6px_6px_0_0_#0D0431] space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-[#0D0431] pb-4">
+              <div className="flex items-center gap-2.5">
+                <span className="w-3 h-3 rounded-full bg-[#896EE2] border border-[#0D0431]" />
+                <h3 className="font-heading font-black text-sm uppercase text-[#0D0431] tracking-wider">
+                  STAR Response Framework Blueprint
                 </h3>
               </div>
-              <span className="text-[11px] text-zinc-500 font-mono">
+              <span className="text-xs text-[#0D0431] font-mono font-bold bg-[#FEF9CF] px-3 py-1 rounded-full border border-[#0D0431]">
                 Target allocation for behavioral answers
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1.5">
-                <span className="font-mono text-xs font-bold text-white block">Situation</span>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Context, constraints, and project scope.
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Situation Card */}
+              <div className="p-4 bg-[#FEF9CF] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-heading font-black text-xs text-[#0D0431]">Situation</span>
+                  <span className="font-mono text-[11px] font-bold text-[#0D0431] bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
+                    20% Weight
+                  </span>
+                </div>
+                <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
+                  Context, system constraints, business stakes, and project scope.
                 </p>
               </div>
 
-              <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1.5">
-                <span className="font-mono text-xs font-bold text-white block">Task</span>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Your specific responsibility and primary objective.
+              {/* Task Card */}
+              <div className="p-4 bg-[#D4FDF7] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-heading font-black text-xs text-[#0D0431]">Task</span>
+                  <span className="font-mono text-[11px] font-bold text-[#0D0431] bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
+                    10% Weight
+                  </span>
+                </div>
+                <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
+                  Your specific individual responsibility and primary objective.
                 </p>
               </div>
 
-              <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1.5">
-                <span className="font-mono text-xs font-bold text-white block">Action</span>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Technical decisions, trade-offs, and execution steps.
+              {/* Action Card */}
+              <div className="p-4 bg-[#FEDF6A] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-heading font-black text-xs text-[#0D0431]">Action</span>
+                  <span className="font-mono text-[11px] font-bold text-[#0D0431] bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
+                    50% Weight
+                  </span>
+                </div>
+                <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
+                  Technical decisions, trade-offs, architecture, and proactive execution steps.
                 </p>
               </div>
 
-              <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1.5">
-                <span className="font-mono text-xs font-bold text-white block">Result</span>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Quantifiable outcomes, metrics, and key learnings.
+              {/* Result Card */}
+              <div className="p-4 bg-[#E4CDFB] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-heading font-black text-xs text-[#0D0431]">Result</span>
+                  <span className="font-mono text-[11px] font-bold text-[#0D0431] bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
+                    20% Weight
+                  </span>
+                </div>
+                <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
+                  Quantifiable metrics, business outcomes, latency savings, and lessons.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Filter Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-[#121215] border border-zinc-800 p-3.5 rounded-xl">
+          {/* Filter & Control Bar */}
+          <div className="col-span-12 flex flex-wrap items-center justify-between gap-4 bg-white border-2 border-[#0D0431] p-4 rounded-2xl shadow-[4px_4px_0_0_#0D0431]">
             <div className="flex flex-wrap items-center gap-3">
               <select
                 value={selectedCompany}
                 onChange={(e) => setSelectedCompany(e.target.value)}
-                className="px-3.5 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs font-medium text-white focus:outline-none focus:border-zinc-500 font-mono cursor-pointer"
+                className="px-4 py-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold shadow-[2px_2px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:outline-none transition-all cursor-pointer"
               >
                 {COMPANY_FILTERS.map((c) => (
                   <option key={c} value={c}>
@@ -282,7 +320,7 @@ export default function HRPrep() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3.5 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs font-medium text-white focus:outline-none focus:border-zinc-500 font-mono cursor-pointer"
+                className="px-4 py-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold shadow-[2px_2px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:outline-none transition-all cursor-pointer"
               >
                 {CATEGORY_FILTERS.map((cat) => (
                   <option key={cat} value={cat}>
@@ -293,53 +331,54 @@ export default function HRPrep() {
             </div>
 
             <button
+              type="button"
               onClick={fetchQuestions}
               disabled={loading}
-              className="flex items-center gap-1.5 text-xs text-zinc-300 hover:text-white px-3.5 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-xl border border-zinc-800 transition font-mono cursor-pointer"
+              className="flex items-center gap-1.5 text-xs text-[#0D0431] font-bold bg-[#FEDF6A] hover:bg-[#FFE995] px-4 py-2.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
             >
-              <RotateCcw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-zinc-300" : ""}`} />
-              <span>Refresh Prompts</span>
+              <RotateCcw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+              Refresh Prompts
             </button>
           </div>
         </div>
 
         {/* Questions Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 grid-flow-dense">
           {questions.map((q, idx) => (
             <div
               key={q.id || idx}
-              className="gsap-bento-card bg-[#121215] border border-zinc-800 hover:border-zinc-700 rounded-2xl p-6 flex flex-col justify-between space-y-4 transition"
+              className="gsap-bento-card bg-white border-2 border-[#0D0431] hover:border-[#0D0431] rounded-3xl p-6 md:p-7 shadow-[4px_4px_0_0_#0D0431] hover:shadow-[6px_6px_0_0_#0D0431] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-4"
             >
-              <div className="space-y-3.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-semibold">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <CaideBadge theme="light-purple" size="sm">
                     {q.category || "Behavioral Track"}
-                  </span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 bg-zinc-950 text-zinc-400 rounded-full border border-zinc-800">
+                  </CaideBadge>
+                  <CaideBadge theme="yellow" size="sm">
                     Level: {q.difficulty || "Medium"}
-                  </span>
+                  </CaideBadge>
                 </div>
 
-                <h3 className="text-base font-bold text-white leading-snug">
+                <h3 className="text-base sm:text-lg font-heading font-bold text-[#0D0431] leading-snug">
                   "{q.question}"
                 </h3>
 
                 {q.why_asked && (
-                  <div className="text-xs text-zinc-400 border-t border-zinc-800 pt-3 space-y-1">
-                    <span className="text-zinc-300 font-semibold block">
+                  <div className="text-xs text-[#0D0431] bg-[#FEF9CF] border-2 border-[#0D0431] rounded-xl p-3.5 space-y-1 shadow-[2px_2px_0_0_#0D0431]">
+                    <span className="font-heading font-bold text-[#0D0431] block uppercase tracking-wider text-[10px]">
                       Evaluator Intent:
                     </span>
-                    <p className="text-zinc-400 leading-relaxed">{q.why_asked}</p>
+                    <p className="text-[#0D0431]/80 leading-relaxed font-sans font-medium">{q.why_asked}</p>
                   </div>
                 )}
 
                 {q.star_tips && (
-                  <div className="p-3.5 bg-zinc-950 border border-zinc-800 rounded-xl text-xs space-y-1">
-                    <span className="text-zinc-300 font-semibold flex items-center gap-1.5">
-                      <HelpCircle className="w-3.5 h-3.5 text-zinc-400" />
+                  <div className="p-3.5 bg-[#D4FDF7] border-2 border-[#0D0431] rounded-xl text-xs space-y-1 shadow-[2px_2px_0_0_#0D0431]">
+                    <span className="font-heading font-bold text-[#0D0431] flex items-center gap-1.5">
+                      <HelpCircle className="w-3.5 h-3.5 text-[#0D0431]" />
                       STAR Strategy:
                     </span>
-                    <p className="text-zinc-400 font-mono text-[11px] leading-relaxed">
+                    <p className="text-[#0D0431]/80 font-mono text-[11px] leading-relaxed">
                       {q.star_tips}
                     </p>
                   </div>
@@ -347,37 +386,40 @@ export default function HRPrep() {
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-3 border-t border-zinc-800 flex items-center justify-between gap-2">
-                {q.sample_answer && (
+              <div className="pt-4 border-t-2 border-[#0D0431] flex items-center justify-between gap-3 flex-wrap">
+                {q.sample_answer ? (
                   <button
+                    type="button"
                     onClick={() => handleCopyModel(q.sample_answer, q.id || idx)}
-                    className="flex items-center gap-1.5 text-xs text-zinc-300 hover:text-white bg-zinc-950 hover:bg-zinc-900 px-3.5 py-2 rounded-xl transition border border-zinc-800 font-mono cursor-pointer"
+                    className="flex items-center gap-1.5 text-xs text-[#0D0431] bg-white hover:bg-[#FEF9CF] px-3.5 py-2 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all font-mono font-bold cursor-pointer"
                   >
                     {copiedId === (q.id || idx) ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-emerald-400">Copied</span>
+                        <Check className="w-3.5 h-3.5 text-[#0D0431]" />
+                        <span className="text-[#0D0431]">Copied</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="w-3.5 h-3.5" />
+                        <Copy className="w-3.5 h-3.5 text-[#896EE2]" />
                         <span>Copy Model</span>
                       </>
                     )}
                   </button>
+                ) : (
+                  <div />
                 )}
 
-                <button
+                <CaideButton
                   onClick={() => {
                     setActiveQuestion(q);
                     setPracticeAnswer("");
                     setEvaluationResult(null);
                   }}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-zinc-100 hover:bg-white text-zinc-950 rounded-xl text-xs font-bold transition shadow font-mono cursor-pointer ml-auto"
+                  variant="stacked-yellow"
+                  size="sm"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Practice Response</span>
-                </button>
+                  Practice Response
+                </CaideButton>
               </div>
             </div>
           ))}
@@ -385,27 +427,20 @@ export default function HRPrep() {
 
         {/* PRACTICE & AI EVALUATION MODAL */}
         {activeQuestion && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-            <div className="bg-[#121215] border border-zinc-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 max-h-[88vh] overflow-y-auto gsap-bento-card">
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <BrainCog className="w-4 h-4 text-zinc-400" />
-                  <span>Practice Response</span>
-                </h3>
-                <button
-                  onClick={() => setActiveQuestion(null)}
-                  className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
+          <CaideModal
+            isOpen={!!activeQuestion}
+            onClose={() => setActiveQuestion(null)}
+            title="Practice Behavioral Response"
+            subtitle={activeQuestion.category}
+            maxWidth="max-w-2xl"
+          >
+            <div className="space-y-5">
               {/* Question Context */}
-              <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1">
-                <span className="text-[10px] uppercase font-mono text-zinc-400 font-bold">
-                  {activeQuestion.category}
+              <div className="p-4 bg-[#FEF9CF] border-2 border-[#0D0431] rounded-2xl shadow-[3px_3px_0_0_#0D0431] space-y-1">
+                <span className="text-[10px] uppercase font-mono text-[#0D0431] font-bold">
+                  Target Competency: {activeQuestion.category}
                 </span>
-                <h4 className="text-sm font-semibold text-white leading-snug">
+                <h4 className="text-sm md:text-base font-heading font-bold text-[#0D0431] leading-snug">
                   "{activeQuestion.question}"
                 </h4>
               </div>
@@ -413,15 +448,16 @@ export default function HRPrep() {
               {/* Input Area */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs uppercase tracking-wider font-mono text-zinc-400">
+                  <label className="text-xs uppercase font-bold tracking-wider font-sans text-[#0D0431]">
                     Your Response
                   </label>
                   <button
+                    type="button"
                     onClick={handleToggleVoice}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition font-mono cursor-pointer ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer ${
                       isRecording
-                        ? "bg-rose-600 hover:bg-rose-500 text-white"
-                        : "bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800"
+                        ? "bg-[#F85B52] text-white"
+                        : "bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431]"
                     }`}
                   >
                     {isRecording ? (
@@ -431,7 +467,7 @@ export default function HRPrep() {
                       </>
                     ) : (
                       <>
-                        <Mic className="w-3 h-3 text-zinc-300" />
+                        <Mic className="w-3 h-3 text-[#0D0431]" />
                         Record Voice
                       </>
                     )}
@@ -442,73 +478,67 @@ export default function HRPrep() {
                   rows={5}
                   value={practiceAnswer}
                   onChange={(e) => setPracticeAnswer(e.target.value)}
-                  placeholder="Type or record your response (Situation, Task, Action, Result)..."
-                  className="w-full p-3.5 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 resize-none leading-relaxed"
+                  placeholder="Type or record your STAR response (Situation, Task, Action, Result)..."
+                  className="w-full p-4 bg-white text-[#0D0431] placeholder-[#0D0431]/40 border-2 border-[#0D0431] rounded-xl text-sm font-sans font-medium shadow-[3px_3px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:shadow-[4px_4px_0_0_#0D0431] focus:outline-none transition-all resize-none leading-relaxed"
                 />
 
-                <button
+                <CaideButton
                   onClick={handleEvaluatePractice}
                   disabled={evaluating || !practiceAnswer.trim()}
-                  className={`w-full py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition font-mono cursor-pointer ${
-                    evaluating || !practiceAnswer.trim()
-                      ? "bg-zinc-900 text-zinc-600 cursor-not-allowed border border-zinc-800"
-                      : "bg-zinc-100 hover:bg-white text-zinc-950 shadow"
-                  }`}
+                  variant="stacked"
+                  size="md"
+                  fullWidth
                 >
-                  {evaluating ? (
-                    <>
-                      <Sparkles className="w-3.5 h-3.5 animate-spin" />
-                      <span>Evaluating response...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Evaluate Response</span>
-                    </>
-                  )}
-                </button>
+                  {evaluating ? "Evaluating Answer..." : "Evaluate Response with AI"}
+                </CaideButton>
               </div>
 
               {/* Evaluation Results */}
               {evaluationResult && (
-                <div className="space-y-3.5 pt-3 border-t border-zinc-800 font-sans">
-                  <div className="flex items-center justify-between bg-zinc-950 p-3 rounded-xl border border-zinc-800">
-                    <span className="text-xs font-semibold text-zinc-300">
+                <div className="space-y-4 pt-4 border-t-2 border-[#0D0431]">
+                  <div className="flex items-center justify-between bg-[#FEDF6A] p-4 rounded-2xl border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
+                    <span className="text-xs font-heading font-black text-[#0D0431]">
                       Overall Score:
                     </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg font-mono font-bold text-white">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xl font-heading font-black text-[#0D0431]">
                         {evaluationResult.score} / 100
                       </span>
-                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
-                        evaluationResult.score >= 80
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                      <span
+                        className={`text-[11px] font-mono font-bold px-3 py-1 rounded-full border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] ${
+                          evaluationResult.score >= 80
+                            ? "bg-[#D4FDF7] text-[#0D0431]"
+                            : evaluationResult.score >= 60
+                            ? "bg-[#FFE995] text-[#0D0431]"
+                            : "bg-[#FFC5B7] text-[#0D0431]"
+                        }`}
+                      >
+                        {evaluationResult.score >= 80
+                          ? "Interview Ready"
                           : evaluationResult.score >= 60
-                          ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                          : "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                      }`}>
-                        {evaluationResult.score >= 80 ? "Interview Ready" : evaluationResult.score >= 60 ? "Developing" : "Needs Practice"}
+                          ? "Developing"
+                          : "Needs Practice"}
                       </span>
                     </div>
                   </div>
 
                   {/* STAR Detection Badges */}
                   {evaluationResult.star_compliance && (
-                    <div className="space-y-1.5">
-                      <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 block">
-                        STAR Components:
+                    <div className="space-y-2">
+                      <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431] block">
+                        STAR Framework Compliance:
                       </span>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         {["situation", "task", "action", "result"].map((k) => {
                           const detected =
                             evaluationResult.star_compliance[`${k}_detected`];
                           return (
                             <div
                               key={k}
-                              className={`p-1.5 rounded-lg border text-center text-[11px] font-mono font-semibold ${
+                              className={`p-2 rounded-xl border-2 border-[#0D0431] text-center text-xs font-mono font-bold shadow-[2px_2px_0_0_#0D0431] ${
                                 detected
-                                  ? "bg-zinc-950 border-emerald-500/30 text-emerald-400"
-                                  : "bg-zinc-950 border-rose-500/30 text-rose-400"
+                                  ? "bg-[#D4FDF7] text-[#0D0431]"
+                                  : "bg-[#FFC5B7] text-[#0D0431]"
                               }`}
                             >
                               {k.toUpperCase()}: {detected ? "Verified" : "Missing"}
@@ -519,76 +549,84 @@ export default function HRPrep() {
                     </div>
                   )}
 
-                  {/* Strengths & Improve */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1">
-                      <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
+                  {/* Strengths & Improvement Bento */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="p-4 bg-[#D4FDF7] border-2 border-[#0D0431] rounded-xl shadow-[3px_3px_0_0_#0D0431] space-y-1.5">
+                      <span className="text-xs font-heading font-black text-[#0D0431] flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-[#0D0431]" />
                         Strengths
                       </span>
-                      <ul className="text-xs text-zinc-300 space-y-0.5">
-                        {(evaluationResult.strengths || [
-                          "Structured technical articulation",
-                          "Clear individual role identification",
-                        ]).slice(0, 2).map((s, i) => (
-                          <li key={i} className="flex items-start gap-1">
-                            <span className="text-emerald-400">•</span>
-                            <span className="line-clamp-2">{s}</span>
-                          </li>
-                        ))}
+                      <ul className="text-xs text-[#0D0431] space-y-1 font-medium">
+                        {(
+                          evaluationResult.strengths || [
+                            "Structured technical articulation",
+                            "Clear individual role identification",
+                          ]
+                        )
+                          .slice(0, 2)
+                          .map((s, i) => (
+                            <li key={i} className="flex items-start gap-1.5">
+                              <span className="text-[#0D0431] font-bold">•</span>
+                              <span className="line-clamp-2">{s}</span>
+                            </li>
+                          ))}
                       </ul>
                     </div>
 
-                    <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1">
-                      <span className="text-xs font-semibold text-amber-400 flex items-center gap-1.5">
-                        <AlertTriangle className="w-3.5 h-3.5" />
+                    <div className="p-4 bg-[#FFC5B7] border-2 border-[#0D0431] rounded-xl shadow-[3px_3px_0_0_#0D0431] space-y-1.5">
+                      <span className="text-xs font-heading font-black text-[#0D0431] flex items-center gap-1.5">
+                        <AlertTriangle className="w-4 h-4 text-[#0D0431]" />
                         Areas to Improve
                       </span>
-                      <ul className="text-xs text-zinc-300 space-y-0.5">
-                        {(evaluationResult.areas_for_improvement || [
-                          "Add quantifiable business or latency metrics",
-                          "Elaborate on architectural trade-offs in Action phase",
-                        ]).slice(0, 2).map((a, i) => (
-                          <li key={i} className="flex items-start gap-1">
-                            <span className="text-amber-400">•</span>
-                            <span className="line-clamp-2">{a}</span>
-                          </li>
-                        ))}
+                      <ul className="text-xs text-[#0D0431] space-y-1 font-medium">
+                        {(
+                          evaluationResult.areas_for_improvement || [
+                            "Add quantifiable business or latency metrics",
+                            "Elaborate on architectural trade-offs in Action phase",
+                          ]
+                        )
+                          .slice(0, 2)
+                          .map((a, i) => (
+                            <li key={i} className="flex items-start gap-1.5">
+                              <span className="text-[#0D0431] font-bold">•</span>
+                              <span className="line-clamp-2">{a}</span>
+                            </li>
+                          ))}
                       </ul>
                     </div>
                   </div>
 
                   {/* One Tip */}
-                  <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl flex items-start gap-2 text-xs text-zinc-300">
-                    <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                  <div className="p-4 bg-[#E4CDFB] border-2 border-[#0D0431] rounded-xl flex items-start gap-3 text-xs text-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
+                    <Sparkles className="w-5 h-5 text-[#0D0431] shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-bold text-zinc-200 block text-[11px] uppercase tracking-wider font-mono">
-                        Key Tip:
+                      <span className="font-heading font-black text-[#0D0431] block text-[11px] uppercase tracking-wider mb-0.5">
+                        Key Strategic Tip:
                       </span>
-                      <p className="text-zinc-300">
+                      <p className="text-[#0D0431]/90 font-sans font-medium leading-relaxed">
                         {evaluationResult.one_tip ||
                           evaluationResult.key_takeaway ||
-                          "Focus on the Action phase detailing your direct technical contribution and trade-offs."}
+                          "Focus heavily on the Action phase detailing your direct technical contribution and trade-offs."}
                       </p>
                     </div>
                   </div>
 
-                  {/* Exemplary Answer (Progressive Disclosure) */}
+                  {/* Polished Exemplary Answer (Progressive Disclosure) */}
                   {evaluationResult.suggested_better_answer && (
                     <div className="pt-1">
                       <button
                         type="button"
                         onClick={() => setShowModelAnswer(!showModelAnswer)}
-                        className="text-xs font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1 cursor-pointer"
+                        className="text-xs font-bold font-sans text-[#896EE2] hover:text-[#0D0431] flex items-center gap-1 cursor-pointer"
                       >
                         <span>{showModelAnswer ? "Hide Model Answer" : "Show Model Answer"}</span>
                       </button>
                       {showModelAnswer && (
-                        <div className="mt-2 p-3 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1">
-                          <span className="text-xs font-bold text-zinc-200 block">
+                        <div className="mt-2 p-4 bg-white border-2 border-[#0D0431] rounded-xl space-y-1 shadow-[2px_2px_0_0_#0D0431]">
+                          <span className="text-xs font-heading font-bold text-[#0D0431] block">
                             Model Answer:
                           </span>
-                          <p className="text-xs text-zinc-400 leading-relaxed">
+                          <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium">
                             {evaluationResult.suggested_better_answer}
                           </p>
                         </div>
@@ -598,7 +636,7 @@ export default function HRPrep() {
                 </div>
               )}
             </div>
-          </div>
+          </CaideModal>
         )}
       </div>
     </main>

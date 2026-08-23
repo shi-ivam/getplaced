@@ -19,4 +19,42 @@ export default defineConfig({
   optimizeDeps: {
     include: ["react", "react-dom"],
   },
+  server: {
+    port: 5173,
+    host: "0.0.0.0",
+    proxy: {
+      "/api/problems": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+      "/api/resume": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+      "/api/interview": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+      "/api/communication": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+      "/api/company": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+      "/analyze-resume": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+      "/api": {
+        target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+      },
+      "/job-recommendations": {
+        target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+      },
+    },
+  },
 })

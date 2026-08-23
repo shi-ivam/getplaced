@@ -13,6 +13,9 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { PY_API_URL } from "@/config/api";
+import CaideBadge from "@/components/caide/CaideBadge";
+import CaideCard from "@/components/caide/CaideCard";
+import CaideButton from "@/components/caide/CaideButton";
 
 export default function ResumeBuilderEditor({
   builderData,
@@ -123,40 +126,41 @@ export default function ResumeBuilderEditor({
   return (
     <div className="space-y-6">
       
-      {/* Header */}
-      <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 sm:p-7 backdrop-blur-xl space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-5">
+      {/* Header Deck */}
+      <CaideCard theme="white" shadow="lg" rounded="3xl" className="p-6 sm:p-7 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#0D0431] pb-5">
           <div className="space-y-1">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
-              <Edit3 className="w-4 h-4 text-neutral-400" />
+            <h2 className="text-sm font-heading font-bold uppercase tracking-wider text-[#0D0431] flex items-center gap-2">
+              <Edit3 className="w-4 h-4 text-[#896EE2]" />
               Resume Builder & Section Editor
             </h2>
-            <p className="text-xs text-neutral-400">
+            <p className="text-xs text-[#0D0431]/70 font-sans font-medium">
               Structured resume editor with XYZ metric bullet enhancements and ATS synchronization.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center gap-2.5 self-start sm:self-auto">
             <button
+              type="button"
               onClick={handleExportBuilderJSON}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] text-neutral-200 border border-white/[0.08] rounded-xl text-xs font-medium transition"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-[#FEF9CF] text-[#0D0431] border-2 border-[#0D0431] rounded-2xl text-xs font-heading font-bold shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
-              Export JSON
+              <span>Export JSON</span>
             </button>
-            <button
+            <CaideButton
               onClick={handleSendToATS}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white text-black font-semibold rounded-xl text-xs shadow-sm hover:bg-neutral-200 transition"
+              variant="stacked-yellow"
+              size="sm"
             >
-              <Sparkles className="w-3.5 h-3.5" />
               Evaluate ATS Score
-            </button>
+            </CaideButton>
           </div>
         </div>
 
         {/* 1. Personal Information */}
         <div className="space-y-3">
-          <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block">
+          <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-[#0D0431]/70 block">
             Personal Information
           </span>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -170,7 +174,7 @@ export default function ResumeBuilderEditor({
                 })
               }
               placeholder="Full Name"
-              className="px-3.5 py-2 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-white/30"
+              className="px-4 py-2.5 bg-white border-2 border-[#0D0431] rounded-xl text-xs font-sans font-medium text-[#0D0431] placeholder-[#0D0431]/40 shadow-[2px_2px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:outline-none"
             />
             <input
               type="email"
@@ -182,7 +186,7 @@ export default function ResumeBuilderEditor({
                 })
               }
               placeholder="Email Address"
-              className="px-3.5 py-2 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-white/30"
+              className="px-4 py-2.5 bg-white border-2 border-[#0D0431] rounded-xl text-xs font-sans font-medium text-[#0D0431] placeholder-[#0D0431]/40 shadow-[2px_2px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:outline-none"
             />
             <input
               type="text"
@@ -194,41 +198,43 @@ export default function ResumeBuilderEditor({
                 })
               }
               placeholder="LinkedIn Profile URL"
-              className="px-3.5 py-2 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-white focus:outline-none focus:border-white/30"
+              className="px-4 py-2.5 bg-white border-2 border-[#0D0431] rounded-xl text-xs font-sans font-medium text-[#0D0431] placeholder-[#0D0431]/40 shadow-[2px_2px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:outline-none"
             />
           </div>
         </div>
 
         {/* 2. Professional Summary */}
-        <div className="space-y-2 pt-2 border-t border-white/[0.06]">
+        <div className="space-y-2.5 pt-3 border-t-2 border-[#0D0431]">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400">
+            <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-[#0D0431]/70">
               Professional Summary
             </span>
             <button
+              type="button"
               onClick={handleAISummaryOptimize}
               disabled={isImprovingSection}
-              className="flex items-center gap-1 text-[11px] text-neutral-300 hover:text-white bg-white/[0.05] border border-white/[0.08] px-2.5 py-1 rounded-lg transition font-mono"
+              className="flex items-center gap-1.5 text-xs text-[#0D0431] font-heading font-bold bg-[#E4CDFB] hover:bg-[#FEDF6A] border-2 border-[#0D0431] px-3 py-1.5 rounded-xl shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
             >
-              <Sparkles className="w-3 h-3 text-emerald-400" />
-              {isImprovingSection ? "Optimizing..." : "Polish Summary"}
+              <Sparkles className="w-3.5 h-3.5 text-[#896EE2]" />
+              <span>{isImprovingSection ? "Optimizing..." : "Polish Summary"}</span>
             </button>
           </div>
           <textarea
             rows={3}
             value={builderData.summary}
             onChange={(e) => setBuilderData({ ...builderData, summary: e.target.value })}
-            className="w-full px-3.5 py-2.5 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-neutral-200 focus:outline-none focus:border-white/30 resize-none font-sans leading-relaxed"
+            className="w-full px-4 py-3 bg-white border-2 border-[#0D0431] rounded-2xl text-xs text-[#0D0431] font-sans font-medium focus:bg-[#FEF9CF] focus:outline-none resize-none leading-relaxed shadow-[2px_2px_0_0_#0D0431]"
           />
         </div>
 
         {/* 3. Work Experience */}
-        <div className="space-y-4 pt-2 border-t border-white/[0.06]">
+        <div className="space-y-4 pt-3 border-t-2 border-[#0D0431]">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400">
+            <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-[#0D0431]/70">
               Work Experience & Bullets
             </span>
             <button
+              type="button"
               onClick={() => {
                 const newExp = {
                   id: `exp-${Date.now()}`,
@@ -241,10 +247,10 @@ export default function ResumeBuilderEditor({
                 };
                 setBuilderData({ ...builderData, experience: [...builderData.experience, newExp] });
               }}
-              className="flex items-center gap-1 text-[11px] text-neutral-300 hover:text-white bg-white/[0.05] px-2.5 py-1 rounded-lg border border-white/[0.08] transition"
+              className="flex items-center gap-1.5 text-xs text-[#0D0431] font-heading font-bold bg-white hover:bg-[#FEDF6A] px-3.5 py-1.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
             >
-              <Plus className="w-3 h-3" />
-              Add Role
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Role</span>
             </button>
           </div>
 
@@ -252,9 +258,9 @@ export default function ResumeBuilderEditor({
             {builderData.experience.map((exp, expIdx) => (
               <div
                 key={exp.id || expIdx}
-                className="bg-black/30 border border-white/[0.06] p-4 rounded-xl space-y-3.5"
+                className="bg-[#FEF9CF] border-2 border-[#0D0431] p-5 rounded-2xl space-y-4 shadow-[3px_3px_0_0_#0D0431]"
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input
                     type="text"
                     value={exp.role}
@@ -264,7 +270,7 @@ export default function ResumeBuilderEditor({
                       setBuilderData(updated);
                     }}
                     placeholder="Role / Title"
-                    className="px-3 py-1.5 bg-black/40 border border-white/[0.08] rounded-lg text-xs font-medium text-white focus:outline-none focus:border-white/30"
+                    className="px-3.5 py-2 bg-white border-2 border-[#0D0431] rounded-xl text-xs font-heading font-bold text-[#0D0431] focus:bg-[#FEF9CF] focus:outline-none shadow-[2px_2px_0_0_#0D0431]"
                   />
                   <input
                     type="text"
@@ -275,17 +281,17 @@ export default function ResumeBuilderEditor({
                       setBuilderData(updated);
                     }}
                     placeholder="Company / Organization"
-                    className="px-3 py-1.5 bg-black/40 border border-white/[0.08] rounded-lg text-xs font-medium text-neutral-300 focus:outline-none focus:border-white/30"
+                    className="px-3.5 py-2 bg-white border-2 border-[#0D0431] rounded-xl text-xs font-heading font-bold text-[#0D0431] focus:bg-[#FEF9CF] focus:outline-none shadow-[2px_2px_0_0_#0D0431]"
                   />
                 </div>
 
                 {/* Bullets List */}
-                <div className="space-y-2 pt-1">
-                  <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider block">
+                <div className="space-y-2.5 pt-1">
+                  <span className="text-[10px] font-heading font-bold text-[#0D0431]/70 uppercase tracking-wider block">
                     Impact Bullet Points (XYZ Framework):
                   </span>
                   {exp.bullets.map((bullet, bIdx) => (
-                    <div key={bIdx} className="flex items-center gap-2">
+                    <div key={bIdx} className="flex items-center gap-2.5">
                       <input
                         type="text"
                         value={bullet}
@@ -294,15 +300,16 @@ export default function ResumeBuilderEditor({
                           updated.experience[expIdx].bullets[bIdx] = e.target.value;
                           setBuilderData(updated);
                         }}
-                        className="flex-1 px-3 py-1.5 bg-black/40 border border-white/[0.08] rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-white/30"
+                        className="flex-1 px-3.5 py-2 bg-white border-2 border-[#0D0431] rounded-xl text-xs text-[#0D0431] font-sans font-medium focus:bg-[#FEF9CF] focus:outline-none shadow-[2px_2px_0_0_#0D0431]"
                       />
                       <button
+                        type="button"
                         onClick={() => handleAIImproveBullet(bullet, expIdx, bIdx)}
                         disabled={improvingBulletKey === `${expIdx}-${bIdx}`}
-                        className="flex items-center gap-1 px-2.5 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-neutral-200 rounded-lg text-[11px] font-medium shrink-0 transition font-mono"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-[#FEDF6A] hover:bg-[#FFE995] active:translate-x-0.5 active:translate-y-0.5 border-2 border-[#0D0431] text-[#0D0431] rounded-xl text-xs font-heading font-bold shrink-0 transition-all shadow-[2px_2px_0_0_#0D0431] cursor-pointer"
                       >
-                        <Sparkles className="w-3 h-3 text-emerald-400" />
-                        {improvingBulletKey === `${expIdx}-${bIdx}` ? "..." : "Enhance Bullet"}
+                        <Sparkles className="w-3.5 h-3.5 text-[#896EE2]" />
+                        <span>{improvingBulletKey === `${expIdx}-${bIdx}` ? "..." : "Enhance"}</span>
                       </button>
                     </div>
                   ))}
@@ -312,61 +319,63 @@ export default function ResumeBuilderEditor({
           </div>
         </div>
 
-      </div>
+      </CaideCard>
 
       {/* Bullet Improvement Modal */}
       {bulletImprovementModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0b0d14] border border-white/[0.12] rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl animate-scaleUp">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
-                <Zap className="w-3.5 h-3.5 text-amber-400" />
+        <div className="fixed inset-0 bg-[#0D0431]/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white border-2 border-[#0D0431] rounded-3xl max-w-xl w-full shadow-[8px_8px_0_0_#0D0431] overflow-hidden text-[#0D0431] animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 bg-[#FEF9CF] border-b-2 border-[#0D0431] flex items-center justify-between">
+              <h3 className="text-xs font-heading font-bold uppercase tracking-wider text-[#0D0431] flex items-center gap-2">
+                <Zap className="w-4 h-4 text-[#FEDF6A]" />
                 Select Bullet Improvement (XYZ Formula)
               </h3>
               <button
+                type="button"
                 onClick={() => setBulletImprovementModal(null)}
-                className="text-neutral-400 hover:text-white"
+                className="p-1.5 rounded-full border-2 border-[#0D0431] bg-white hover:bg-[#FFC5B7] text-[#0D0431] transition-all shadow-[2px_2px_0_0_#0D0431] cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-3">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400 block">
+            <div className="p-6 space-y-4">
+              <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-[#0D0431] block">
                 Recommended Formulation:
               </span>
               <div
                 onClick={() => applyImprovedBullet(bulletImprovementModal.data.improved_xyz)}
-                className="p-3.5 bg-emerald-500/[0.06] border border-emerald-500/30 hover:border-emerald-400 rounded-xl cursor-pointer transition text-xs text-emerald-200 font-medium"
+                className="p-4 bg-[#D4FDF7] hover:bg-[#9BFFED] border-2 border-[#0D0431] rounded-2xl cursor-pointer transition text-xs text-[#0D0431] font-heading font-bold shadow-[3px_3px_0_0_#0D0431]"
               >
                 {bulletImprovementModal.data.improved_xyz}
               </div>
 
               {bulletImprovementModal.data.alternative_versions?.length > 0 && (
-                <div className="space-y-2 pt-2">
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block">
+                <div className="space-y-2.5 pt-2">
+                  <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-[#0D0431]/70 block">
                     Alternative Options:
                   </span>
                   {bulletImprovementModal.data.alternative_versions.map((alt, idx) => (
                     <div
                       key={idx}
                       onClick={() => applyImprovedBullet(alt)}
-                      className="p-3 bg-black/40 border border-white/[0.08] hover:border-white/30 rounded-xl cursor-pointer transition text-xs text-neutral-300"
+                      className="p-3.5 bg-white hover:bg-[#FEF9CF] border-2 border-[#0D0431] rounded-2xl cursor-pointer transition text-xs text-[#0D0431] font-sans font-medium shadow-[2px_2px_0_0_#0D0431]"
                     >
                       {alt}
                     </div>
                   ))}
                 </div>
               )}
-            </div>
 
-            <div className="flex justify-end pt-2">
-              <button
-                onClick={() => setBulletImprovementModal(null)}
-                className="px-4 py-2 bg-white/[0.06] hover:bg-white/[0.1] text-neutral-300 rounded-xl text-xs transition"
-              >
-                Cancel
-              </button>
+              <div className="flex justify-end pt-3 border-t-2 border-[#0D0431]">
+                <button
+                  type="button"
+                  onClick={() => setBulletImprovementModal(null)}
+                  className="px-4 py-2 bg-white hover:bg-[#FEF9CF] border-2 border-[#0D0431] text-[#0D0431] rounded-xl text-xs font-heading font-bold shadow-[2px_2px_0_0_#0D0431] transition"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>

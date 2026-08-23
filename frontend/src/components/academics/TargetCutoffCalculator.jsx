@@ -9,7 +9,10 @@ import {
   Sparkles,
   ArrowRight,
   ShieldAlert,
+  GraduationCap,
 } from "lucide-react";
+import CaideCard from "@/components/caide/CaideCard";
+import CaideBadge from "@/components/caide/CaideBadge";
 
 export default function TargetCutoffCalculator({
   currentCgpa = 8.0,
@@ -42,7 +45,7 @@ export default function TargetCutoffCalculator({
         difficultyLevel: currCgpa >= target ? "Already Achieved" : "No Semesters Remaining",
         statusMessage:
           currCgpa >= target
-            ? "Target already satisfied based on current record."
+            ? "Target already satisfied based on current transcript."
             : "No remaining semesters to adjust cumulative CGPA.",
       });
       return;
@@ -87,28 +90,39 @@ export default function TargetCutoffCalculator({
   }, [currCgpa, completed, total, target]);
 
   return (
-    <div className="rounded-3xl bg-zinc-900/60 border border-white/10 p-6 md:p-8 backdrop-blur-md shadow-2xl relative overflow-hidden space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <CaideCard
+      theme="white"
+      shadow="default"
+      className="p-6 md:p-8 space-y-6"
+    >
+      {/* ── Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b-2 border-[#0D0431]">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+          <div className="w-11 h-11 rounded-xl bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] flex items-center justify-center text-[#0D0431] shrink-0">
             <Calculator className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white tracking-tight">
-              Target CGPA Cutoff Calculator
+            <div className="flex items-center gap-2">
+              <CaideBadge theme="yellow" size="sm">
+                Target CGPA Engine
+              </CaideBadge>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-heading font-black text-[#0D0431] tracking-tight mt-0.5">
+              Placement Target CGPA Cutoff Calculator
             </h3>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-[#0D0431]/75 font-sans mt-0.5">
               Calculate exact SGPA requirements in upcoming semesters to clear tier-1 company cutoffs
             </p>
           </div>
         </div>
       </div>
 
+      {/* ── 3 Input Parameter Cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Current CGPA */}
-        <div className="p-5 rounded-2xl bg-zinc-950/80 border border-white/10 hover:border-white/20 transition-colors">
-          <label className="text-xs text-zinc-400 font-mono font-medium block mb-2">
-            Current CGPA
+        <div className="p-5 rounded-2xl border-2 border-[#0D0431] bg-[#FEF9CF] shadow-[3px_3px_0_0_#0D0431] space-y-2">
+          <label className="text-xs text-[#0D0431] font-heading font-black uppercase tracking-wider block">
+            Current Cumulative CGPA
           </label>
           <input
             type="number"
@@ -117,16 +131,16 @@ export default function TargetCutoffCalculator({
             max="10"
             value={currCgpa}
             onChange={(e) => setCurrCgpa(parseFloat(e.target.value) || 0)}
-            className="w-full bg-zinc-900 text-white text-2xl font-mono font-bold rounded-xl px-4 py-2 border border-white/10 focus:border-amber-400 focus:outline-none transition-colors"
+            className="w-full bg-white text-[#0D0431] text-3xl font-heading font-black rounded-xl px-4 py-2 border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] focus:bg-[#FEDF6A] focus:outline-none transition-all"
           />
-          <span className="text-[11px] text-zinc-500 font-mono mt-2 block">
+          <span className="text-[11px] text-[#0D0431]/70 font-mono font-bold block pt-1">
             Across {completed} completed semesters
           </span>
         </div>
 
         {/* Semesters Completed */}
-        <div className="p-5 rounded-2xl bg-zinc-950/80 border border-white/10 hover:border-white/20 transition-colors">
-          <label className="text-xs text-zinc-400 font-mono font-medium block mb-2">
+        <div className="p-5 rounded-2xl border-2 border-[#0D0431] bg-[#FEF9CF] shadow-[3px_3px_0_0_#0D0431] space-y-2">
+          <label className="text-xs text-[#0D0431] font-heading font-black uppercase tracking-wider block">
             Semesters Completed
           </label>
           <div className="flex items-center gap-3">
@@ -136,18 +150,18 @@ export default function TargetCutoffCalculator({
               max={total - 1}
               value={completed}
               onChange={(e) => setCompleted(parseInt(e.target.value) || 1)}
-              className="w-full bg-zinc-900 text-white text-2xl font-mono font-bold rounded-xl px-4 py-2 border border-white/10 focus:border-amber-400 focus:outline-none transition-colors"
+              className="w-full bg-white text-[#0D0431] text-3xl font-heading font-black rounded-xl px-4 py-2 border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] focus:bg-[#FEDF6A] focus:outline-none transition-all"
             />
-            <span className="text-zinc-400 text-base font-mono font-semibold">/ {total}</span>
+            <span className="text-[#0D0431] text-xl font-heading font-black">/ {total}</span>
           </div>
-          <span className="text-[11px] text-zinc-500 font-mono mt-2 block">
+          <span className="text-[11px] text-[#0D0431]/70 font-mono font-bold block pt-1">
             {total - completed} semesters remaining
           </span>
         </div>
 
         {/* Target CGPA */}
-        <div className="p-5 rounded-2xl bg-zinc-950/80 border border-white/10 hover:border-amber-500/40 transition-colors">
-          <label className="text-xs text-amber-400 font-mono font-medium block mb-2">
+        <div className="p-5 rounded-2xl border-2 border-[#0D0431] bg-[#E4CDFB] shadow-[3px_3px_0_0_#0D0431] space-y-2">
+          <label className="text-xs text-[#0D0431] font-heading font-black uppercase tracking-wider block">
             Target CGPA Goal
           </label>
           <input
@@ -157,53 +171,61 @@ export default function TargetCutoffCalculator({
             max="10"
             value={target}
             onChange={(e) => setTarget(parseFloat(e.target.value) || 0)}
-            className="w-full bg-zinc-900 text-amber-400 text-2xl font-mono font-bold rounded-xl px-4 py-2 border border-amber-500/30 focus:border-amber-400 focus:outline-none transition-colors"
+            className="w-full bg-white text-[#0D0431] text-3xl font-heading font-black rounded-xl px-4 py-2 border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] focus:bg-[#FEDF6A] focus:outline-none transition-all"
           />
-          <span className="text-[11px] text-zinc-500 font-mono mt-2 block">
+          <span className="text-[11px] text-[#0D0431]/70 font-mono font-bold block pt-1">
             Desired final degree aggregate
           </span>
         </div>
       </div>
 
-      {/* Result Card */}
+      {/* ── Result Bento Card ── */}
       {analysis && (
         <div
-          className={`p-6 rounded-2xl border transition-all duration-300 ${
+          className={`p-6 rounded-2xl border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] transition-all ${
             analysis.achievable
-              ? "bg-emerald-950/20 border-emerald-500/30"
-              : "bg-rose-950/20 border-rose-500/30"
+              ? "bg-[#D4FDF7] text-[#0D0431]"
+              : "bg-[#FFC5B7] text-[#0D0431]"
           }`}
         >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              {analysis.achievable ? (
-                <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0">
-                  <CheckCircle2 className="w-7 h-7" />
-                </div>
-              ) : (
-                <div className="p-3 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/30 shrink-0">
-                  <ShieldAlert className="w-7 h-7" />
-                </div>
-              )}
+              <div
+                className={`w-12 h-12 rounded-2xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center shrink-0 ${
+                  analysis.achievable ? "bg-[#9BFFED]" : "bg-[#F85B52] text-white"
+                }`}
+              >
+                {analysis.achievable ? (
+                  <CheckCircle2 className="w-6 h-6 text-[#0D0431]" />
+                ) : (
+                  <ShieldAlert className="w-6 h-6" />
+                )}
+              </div>
 
               <div>
-                <div className="text-xs text-zinc-400 font-mono uppercase tracking-wider">
+                <div className="text-xs text-[#0D0431] font-heading font-black uppercase tracking-wider">
                   {analysis.achievable
                     ? `Required Average SGPA (Next ${analysis.remainingSemesters} Semesters)`
                     : "Target Attainability Matrix"}
                 </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-white mt-1 flex flex-wrap items-center gap-3 font-mono">
+                <div className="text-3xl sm:text-4xl font-heading font-black text-[#0D0431] mt-1 flex flex-wrap items-center gap-3">
                   {analysis.achievable ? (
                     <>
-                      <span className="text-emerald-400">
-                        {analysis.requiredSgpaPerSem} SGPA
-                      </span>
-                      <span className="text-xs font-sans font-semibold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                      <span>{analysis.requiredSgpaPerSem} SGPA</span>
+                      <CaideBadge
+                        theme={
+                          analysis.difficultyLevel.startsWith("Comfortable")
+                            ? "lime"
+                            : analysis.difficultyLevel.startsWith("Moderate")
+                            ? "yellow"
+                            : "coral"
+                        }
+                      >
                         {analysis.difficultyLevel}
-                      </span>
+                      </CaideBadge>
                     </>
                   ) : (
-                    <span className="text-rose-400 text-xl sm:text-2xl">
+                    <span className="text-[#0D0431] text-2xl sm:text-3xl">
                       Mathematically Impossible
                     </span>
                   )}
@@ -211,20 +233,21 @@ export default function TargetCutoffCalculator({
               </div>
             </div>
 
-            <div className="text-left md:text-right border-t md:border-t-0 pt-3 md:pt-0 border-white/10">
-              <div className="text-xs text-zinc-400 font-mono">Max Reachable CGPA</div>
-              <div className="text-2xl font-mono font-bold text-zinc-200 mt-0.5">
+            <div className="text-left md:text-right border-t-2 md:border-t-0 pt-3 md:pt-0 border-[#0D0431]/20">
+              <div className="text-xs text-[#0D0431]/70 font-mono uppercase font-bold">
+                Max Reachable CGPA
+              </div>
+              <div className="text-3xl font-heading font-black text-[#0D0431] mt-0.5">
                 {analysis.maxPossibleCgpa}
               </div>
             </div>
           </div>
 
-          <p className="text-xs text-zinc-300 mt-4 border-t border-white/10 pt-4 leading-relaxed">
+          <p className="text-xs text-[#0D0431] font-medium mt-4 border-t-2 border-[#0D0431]/20 pt-3 leading-relaxed font-sans">
             {analysis.statusMessage}
           </p>
         </div>
       )}
-    </div>
+    </CaideCard>
   );
 }
-

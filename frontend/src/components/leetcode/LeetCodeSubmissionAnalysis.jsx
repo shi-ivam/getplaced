@@ -26,10 +26,10 @@ import {
   Trophy,
   Filter,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { leetcodeService } from "@/services/leetcodeService";
+import CaideBadge from "@/components/caide/CaideBadge";
+import CaideButton, { CaideArrow } from "@/components/caide/CaideButton";
+import CaideCard from "@/components/caide/CaideCard";
 
 export default function LeetCodeSubmissionAnalysis({
   initialData = null,
@@ -83,9 +83,7 @@ export default function LeetCodeSubmissionAnalysis({
     setRefreshing(true);
     setError("");
     try {
-      // First trigger sync to pull newest data from LeetCode
       await leetcodeService.syncProfile();
-      // Then re-fetch analysis
       await fetchAnalysis(true);
     } catch (err) {
       console.error("Error syncing LeetCode data:", err);
@@ -100,7 +98,6 @@ export default function LeetCodeSubmissionAnalysis({
       let date;
       const num = Number(timestamp);
       if (!isNaN(num) && num > 0) {
-        // LeetCode timestamps are unix seconds
         date = new Date(num * 1000);
       } else {
         date = new Date(timestamp);
@@ -147,7 +144,6 @@ export default function LeetCodeSubmissionAnalysis({
       const dayStartSec = Math.floor(d.getTime() / 1000);
       const dayEndSec = dayStartSec + 86400;
 
-      // Find any submission count on this day
       let count = 0;
       for (const [tsStr, c] of Object.entries(calendarMap)) {
         const ts = Number(tsStr);
@@ -170,23 +166,11 @@ export default function LeetCodeSubmissionAnalysis({
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-7 w-64 bg-zinc-800" />
-          <Skeleton className="h-8 w-28 bg-zinc-800" />
-        </div>
+        <div className="h-8 w-64 bg-[#FEF9CF] rounded-xl animate-pulse border-2 border-[#0D0431]" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-28 bg-zinc-900 rounded-xl" />
+            <div key={i} className="h-28 bg-[#FAF7EE] rounded-2xl animate-pulse border-2 border-[#0D0431]" />
           ))}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-40 bg-zinc-900 rounded-xl" />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Skeleton className="h-64 bg-zinc-900 rounded-xl" />
-          <Skeleton className="h-64 bg-zinc-900 rounded-xl" />
         </div>
       </div>
     );
@@ -197,25 +181,23 @@ export default function LeetCodeSubmissionAnalysis({
 
   if (!isConnected || !analysis) {
     return (
-      <Card className="bg-[#141417] border-zinc-800/80 shadow-md">
-        <CardContent className="pt-8 pb-8 text-center space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mx-auto flex items-center justify-center">
-            <Code2 className="w-6 h-6" />
+      <div className="bg-[#FEF9CF] border-2 border-[#0D0431] rounded-3xl p-8 text-center space-y-4 shadow-[6px_6px_0_0_#0D0431]">
+        <div className="w-14 h-14 rounded-2xl bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-[#0D0431] mx-auto flex items-center justify-center">
+          <Code2 className="w-7 h-7" />
+        </div>
+        <div className="space-y-1">
+          <h3 className="text-xl font-heading font-black text-[#0D0431]">No Connected LeetCode Profile</h3>
+          <p className="text-xs text-[#0D0431]/80 max-w-md mx-auto leading-relaxed font-medium">
+            Connect your LeetCode account in your Profile to unlock submission activity analytics,
+            difficulty accuracy rates, consistency tracking, and pass/fail diagnostics.
+          </p>
+        </div>
+        {error && (
+          <div className="text-xs text-[#0D0431] font-mono font-bold bg-[#FFC5B7] border-2 border-[#0D0431] p-3 rounded-xl max-w-md mx-auto">
+            {error}
           </div>
-          <div className="space-y-1">
-            <h3 className="text-base font-bold text-white">No Connected LeetCode Profile</h3>
-            <p className="text-xs text-zinc-400 max-w-md mx-auto leading-relaxed">
-              Connect your LeetCode account in your Profile to unlock submission activity analytics,
-              difficulty accuracy rates, consistency tracking, and pass/fail diagnostics.
-            </p>
-          </div>
-          {error && (
-            <div className="text-xs text-rose-400 font-mono bg-rose-950/40 border border-rose-900/60 p-2 rounded max-w-md mx-auto">
-              {error}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        )}
+      </div>
     );
   }
 
@@ -229,17 +211,6 @@ export default function LeetCodeSubmissionAnalysis({
     insights,
   } = analysis;
 
-  // Archetype Badge Color Mapping
-  const archetypeColorMap = {
-    emerald: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
-    purple: "bg-purple-500/10 text-purple-300 border-purple-500/20",
-    amber: "bg-amber-500/10 text-amber-300 border-amber-500/20",
-    rose: "bg-rose-500/10 text-rose-300 border-rose-500/20",
-    zinc: "bg-zinc-800 text-zinc-300 border-zinc-700",
-  };
-  const archetypeBadgeStyle =
-    archetypeColorMap[consistency?.archetypeColor] || archetypeColorMap.zinc;
-
   // Filtered recent submissions
   const filteredRecentList = (recentSubmissionsAnalysis?.recentList || []).filter((sub) => {
     if (statusFilter === "accepted") return sub.isAccepted;
@@ -252,50 +223,48 @@ export default function LeetCodeSubmissionAnalysis({
     : filteredRecentList.slice(0, 8);
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-6 text-[#0D0431] ${className}`}>
       {/* Header Banner */}
       {showHeader && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#14141c] border border-zinc-800 p-4 md:p-5 rounded-2xl">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 font-mono font-bold text-lg shrink-0 shadow-inner">
-              <Activity className="w-5 h-5" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#FEF9CF] border-2 border-[#0D0431] p-5 sm:p-6 rounded-3xl shadow-[6px_6px_0_0_#0D0431]">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#E4CDFB] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center text-[#0D0431] shrink-0">
+              <Activity className="w-6 h-6" />
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="font-bold text-white text-base md:text-lg">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h3 className="font-heading font-black text-lg sm:text-xl text-[#0D0431]">
                   LeetCode Submission & Consistency Analysis
                 </h3>
-                <span
-                  className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-mono font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800"
-                >
-                  <Sparkles className="w-3 h-3 text-zinc-400" />
+                <CaideBadge theme="yellow">
+                  <Sparkles className="w-3 h-3 mr-1" />
                   {consistency?.archetype || "Active Coder"}
-                </span>
+                </CaideBadge>
               </div>
-              <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 mt-1 font-mono">
+              <div className="flex flex-wrap items-center gap-3 text-xs text-[#0D0431]/80 mt-1 font-mono font-bold">
                 <a
                   href={profile?.profileUrl || `https://leetcode.com/u/${profile?.username}/`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-zinc-300 hover:text-white inline-flex items-center gap-1 transition-colors"
+                  className="text-[#0D0431] hover:underline inline-flex items-center gap-1"
                 >
                   <span>@{profile?.username}</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
                 {profile?.ranking && profile.ranking < 5000000 ? (
-                  <span className="text-zinc-400 flex items-center gap-1">
-                    <Trophy className="w-3 h-3 text-zinc-400" />
+                  <span className="flex items-center gap-1">
+                    <Trophy className="w-3.5 h-3.5 text-[#0D0431]" />
                     Rank #{profile.ranking.toLocaleString()}
                   </span>
                 ) : (
-                  <span className="text-zinc-500 flex items-center gap-1">
-                    <Trophy className="w-3 h-3 text-zinc-600" />
+                  <span className="flex items-center gap-1 opacity-60">
+                    <Trophy className="w-3.5 h-3.5" />
                     Unranked
                   </span>
                 )}
                 {consistency?.streak > 0 && (
-                  <span className="text-zinc-300 flex items-center gap-1 font-semibold">
-                    <Flame className="w-3.5 h-3.5 fill-zinc-400 text-zinc-400" />
+                  <span className="flex items-center gap-1 bg-[#FEDF6A] px-2 py-0.5 rounded-md border border-[#0D0431]">
+                    <Flame className="w-3.5 h-3.5 text-[#0D0431]" />
                     {consistency.streak}-Day Streak
                   </span>
                 )}
@@ -304,78 +273,74 @@ export default function LeetCodeSubmissionAnalysis({
           </div>
 
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
-            <Button
+            <button
               type="button"
-              variant="outline"
-              size="sm"
               onClick={handleSyncLatest}
               disabled={refreshing}
-              className="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border-zinc-800 text-xs h-8 px-3 flex items-center gap-1.5 cursor-pointer shadow-sm"
+              className="btn_secondary_wrap px-4 py-2 text-xs font-bold font-mono cursor-pointer flex items-center gap-1.5"
               title="Refresh submission statistics from LeetCode"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-zinc-200" : "text-zinc-400"}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
               <span>{refreshing ? "Refreshing..." : "Refresh Stats"}</span>
-            </Button>
+            </button>
           </div>
         </div>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="flex items-center gap-2 bg-rose-950/70 border border-rose-600/60 text-rose-200 px-3.5 py-2.5 rounded-xl text-xs font-medium">
-          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+        <div className="flex items-center gap-2 bg-[#FFC5B7] border-2 border-[#0D0431] text-[#0D0431] px-4 py-3 rounded-2xl text-xs font-bold font-mono shadow-[3px_3px_0_0_#0D0431]">
+          <AlertCircle className="w-4 h-4 text-[#0D0431] shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* ------------------------------------------------------------- */}
       {/* 1. KPI OVERVIEW: Accuracy, Volume & Efficiency */}
-      {/* ------------------------------------------------------------- */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Submissions Card */}
-        <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-2 relative overflow-hidden group hover:border-zinc-700 transition-colors">
+        <div className="bg-[#FAF7EE] border-2 border-[#0D0431] rounded-2xl p-5 space-y-2.5 shadow-[4px_4px_0_0_#0D0431]">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431]/70">
               Total Submissions
             </span>
-            <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+            <div className="w-7 h-7 rounded-lg bg-[#E4CDFB] border border-[#0D0431] flex items-center justify-center text-[#0D0431]">
               <Activity className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-mono text-white">
+          <div className="text-3xl font-heading font-black text-[#0D0431]">
             {overview?.totalSubmissions?.toLocaleString() || 0}
           </div>
-          <div className="flex items-center justify-between text-[11px] text-zinc-400 font-mono">
-            <span className="text-emerald-400 flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3" />
+          <div className="flex items-center justify-between text-[11px] font-mono font-bold">
+            <span className="text-emerald-700 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5" />
               {overview?.acceptedSubmissions?.toLocaleString() || 0} Accepted
             </span>
-            <span className="text-rose-400 flex items-center gap-1">
-              <XCircle className="w-3 h-3" />
+            <span className="text-[#F85B52] flex items-center gap-1">
+              <XCircle className="w-3.5 h-3.5" />
               {overview?.rejectedSubmissions?.toLocaleString() || 0} Rejected
             </span>
           </div>
         </div>
 
         {/* Overall Acceptance Rate Card */}
-        <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-2 relative overflow-hidden group hover:border-zinc-700 transition-colors">
+        <div className="bg-[#FAF7EE] border-2 border-[#0D0431] rounded-2xl p-5 space-y-2.5 shadow-[4px_4px_0_0_#0D0431]">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
-              Overall Acceptance Rate
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431]/70">
+              Acceptance Rate
             </span>
-            <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+            <div className="w-7 h-7 rounded-lg bg-[#D4FDF7] border border-[#0D0431] flex items-center justify-center text-[#0D0431]">
               <TrendingUp className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-mono text-emerald-400">
+            <span className="text-3xl font-heading font-black text-[#0D0431]">
               {overview?.overallAcceptanceRate ?? 0}%
             </span>
-            <span className="text-[11px] text-zinc-500 font-mono">accuracy</span>
+            <span className="text-xs font-mono font-bold text-[#0D0431]/70">accuracy</span>
           </div>
-          <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-white rounded-full h-2 overflow-hidden border border-[#0D0431]">
             <div
-              className="bg-zinc-200 h-full rounded-full transition-all duration-500"
+              className="bg-[#896EE2] h-full rounded-full transition-all duration-500"
               style={{
                 width: `${Math.min(100, Math.max(0, overview?.overallAcceptanceRate || 0))}%`,
               }}
@@ -384,64 +349,64 @@ export default function LeetCodeSubmissionAnalysis({
         </div>
 
         {/* Efficiency Ratio Card */}
-        <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-2 relative overflow-hidden group hover:border-zinc-700 transition-colors">
+        <div className="bg-[#FAF7EE] border-2 border-[#0D0431] rounded-2xl p-5 space-y-2.5 shadow-[4px_4px_0_0_#0D0431]">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
-              Submission Efficiency
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431]/70">
+              Efficiency
             </span>
-            <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+            <div className="w-7 h-7 rounded-lg bg-[#FEDF6A] border border-[#0D0431] flex items-center justify-center text-[#0D0431]">
               <Zap className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-mono text-zinc-200">
+            <span className="text-3xl font-heading font-black text-[#0D0431]">
               {overview?.efficiencyRatio !== null ? `${overview.efficiencyRatio}x` : "N/A"}
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-zinc-900 text-zinc-300 border border-zinc-800 truncate">
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-[#FEF9CF] border border-[#0D0431]">
               {overview?.efficiencyLabel || "Standard"}
             </span>
           </div>
-          <p className="text-[10px] text-zinc-400 font-mono truncate" title={overview?.efficiencyDescription}>
+          <p className="text-[10px] text-[#0D0431]/70 font-mono font-bold truncate">
             {overview?.efficiencyRatio !== null
-              ? `Avg ${overview.efficiencyRatio} submissions / solved problem`
+              ? `Avg ${overview.efficiencyRatio} subs / problem`
               : "No solved problems recorded"}
           </p>
         </div>
 
         {/* Practice Momentum & Consistency Card */}
-        <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-2 relative overflow-hidden group hover:border-zinc-700 transition-colors">
+        <div className="bg-[#FAF7EE] border-2 border-[#0D0431] rounded-2xl p-5 space-y-2.5 shadow-[4px_4px_0_0_#0D0431]">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
-              Practice Consistency
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431]/70">
+              Active Practice
             </span>
-            <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+            <div className="w-7 h-7 rounded-lg bg-[#FFC5B7] border border-[#0D0431] flex items-center justify-center text-[#0D0431]">
               <Flame className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-mono text-zinc-200">
+            <span className="text-3xl font-heading font-black text-[#0D0431]">
               {consistency?.activeDays || 0}
             </span>
-            <span className="text-xs text-zinc-400 font-mono">active days</span>
+            <span className="text-xs font-mono font-bold text-[#0D0431]/70">active days</span>
           </div>
-          <div className="flex items-center justify-between text-[11px] font-mono">
-            <span className="text-zinc-300 flex items-center gap-1 font-semibold">
-              <Flame className="w-3 h-3 text-zinc-400 fill-zinc-400" />
+          <div className="flex items-center justify-between text-[11px] font-mono font-bold">
+            <span className="text-[#0D0431] flex items-center gap-1">
+              <Flame className="w-3 h-3 text-[#0D0431]" />
               {consistency?.streak || 0}-day streak
             </span>
-            <span className="text-zinc-500">{consistency?.archetypeBadge}</span>
+            <span className="text-[10px] bg-white px-2 py-0.5 rounded-full border border-[#0D0431]">
+              {consistency?.archetypeBadge}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* ------------------------------------------------------------- */}
       {/* 2. PER-DIFFICULTY ACCURACY CARDS */}
-      {/* ------------------------------------------------------------- */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-zinc-400" />
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-200 font-mono">
+            <BarChart3 className="w-4 h-4 text-[#0D0431]" />
+            <h4 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
               Per-Difficulty Submission Accuracy
             </h4>
           </div>
@@ -449,28 +414,28 @@ export default function LeetCodeSubmissionAnalysis({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Easy Card */}
-          <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4.5 space-y-3 relative overflow-hidden">
+          <div className="bg-[#D4FDF7] border-2 border-[#0D0431] rounded-2xl p-5 space-y-3 shadow-[4px_4px_0_0_#0D0431]">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+              <span className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431] flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 border border-[#0D0431]" />
                 Easy Problems
               </span>
-              <span className="text-xs font-bold font-mono text-white">
+              <span className="text-xs font-mono font-black text-[#0D0431]">
                 {difficultyBreakdown?.easy?.solved || 0} Solved
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 bg-[#0f1017] border border-zinc-800/80 p-2.5 rounded-lg text-xs font-mono">
+            <div className="grid grid-cols-2 gap-2 bg-white border-2 border-[#0D0431] p-2.5 rounded-xl text-xs font-mono font-bold shadow-[1px_1px_0_0_#0D0431]">
               <div>
-                <div className="text-[10px] text-zinc-400 uppercase">Submissions</div>
-                <div className="text-zinc-200 font-semibold mt-0.5">
+                <div className="text-[10px] text-[#0D0431]/70 uppercase">Submissions</div>
+                <div className="text-[#0D0431] mt-0.5">
                   {difficultyBreakdown?.easy?.acceptedSubmissions || 0} /{" "}
                   {difficultyBreakdown?.easy?.totalSubmissions || 0}
                 </div>
               </div>
               <div>
-                <div className="text-[10px] text-zinc-400 uppercase">Accuracy (AR)</div>
-                <div className="text-emerald-400 font-bold mt-0.5">
+                <div className="text-[10px] text-[#0D0431]/70 uppercase">Accuracy</div>
+                <div className="text-emerald-700 font-black mt-0.5">
                   {difficultyBreakdown?.easy?.acceptanceRate !== null
                     ? `${difficultyBreakdown.easy.acceptanceRate}%`
                     : "N/A"}
@@ -479,13 +444,7 @@ export default function LeetCodeSubmissionAnalysis({
             </div>
 
             <div className="space-y-1">
-              <div className="flex justify-between text-[10px] text-zinc-400 font-mono">
-                <span>Acceptance Rate</span>
-                <span className="text-emerald-400 font-semibold">
-                  {difficultyBreakdown?.easy?.acceptanceRate || 0}%
-                </span>
-              </div>
-              <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
+              <div className="w-full bg-white rounded-full h-2 overflow-hidden border border-[#0D0431]">
                 <div
                   className="bg-emerald-500 h-full rounded-full transition-all duration-500"
                   style={{
@@ -494,40 +453,31 @@ export default function LeetCodeSubmissionAnalysis({
                 />
               </div>
             </div>
-
-            <div className="flex items-center justify-between text-[11px] text-zinc-400 font-mono pt-0.5">
-              <span>Efficiency Ratio</span>
-              <span className="text-zinc-200 font-semibold">
-                {difficultyBreakdown?.easy?.efficiencyRatio
-                  ? `${difficultyBreakdown.easy.efficiencyRatio} sub/problem`
-                  : "N/A"}
-              </span>
-            </div>
           </div>
 
           {/* Medium Card */}
-          <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4.5 space-y-3 relative overflow-hidden">
+          <div className="bg-[#FEDF6A] border-2 border-[#0D0431] rounded-2xl p-5 space-y-3 shadow-[4px_4px_0_0_#0D0431]">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold font-mono uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+              <span className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431] flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-600 border border-[#0D0431]" />
                 Medium Problems
               </span>
-              <span className="text-xs font-bold font-mono text-white">
+              <span className="text-xs font-mono font-black text-[#0D0431]">
                 {difficultyBreakdown?.medium?.solved || 0} Solved
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 bg-[#0f1017] border border-zinc-800/80 p-2.5 rounded-lg text-xs font-mono">
+            <div className="grid grid-cols-2 gap-2 bg-white border-2 border-[#0D0431] p-2.5 rounded-xl text-xs font-mono font-bold shadow-[1px_1px_0_0_#0D0431]">
               <div>
-                <div className="text-[10px] text-zinc-400 uppercase">Submissions</div>
-                <div className="text-zinc-200 font-semibold mt-0.5">
+                <div className="text-[10px] text-[#0D0431]/70 uppercase">Submissions</div>
+                <div className="text-[#0D0431] mt-0.5">
                   {difficultyBreakdown?.medium?.acceptedSubmissions || 0} /{" "}
                   {difficultyBreakdown?.medium?.totalSubmissions || 0}
                 </div>
               </div>
               <div>
-                <div className="text-[10px] text-zinc-400 uppercase">Accuracy (AR)</div>
-                <div className="text-amber-400 font-bold mt-0.5">
+                <div className="text-[10px] text-[#0D0431]/70 uppercase">Accuracy</div>
+                <div className="text-amber-800 font-black mt-0.5">
                   {difficultyBreakdown?.medium?.acceptanceRate !== null
                     ? `${difficultyBreakdown.medium.acceptanceRate}%`
                     : "N/A"}
@@ -536,13 +486,7 @@ export default function LeetCodeSubmissionAnalysis({
             </div>
 
             <div className="space-y-1">
-              <div className="flex justify-between text-[10px] text-zinc-400 font-mono">
-                <span>Acceptance Rate</span>
-                <span className="text-amber-400 font-semibold">
-                  {difficultyBreakdown?.medium?.acceptanceRate || 0}%
-                </span>
-              </div>
-              <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
+              <div className="w-full bg-white rounded-full h-2 overflow-hidden border border-[#0D0431]">
                 <div
                   className="bg-amber-500 h-full rounded-full transition-all duration-500"
                   style={{
@@ -551,40 +495,31 @@ export default function LeetCodeSubmissionAnalysis({
                 />
               </div>
             </div>
-
-            <div className="flex items-center justify-between text-[11px] text-zinc-400 font-mono pt-0.5">
-              <span>Efficiency Ratio</span>
-              <span className="text-zinc-200 font-semibold">
-                {difficultyBreakdown?.medium?.efficiencyRatio
-                  ? `${difficultyBreakdown.medium.efficiencyRatio} sub/problem`
-                  : "N/A"}
-              </span>
-            </div>
           </div>
 
           {/* Hard Card */}
-          <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4.5 space-y-3 relative overflow-hidden">
+          <div className="bg-[#FFC5B7] border-2 border-[#0D0431] rounded-2xl p-5 space-y-3 shadow-[4px_4px_0_0_#0D0431]">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold font-mono uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
+              <span className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431] flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-600 border border-[#0D0431]" />
                 Hard Problems
               </span>
-              <span className="text-xs font-bold font-mono text-white">
+              <span className="text-xs font-mono font-black text-[#0D0431]">
                 {difficultyBreakdown?.hard?.solved || 0} Solved
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 bg-[#0f1017] border border-zinc-800/80 p-2.5 rounded-lg text-xs font-mono">
+            <div className="grid grid-cols-2 gap-2 bg-white border-2 border-[#0D0431] p-2.5 rounded-xl text-xs font-mono font-bold shadow-[1px_1px_0_0_#0D0431]">
               <div>
-                <div className="text-[10px] text-zinc-400 uppercase">Submissions</div>
-                <div className="text-zinc-200 font-semibold mt-0.5">
+                <div className="text-[10px] text-[#0D0431]/70 uppercase">Submissions</div>
+                <div className="text-[#0D0431] mt-0.5">
                   {difficultyBreakdown?.hard?.acceptedSubmissions || 0} /{" "}
                   {difficultyBreakdown?.hard?.totalSubmissions || 0}
                 </div>
               </div>
               <div>
-                <div className="text-[10px] text-zinc-400 uppercase">Accuracy (AR)</div>
-                <div className="text-rose-400 font-bold mt-0.5">
+                <div className="text-[10px] text-[#0D0431]/70 uppercase">Accuracy</div>
+                <div className="text-[#F85B52] font-black mt-0.5">
                   {difficultyBreakdown?.hard?.acceptanceRate !== null
                     ? `${difficultyBreakdown.hard.acceptanceRate}%`
                     : "N/A"}
@@ -593,13 +528,7 @@ export default function LeetCodeSubmissionAnalysis({
             </div>
 
             <div className="space-y-1">
-              <div className="flex justify-between text-[10px] text-zinc-400 font-mono">
-                <span>Acceptance Rate</span>
-                <span className="text-rose-400 font-semibold">
-                  {difficultyBreakdown?.hard?.acceptanceRate || 0}%
-                </span>
-              </div>
-              <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
+              <div className="w-full bg-white rounded-full h-2 overflow-hidden border border-[#0D0431]">
                 <div
                   className="bg-rose-500 h-full rounded-full transition-all duration-500"
                   style={{
@@ -608,91 +537,72 @@ export default function LeetCodeSubmissionAnalysis({
                 />
               </div>
             </div>
-
-            <div className="flex items-center justify-between text-[11px] text-zinc-400 font-mono pt-0.5">
-              <span>Efficiency Ratio</span>
-              <span className="text-zinc-200 font-semibold">
-                {difficultyBreakdown?.hard?.efficiencyRatio
-                  ? `${difficultyBreakdown.hard.efficiencyRatio} sub/problem`
-                  : "N/A"}
-              </span>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* ------------------------------------------------------------- */}
       {/* 3. CONSISTENCY, STREAKS & ACTIVITY TIMELINE */}
-      {/* ------------------------------------------------------------- */}
-      <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 md:p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/60 pb-3">
+      <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 sm:p-8 space-y-5 shadow-[6px_6px_0_0_#0D0431]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-[#0D0431] pb-4">
           <div className="flex items-center gap-2">
-            <Flame className="w-4 h-4 text-zinc-400" />
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-200 font-mono">
+            <Flame className="w-4 h-4 text-[#0D0431]" />
+            <h4 className="text-sm font-heading font-black uppercase tracking-wider text-[#0D0431]">
               Practice Consistency & Habit Tracking
             </h4>
           </div>
-          <div className="flex items-center gap-2 font-mono text-xs">
-            <span className="text-zinc-400">Consistency Archetype:</span>
-            <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800">
+          <div className="flex items-center gap-2 font-mono text-xs font-bold">
+            <span className="text-[#0D0431]/70">Archetype:</span>
+            <CaideBadge theme="light-purple">
               {consistency?.archetype}
-            </span>
+            </CaideBadge>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Archetype Description & Signals */}
-          <div className="space-y-3 bg-zinc-900/60 border border-zinc-800/70 p-4 rounded-xl">
-            <div className="text-xs font-bold text-white flex items-center gap-1.5">
-              <Award className="w-4 h-4 text-amber-400" />
+          <div className="space-y-3 bg-[#FEF9CF] border-2 border-[#0D0431] p-5 rounded-2xl shadow-[3px_3px_0_0_#0D0431]">
+            <div className="text-xs font-heading font-black text-[#0D0431] flex items-center gap-2">
+              <Award className="w-4 h-4 text-[#0D0431]" />
               <span>{consistency?.archetypeBadge || "Coding Persona"}</span>
             </div>
-            <p className="text-xs text-zinc-300 leading-relaxed font-sans">
+            <p className="text-xs text-[#0D0431]/90 leading-relaxed font-medium">
               {consistency?.archetypeDescription}
             </p>
-            <div className="pt-2 border-t border-zinc-800/80 space-y-1.5 text-xs font-mono">
-              <div className="flex justify-between text-zinc-400">
+            <div className="pt-3 border-t-2 border-[#0D0431]/20 space-y-2 text-xs font-mono font-bold">
+              <div className="flex justify-between text-[#0D0431]">
                 <span>Active Coding Days:</span>
-                <span className="text-white font-bold">{consistency?.activeDays || 0} days</span>
+                <span>{consistency?.activeDays || 0} days</span>
               </div>
-              <div className="flex justify-between text-zinc-400">
+              <div className="flex justify-between text-[#0D0431]">
                 <span>Current Streak:</span>
-                <span className="text-orange-400 font-bold">{consistency?.streak || 0} days</span>
+                <span>{consistency?.streak || 0} days</span>
               </div>
-              {consistency?.activitySummary?.lastActiveDate && (
-                <div className="flex justify-between text-zinc-400">
-                  <span>Last Active:</span>
-                  <span className="text-zinc-300">
-                    {formatRelativeTime(consistency.activitySummary.lastActiveDate)}
-                  </span>
-                </div>
-              )}
             </div>
           </div>
 
           {/* 30-Day Activity Heatmap */}
-          <div className="lg:col-span-2 space-y-3 bg-zinc-900/60 border border-zinc-800/70 p-4 rounded-xl">
+          <div className="lg:col-span-2 space-y-3 bg-[#FAF7EE] border-2 border-[#0D0431] p-5 rounded-2xl shadow-[3px_3px_0_0_#0D0431]">
             <div className="flex items-center justify-between">
-              <div className="text-xs font-bold text-zinc-200 flex items-center gap-1.5 font-mono">
-                <Calendar className="w-3.5 h-3.5 text-zinc-400" />
+              <div className="text-xs font-heading font-black text-[#0D0431] flex items-center gap-1.5 font-mono">
+                <Calendar className="w-3.5 h-3.5 text-[#0D0431]" />
                 <span>Last 30 Days Activity Log</span>
               </div>
             </div>
 
             {/* Heatmap Grid */}
-            <div className="grid grid-cols-10 sm:grid-cols-15 md:grid-cols-30 gap-1.5 pt-1">
+            <div className="grid grid-cols-10 sm:grid-cols-15 md:grid-cols-30 gap-1.5 pt-2">
               {recentDaysHeatmap.map((day, idx) => (
                 <div
                   key={idx}
                   title={`${day.formatted}: ${day.count} submission${day.count === 1 ? "" : "s"}`}
-                  className={`h-7 rounded transition-all duration-200 flex items-center justify-center text-[9px] font-mono cursor-pointer ${
+                  className={`h-7 rounded-lg border border-[#0D0431] transition-all flex items-center justify-center text-[10px] font-mono font-bold cursor-pointer ${
                     day.count >= 5
-                      ? "bg-emerald-400 text-black font-bold"
+                      ? "bg-[#896EE2] text-white shadow-[1px_1px_0_0_#0D0431]"
                       : day.count >= 2
-                      ? "bg-emerald-600 text-white"
+                      ? "bg-[#FEDF6A] text-[#0D0431]"
                       : day.count === 1
-                      ? "bg-emerald-800 text-emerald-100"
-                      : "bg-zinc-800/60 hover:bg-zinc-700 text-zinc-600"
+                      ? "bg-[#D4FDF7] text-[#0D0431]"
+                      : "bg-white text-[#0D0431]/30 hover:bg-[#FEF9CF]"
                   }`}
                 >
                   {day.count > 0 ? day.count : ""}
@@ -700,15 +610,15 @@ export default function LeetCodeSubmissionAnalysis({
               ))}
             </div>
 
-            <div className="flex items-center justify-between text-[10px] text-zinc-400 font-mono pt-1">
+            <div className="flex items-center justify-between text-[10px] text-[#0D0431]/70 font-mono font-bold pt-2">
               <span>30 days ago</span>
               <div className="flex items-center gap-1.5">
-                <span className="text-zinc-400">Less</span>
-                <span className="w-2.5 h-2.5 rounded bg-zinc-800" />
-                <span className="w-2.5 h-2.5 rounded bg-emerald-800" />
-                <span className="w-2.5 h-2.5 rounded bg-emerald-600" />
-                <span className="w-2.5 h-2.5 rounded bg-emerald-400" />
-                <span className="text-zinc-400">More</span>
+                <span>Less</span>
+                <span className="w-3 h-3 rounded bg-white border border-[#0D0431]" />
+                <span className="w-3 h-3 rounded bg-[#D4FDF7] border border-[#0D0431]" />
+                <span className="w-3 h-3 rounded bg-[#FEDF6A] border border-[#0D0431]" />
+                <span className="w-3 h-3 rounded bg-[#896EE2] border border-[#0D0431]" />
+                <span>More</span>
               </div>
               <span>Today</span>
             </div>
@@ -716,29 +626,19 @@ export default function LeetCodeSubmissionAnalysis({
         </div>
       </div>
 
-      {/* ------------------------------------------------------------- */}
-      {/* 4. RECENT SUBMISSIONS QUALITY & VERDICT BREAKDOWN */}
-      {/* ------------------------------------------------------------- */}
-      <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 md:p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/60 pb-3">
+      {/* 4. RECENT SUBMISSIONS */}
+      <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 sm:p-8 space-y-4 shadow-[6px_6px_0_0_#0D0431]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-[#0D0431] pb-4">
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-zinc-400" />
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-200 font-mono">
-              Recent Submissions
+            <Clock className="w-4 h-4 text-[#0D0431]" />
+            <h4 className="text-sm font-heading font-black uppercase tracking-wider text-[#0D0431]">
+              Recent Submissions Quality
             </h4>
           </div>
 
-          <div className="flex items-center gap-2 font-mono text-xs">
-            <span className="text-zinc-400">Pass Rate:</span>
-            <span
-              className={`px-2 py-0.5 rounded font-bold ${
-                recentSubmissionsAnalysis?.passRate >= 70
-                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                  : recentSubmissionsAnalysis?.passRate >= 45
-                  ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                  : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-              }`}
-            >
+          <div className="flex items-center gap-2 font-mono text-xs font-bold">
+            <span className="text-[#0D0431]/70">Pass Rate:</span>
+            <span className="px-3 py-0.5 rounded-full bg-[#D4FDF7] border border-[#0D0431] text-[#0D0431]">
               {recentSubmissionsAnalysis?.acceptedCount || 0} /{" "}
               {recentSubmissionsAnalysis?.totalRecent || 0} (
               {recentSubmissionsAnalysis?.passRate || 0}%)
@@ -746,100 +646,58 @@ export default function LeetCodeSubmissionAnalysis({
           </div>
         </div>
 
-        {/* Verdict Distribution Pills */}
-        <div className="flex flex-wrap gap-2">
-          {recentSubmissionsAnalysis?.verdictDistribution && (
-            <>
-              <div className="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md text-xs font-mono text-emerald-400">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Accepted:</span>
-                <strong>{recentSubmissionsAnalysis.verdictDistribution.accepted}</strong>
-              </div>
-
-              <div className="inline-flex items-center gap-1.5 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 rounded-md text-xs font-mono text-rose-400">
-                <XCircle className="w-3.5 h-3.5 text-rose-400" />
-                <span>Wrong Answer:</span>
-                <strong>{recentSubmissionsAnalysis.verdictDistribution.wrongAnswer}</strong>
-              </div>
-
-              {recentSubmissionsAnalysis.verdictDistribution.timeLimitExceeded > 0 && (
-                <div className="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-md text-xs font-mono text-amber-400">
-                  <Clock className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Time Limit:</span>
-                  <strong>{recentSubmissionsAnalysis.verdictDistribution.timeLimitExceeded}</strong>
-                </div>
-              )}
-
-              {recentSubmissionsAnalysis.verdictDistribution.runtimeError > 0 && (
-                <div className="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-md text-xs font-mono text-zinc-300">
-                  <AlertCircle className="w-3.5 h-3.5 text-zinc-400" />
-                  <span>Runtime Error:</span>
-                  <strong>{recentSubmissionsAnalysis.verdictDistribution.runtimeError}</strong>
-                </div>
-              )}
-
-              {recentSubmissionsAnalysis.verdictDistribution.compileError > 0 && (
-                <div className="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-md text-xs font-mono text-zinc-300">
-                  <span>Compile Error:</span>
-                  <strong>{recentSubmissionsAnalysis.verdictDistribution.compileError}</strong>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Filter Tabs for Recent Submissions */}
+        {/* Filter Tabs */}
         <div className="flex items-center justify-between gap-2 pt-1">
-          <div className="inline-flex items-center bg-zinc-900 border border-zinc-800 p-0.5 rounded-lg text-xs font-mono">
+          <div className="inline-flex items-center bg-[#FEF9CF] border-2 border-[#0D0431] p-1 rounded-2xl text-xs font-mono font-bold shadow-[2px_2px_0_0_#0D0431]">
             <button
               type="button"
               onClick={() => setStatusFilter("all")}
-              className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
-                statusFilter === "all" ? "bg-zinc-100 text-zinc-950 font-bold" : "text-zinc-400 hover:text-zinc-200"
+              className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
+                statusFilter === "all" ? "bg-white text-[#0D0431] shadow-[1px_1px_0_0_#0D0431]" : "text-[#0D0431]/70"
               }`}
             >
-              All
+              All ({recentSubmissionsAnalysis?.recentList?.length || 0})
             </button>
             <button
               type="button"
               onClick={() => setStatusFilter("accepted")}
-              className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
-                statusFilter === "accepted" ? "bg-zinc-100 text-zinc-950 font-bold" : "text-zinc-400 hover:text-zinc-200"
+              className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
+                statusFilter === "accepted" ? "bg-white text-[#0D0431] shadow-[1px_1px_0_0_#0D0431]" : "text-[#0D0431]/70"
               }`}
             >
-              Accepted
+              Accepted ({recentSubmissionsAnalysis?.acceptedCount || 0})
             </button>
             <button
               type="button"
               onClick={() => setStatusFilter("failed")}
-              className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
-                statusFilter === "failed" ? "bg-zinc-100 text-zinc-950 font-bold" : "text-zinc-400 hover:text-zinc-200"
+              className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
+                statusFilter === "failed" ? "bg-white text-[#0D0431] shadow-[1px_1px_0_0_#0D0431]" : "text-[#0D0431]/70"
               }`}
             >
-              Failed
+              Failed ({recentSubmissionsAnalysis?.rejectedCount || 0})
             </button>
           </div>
 
-          <span className="text-[11px] text-zinc-500 font-mono hidden sm:inline">
+          <span className="text-[11px] text-[#0D0431]/70 font-mono font-bold hidden sm:inline">
             Showing {displayedRecentList.length} of {filteredRecentList.length}
           </span>
         </div>
 
         {/* Recent Submissions List */}
         {displayedRecentList.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {displayedRecentList.map((sub, idx) => {
               const isAccepted = sub.isAccepted;
               return (
                 <div
                   key={idx}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between text-xs py-2.5 px-3.5 rounded-lg bg-[#0f1017] border border-zinc-800/70 hover:border-zinc-700 transition-colors gap-2"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between text-xs py-3 px-4 rounded-2xl bg-[#FAF7EE] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] gap-2"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0">
                     {isAccepted ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
                     ) : (
-                      <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                      <XCircle className="w-4 h-4 text-[#F85B52] shrink-0" />
                     )}
 
                     <div className="min-w-0">
@@ -848,18 +706,18 @@ export default function LeetCodeSubmissionAnalysis({
                           href={`https://leetcode.com/problems/${sub.titleSlug}/`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-zinc-200 hover:text-white font-medium truncate inline-flex items-center gap-1 cursor-pointer transition-colors"
+                          className="text-[#0D0431] font-heading font-bold truncate inline-flex items-center gap-1 hover:underline"
                         >
                           <span>{sub.title}</span>
-                          <ExternalLink className="w-2.5 h-2.5 text-zinc-500 shrink-0" />
+                          <ExternalLink className="w-3 h-3 text-[#0D0431]/60" />
                         </a>
                       ) : (
-                        <span className="text-zinc-200 font-medium truncate">{sub.title}</span>
+                        <span className="text-[#0D0431] font-heading font-bold truncate">{sub.title}</span>
                       )}
 
-                      <div className="text-[10px] text-zinc-500 font-mono flex items-center gap-2 mt-0.5">
+                      <div className="text-[10px] text-[#0D0431]/70 font-mono font-bold flex items-center gap-2 mt-0.5">
                         {sub.lang && (
-                          <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300">
+                          <span className="px-1.5 py-0.2 rounded bg-white border border-[#0D0431]">
                             {sub.lang}
                           </span>
                         )}
@@ -870,14 +728,10 @@ export default function LeetCodeSubmissionAnalysis({
 
                   <div className="self-end sm:self-auto shrink-0">
                     <span
-                      className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold ${
+                      className={`text-[10px] px-2.5 py-1 rounded-full font-mono font-black border ${
                         isAccepted
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                          : sub.statusDisplay?.includes("Wrong Answer")
-                          ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                          : sub.statusDisplay?.includes("Time Limit")
-                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                          : "bg-zinc-800 text-zinc-400 border border-zinc-700"
+                          ? "bg-[#D4FDF7] text-[#0D0431] border-[#0D0431]"
+                          : "bg-[#FFC5B7] text-[#0D0431] border-[#0D0431]"
                       }`}
                     >
                       {sub.statusDisplay}
@@ -892,17 +746,17 @@ export default function LeetCodeSubmissionAnalysis({
                 <button
                   type="button"
                   onClick={() => setShowAllRecent((prev) => !prev)}
-                  className="text-xs text-zinc-300 hover:text-white font-mono flex items-center gap-1 cursor-pointer transition-colors"
+                  className="text-xs text-[#0D0431] font-mono font-bold underline flex items-center gap-1 cursor-pointer"
                 >
                   {showAllRecent ? (
                     <>
                       <ChevronUp className="w-3.5 h-3.5" />
-                      <span>Show Less Submissions</span>
+                      <span>Show Less</span>
                     </>
                   ) : (
                     <>
                       <ChevronDown className="w-3.5 h-3.5" />
-                      <span>Show All {filteredRecentList.length} Submissions</span>
+                      <span>Show All {filteredRecentList.length}</span>
                     </>
                   )}
                 </button>
@@ -910,87 +764,28 @@ export default function LeetCodeSubmissionAnalysis({
             )}
           </div>
         ) : (
-          <div className="text-xs text-zinc-500 font-mono py-6 text-center bg-zinc-900/40 rounded-lg">
+          <div className="text-xs text-[#0D0431]/70 font-mono py-6 text-center bg-[#FAF7EE] rounded-2xl border border-[#0D0431]">
             No submissions matching filter criteria.
           </div>
         )}
       </div>
 
-      {/* ------------------------------------------------------------- */}
-      {/* 5. LANGUAGE VERSATILITY & DISTRIBUTION */}
-      {/* ------------------------------------------------------------- */}
-      {languageDistribution && languageDistribution.length > 0 && (
-        <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 md:p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
-            <div className="flex items-center gap-2">
-              <Code2 className="w-4 h-4 text-zinc-400" />
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-200 font-mono">
-                Language Versatility & Distribution
-              </h4>
-            </div>
-            <span className="text-[11px] text-zinc-500 font-mono">
-              {languageDistribution.length} implementation language
-              {languageDistribution.length === 1 ? "" : "s"}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {languageDistribution.map((lang, idx) => (
-              <div
-                key={lang.languageName || idx}
-                className={`p-3.5 rounded-xl border transition-all ${
-                  lang.isPrimary
-                    ? "bg-[#0f1017] border-zinc-700"
-                    : "bg-[#0f1017] border-zinc-800/70"
-                }`}
-              >
-                <div className="flex items-center justify-between text-xs mb-2">
-                  <span className="font-semibold text-zinc-200 flex items-center gap-1.5">
-                    {lang.isPrimary && <Crown className="w-3.5 h-3.5 text-zinc-400" />}
-                    {lang.languageName}
-                  </span>
-                  <span className="font-mono text-zinc-400">
-                    {lang.problemsSolved} solved
-                  </span>
-                </div>
-                <div className="w-full bg-zinc-950 rounded-full h-1.5 overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      lang.isPrimary ? "bg-zinc-200" : "bg-zinc-600"
-                    }`}
-                    style={{
-                      width: `${Math.min(100, Math.max(8, lang.percentage))}%`,
-                    }}
-                  />
-                </div>
-                <div className="flex justify-between text-[10px] text-zinc-500 font-mono mt-1.5">
-                  <span>{lang.isPrimary ? "Primary Language" : "Secondary"}</span>
-                  <span className="font-semibold text-zinc-400">{lang.percentage}%</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ------------------------------------------------------------- */}
-      {/* 6. ACTIONABLE PLACEMENT INSIGHTS */}
-      {/* ------------------------------------------------------------- */}
+      {/* 5. ACTIONABLE PLACEMENT INSIGHTS */}
       {insights && insights.length > 0 && (
-        <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 md:p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-zinc-400" />
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-200 font-mono">
+        <div className="bg-[#FEF9CF] border-2 border-[#0D0431] rounded-3xl p-6 sm:p-8 space-y-4 shadow-[6px_6px_0_0_#0D0431]">
+          <div className="flex items-center gap-2 border-b-2 border-[#0D0431] pb-3">
+            <Sparkles className="w-4 h-4 text-[#896EE2]" />
+            <h4 className="text-sm font-heading font-black uppercase tracking-wider text-[#0D0431]">
               Submission Insights & Tactical Recommendations
             </h4>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {insights.map((insight, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-2.5 text-xs text-zinc-300 font-mono bg-[#0f1017] border border-zinc-800 p-2.5 rounded-lg"
+                className="flex items-start gap-3 text-xs text-[#0D0431] font-mono font-bold bg-white border-2 border-[#0D0431] p-3.5 rounded-2xl shadow-[2px_2px_0_0_#0D0431]"
               >
-                <span className="text-zinc-400 shrink-0 mt-0.5">✦</span>
+                <span className="text-[#896EE2] font-black shrink-0 text-sm">✦</span>
                 <span className="leading-relaxed">{insight}</span>
               </div>
             ))}

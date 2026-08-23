@@ -17,18 +17,24 @@ const authUser = asyncHandler(async (req, res) => {
   const normalizedEmail = email.trim().toLowerCase()
   const user = await User.findOne({ email: normalizedEmail })
 
-  if (user && (await user.matchPassword(password))) {
-    generateToken(res, user._id)
+  if (!user) {
+    res.status(404)
+    throw new Error("No account exists with this email")
+  }
+
+  if (await user.matchPassword(password)) {
+    const token = generateToken(res, user._id)
 
     res.status(200).json({
       _id: user._id,
       name: user.name,
       email: user.email,
       onboardingCompleted: Boolean(user.onboardingCompleted),
+      token,
     })
   } else {
     res.status(401)
-    throw new Error("Invalid email or password")
+    throw new Error("Email or password is incorrect")
   }
 })
 
@@ -43,12 +49,17 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error("Please provide name, email, and password")
   }
 
+  if (password.length < 6) {
+    res.status(400)
+    throw new Error("Password must be at least 6 characters long")
+  }
+
   const normalizedEmail = email.trim().toLowerCase()
   const userExists = await User.findOne({ email: normalizedEmail })
 
   if (userExists) {
     res.status(400)
-    throw new Error("User already exists")
+    throw new Error("An account already exists with this email")
   }
 
   const user = await User.create({
@@ -60,16 +71,17 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (!user) {
     res.status(400)
-    throw new Error("Invalid data")
+    throw new Error("Could not create account with the provided data")
   }
 
-  generateToken(res, user._id)
+  const token = generateToken(res, user._id)
 
   res.status(201).json({
     _id: user._id,
     name: user.name,
     email: user.email,
     onboardingCompleted: false,
+    token,
   })
 })
 

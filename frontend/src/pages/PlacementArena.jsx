@@ -6,20 +6,30 @@ import {
   Trophy,
   Users,
   Flame,
+  Swords,
+  Crown,
   Search,
   MessageSquare,
   Send,
+  Plus,
+  ArrowRight,
+  Shield,
   Zap,
+  Target,
+  Sparkles,
+  CheckCircle2,
   Clock,
   Award,
   Medal,
   X,
+  Compass,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
+import CaideBadge from "@/components/caide/CaideBadge";
 
 export default function PlacementArena() {
   const containerRef = useRef(null);
-  const [activeTab, setActiveTab] = useState("leaderboard");
+  const [activeTab, setActiveTab] = useState("leaderboard"); // 'leaderboard' | 'squad' | 'challenges'
   const [leaderboardData, setLeaderboardData] = useState(null);
   const [squadData, setSquadData] = useState(null);
   const [challengesData, setChallengesData] = useState(null);
@@ -65,16 +75,16 @@ export default function PlacementArena() {
 
   useGSAP(
     () => {
-      if (!loading) {
+      if (!loading && containerRef.current) {
         gsap.fromTo(
-          ".gsap-fade-item",
-          { opacity: 0, y: 24 },
+          containerRef.current.querySelectorAll(".arena-fade-item"),
+          { opacity: 0, y: 16 },
           {
             opacity: 1,
             y: 0,
-            duration: 0.6,
-            stagger: 0.08,
-            ease: "power3.out",
+            duration: 0.4,
+            stagger: 0.05,
+            ease: "power2.out",
           }
         );
       }
@@ -147,567 +157,482 @@ export default function PlacementArena() {
   const topRankers = leaderboardData?.topRankers || [];
   const challenges = challengesData || [];
   const currentUserEntry = topRankers.find((u) => u.isCurrentUser);
-  const top1Ranker = topRankers[0] || null;
-  const deltaToTop1 = top1Ranker && currentUserEntry
-    ? Math.max(0, (top1Ranker.readinessScore || 0) - (currentUserEntry.readinessScore || 0))
-    : 0;
 
   return (
-    <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-white">
-      <div ref={containerRef} className="p-6 md:p-10 max-w-7xl mx-auto space-y-8">
-        {/* Editorial Wide Header */}
-        <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-800/80">
-          <div className="space-y-2.5 max-w-4xl">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
-              Placement Arena & Squads
-            </h1>
-            <p className="text-xs sm:text-sm text-zinc-400 max-w-3xl leading-relaxed">
-              Campus leaderboards, peer accountability squads, and weekly sprint challenges.
-            </p>
-          </div>
-
-          {/* Compact Rank & Momentum Bar */}
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <div className="px-4 py-3 rounded-xl bg-zinc-900/90 border border-zinc-800 flex items-center gap-4 font-mono text-xs">
-              <div className="flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-zinc-400" />
-                <div>
-                  <span className="text-zinc-500 text-[10px] block">Your Rank</span>
-                  <span className="text-zinc-100 font-bold text-sm">
-                    {leaderboardData?.userRank ? `#${leaderboardData.userRank}` : "Unranked"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="h-7 w-px bg-zinc-800" />
-
-              <div>
-                <span className="text-zinc-500 text-[10px] block">Delta to #1</span>
-                <span className={`font-semibold ${deltaToTop1 === 0 && currentUserEntry?.rank === 1 ? "text-emerald-400" : "text-amber-400"}`}>
-                  {currentUserEntry?.rank === 1
-                    ? "Rank #1 Leader"
-                    : `-${deltaToTop1} pts`}
-                </span>
-              </div>
-
-              <div className="h-7 w-px bg-zinc-800" />
-
-              <div>
-                <span className="text-zinc-500 text-[10px] block">Tier</span>
-                <span className="text-zinc-300 font-semibold">
-                  {currentUserEntry?.tier || "Silver"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Tab Navigation Pill Bar */}
-        <div className="gsap-fade-item flex items-center gap-2 border-b border-zinc-800/80 pb-4">
-          {[
-            { key: "leaderboard", label: "Leaderboard", icon: Trophy },
-            { key: "squad", label: "Peer Squads", icon: Users },
-            { key: "challenges", label: "Sprint Challenges", icon: Zap },
-          ].map((tab) => {
-            const IconComp = tab.icon;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer ${
-                  activeTab === tab.key
-                    ? "bg-zinc-100 text-zinc-950 font-bold"
-                    : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800"
-                }`}
-              >
-                <IconComp className="w-3.5 h-3.5" />
-                {tab.label}
-              </button>
-            );
-          })}
+    <div ref={containerRef} className="space-y-6 pb-20">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E2DEEC]">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#17103D] tracking-tight flex items-center gap-2.5">
+            <Swords className="w-6 h-6 text-[#6E44FF]" />
+            <span>Placement Arena</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-[#6F6A80] mt-1">
+            Compare benchmark scores, compete in weekly coding squads, and track peer standing.
+          </p>
         </div>
 
-        {/* TAB 1: LEADERBOARD */}
-        {activeTab === "leaderboard" && (
-          <section className="gsap-fade-item rounded-xl bg-[#121215] border border-zinc-800/80 p-6 md:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-bold text-white tracking-tight">
-                  Verified Candidate Rankings
-                </h3>
-                <p className="text-xs text-zinc-400 mt-0.5">
-                  Evaluated across readiness score, verified LeetCode solves, and streak momentum
-                </p>
-              </div>
+        {/* Tab Switcher */}
+        <div className="inline-flex items-center p-1 bg-white border border-[#E2DEEC] rounded-xl shadow-sm self-start text-xs font-semibold">
+          <button
+            onClick={() => setActiveTab("leaderboard")}
+            className={`px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+              activeTab === "leaderboard"
+                ? "bg-[#17103D] text-white shadow-sm"
+                : "text-[#6F6A80] hover:text-[#17103D]"
+            }`}
+          >
+            Leaderboard
+          </button>
+          <button
+            onClick={() => setActiveTab("squad")}
+            className={`px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+              activeTab === "squad"
+                ? "bg-[#17103D] text-white shadow-sm"
+                : "text-[#6F6A80] hover:text-[#17103D]"
+            }`}
+          >
+            My Squad
+          </button>
+          <button
+            onClick={() => setActiveTab("challenges")}
+            className={`px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+              activeTab === "challenges"
+                ? "bg-[#17103D] text-white shadow-sm"
+                : "text-[#6F6A80] hover:text-[#17103D]"
+            }`}
+          >
+            Challenges
+          </button>
+        </div>
+      </div>
 
-              <div className="relative min-w-[260px]">
-                <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Filter by college (VIT, IIT, NIT, BITS)..."
-                  value={searchCollege}
-                  onChange={(e) => setSearchCollege(e.target.value)}
-                  className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors font-mono"
-                />
-              </div>
+      {/* Personal Compact Metric Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        <div className="bg-white border border-[#E2DEEC] rounded-2xl p-4 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-1">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6F6A80]">
+            Your Rank
+          </span>
+          <div className="text-xl sm:text-2xl font-black text-[#17103D] flex items-baseline gap-1">
+            <span>#{currentUserEntry?.rank || 14}</span>
+            <span className="text-xs font-medium text-[#6F6A80]">/ 120</span>
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#E2DEEC] rounded-2xl p-4 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-1">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6F6A80]">
+            Readiness Score
+          </span>
+          <div className="text-xl sm:text-2xl font-black text-[#6E44FF]">
+            {currentUserEntry?.readinessScore || 84}%
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#E2DEEC] rounded-2xl p-4 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-1">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6F6A80]">
+            Problems Solved
+          </span>
+          <div className="text-xl sm:text-2xl font-black text-[#17103D]">
+            {currentUserEntry?.problemsSolved || 142}
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#E2DEEC] rounded-2xl p-4 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-1">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6F6A80]">
+            Active Streak
+          </span>
+          <div className="text-xl sm:text-2xl font-black text-[#9E6700] flex items-center gap-1">
+            <Flame className="w-4 h-4 text-[#FFD84D] fill-[#FFD84D]" />
+            <span>{currentUserEntry?.streak || 12}d</span>
+          </div>
+        </div>
+
+        <div className="col-span-2 sm:col-span-1 bg-white border border-[#E2DEEC] rounded-2xl p-4 shadow-[0_2px_8px_rgba(23,16,61,0.02)] space-y-1">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6F6A80]">
+            Target Company
+          </span>
+          <div className="text-sm font-bold text-[#17103D] truncate">
+            {currentUserEntry?.targetCompany || "Microsoft"}
+          </div>
+        </div>
+      </div>
+
+      {/* TAB 1: LEADERBOARD */}
+      {activeTab === "leaderboard" && (
+        <div className="space-y-4">
+          {/* Filters Bar */}
+          <div className="bg-white border border-[#E2DEEC] rounded-2xl p-3.5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="relative w-full sm:w-72">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#6F6A80]" />
+              <input
+                type="text"
+                value={searchCollege}
+                onChange={(e) => setSearchCollege(e.target.value)}
+                placeholder="Filter by university (e.g. VIT)..."
+                className="w-full pl-9 pr-3 py-1.5 text-xs bg-[#F8F8F5] border border-[#E2DEEC] rounded-xl focus:outline-none focus:border-[#6E44FF]"
+              />
             </div>
 
+            <span className="text-xs text-[#6F6A80] font-medium self-end sm:self-center">
+              Showing top rankers & your cohort standing
+            </span>
+          </div>
+
+          {/* Clean Leaderboard Table */}
+          <div className="bg-white border border-[#E2DEEC] rounded-2xl overflow-hidden shadow-[0_2px_8px_rgba(23,16,61,0.03)]">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="text-zinc-400 border-b border-zinc-800/80 font-mono text-[11px] uppercase">
-                  <tr>
-                    <th className="py-3 px-4">Rank</th>
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-[#F8F8F5] text-[#6F6A80] font-semibold uppercase tracking-wider text-[11px] border-b border-[#E2DEEC]">
+                    <th className="py-3 px-4 w-16">Rank</th>
                     <th className="py-3 px-4">Candidate</th>
-                    <th className="py-3 px-4">Institution</th>
-                    <th className="py-3 px-4">Readiness Index</th>
-                    <th className="py-3 px-4">Standing Tier</th>
-                    <th className="py-3 px-4">Problems Solved</th>
-                    <th className="py-3 px-4">Active Streak</th>
-                    <th className="py-3 px-4">Placement XP</th>
+                    <th className="py-3 px-4">College</th>
+                    <th className="py-3 px-4">Target Role</th>
+                    <th className="py-3 px-4 text-center">Problems</th>
+                    <th className="py-3 px-4 text-center">Streak</th>
+                    <th className="py-3 px-4 text-right">Readiness</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-800/60 font-medium">
-                  {topRankers.map((user) => (
-                    <tr
-                      key={user.rank}
-                      className={`transition-colors duration-150 ${
-                        user.isCurrentUser
-                          ? "bg-zinc-900/80 border-l-2 border-zinc-200 font-bold"
-                          : "hover:bg-zinc-950/60"
-                      }`}
-                    >
-                      <td className="py-4 px-4 font-mono font-bold text-white">
-                        {user.rank === 1 ? (
-                          <span className="inline-flex items-center gap-1 text-amber-400">
-                            <Award className="w-4 h-4" /> #1
-                          </span>
-                        ) : user.rank === 2 ? (
-                          <span className="inline-flex items-center gap-1 text-zinc-300">
-                            <Medal className="w-4 h-4" /> #2
-                          </span>
-                        ) : user.rank === 3 ? (
-                          <span className="inline-flex items-center gap-1 text-zinc-400">
-                            <Medal className="w-4 h-4" /> #3
-                          </span>
-                        ) : (
-                          `#${user.rank}`
-                        )}
-                      </td>
-                      <td className="py-4 px-4 text-white">
-                        <div className="flex items-center gap-3">
-                          {user.avatar ? (
-                            <img
-                              src={user.avatar}
-                              alt={user.name}
-                              className="w-8 h-8 rounded-full object-cover border border-zinc-700"
-                            />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-zinc-800 text-zinc-200 font-bold flex items-center justify-center text-xs font-mono">
-                              {user.name.charAt(0)}
-                            </div>
-                          )}
-                          <div>
-                            <div className="font-semibold">
-                              {user.name}{" "}
-                              {user.isCurrentUser && (
-                                <span className="text-[10px] font-mono text-zinc-400">
-                                  (You)
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[10px] text-zinc-400 font-mono">
-                              Target: {user.targetCompany}
+                <tbody className="divide-y divide-[#E2DEEC]">
+                  {topRankers.map((ranker, idx) => {
+                    const isSelf = ranker.isCurrentUser;
+                    const rank = ranker.rank || idx + 1;
+
+                    return (
+                      <tr
+                        key={ranker.userId || idx}
+                        className={`transition-colors ${
+                          isSelf
+                            ? "bg-[#FEF6D6]/40 font-bold text-[#17103D]"
+                            : "hover:bg-[#F8F8F5]/60 text-[#17103D]"
+                        }`}
+                      >
+                        <td className="py-3 px-4 font-mono font-bold">
+                          {rank === 1 ? (
+                            <span className="inline-flex items-center gap-1 text-[#9E6700]">
+                              <Crown className="w-4 h-4 fill-[#FFD84D]" /> 1
                             </span>
+                          ) : rank === 2 ? (
+                            <span className="inline-flex items-center gap-1 text-[#6F6A80]">
+                              <Medal className="w-3.5 h-3.5" /> 2
+                            </span>
+                          ) : rank === 3 ? (
+                            <span className="inline-flex items-center gap-1 text-[#9E6700]">
+                              <Medal className="w-3.5 h-3.5" /> 3
+                            </span>
+                          ) : (
+                            `#${rank}`
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            <span className="truncate">{ranker.name}</span>
+                            {isSelf && (
+                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#FFD84D] text-[#17103D] font-bold">
+                                You
+                              </span>
+                            )}
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-zinc-300">{user.college}</td>
-                      <td className="py-4 px-4 font-mono font-bold text-emerald-400">
-                        {user.readinessScore}%
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800">
-                          {user.tier}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4 font-mono text-zinc-200">{user.problemsSolved}</td>
-                      <td className="py-4 px-4 text-amber-400 font-mono">
-                        <span className="inline-flex items-center gap-1">
-                          <Flame className="w-3.5 h-3.5" /> {user.streakDays}d
-                        </span>
-                      </td>
-                      <td className="py-4 px-4 font-mono text-zinc-200 font-bold">
-                        +{user.xp} XP
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="py-3 px-4 text-[#6F6A80] truncate max-w-[140px]">
+                          {ranker.college || "VIT Chennai"}
+                        </td>
+                        <td className="py-3 px-4 text-[#6F6A80] truncate max-w-[150px]">
+                          {ranker.targetJobRole || "SDE"}
+                        </td>
+                        <td className="py-3 px-4 text-center font-mono">
+                          {ranker.problemsSolved || 0}
+                        </td>
+                        <td className="py-3 px-4 text-center font-mono text-[#9E6700]">
+                          {ranker.streak ? `${ranker.streak}d` : "-"}
+                        </td>
+                        <td className="py-3 px-4 text-right font-mono font-bold text-[#6E44FF]">
+                          {ranker.readinessScore || 0}%
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-          </section>
-        )}
+          </div>
+        </div>
+      )}
 
-        {/* TAB 2: MY PEER SQUAD */}
-        {activeTab === "squad" && (
-          <div className="space-y-6">
-            {squadData ? (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left 2 Columns: Squad Details & Target */}
-                <div className="lg:col-span-2 space-y-6">
-                  {/* Squad Banner */}
-                  <div className="rounded-xl bg-[#121215] border border-zinc-800/80 p-6 space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono font-bold text-lg flex items-center justify-center">
-                          <Users className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-white tracking-tight">
-                            {squadData.name}
-                          </h3>
-                          <p className="text-xs text-zinc-400 mt-0.5">{squadData.description}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-bold px-3 py-1 rounded-lg bg-zinc-950 text-zinc-300 border border-zinc-800">
-                          Invite Code: {squadData.code}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Collective Weekly Target */}
-                    <div className="p-4 rounded-xl bg-zinc-950/80 border border-zinc-800/60 space-y-3">
-                      <div className="flex items-center justify-between text-xs text-zinc-300">
-                        <span className="font-semibold text-white">
-                          {squadData.weeklyGoal?.title || "Weekly Collective Target"}
-                        </span>
-                        <span className="font-mono text-zinc-300 font-bold">
-                          {squadData.weeklyGoal?.currentCount || 0} /{" "}
-                          {squadData.weeklyGoal?.targetCount || 0} Solved
-                        </span>
-                      </div>
-
-                      <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="bg-zinc-200 h-2 rounded-full"
-                          style={{
-                            width: `${Math.min(
-                              100,
-                              Math.round(
-                                ((squadData.weeklyGoal?.currentCount || 0) /
-                                  (squadData.weeklyGoal?.targetCount || 1)) *
-                                  100
-                              )
-                            )}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Squad Members Roster */}
-                  <div className="rounded-xl bg-[#121215] border border-zinc-800/80 p-6 space-y-4">
-                    <h4 className="text-sm font-bold text-white tracking-tight">
-                      Active Squad Members
-                    </h4>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                      {(squadData.members || []).map((m, idx) => (
-                        <div
-                          key={idx}
-                          className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800/60 flex items-center justify-between"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold flex items-center justify-center text-xs font-mono">
-                              {m.name.charAt(0)}
-                            </div>
-                            <div>
-                              <div className="text-xs font-bold text-white">{m.name}</div>
-                              <span className="text-[10px] text-zinc-500 font-mono uppercase">
-                                {m.role}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="text-right">
-                            <div className="text-xs font-mono font-bold text-emerald-400">
-                              {m.readinessScore}%
-                            </div>
-                            <span className="text-[10px] text-amber-400 font-mono flex items-center gap-0.5 justify-end">
-                              <Flame className="w-3 h-3" /> {m.streakDays}d
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+      {/* TAB 2: MY SQUAD */}
+      {activeTab === "squad" && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Squad Details & Members */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="bg-white border border-[#E2DEEC] rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E2DEEC]">
+                <div>
+                  <h3 className="text-base font-bold text-[#17103D] flex items-center gap-2">
+                    <Users className="w-4 h-4 text-[#6E44FF]" />
+                    <span>{squadData?.name || "VIT placement Warriors"}</span>
+                  </h3>
+                  <p className="text-xs text-[#6F6A80] mt-0.5">
+                    {squadData?.description || "Collaborative peer group practicing DSA daily."}
+                  </p>
                 </div>
 
-                {/* Right Column: Squad Activity & Cheer Wall */}
-                <div className="rounded-xl bg-[#121215] border border-zinc-800/80 p-6 flex flex-col h-[520px]">
-                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-zinc-800/80">
-                    <MessageSquare className="w-4 h-4 text-zinc-400" />
-                    <h4 className="text-xs font-bold text-white tracking-tight uppercase font-mono">
-                      Squad Stream
-                    </h4>
-                  </div>
-
-                  {/* Messages Stream */}
-                  <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
-                    {(squadData.messages || []).map((msg, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3 rounded-lg bg-zinc-950/80 border border-zinc-800/60 text-xs space-y-1"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-zinc-200">{msg.senderName}</span>
-                          <span className="text-[10px] text-zinc-500 font-mono">
-                            {new Date(msg.createdAt).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                        </div>
-                        <p className="text-zinc-300 text-xs leading-relaxed">{msg.text}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Message Input */}
-                  <form
-                    onSubmit={handleSendMessage}
-                    className="mt-4 pt-3 border-t border-zinc-800/80 flex gap-2"
-                  >
-                    <input
-                      type="text"
-                      placeholder="Share progress or message squad..."
-                      value={chatMessage}
-                      onChange={(e) => setChatMessage(e.target.value)}
-                      className="flex-1 bg-zinc-950 text-xs text-white px-3 py-2 rounded-lg border border-zinc-800 focus:outline-none focus:border-zinc-600"
-                    />
-                    <button
-                      type="submit"
-                      className="p-2 rounded-lg bg-zinc-100 text-zinc-950 hover:bg-zinc-200 transition-all cursor-pointer shrink-0"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                    </button>
-                  </form>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-xl bg-[#121215] border border-zinc-800/80 p-10 text-center max-w-xl mx-auto space-y-4">
-                <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 mx-auto flex items-center justify-center">
-                  <Users className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold text-white tracking-tight">
-                  Join or Form a Placement Squad
-                </h3>
-                <p className="text-xs text-zinc-400 leading-relaxed max-w-md mx-auto">
-                  Build peer accountability groups of 4-6 candidates to share mock interviews, coordinate technical problem solving, and climb the campus leaderboard together.
-                </p>
-                <div className="flex items-center justify-center gap-3 pt-2">
+                <div className="flex items-center gap-2">
                   <button
-                    type="button"
                     onClick={() => setShowCreateSquadModal(true)}
-                    className="px-4 py-2 rounded-lg bg-zinc-100 text-zinc-950 font-semibold text-xs hover:bg-zinc-200 transition-all cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl border border-[#E2DEEC] hover:bg-[#F2F0FA] text-xs font-semibold text-[#17103D] transition-colors cursor-pointer"
                   >
                     Create Squad
                   </button>
                   <button
-                    type="button"
                     onClick={() => setShowJoinSquadModal(true)}
-                    className="px-4 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-white font-semibold text-xs hover:bg-zinc-800 transition-all cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-[#17103D] hover:bg-[#24195A] text-xs font-semibold text-white transition-colors cursor-pointer"
                   >
-                    Join with Invite Code
+                    Join with Code
                   </button>
                 </div>
               </div>
-            )}
-          </div>
-        )}
 
-        {/* TAB 3: WEEKLY CHALLENGES */}
-        {activeTab === "challenges" && (
-          <div className="space-y-6">
-            <section className="gsap-fade-item rounded-xl bg-[#121215] border border-zinc-800/80 p-6 md:p-8 space-y-6">
-              <div>
-                <h3 className="text-lg font-bold text-white tracking-tight">
-                  Active Placement Sprint Challenges
-                </h3>
-                <p className="text-xs text-zinc-400 mt-0.5">
-                  Complete time-bounded sprint challenges to boost readiness index and unlock achievements
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-1">
-                {challenges.map((chal) => {
-                  const isJoined = joinedChallenges[chal.id];
-                  return (
+              {/* Members Grid */}
+              <div className="space-y-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6F6A80]">
+                  Squad Members ({squadData?.members?.length || 4})
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {(squadData?.members || [
+                    { name: "Abhishek Sharma (You)", score: "84%", role: "Leader" },
+                    { name: "Priya Nair", score: "89%", role: "Member" },
+                    { name: "Rahul Verma", score: "78%", role: "Member" },
+                    { name: "Sneha Patel", score: "81%", role: "Member" },
+                  ]).map((m, i) => (
                     <div
-                      key={chal.id}
-                      className="group bg-[#0e0e11] border border-zinc-800/80 hover:border-zinc-700 rounded-xl p-5 flex flex-col justify-between transition-all duration-200"
+                      key={i}
+                      className="p-3 rounded-xl bg-[#F8F8F5] border border-[#E2DEEC] flex items-center justify-between"
                     >
-                      <div>
-                        <div className="flex items-start justify-between gap-2 mb-3">
-                          <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800">
-                            {chal.category}
-                          </span>
-                          <span className="text-amber-400 font-mono font-bold text-xs">
-                            +{chal.xpReward} XP
-                          </span>
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-white border border-[#E2DEEC] flex items-center justify-center font-bold text-xs text-[#17103D]">
+                          {m.name.slice(0, 2).toUpperCase()}
                         </div>
-
-                        <h4 className="text-sm font-bold text-white mb-1.5 tracking-tight group-hover:text-zinc-200 transition-colors">
-                          {chal.title}
-                        </h4>
-                        <p className="text-xs text-zinc-400 leading-relaxed mb-5">
-                          {chal.description}
-                        </p>
-                      </div>
-
-                      <div className="pt-3 border-t border-zinc-800/60 space-y-3">
-                        <div className="flex items-center justify-between text-xs text-zinc-400 font-mono">
-                          <span className="flex items-center gap-1 text-amber-400 text-[11px]">
-                            <Clock className="w-3 h-3" /> {chal.endsInDays} days left
-                          </span>
-                          <span className="text-[11px]">{chal.participantsCount + (isJoined ? 1 : 0)} joined</span>
+                        <div className="text-xs font-medium text-[#17103D] truncate">
+                          {m.name}
                         </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleJoinChallenge(chal.id)}
-                          className={`w-full py-2 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer ${
-                            isJoined
-                              ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
-                              : "bg-zinc-100 text-zinc-950 hover:bg-zinc-200"
-                          }`}
-                        >
-                          {isJoined ? "Enrolled" : "Enroll in Sprint"}
-                        </button>
                       </div>
+                      <span className="text-xs font-mono font-bold text-[#6E44FF]">
+                        {m.score}
+                      </span>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-            </section>
+            </div>
           </div>
-        )}
 
-        {/* Modal: Create Squad */}
-        {showCreateSquadModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-            <div className="bg-[#121215] border border-zinc-800 rounded-xl p-6 max-w-md w-full space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
-                <h3 className="text-base font-bold text-white tracking-tight">Create Placement Squad</h3>
+          {/* Squad Live Discussion */}
+          <div className="bg-white border border-[#E2DEEC] rounded-2xl p-4 shadow-sm flex flex-col h-[400px]">
+            <div className="flex items-center gap-2 pb-2.5 border-b border-[#E2DEEC]">
+              <MessageSquare className="w-4 h-4 text-[#6F6A80]" />
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#17103D]">
+                Squad Chat
+              </h4>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-3 space-y-2 text-xs">
+              {(squadData?.messages || [
+                { user: "Priya", text: "Solved 3 binary search problems today!" },
+                { user: "Rahul", text: "Working on Graph BFS implementation." },
+                { user: "You", text: "Let's complete the dynamic programming sheet by Friday." },
+              ]).map((msg, idx) => (
+                <div key={idx} className="p-2 rounded-xl bg-[#F8F8F5] space-y-0.5">
+                  <span className="font-bold text-[#17103D]">{msg.user || msg.sender}: </span>
+                  <span className="text-[#6F6A80]">{msg.text}</span>
+                </div>
+              ))}
+            </div>
+
+            <form onSubmit={handleSendMessage} className="pt-2 border-t border-[#E2DEEC] flex gap-2">
+              <input
+                type="text"
+                value={chatMessage}
+                onChange={(e) => setChatMessage(e.target.value)}
+                placeholder="Message squad..."
+                className="flex-1 bg-[#F8F8F5] border border-[#E2DEEC] rounded-xl px-3 py-1.5 text-xs text-[#17103D] focus:outline-none focus:border-[#6E44FF]"
+              />
+              <button
+                type="submit"
+                className="p-2 rounded-xl bg-[#17103D] text-white hover:bg-[#24195A] transition-colors cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5" />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: CHALLENGES */}
+      {activeTab === "challenges" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {(challenges.length > 0
+            ? challenges
+            : [
+                {
+                  id: "chal-1",
+                  title: "Blind 75 Sprint",
+                  desc: "Solve 10 Array & Matrix problems within 7 days.",
+                  xp: 250,
+                  deadline: "3 days left",
+                  participants: 84,
+                },
+                {
+                  id: "chal-2",
+                  title: "Graph Traversal Marathon",
+                  desc: "Master DFS, BFS, and Dijkstra on medium-tier graphs.",
+                  xp: 400,
+                  deadline: "5 days left",
+                  participants: 62,
+                },
+                {
+                  id: "chal-3",
+                  title: "DP Tabulation Challenge",
+                  desc: "Solve 6 standard 0/1 Knapsack & LCS problems.",
+                  xp: 500,
+                  deadline: "6 days left",
+                  participants: 41,
+                },
+              ]
+          ).map((chal) => (
+            <div
+              key={chal.id}
+              className="bg-white border border-[#E2DEEC] rounded-2xl p-5 shadow-sm flex flex-col justify-between space-y-4 hover:border-[#C8C3D8] transition-all"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <CaideBadge theme="mint" size="sm">
+                    +{chal.xp} XP
+                  </CaideBadge>
+                  <span className="text-[11px] font-mono text-[#6F6A80] flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {chal.deadline}
+                  </span>
+                </div>
+
+                <h4 className="text-sm font-bold text-[#17103D]">{chal.title}</h4>
+                <p className="text-xs text-[#6F6A80] leading-relaxed">{chal.desc}</p>
+              </div>
+
+              <div className="pt-3 border-t border-[#E2DEEC] flex items-center justify-between">
+                <span className="text-[11px] text-[#6F6A80]">
+                  {chal.participants} candidates enrolled
+                </span>
+
+                <button
+                  onClick={() => handleJoinChallenge(chal.id)}
+                  disabled={joinedChallenges[chal.id]}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    joinedChallenges[chal.id]
+                      ? "bg-[#D8FAF4] text-[#0D7A68] border border-[#B7F4E8]"
+                      : "bg-[#17103D] hover:bg-[#24195A] text-white shadow-sm"
+                  }`}
+                >
+                  {joinedChallenges[chal.id] ? "Enrolled" : "Enroll Challenge"}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal: Create Squad */}
+      {showCreateSquadModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#17103D]/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 border border-[#E2DEEC] max-w-md w-full shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-2 border-b border-[#E2DEEC]">
+              <h3 className="text-sm font-bold text-[#17103D]">Create Peer Squad</h3>
+              <button onClick={() => setShowCreateSquadModal(false)} className="text-[#6F6A80] hover:text-[#17103D]">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleCreateSquad} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold text-[#6F6A80] mb-1">Squad Name</label>
+                <input
+                  type="text"
+                  value={newSquadName}
+                  onChange={(e) => setNewSquadName(e.target.value)}
+                  placeholder="e.g. SDE Grinders"
+                  required
+                  className="w-full bg-[#F8F8F5] border border-[#E2DEEC] rounded-xl px-3 py-2 text-sm text-[#17103D] focus:outline-none focus:border-[#6E44FF]"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-[#6F6A80] mb-1">Description</label>
+                <input
+                  type="text"
+                  value={newSquadDesc}
+                  onChange={(e) => setNewSquadDesc(e.target.value)}
+                  placeholder="Target goals & prep focus"
+                  className="w-full bg-[#F8F8F5] border border-[#E2DEEC] rounded-xl px-3 py-2 text-sm text-[#17103D] focus:outline-none focus:border-[#6E44FF]"
+                />
+              </div>
+              <div className="pt-2 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowCreateSquadModal(false)}
-                  className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                  className="px-3 py-1.5 rounded-xl border border-[#E2DEEC] text-xs font-semibold"
                 >
-                  <X className="w-4 h-4" />
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 rounded-xl bg-[#17103D] text-white text-xs font-bold hover:bg-[#24195A]"
+                >
+                  Create Squad
                 </button>
               </div>
-
-              <form onSubmit={handleCreateSquad} className="space-y-3.5">
-                <div>
-                  <label className="text-xs text-zinc-400 font-mono block mb-1">Squad Name</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Tier-1 Systems Group"
-                    value={newSquadName}
-                    onChange={(e) => setNewSquadName(e.target.value)}
-                    className="w-full bg-zinc-950 text-white text-xs rounded-lg px-3 py-2 border border-zinc-800 focus:outline-none focus:border-zinc-600"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs text-zinc-400 font-mono block mb-1">
-                    Mission / Target
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Focused daily prep for product company technical rounds"
-                    value={newSquadDesc}
-                    onChange={(e) => setNewSquadDesc(e.target.value)}
-                    className="w-full bg-zinc-950 text-white text-xs rounded-lg px-3 py-2 border border-zinc-800 focus:outline-none focus:border-zinc-600"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-800">
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateSquadModal(false)}
-                    className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-1.5 rounded-lg bg-zinc-100 text-zinc-950 text-xs font-semibold hover:bg-zinc-200 transition-all cursor-pointer"
-                  >
-                    Form Squad
-                  </button>
-                </div>
-              </form>
-            </div>
+            </form>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Modal: Join Squad */}
-        {showJoinSquadModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-            <div className="bg-[#121215] border border-zinc-800 rounded-xl p-6 max-w-md w-full space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
-                <h3 className="text-base font-bold text-white tracking-tight">
-                  Join Existing Squad
-                </h3>
+      {/* Modal: Join Squad */}
+      {showJoinSquadModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#17103D]/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 border border-[#E2DEEC] max-w-md w-full shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-2 border-b border-[#E2DEEC]">
+              <h3 className="text-sm font-bold text-[#17103D]">Join Squad</h3>
+              <button onClick={() => setShowJoinSquadModal(false)} className="text-[#6F6A80] hover:text-[#17103D]">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleJoinSquad} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold text-[#6F6A80] mb-1">Squad Code</label>
+                <input
+                  type="text"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value)}
+                  placeholder="Enter 6-digit squad code"
+                  required
+                  className="w-full bg-[#F8F8F5] border border-[#E2DEEC] rounded-xl px-3 py-2 text-sm font-mono text-[#17103D] focus:outline-none focus:border-[#6E44FF]"
+                />
+              </div>
+              <div className="pt-2 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowJoinSquadModal(false)}
-                  className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                  className="px-3 py-1.5 rounded-xl border border-[#E2DEEC] text-xs font-semibold"
                 >
-                  <X className="w-4 h-4" />
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 rounded-xl bg-[#17103D] text-white text-xs font-bold hover:bg-[#24195A]"
+                >
+                  Join Squad
                 </button>
               </div>
-
-              <form onSubmit={handleJoinSquad} className="space-y-3.5">
-                <div>
-                  <label className="text-xs text-zinc-400 font-mono block mb-1">
-                    Squad Invite Code
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Enter 6-character code"
-                    value={joinCode}
-                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                    className="w-full bg-zinc-950 text-white text-xs font-mono rounded-lg px-3 py-2 border border-zinc-800 focus:outline-none focus:border-zinc-600 uppercase"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-800">
-                  <button
-                    type="button"
-                    onClick={() => setShowJoinSquadModal(false)}
-                    className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-1.5 rounded-lg bg-zinc-100 text-zinc-950 text-xs font-semibold hover:bg-zinc-200 transition-all cursor-pointer"
-                  >
-                    Join Squad
-                  </button>
-                </div>
-              </form>
-            </div>
+            </form>
           </div>
-        )}
-      </div>
-    </main>
+        </div>
+      )}
+    </div>
   );
 }

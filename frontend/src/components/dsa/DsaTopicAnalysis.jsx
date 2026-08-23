@@ -128,14 +128,14 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
   if (loading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-44 w-full bg-zinc-900 rounded-xl" />
+        <Skeleton className="h-48 w-full bg-white/70 border-2 border-[#0D0431] rounded-3xl shadow-[4px_4px_0_0_#0D0431]" />
         <div className="flex justify-between items-center gap-4">
-          <Skeleton className="h-10 w-64 bg-zinc-900 rounded-lg" />
-          <Skeleton className="h-10 w-48 bg-zinc-900 rounded-lg" />
+          <Skeleton className="h-10 w-64 bg-white/70 border-2 border-[#0D0431] rounded-xl" />
+          <Skeleton className="h-10 w-48 bg-white/70 border-2 border-[#0D0431] rounded-xl" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-48 w-full bg-zinc-900/60 rounded-xl" />
+            <Skeleton key={i} className="h-48 w-full bg-white/70 border-2 border-[#0D0431] rounded-2xl shadow-[4px_4px_0_0_#0D0431]" />
           ))}
         </div>
       </div>
@@ -148,14 +148,14 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-4 text-rose-300 text-xs flex items-center justify-between">
+        <div className="rounded-2xl bg-[#FFC5B7] border-2 border-[#0D0431] p-4 text-[#0D0431] text-xs font-bold shadow-[4px_4px_0_0_#0D0431] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-[#0D0431] shrink-0" />
             <span>{error}</span>
           </div>
           <button
             onClick={() => fetchDsaAnalysis(true)}
-            className="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 rounded text-rose-200 text-xs font-medium cursor-pointer"
+            className="px-3 py-1 bg-white hover:bg-[#FEDF6A] text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
           >
             Retry
           </button>
@@ -171,20 +171,22 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
 
       {/* 2. Category Proficiency Overview Ribbon */}
       {categoriesList.length > 0 && (
-        <div className="rounded-xl bg-[#121215] border border-zinc-800/80 p-4 space-y-3">
+        <div className="rounded-3xl bg-[#FEF9CF] border-2 border-[#0D0431] p-5 space-y-4 shadow-[4px_4px_0_0_#0D0431]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-zinc-400" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
+              <span className="p-1.5 rounded-lg bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                <Layers className="w-4 h-4 text-[#0D0431]" />
+              </span>
+              <h3 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
                 Category Breakdown
               </h3>
             </div>
-            <span className="text-[11px] text-zinc-500 font-mono">
+            <span className="text-[11px] text-[#0D0431] font-mono font-bold bg-white border-2 border-[#0D0431] px-2.5 py-0.5 rounded-full shadow-[2px_2px_0_0_#0D0431]">
               {categoriesList.length} Categories
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
             {categoriesList.map((cat) => {
               const isSelected = selectedCategory === cat.id;
               return (
@@ -192,30 +194,32 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
                   key={cat.id}
                   type="button"
                   onClick={() => setSelectedCategory(isSelected ? "all" : cat.id)}
-                  className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer space-y-1.5 flex flex-col justify-between ${
+                  className={`p-3 rounded-2xl border-2 border-[#0D0431] text-left transition-all cursor-pointer space-y-2 flex flex-col justify-between ${
                     isSelected
-                      ? "bg-zinc-800 border-zinc-600 text-white"
-                      : "bg-[#16161a] border-zinc-800/80 hover:border-zinc-700 text-zinc-300 hover:text-white"
+                      ? "bg-[#0D0431] text-white shadow-[3px_3px_0_0_#896EE2]"
+                      : "bg-white text-[#0D0431] hover:bg-[#FEDF6A] shadow-[2px_2px_0_0_#0D0431] hover:-translate-x-0.5 hover:-translate-y-0.5"
                   }`}
                 >
                   <div className="space-y-0.5">
-                    <div className="text-[11px] font-semibold truncate">{cat.name}</div>
-                    <div className="text-[10px] text-zinc-500 font-mono">
+                    <div className="text-[11px] font-heading font-black truncate">{cat.name}</div>
+                    <div className={`text-[10px] font-mono font-semibold ${isSelected ? "text-white/80" : "text-[#0D0431]/70"}`}>
                       {cat.totalProblemsSolved} solved
                     </div>
                   </div>
 
-                  <div className="flex items-baseline justify-between pt-1 border-t border-zinc-800/60 font-mono text-[11px]">
-                    <span className="text-zinc-500 text-[10px]">Avg:</span>
+                  <div className={`flex items-baseline justify-between pt-1.5 border-t-2 font-mono text-[11px] ${isSelected ? "border-white/20" : "border-[#0D0431]/15"}`}>
+                    <span className={`text-[10px] font-bold ${isSelected ? "text-white/70" : "text-[#0D0431]/60"}`}>Avg:</span>
                     <span
-                      className={`font-bold ${
-                        cat.averageLevel !== null
+                      className={`font-black px-1.5 py-0.2 rounded border ${
+                        isSelected
+                          ? "bg-white text-[#0D0431] border-white"
+                          : cat.averageLevel !== null
                           ? cat.averageLevel >= 8.0
-                            ? "text-emerald-400"
+                            ? "bg-[#D3F8C6] text-[#0D0431] border-[#0D0431]"
                             : cat.averageLevel >= 6.5
-                            ? "text-zinc-200"
-                            : "text-amber-400"
-                          : "text-zinc-600"
+                            ? "bg-[#CDE1FF] text-[#0D0431] border-[#0D0431]"
+                            : "bg-[#FEDF6A] text-[#0D0431] border-[#0D0431]"
+                          : "bg-gray-100 text-[#0D0431]/50 border-gray-300"
                       }`}
                     >
                       {cat.averageLevel !== null ? `${cat.averageLevel}` : "—"}
@@ -229,23 +233,23 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
       )}
 
       {/* 3. Search and Filtering Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#121215] border border-zinc-800/80 p-3 rounded-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white border-2 border-[#0D0431] p-4 rounded-3xl shadow-[4px_4px_0_0_#0D0431]">
         <div className="flex flex-1 items-center gap-2 max-w-md">
           <div className="relative w-full">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#0D0431]/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search topics (e.g. Trie, Dynamic Programming, BFS, Two Pointers)..."
-              className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 font-sans"
+              className="w-full pl-10 pr-4 py-2 rounded-xl bg-[#FEF9CF] border-2 border-[#0D0431] text-xs font-sans font-semibold text-[#0D0431] placeholder:text-[#0D0431]/50 shadow-[2px_2px_0_0_#0D0431] focus:outline-none focus:bg-white transition-all"
             />
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 self-start md:self-auto shrink-0">
           {/* Status Filter Tabs */}
-          <div className="flex items-center bg-zinc-900 border border-zinc-800 p-0.5 rounded-lg text-xs font-mono">
+          <div className="flex items-center bg-[#FEF9CF] border-2 border-[#0D0431] p-1 rounded-2xl text-xs font-mono gap-1 shadow-[2px_2px_0_0_#0D0431]">
             {[
               { id: "all", label: "All" },
               { id: "weakest", label: "Focus / Gaps" },
@@ -257,10 +261,10 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
                 key={tab.id}
                 type="button"
                 onClick={() => setStatusFilter(tab.id)}
-                className={`px-2.5 py-1 rounded-md transition-all cursor-pointer text-[11px] ${
+                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[11px] font-bold ${
                   statusFilter === tab.id
-                    ? "bg-zinc-100 text-zinc-950 font-bold"
-                    : "text-zinc-400 hover:text-zinc-200"
+                    ? "bg-[#FEDF6A] text-[#0D0431] border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]"
+                    : "text-[#0D0431]/70 hover:text-[#0D0431] border-2 border-transparent"
                 }`}
               >
                 {tab.label}
@@ -269,12 +273,14 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
           </div>
 
           {/* View Mode Toggle: Grid vs Table */}
-          <div className="flex items-center bg-zinc-900 border border-zinc-800 p-0.5 rounded-lg">
+          <div className="flex items-center bg-[#FEF9CF] border-2 border-[#0D0431] p-1 rounded-2xl gap-1 shadow-[2px_2px_0_0_#0D0431]">
             <button
               type="button"
               onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded-md transition-all cursor-pointer ${
-                viewMode === "grid" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-zinc-200"
+              className={`p-1.5 rounded-xl transition-all cursor-pointer border-2 ${
+                viewMode === "grid"
+                  ? "bg-[#FEDF6A] text-[#0D0431] border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]"
+                  : "bg-transparent text-[#0D0431]/60 border-transparent hover:text-[#0D0431]"
               }`}
               title="Card Grid View"
             >
@@ -283,8 +289,10 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
             <button
               type="button"
               onClick={() => setViewMode("table")}
-              className={`p-1.5 rounded-md transition-all cursor-pointer ${
-                viewMode === "table" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-zinc-200"
+              className={`p-1.5 rounded-xl transition-all cursor-pointer border-2 ${
+                viewMode === "table"
+                  ? "bg-[#FEDF6A] text-[#0D0431] border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]"
+                  : "bg-transparent text-[#0D0431]/60 border-transparent hover:text-[#0D0431]"
               }`}
               title="Compact Table View"
             >
@@ -297,18 +305,18 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
             type="button"
             onClick={() => fetchDsaAnalysis(true)}
             disabled={refreshing}
-            className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors cursor-pointer"
+            className="p-2 rounded-xl bg-white hover:bg-[#FEDF6A] border-2 border-[#0D0431] text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] hover:scale-105 active:scale-95 transition-all cursor-pointer"
             title="Refresh analysis"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-purple-400" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-[#896EE2]" : ""}`} />
           </button>
         </div>
       </div>
 
       {/* Results Header Count */}
-      <div className="flex items-center justify-between text-xs font-mono text-zinc-500 px-1">
+      <div className="flex items-center justify-between text-xs font-mono font-bold text-[#0D0431]/70 px-1">
         <span>
-          Showing <span className="text-zinc-300 font-semibold">{filteredTopics.length}</span> topics
+          Showing <span className="text-[#0D0431] font-black">{filteredTopics.length}</span> topics
           {selectedCategory !== "all" ? ` in ${selectedCategory}` : ""}
           {statusFilter !== "all" ? ` (${statusFilter.replace("_", " ")})` : ""}
         </span>
@@ -321,7 +329,7 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
               setSelectedCategory("all");
               setStatusFilter("all");
             }}
-            className="text-purple-400 hover:underline cursor-pointer text-[11px]"
+            className="text-[#896EE2] hover:underline cursor-pointer text-[11px] font-bold font-mono"
           >
             Reset Filters
           </button>
@@ -330,15 +338,17 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
 
       {/* 4. Display Topics: Grid View vs Table View */}
       {filteredTopics.length === 0 ? (
-        <div className="rounded-xl bg-[#121215] border border-zinc-800/80 p-8 text-center space-y-2">
-          <HelpCircle className="w-8 h-8 text-zinc-500 mx-auto" />
-          <h3 className="text-sm font-semibold text-zinc-200">No topics match your current filter</h3>
-          <p className="text-xs text-zinc-500">
+        <div className="rounded-3xl bg-white border-2 border-[#0D0431] p-10 text-center space-y-3 shadow-[4px_4px_0_0_#0D0431]">
+          <div className="w-12 h-12 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center mx-auto">
+            <HelpCircle className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-heading font-black text-[#0D0431]">No topics match your current filter</h3>
+          <p className="text-xs text-[#0D0431]/70 font-medium max-w-sm mx-auto">
             Try adjusting your search keyword, category selection, or status filter.
           </p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredTopics.map((topic) => (
             <TopicSkillCard
               key={topic.id}
@@ -350,108 +360,108 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
         </div>
       ) : (
         /* Table View */
-        <div className="rounded-xl bg-[#121215] border border-zinc-800/80 overflow-hidden">
+        <div className="rounded-3xl bg-white border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-zinc-800 bg-[#16161a] text-zinc-400 font-mono text-[11px]">
-                  <th className="py-3 px-4">Topic & Category</th>
-                  <th className="py-3 px-3">Your Level</th>
-                  <th className="py-3 px-3">Required Bar</th>
-                  <th className="py-3 px-3">Status / Gap</th>
-                  <th className="py-3 px-3">Confidence</th>
-                  <th className="py-3 px-3">Solved Count</th>
-                  <th className="py-3 px-3 text-right">Details</th>
+                <tr className="border-b-2 border-[#0D0431] bg-[#FEF9CF] text-[#0D0431] font-heading font-black text-[11px]">
+                  <th className="py-3.5 px-4">Topic & Category</th>
+                  <th className="py-3.5 px-3">Your Level</th>
+                  <th className="py-3.5 px-3">Required Bar</th>
+                  <th className="py-3.5 px-3">Status / Gap</th>
+                  <th className="py-3.5 px-3">Confidence</th>
+                  <th className="py-3.5 px-3">Solved Count</th>
+                  <th className="py-3.5 px-3 text-right">Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/60 font-mono">
+              <tbody className="divide-y-2 divide-[#0D0431]/15 font-mono text-[#0D0431]">
                 {filteredTopics.map((topic) => {
                   const isExpanded = Boolean(expandedRows[topic.id]);
                   return (
                     <React.Fragment key={topic.id}>
-                      <tr className="hover:bg-zinc-900/40 transition-colors">
-                        <td className="py-3 px-4">
-                          <div className="font-semibold text-zinc-200 font-sans">{topic.name}</div>
-                          <div className="text-[10px] text-zinc-500">{topic.category}</div>
+                      <tr className="hover:bg-[#FEF9CF]/50 transition-colors">
+                        <td className="py-3.5 px-4">
+                          <div className="font-heading font-black text-xs text-[#0D0431]">{topic.name}</div>
+                          <div className="text-[10px] text-[#0D0431]/60 font-semibold">{topic.category}</div>
                         </td>
 
-                        <td className="py-3 px-3 font-semibold">
+                        <td className="py-3.5 px-3 font-bold">
                           {topic.currentLevel !== null ? (
                             <span
-                              className={
+                              className={`px-2 py-0.5 rounded-full border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] ${
                                 topic.currentLevel >= 8.0
-                                  ? "text-emerald-400"
+                                  ? "bg-[#D3F8C6] text-[#0D0431]"
                                   : topic.currentLevel >= 6.5
-                                  ? "text-zinc-200"
-                                  : "text-amber-400"
-                              }
+                                  ? "bg-[#CDE1FF] text-[#0D0431]"
+                                  : "bg-[#FEDF6A] text-[#0D0431]"
+                              }`}
                             >
                               {topic.currentLevel.toFixed(1)} / 10
                             </span>
                           ) : (
-                            <span className="text-zinc-500">—</span>
+                            <span className="text-[#0D0431]/50">—</span>
                           )}
                         </td>
 
-                        <td className="py-3 px-3 text-zinc-300">
+                        <td className="py-3.5 px-3 text-[#0D0431] font-bold">
                           {topic.requiredLevel !== null ? `${topic.requiredLevel.toFixed(1)} / 10` : "—"}
                         </td>
 
-                        <td className="py-3 px-3">
+                        <td className="py-3.5 px-3">
                           {topic.gap !== null ? (
                             <span
-                              className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                              className={`inline-block text-[10px] px-2.5 py-0.5 rounded-full font-bold border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] ${
                                 topic.gap > 0
-                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  ? "bg-[#D3F8C6] text-[#0D0431]"
                                   : topic.gap === 0
-                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  ? "bg-[#D3F8C6] text-[#0D0431]"
                                   : topic.gap > -2.0
-                                  ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                                  : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                                  ? "bg-[#FEDF6A] text-[#0D0431]"
+                                  : "bg-[#FFC5B7] text-[#0D0431]"
                               }`}
                             >
                               {topic.gap > 0 ? `+${topic.gap.toFixed(1)} Above` : topic.gap === 0 ? "Meets" : `${topic.gap.toFixed(1)} Gap`}
                             </span>
                           ) : (
-                            <span className="text-[10px] text-zinc-500">Unassessed</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-[#0D0431]/60 border border-gray-300">Unassessed</span>
                           )}
                         </td>
 
-                        <td className="py-3 px-3 text-zinc-400">
+                        <td className="py-3.5 px-3 text-[#0D0431] font-bold">
                           {topic.confidence > 0 ? `${topic.confidence}%` : "—"}
                         </td>
 
-                        <td className="py-3 px-3 text-zinc-300">
+                        <td className="py-3.5 px-3 text-[#0D0431] font-bold">
                           {topic.problemsSolved?.total || 0}
                           {topic.problemsSolved?.total > 0 && (
-                            <span className="text-[10px] text-zinc-500 block">
+                            <span className="text-[10px] text-[#0D0431]/60 font-semibold block">
                               {topic.problemsSolved.medium}M · {topic.problemsSolved.hard}H
                             </span>
                           )}
                         </td>
 
-                        <td className="py-3 px-3 text-right">
+                        <td className="py-3.5 px-3 text-right">
                           <button
                             type="button"
                             onClick={() => toggleRowExpand(topic.id)}
-                            className="p-1 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-xl border-2 border-[#0D0431] bg-white hover:bg-[#FEDF6A] text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
                           >
                             {isExpanded ? (
-                              <ChevronUp className="w-4 h-4" />
+                              <ChevronUp className="w-3.5 h-3.5" />
                             ) : (
-                              <ChevronDown className="w-4 h-4" />
+                              <ChevronDown className="w-3.5 h-3.5" />
                             )}
                           </button>
                         </td>
                       </tr>
 
                       {isExpanded && (
-                        <tr className="bg-[#0e0e11] border-b border-zinc-800/80">
-                          <td colSpan={7} className="p-4 space-y-3 text-xs font-sans">
-                            <p className="text-zinc-400 text-[11px]">{topic.description}</p>
+                        <tr className="bg-[#FEF9CF]/40 border-b-2 border-[#0D0431]">
+                          <td colSpan={7} className="p-5 space-y-3 text-xs font-sans text-[#0D0431]">
+                            <p className="text-[#0D0431]/80 text-xs font-medium">{topic.description}</p>
                             <div className="space-y-1">
-                              <span className="text-[10px] font-mono text-zinc-500 uppercase">Evidence:</span>
-                              <ul className="list-disc list-inside space-y-0.5 text-zinc-300 text-[11px]">
+                              <span className="text-[10px] font-mono text-[#0D0431] font-bold uppercase tracking-wider">Evidence:</span>
+                              <ul className="list-disc list-inside space-y-0.5 text-[#0D0431] text-xs font-medium">
                                 {topic.evidence?.map((e, idx) => (
                                   <li key={idx}>{e}</li>
                                 ))}
@@ -459,9 +469,9 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
                             </div>
                             {topic.recommendedPatterns && (
                               <div className="flex flex-wrap items-center gap-1.5 pt-1 font-mono text-[10px]">
-                                <span className="text-zinc-500">Patterns:</span>
+                                <span className="text-[#0D0431] font-bold">Patterns:</span>
                                 {topic.recommendedPatterns.map((p, idx) => (
-                                  <span key={idx} className="bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 text-zinc-300">
+                                  <span key={idx} className="bg-white px-2.5 py-0.5 rounded-lg border-2 border-[#0D0431] text-[#0D0431] font-bold shadow-[1px_1px_0_0_#0D0431]">
                                     {p}
                                   </span>
                                 ))}

@@ -36,20 +36,25 @@ export default function SheetVideoModal({ videoUrl, title, onClose }) {
   return createPortal(
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 sm:p-6 overflow-hidden animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0D0431]/80 backdrop-blur-sm p-4 sm:p-6 overflow-hidden animate-in fade-in duration-200"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-[#0c0c0e] border border-zinc-800 rounded-xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden p-4 sm:p-6 space-y-4"
+        className="bg-white border-2 border-[#0D0431] rounded-3xl shadow-[8px_8px_0_0_#0D0431] max-w-3xl w-full max-h-[88vh] flex flex-col overflow-hidden p-0 animate-in zoom-in-95 duration-200"
       >
-        <div className="flex items-center justify-between gap-4 pb-3 border-b border-zinc-800/80 shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 shrink-0">
+        {/* Modal Header (Caide Bento Style with #FEF9CF titlebar) */}
+        <div className="px-6 py-4 bg-[#FEF9CF] border-b-2 border-[#0D0431] flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3 min-w-0 pr-4">
+            <div className="p-2 rounded-xl bg-[#FFC5B7] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] shrink-0">
               <Play className="w-4 h-4 fill-current" />
             </div>
             <div className="min-w-0">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block">Video Solution</span>
-              <h3 className="text-sm sm:text-base font-bold text-white truncate">{title || "Video Solution"}</h3>
+              <span className="text-[10px] font-mono text-[#0D0431]/70 uppercase tracking-widest font-bold block">
+                Video Solution
+              </span>
+              <h3 className="text-sm sm:text-base font-heading font-black text-[#0D0431] truncate">
+                {title || "Video Solution"}
+              </h3>
             </div>
           </div>
 
@@ -58,7 +63,7 @@ export default function SheetVideoModal({ videoUrl, title, onClose }) {
               href={videoUrl}
               target="_blank"
               rel="noreferrer"
-              className="p-2 text-zinc-400 hover:text-white rounded-lg bg-zinc-900 border border-zinc-800 transition-colors inline-flex items-center gap-1 text-xs"
+              className="p-2 text-[#0D0431] hover:bg-[#FEDF6A] rounded-full bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all inline-flex items-center gap-1 text-xs font-mono font-bold"
               title="Open on YouTube"
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -66,7 +71,7 @@ export default function SheetVideoModal({ videoUrl, title, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="p-2 text-zinc-400 hover:text-white rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer"
+              className="p-2 text-[#0D0431] hover:bg-[#F85B52] hover:text-white rounded-full bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -74,14 +79,16 @@ export default function SheetVideoModal({ videoUrl, title, onClose }) {
         </div>
 
         {/* Video Frame with strict height bounds to avoid window overflow */}
-        <div className="relative aspect-video w-full max-h-[65vh] rounded-xl overflow-hidden bg-black border border-zinc-800 shrink-0">
-          <iframe
-            src={embedUrl}
-            title={title || "Video lecture"}
-            className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+        <div className="p-4 sm:p-6 bg-white overflow-hidden flex-1">
+          <div className="relative aspect-video w-full max-h-[65vh] rounded-2xl overflow-hidden bg-[#0D0431] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] shrink-0">
+            <iframe
+              src={embedUrl}
+              title={title || "Video lecture"}
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
         </div>
       </div>
     </div>,

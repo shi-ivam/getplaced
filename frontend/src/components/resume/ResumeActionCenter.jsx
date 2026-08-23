@@ -25,25 +25,28 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { PY_API_URL } from "@/config/api";
+import CaideBadge from "@/components/caide/CaideBadge";
+import CaideCard from "@/components/caide/CaideCard";
+import CaideButton from "@/components/caide/CaideButton";
 
-const CATEGORY_COLORS = {
-  Keywords: "text-purple-300 bg-purple-500/10 border-purple-500/30",
-  "Measurable Impact": "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
-  Projects: "text-zinc-300 bg-zinc-500/10 border-zinc-500/30",
-  Experience: "text-zinc-300 bg-zinc-500/10 border-zinc-500/30",
-  Skills: "text-purple-300 bg-purple-500/10 border-purple-500/30",
-  Formatting: "text-amber-300 bg-amber-500/10 border-amber-500/30",
-  Structure: "text-amber-300 bg-amber-500/10 border-amber-500/30",
-  Links: "text-zinc-400 bg-zinc-500/10 border-zinc-500/30",
-  "Role Relevance": "text-purple-300 bg-purple-500/10 border-purple-500/30",
-  Achievements: "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
-  Education: "text-zinc-300 bg-zinc-500/10 border-zinc-500/30"
+const CATEGORY_THEMES = {
+  Keywords: "mint",
+  "Measurable Impact": "yellow",
+  Projects: "light-purple",
+  Experience: "blue",
+  Skills: "mint",
+  Formatting: "yellow",
+  Structure: "light-purple",
+  Links: "coral",
+  "Role Relevance": "light-purple",
+  Achievements: "yellow",
+  Education: "blue"
 };
 
-const IMPACT_COLORS = {
-  HIGH: "text-rose-300 bg-rose-500/10 border-rose-500/30",
-  MEDIUM: "text-amber-300 bg-amber-500/10 border-amber-500/30",
-  LOW: "text-neutral-400 bg-neutral-500/10 border-neutral-500/30"
+const IMPACT_THEMES = {
+  HIGH: "coral",
+  MEDIUM: "yellow",
+  LOW: "blue"
 };
 
 export default function ResumeActionCenter({
@@ -376,44 +379,44 @@ export default function ResumeActionCenter({
     <div className="space-y-6">
       
       {/* 1. Header & Summary Statistics Strip */}
-      <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-5 sm:p-6 backdrop-blur-xl space-y-5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/[0.06] pb-5">
+      <CaideCard theme="white" shadow="lg" rounded="3xl" className="p-5 sm:p-7 space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-[#0D0431] pb-5">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-emerald-400" />
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-white font-mono">
+              <Zap className="w-4 h-4 text-[#FEDF6A]" />
+              <h2 className="text-base font-heading font-black uppercase tracking-wider text-[#0D0431]">
                 Resume Action Center
               </h2>
+              <CaideBadge theme="light-purple" size="sm">
+                Recommendation Engine
+              </CaideBadge>
             </div>
-            <p className="text-xs text-neutral-400">
+            <p className="text-xs text-[#0D0431]/70 font-sans font-medium">
               Select specific recommendations, preview suggested enhancements, and calculate ATS impact.
             </p>
           </div>
 
           {/* Impact summary badges */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="px-3 py-1.5 bg-black/40 border border-white/[0.08] rounded-xl flex items-center gap-2 text-xs">
-              <span className="font-semibold text-white font-mono">{totalCount}</span>
-              <span className="text-neutral-400">Issues</span>
+            <div className="px-3.5 py-1 bg-[#FEF9CF] border-2 border-[#0D0431] rounded-full flex items-center gap-2 text-xs shadow-[2px_2px_0_0_#0D0431]">
+              <span className="font-heading font-black text-[#0D0431]">{totalCount}</span>
+              <span className="font-sans font-bold text-[#0D0431]/70">Issues</span>
             </div>
             {highImpactCount > 0 && (
-              <div className="px-3 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-1.5 text-xs text-rose-300">
-                <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse" />
-                <span className="font-bold font-mono">{highImpactCount}</span>
-                <span>High Impact</span>
+              <div className="px-3.5 py-1 bg-[#FFC5B7] border-2 border-[#0D0431] rounded-full flex items-center gap-1.5 text-xs text-[#0D0431] font-heading font-bold shadow-[2px_2px_0_0_#0D0431]">
+                <span className="w-2 h-2 rounded-full bg-[#F85B52] animate-pulse" />
+                <span>{highImpactCount} High Impact</span>
               </div>
             )}
             {mediumImpactCount > 0 && (
-              <div className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-1.5 text-xs text-amber-300">
-                <span className="font-bold font-mono">{mediumImpactCount}</span>
-                <span>Medium Impact</span>
+              <div className="px-3.5 py-1 bg-[#FEDF6A] border-2 border-[#0D0431] rounded-full flex items-center gap-1.5 text-xs text-[#0D0431] font-heading font-bold shadow-[2px_2px_0_0_#0D0431]">
+                <span>{mediumImpactCount} Medium</span>
               </div>
             )}
             {resolvedCount > 0 && (
-              <div className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-1.5 text-xs text-emerald-300">
+              <div className="px-3.5 py-1 bg-[#D4FDF7] border-2 border-[#0D0431] rounded-full flex items-center gap-1.5 text-xs text-[#0D0431] font-heading font-bold shadow-[2px_2px_0_0_#0D0431]">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span className="font-bold font-mono">{resolvedCount}</span>
-                <span>Resolved</span>
+                <span>{resolvedCount} Resolved</span>
               </div>
             )}
           </div>
@@ -426,11 +429,12 @@ export default function ResumeActionCenter({
             {availableCategories.map((cat) => (
               <button
                 key={cat}
+                type="button"
                 onClick={() => setActiveCategoryFilter(cat)}
-                className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-150 ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-heading font-bold whitespace-nowrap transition-all duration-150 cursor-pointer ${
                   activeCategoryFilter === cat
-                    ? "bg-white text-black font-semibold shadow-sm"
-                    : "bg-white/[0.03] text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.06] border border-white/[0.05]"
+                    ? "bg-[#0D0431] text-white shadow-sm"
+                    : "bg-white text-[#0D0431] hover:bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
                 }`}
               >
                 {cat === "ALL" ? "All Categories" : cat}
@@ -441,72 +445,75 @@ export default function ResumeActionCenter({
           {/* Quick Selection Buttons */}
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             <button
+              type="button"
               onClick={handleSelectAll}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-neutral-200 border border-white/[0.08] rounded-xl text-xs font-medium transition"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white hover:bg-[#FEF9CF] text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-heading font-bold shadow-[2px_2px_0_0_#0D0431] transition cursor-pointer"
             >
-              <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
-              Select All
+              <CheckSquare className="w-3.5 h-3.5 text-[#0D0431]" />
+              <span>Select All ({filteredActions.filter((a) => a.status !== "RESOLVED").length})</span>
             </button>
 
             <button
+              type="button"
               onClick={handleDeselectAll}
               disabled={selectedIds.size === 0}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition border ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-heading font-bold transition border-2 border-[#0D0431] ${
                 selectedIds.size > 0
-                  ? "bg-white/[0.05] hover:bg-white/[0.1] text-neutral-200 border-white/[0.08]"
-                  : "bg-white/[0.02] text-neutral-600 border-white/[0.04] cursor-not-allowed"
+                  ? "bg-white hover:bg-[#FEF9CF] text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] cursor-pointer"
+                  : "bg-[#F3F3F3] text-[#0D0431]/40 opacity-50 cursor-not-allowed"
               }`}
             >
-              <Square className="w-3.5 h-3.5 text-neutral-400" />
-              Deselect All
+              <Square className="w-3.5 h-3.5" />
+              <span>Deselect All</span>
             </button>
 
             {highImpactCount > 0 && (
               <button
+                type="button"
                 onClick={handleSelectAllHighImpact}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-medium transition"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#FFC5B7] hover:bg-[#F85B52] hover:text-white border-2 border-[#0D0431] text-[#0D0431] rounded-xl text-xs font-heading font-bold shadow-[2px_2px_0_0_#0D0431] transition cursor-pointer"
               >
                 <Zap className="w-3.5 h-3.5" />
-                Select High Impact
+                <span>High Impact</span>
               </button>
             )}
 
             {selectedIds.size > 0 && (
-              <button
+              <CaideButton
                 onClick={handleFixSelected}
-                className="flex items-center gap-2 px-4 py-1.5 bg-white text-black font-semibold rounded-xl text-xs shadow-md hover:bg-neutral-200 active:scale-[0.99] transition"
+                variant="stacked-yellow"
+                size="sm"
               >
-                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                Apply Selected Fixes ({selectedIds.size})
-              </button>
+                Apply Selected ({selectedIds.size})
+              </CaideButton>
             )}
           </div>
         </div>
 
         {/* Selected Count & Estimated ATS Points Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-black/40 border border-white/[0.06] rounded-xl text-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[#FEF9CF] border-2 border-[#0D0431] rounded-2xl text-xs shadow-[2px_2px_0_0_#0D0431]">
           <div className="flex items-center gap-3">
-            <span className="font-mono text-neutral-400">
-              Selected: <strong className="text-white">{selectedIds.size}</strong> of {totalCount}
+            <span className="font-heading font-bold text-[#0D0431]">
+              Selected: <strong className="text-[#0D0431]">{selectedIds.size}</strong> of {totalCount}
             </span>
             {selectedIds.size > 0 && (
-              <span className="text-neutral-500">•</span>
+              <span className="text-[#0D0431]/40">•</span>
             )}
             {selectedIds.size > 0 && (
-              <span className="text-emerald-400 font-mono">
+              <span className="text-[#0D0431] font-sans font-bold">
                 {selectedIds.size} ready for preview
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-2 font-mono">
-            <span className="text-neutral-400">Estimated Impact:</span>
-            <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-semibold rounded">
+            <span className="text-[#0D0431]/70 font-sans font-bold">Estimated Impact:</span>
+            <span className="px-3 py-1 bg-[#D4FDF7] border-2 border-[#0D0431] text-[#0D0431] font-bold rounded-full shadow-[1px_1px_0_0_#0D0431]">
               +{estimatedMinGain} to +{estimatedMaxGain} ATS pts (Est.)
             </span>
           </div>
         </div>
-      </div>
+      </CaideCard>
 
       {/* 2. Success Banner (Displayed after changes applied) */}
       <AnimatePresence>
@@ -515,35 +522,38 @@ export default function ResumeActionCenter({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="p-5 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent border border-emerald-500/30 rounded-2xl space-y-4 backdrop-blur-xl relative overflow-hidden"
+            className="p-6 bg-[#E4FFDA] border-2 border-[#0D0431] rounded-3xl space-y-4 shadow-[4px_4px_0_0_#0D0431] relative overflow-hidden"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-                  <CheckCircle2 className="w-5 h-5" />
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-[#9BFFED] border-2 border-[#0D0431] flex items-center justify-center text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] shrink-0">
+                  <CheckCircle2 className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <h3 className="text-base font-heading font-black text-[#0D0431] flex items-center gap-2">
                     Resume Optimizations Applied
+                    <CaideBadge theme="mint" size="sm">
+                      Verified
+                    </CaideBadge>
                   </h3>
-                  <p className="text-xs text-neutral-300 mt-0.5">
+                  <p className="text-xs text-[#0D0431]/80 font-sans font-medium mt-0.5">
                     {lastApplyResult.summary || "ATS evaluation updated for revised content."}
                   </p>
                 </div>
               </div>
 
               {/* Before -> After Score Badge */}
-              <div className="flex items-center gap-3 self-start sm:self-auto bg-black/50 px-4 py-2 rounded-xl border border-white/[0.08]">
+              <div className="flex items-center gap-3 self-start sm:self-auto bg-white px-4 py-2 rounded-2xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                 <div className="text-center">
-                  <div className="text-[10px] uppercase font-mono text-neutral-400">Previous</div>
-                  <div className="text-base font-bold font-mono text-neutral-300">{lastApplyResult.before_score}</div>
+                  <div className="text-[10px] uppercase font-heading font-bold text-[#0D0431]/60">Previous</div>
+                  <div className="text-base font-heading font-black text-[#0D0431]">{lastApplyResult.before_score}</div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-emerald-400" />
+                <ArrowRight className="w-4 h-4 text-[#0D0431]" />
                 <div className="text-center">
-                  <div className="text-[10px] uppercase font-mono text-emerald-400 font-semibold">New ATS</div>
-                  <div className="text-xl font-bold font-mono text-emerald-300 flex items-center gap-1">
+                  <div className="text-[10px] uppercase font-heading font-bold text-[#896EE2]">New ATS</div>
+                  <div className="text-xl font-heading font-black text-[#0D0431] flex items-center gap-1">
                     {lastApplyResult.after_score}
-                    <span className="text-[11px] font-normal text-emerald-400">
+                    <span className="text-xs font-mono font-bold text-[#896EE2]">
                       (+{lastApplyResult.score_delta} pts)
                     </span>
                   </div>
@@ -553,17 +563,17 @@ export default function ResumeActionCenter({
 
             {/* Category Score Breakdown Deltas */}
             {lastApplyResult.category_deltas && Object.keys(lastApplyResult.category_deltas).length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 pt-2 border-t border-emerald-500/20">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 pt-3 border-t-2 border-[#0D0431]">
                 {Object.entries(lastApplyResult.category_deltas).map(([catKey, deltaObj]) => {
                   const label = catKey.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
                   return (
-                    <div key={catKey} className="bg-black/40 p-2.5 rounded-lg border border-white/[0.05]">
-                      <div className="text-[10px] text-neutral-400 truncate mb-1">{label}</div>
-                      <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-neutral-400">{deltaObj.before}%</span>
-                        <span className="text-white font-bold">→ {deltaObj.after}%</span>
+                    <div key={catKey} className="bg-white p-3 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                      <div className="text-[10px] text-[#0D0431]/70 font-heading font-bold truncate mb-1">{label}</div>
+                      <div className="flex items-center justify-between text-xs font-mono font-bold">
+                        <span className="text-[#0D0431]/60">{deltaObj.before}%</span>
+                        <span className="text-[#0D0431]">→ {deltaObj.after}%</span>
                         {deltaObj.delta > 0 && (
-                          <span className="text-emerald-400 font-semibold">+{deltaObj.delta}%</span>
+                          <span className="text-[#896EE2]">+{deltaObj.delta}%</span>
                         )}
                       </div>
                     </div>
@@ -573,26 +583,28 @@ export default function ResumeActionCenter({
             )}
 
             {/* Revert / Undo Controls */}
-            <div className="flex items-center justify-between pt-1 text-xs">
-              <div className="text-neutral-400 font-mono text-[11px]">
+            <div className="flex items-center justify-between pt-2 text-xs">
+              <div className="text-[#0D0431]/70 font-mono font-semibold">
                 {openCount} recommendation{openCount !== 1 ? "s" : ""} remaining
               </div>
               <div className="flex items-center gap-2">
                 {previousEvaluation && (
                   <button
+                    type="button"
                     onClick={() => {
                       onRevertEvaluation();
                       setLastApplyResult(null);
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-neutral-300 rounded-lg text-xs transition"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white hover:bg-[#FEF9CF] text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-heading font-bold shadow-[2px_2px_0_0_#0D0431] transition cursor-pointer"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
-                    Revert to Previous Version
+                    <span>Revert to Previous</span>
                   </button>
                 )}
                 <button
+                  type="button"
                   onClick={() => setLastApplyResult(null)}
-                  className="px-3 py-1.5 bg-white/[0.08] hover:bg-white/[0.15] text-white font-medium rounded-lg text-xs transition"
+                  className="px-3.5 py-1.5 bg-white hover:bg-[#FEF9CF] text-[#0D0431] border-2 border-[#0D0431] font-heading font-bold rounded-xl text-xs shadow-[2px_2px_0_0_#0D0431] transition cursor-pointer"
                 >
                   Dismiss
                 </button>
@@ -603,12 +615,12 @@ export default function ResumeActionCenter({
       </AnimatePresence>
 
       {/* 3. Interactive Action Items List */}
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         {filteredActions.length === 0 ? (
-          <div className="bg-white/[0.01] border border-dashed border-white/[0.08] rounded-2xl p-10 text-center space-y-2">
-            <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
-            <h3 className="text-sm font-semibold text-white">No actions match current filters</h3>
-            <p className="text-xs text-neutral-400">
+          <div className="bg-white border-2 border-dashed border-[#0D0431] rounded-3xl p-10 text-center space-y-2 shadow-[4px_4px_0_0_#0D0431]">
+            <CheckCircle2 className="w-8 h-8 text-[#0D0431] mx-auto" />
+            <h3 className="text-sm font-heading font-bold text-[#0D0431]">No actions match current filters</h3>
+            <p className="text-xs text-[#0D0431]/70 font-sans font-medium">
               All recommendations in this filter are resolved or skipped.
             </p>
           </div>
@@ -618,20 +630,20 @@ export default function ResumeActionCenter({
             const isExpanded = expandedIds.has(action.id);
             const isResolved = action.status === "RESOLVED";
             const isSkipped = action.status === "SKIPPED";
-            const categoryBadgeClass = CATEGORY_COLORS[action.category] || "text-neutral-300 bg-neutral-500/10 border-neutral-500/30";
-            const impactBadgeClass = IMPACT_COLORS[action.impact] || "text-neutral-400 bg-neutral-500/10 border-neutral-500/30";
+            const categoryTheme = CATEGORY_THEMES[action.category] || "light-purple";
+            const impactTheme = IMPACT_THEMES[action.impact] || "blue";
 
             return (
               <div
                 key={action.id || idx}
-                className={`bg-black/40 border rounded-xl transition-all duration-200 overflow-hidden ${
+                className={`border-2 border-[#0D0431] rounded-2xl transition-all duration-200 overflow-hidden ${
                   isResolved
-                    ? "border-emerald-500/20 bg-emerald-950/10 opacity-80"
+                    ? "bg-[#F3F3F3] border-[#0D0431]/50 opacity-80 shadow-[2px_2px_0_0_#0D0431]"
                     : isSkipped
-                    ? "border-white/[0.04] opacity-50 bg-black/20"
+                    ? "opacity-60 bg-[#F3F3F3] shadow-[1px_1px_0_0_#0D0431]"
                     : isSelected
-                    ? "border-white/30 bg-white/[0.03] shadow-lg shadow-white/[0.02]"
-                    : "border-white/[0.07] hover:border-white/[0.14]"
+                    ? "bg-[#FEF9CF] shadow-[5px_5px_0_0_#0D0431]"
+                    : "bg-white hover:bg-[#FEF9CF]/30 shadow-[3px_3px_0_0_#0D0431]"
                 }`}
               >
                 {/* Main Card Header Bar */}
@@ -642,75 +654,69 @@ export default function ResumeActionCenter({
                       type="button"
                       disabled={isResolved}
                       onClick={() => handleToggleSelect(action.id)}
-                      className={`mt-0.5 sm:mt-0 p-1 rounded-md transition ${
+                      className={`mt-0.5 sm:mt-0 w-6 h-6 rounded-lg border-2 border-[#0D0431] flex items-center justify-center transition-all shadow-[1px_1px_0_0_#0D0431] cursor-pointer shrink-0 ${
                         isResolved
-                          ? "text-emerald-400 cursor-default"
+                          ? "bg-[#D4FDF7] text-[#0D0431] cursor-default"
                           : isSelected
-                          ? "text-white hover:text-neutral-200"
-                          : "text-neutral-500 hover:text-neutral-300"
+                          ? "bg-[#0D0431] text-white"
+                          : "bg-white text-transparent hover:bg-[#FEF9CF]"
                       }`}
                     >
-                      {isResolved ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      ) : isSelected ? (
-                        <CheckSquare className="w-4 h-4 text-white" />
-                      ) : (
-                        <Square className="w-4 h-4" />
-                      )}
+                      <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </button>
 
                     {/* Content Details */}
                     <div className="space-y-1.5 flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         {/* Category Badge */}
-                        <span className={`px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded border ${categoryBadgeClass}`}>
+                        <CaideBadge theme={categoryTheme} size="sm">
                           {action.category || "General"}
-                        </span>
+                        </CaideBadge>
 
                         {/* Impact Badge */}
-                        <span className={`px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded border ${impactBadgeClass}`}>
+                        <CaideBadge theme={impactTheme} size="sm">
                           {action.impact} Impact
-                        </span>
+                        </CaideBadge>
 
                         {/* Severity Badge if Critical */}
                         {action.severity === "CRITICAL" && (
-                          <span className="px-1.5 py-0.5 text-[9px] font-mono uppercase bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded">
+                          <CaideBadge theme="coral" size="sm">
                             Critical Fix
-                          </span>
+                          </CaideBadge>
                         )}
 
                         {/* Status Badge */}
                         {isResolved ? (
-                          <span className="px-2 py-0.5 text-[10px] font-mono uppercase bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded flex items-center gap-1">
-                            <Check className="w-3 h-3" /> Resolved
+                          <span className="px-2.5 py-0.5 text-[10px] font-heading font-bold uppercase bg-[#D4FDF7] text-[#0D0431] border border-[#0D0431] rounded-full flex items-center gap-1 shadow-[1px_1px_0_0_#0D0431]">
+                            <Check className="w-3 h-3 stroke-[3]" /> Resolved
                           </span>
                         ) : isSkipped ? (
-                          <span className="px-2 py-0.5 text-[10px] font-mono uppercase bg-white/[0.05] text-neutral-400 border border-white/[0.08] rounded">
+                          <span className="px-2.5 py-0.5 text-[10px] font-heading font-bold uppercase bg-[#F3F3F3] text-[#0D0431]/70 border border-[#0D0431] rounded-full shadow-[1px_1px_0_0_#0D0431]">
                             Skipped
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 text-[10px] font-mono uppercase bg-amber-500/10 text-amber-300 border border-amber-500/20 rounded">
+                          <span className="px-2.5 py-0.5 text-[10px] font-heading font-bold uppercase bg-[#FEF9CF] text-[#0D0431] border border-[#0D0431] rounded-full shadow-[1px_1px_0_0_#0D0431]">
                             Open
                           </span>
                         )}
 
                         {/* Estimated Impact */}
                         {action.estimatedImpact && (
-                          <span className="text-[11px] font-mono text-neutral-400 ml-auto hidden sm:inline-block">
-                            Est: <strong className="text-emerald-400">+{action.estimatedImpact.min}–{action.estimatedImpact.max} pts</strong>
+                          <span className="text-xs font-mono font-bold text-[#0D0431] ml-auto hidden sm:inline-block">
+                            Est: <strong className="text-[#896EE2]">+{action.estimatedImpact.min}–{action.estimatedImpact.max} pts</strong>
                           </span>
                         )}
                       </div>
 
                       {/* Title */}
-                      <h4 className={`text-xs sm:text-sm font-semibold tracking-tight break-words leading-snug ${
-                        isResolved ? "text-neutral-300 line-through" : "text-white"
+                      <h4 className={`text-sm font-heading font-bold tracking-tight break-words leading-snug ${
+                        isResolved ? "text-[#0D0431]/50 line-through" : "text-[#0D0431]"
                       }`}>
                         {action.title}
                       </h4>
 
                       {/* Short Description */}
-                      <p className="text-xs text-neutral-400 leading-relaxed break-words">
+                      <p className="text-xs text-[#0D0431]/80 leading-relaxed font-sans font-medium break-words">
                         {action.description}
                       </p>
                     </div>
@@ -720,17 +726,19 @@ export default function ResumeActionCenter({
                   <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
                     {!isResolved && (
                       <button
+                        type="button"
                         onClick={() => handleFixSingle(action)}
-                        className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 bg-white text-black font-semibold rounded-lg text-xs shadow-sm hover:bg-neutral-200 transition"
+                        className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 bg-[#FEDF6A] hover:bg-[#FFE995] active:translate-x-0.5 active:translate-y-0.5 border-2 border-[#0D0431] text-[#0D0431] font-heading font-bold rounded-xl text-xs shadow-[2px_2px_0_0_#0D0431] transition cursor-pointer"
                       >
-                        <Sparkles className="w-3 h-3 text-emerald-600" />
-                        Apply Fix
+                        <Sparkles className="w-3.5 h-3.5 text-[#896EE2]" />
+                        <span>Apply Fix</span>
                       </button>
                     )}
 
                     <button
+                      type="button"
                       onClick={() => handleToggleExpand(action.id)}
-                      className="p-1.5 text-neutral-400 hover:text-white rounded-lg bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] transition"
+                      className="p-1.5 text-[#0D0431] rounded-xl bg-white hover:bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition cursor-pointer"
                       aria-label="Toggle details"
                     >
                       {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -745,78 +753,78 @@ export default function ResumeActionCenter({
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      className="border-t border-white/[0.06] bg-black/60 p-4 sm:p-5 space-y-4"
+                      className="border-t-2 border-[#0D0431] bg-[#FEF9CF]/40 p-4 sm:p-5 space-y-4"
                     >
                       {/* Structured 4-Quadrant Analysis */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                        <div className="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl space-y-1">
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-purple-400 block">
+                        <div className="p-3.5 bg-white border-2 border-[#0D0431] rounded-2xl space-y-1 shadow-[2px_2px_0_0_#0D0431]">
+                          <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-[#896EE2] block">
                             Modification
                           </span>
-                          <p className="text-neutral-300 leading-relaxed">
+                          <p className="text-[#0D0431] font-sans font-medium leading-relaxed">
                             {action.what || action.title}
                           </p>
                         </div>
 
-                        <div className="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl space-y-1">
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-rose-400 block">
+                        <div className="p-3.5 bg-white border-2 border-[#0D0431] rounded-2xl space-y-1 shadow-[2px_2px_0_0_#0D0431]">
+                          <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-[#F85B52] block">
                             Current Limitation
                           </span>
-                          <p className="text-neutral-300 leading-relaxed">
+                          <p className="text-[#0D0431] font-sans font-medium leading-relaxed">
                             {action.why || action.reason}
                           </p>
                         </div>
 
-                        <div className="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl space-y-1">
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 block">
+                        <div className="p-3.5 bg-white border-2 border-[#0D0431] rounded-2xl space-y-1 shadow-[2px_2px_0_0_#0D0431]">
+                          <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-[#0D0431] block">
                             Impact
                           </span>
-                          <p className="text-neutral-300 leading-relaxed">
+                          <p className="text-[#0D0431] font-sans font-medium leading-relaxed">
                             {action.impactExplanation || "Increases recruiter ranking index and verified ATS score."}
                           </p>
                         </div>
 
-                        <div className="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl space-y-1">
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 block">
+                        <div className="p-3.5 bg-white border-2 border-[#0D0431] rounded-2xl space-y-1 shadow-[2px_2px_0_0_#0D0431]">
+                          <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-[#0D0431] block">
                             Implementation
                           </span>
-                          <p className="text-neutral-300 leading-relaxed">
-                            {action.how || "Click 'Fix' or 'Edit Manually' to preview and apply the suggested optimization."}
+                          <p className="text-[#0D0431] font-sans font-medium leading-relaxed">
+                            {action.how || "Click 'Apply Fix' or 'Review' to preview and apply the suggested optimization."}
                           </p>
                         </div>
                       </div>
 
                       {/* Before vs After Visual Diff */}
                       {(action.currentText || action.suggestedText) && (
-                        <div className="space-y-2 pt-2 border-t border-white/[0.05]">
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 block">
+                        <div className="space-y-2 pt-2 border-t-2 border-[#0D0431]">
+                          <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-[#0D0431]/70 block">
                             Comparative Formulation:
                           </span>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {/* Before */}
-                            <div className="p-3 bg-rose-500/[0.03] border border-rose-500/20 rounded-xl space-y-1">
-                              <span className="text-[10px] font-mono uppercase text-rose-400 block">
+                            <div className="p-3.5 bg-[#FFC5B7]/30 border-2 border-[#0D0431] rounded-2xl border-l-4 border-l-[#F85B52] space-y-1">
+                              <span className="text-[10px] font-heading font-bold uppercase text-[#F85B52] block">
                                 Original
                               </span>
-                              <p className="text-xs text-neutral-300 italic">
+                              <p className="text-xs text-[#0D0431]/80 italic font-sans font-medium">
                                 "{action.currentText || "Vague phrasing or missing required sections."}"
                               </p>
                             </div>
 
                             {/* After */}
-                            <div className="p-3 bg-emerald-500/[0.04] border border-emerald-500/30 rounded-xl space-y-1">
+                            <div className="p-3.5 bg-[#D4FDF7] border-2 border-[#0D0431] rounded-2xl border-l-4 border-l-[#0D0431] space-y-1 shadow-[2px_2px_0_0_#0D0431]">
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-mono uppercase text-emerald-400 block">
+                                <span className="text-[10px] font-heading font-bold uppercase text-[#0D0431] block">
                                   Recommended (XYZ Metric)
                                 </span>
                                 {action.metricAdded && (
-                                  <span className="text-[9px] font-mono bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded">
+                                  <span className="text-[9px] font-mono font-bold bg-[#FEDF6A] text-[#0D0431] px-2 py-0.5 rounded-full border border-[#0D0431]">
                                     Metric: {action.metricAdded}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-xs text-white font-medium">
+                              <p className="text-xs text-[#0D0431] font-bold font-sans">
                                 {action.suggestedText || "High impact accomplishment statement."}
                               </p>
                             </div>
@@ -828,8 +836,9 @@ export default function ResumeActionCenter({
                       <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                         <div className="flex items-center gap-2">
                           <button
+                            type="button"
                             onClick={() => handleSkipAction(action.id)}
-                            className="px-3 py-1.5 text-xs text-neutral-400 hover:text-neutral-200 bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] rounded-lg transition"
+                            className="px-3.5 py-1.5 text-xs text-[#0D0431] font-heading font-bold bg-white hover:bg-[#FEF9CF] border-2 border-[#0D0431] rounded-xl shadow-[2px_2px_0_0_#0D0431] transition cursor-pointer"
                           >
                             {isSkipped ? "Restore Recommendation" : "Skip Recommendation"}
                           </button>
@@ -838,11 +847,12 @@ export default function ResumeActionCenter({
                         {!isResolved && (
                           <div className="flex items-center gap-2">
                             <button
+                              type="button"
                               onClick={() => handleFixSingle(action)}
-                              className="px-4 py-1.5 bg-white text-black font-semibold rounded-lg text-xs shadow-sm hover:bg-neutral-200 transition flex items-center gap-1.5"
+                              className="px-4 py-1.5 bg-[#FEDF6A] hover:bg-[#FFE995] active:translate-x-0.5 active:translate-y-0.5 border-2 border-[#0D0431] text-[#0D0431] font-heading font-bold rounded-xl text-xs shadow-[2px_2px_0_0_#0D0431] transition flex items-center gap-1.5 cursor-pointer"
                             >
-                              <Sparkles className="w-3.5 h-3.5" />
-                              Apply Fix
+                              <Sparkles className="w-3.5 h-3.5 text-[#896EE2]" />
+                              <span>Apply Fix</span>
                             </button>
                           </div>
                         )}
@@ -866,16 +876,16 @@ export default function ResumeActionCenter({
             exit={{ opacity: 0, y: 30 }}
             className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-xl px-4"
           >
-            <div className="bg-[#0b0d14]/95 border border-white/[0.15] shadow-2xl backdrop-blur-xl p-3.5 sm:p-4 rounded-2xl flex items-center justify-between gap-4 text-xs">
+            <div className="bg-[#0D0431] border-2 border-[#0D0431] shadow-[6px_6px_0_0_#FEDF6A] p-3.5 sm:p-4 rounded-3xl flex items-center justify-between gap-4 text-xs text-white">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-white/[0.08] border border-white/[0.1] flex items-center justify-center font-bold font-mono text-white">
+                <div className="w-9 h-9 rounded-2xl bg-[#FEDF6A] border-2 border-[#0D0431] flex items-center justify-center font-heading font-black text-sm text-[#0D0431] shadow-[1px_1px_0_0_#0D0431]">
                   {selectedIds.size}
                 </div>
                 <div>
-                  <div className="font-semibold text-white">
+                  <div className="font-heading font-bold text-white text-xs">
                     {selectedIds.size} action{selectedIds.size !== 1 ? "s" : ""} selected
                   </div>
-                  <div className="text-[11px] text-emerald-400 font-mono">
+                  <div className="text-[11px] text-[#9BFFED] font-mono font-bold">
                     Estimated: +{estimatedMinGain}–{estimatedMaxGain} ATS pts
                   </div>
                 </div>
@@ -883,18 +893,19 @@ export default function ResumeActionCenter({
 
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={handleDeselectAll}
-                  className="px-3 py-1.5 text-neutral-400 hover:text-white transition"
+                  className="px-3 py-1.5 text-white/80 hover:text-white font-heading font-bold transition cursor-pointer"
                 >
                   Clear
                 </button>
-                <button
+                <CaideButton
                   onClick={handleFixSelected}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-white text-black font-semibold rounded-xl text-xs shadow-lg hover:bg-neutral-200 active:scale-[0.99] transition"
+                  variant="stacked-yellow"
+                  size="sm"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
                   Apply Selected Fixes
-                </button>
+                </CaideButton>
               </div>
             </div>
           </motion.div>
@@ -904,47 +915,48 @@ export default function ResumeActionCenter({
       {/* 5. Review Changes & Manual Edit Modal */}
       <AnimatePresence>
         {previewModalOpen && (
-          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="fixed inset-0 bg-[#0D0431]/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#0b0d14] border border-white/[0.12] rounded-2xl max-w-3xl w-full p-6 space-y-6 shadow-2xl my-8 max-h-[90vh] flex flex-col"
+              className="bg-white border-2 border-[#0D0431] rounded-3xl max-w-3xl w-full shadow-[8px_8px_0_0_#0D0431] my-8 max-h-[90vh] flex flex-col overflow-hidden text-[#0D0431] animate-in zoom-in-95 duration-200"
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between border-b border-white/[0.08] pb-4 shrink-0">
+              <div className="px-6 py-4 bg-[#FEF9CF] border-b-2 border-[#0D0431] flex items-center justify-between shrink-0">
                 <div className="space-y-0.5">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                  <h3 className="text-sm font-heading font-black uppercase tracking-wider text-[#0D0431] flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#896EE2]" />
                     Review & Edit Resume Optimizations
                   </h3>
-                  <p className="text-xs text-neutral-400">
+                  <p className="text-xs text-[#0D0431]/70 font-sans font-medium">
                     Review suggested enhancements. You can edit text before confirming.
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setPreviewModalOpen(false)}
-                  className="p-1.5 text-neutral-400 hover:text-white rounded-lg transition"
+                  className="p-1.5 rounded-full border-2 border-[#0D0431] bg-white hover:bg-[#FFC5B7] text-[#0D0431] transition-all shadow-[2px_2px_0_0_#0D0431] cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Items List (Scrollable) */}
-              <div className="space-y-5 overflow-y-auto pr-1 flex-1">
+              <div className="space-y-4 overflow-y-auto p-6 flex-1">
                 {previewItems.map((item, idx) => (
                   <div
                     key={item.actionId || idx}
-                    className="p-4 bg-white/[0.02] border border-white/[0.07] rounded-xl space-y-3.5"
+                    className="p-4 bg-[#FEF9CF] border-2 border-[#0D0431] rounded-2xl space-y-3.5 shadow-[2px_2px_0_0_#0D0431]"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 text-[10px] font-mono uppercase bg-white/[0.05] text-neutral-300 border border-white/[0.08] rounded">
+                        <CaideBadge theme="light-purple" size="sm">
                           {item.category}
-                        </span>
-                        <h4 className="text-xs font-semibold text-white">{item.title}</h4>
+                        </CaideBadge>
+                        <h4 className="text-xs font-heading font-bold text-[#0D0431]">{item.title}</h4>
                       </div>
-                      <span className="text-[10px] font-mono text-emerald-400">
+                      <span className="text-[10px] font-mono font-bold text-[#896EE2]">
                         Est: +{item.estimatedImpact?.min || 2}–{item.estimatedImpact?.max || 5} pts
                       </span>
                     </div>
@@ -952,10 +964,10 @@ export default function ResumeActionCenter({
                     {/* Original Before */}
                     {item.currentText && (
                       <div className="space-y-1">
-                        <span className="text-[10px] font-mono uppercase text-rose-400 block">
+                        <span className="text-[10px] font-heading font-bold uppercase text-[#F85B52] block">
                           Original:
                         </span>
-                        <p className="text-xs text-neutral-400 italic pl-3 border-l-2 border-rose-500/40">
+                        <p className="text-xs text-[#0D0431]/80 italic pl-3 border-l-4 border-l-[#F85B52] bg-white/80 p-2.5 rounded-r-xl font-sans font-medium">
                           "{item.currentText}"
                         </p>
                       </div>
@@ -964,14 +976,14 @@ export default function ResumeActionCenter({
                     {/* Editable After */}
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono uppercase text-emerald-400 flex items-center gap-1.5">
+                        <span className="text-[10px] font-heading font-bold uppercase text-[#0D0431] flex items-center gap-1.5">
                           <Edit3 className="w-3 h-3" />
                           Recommended (Editable):
                         </span>
                         <button
                           type="button"
                           onClick={() => handleResetToSuggestion(item.actionId)}
-                          className="text-[10px] text-neutral-400 hover:text-white font-mono"
+                          className="text-[10px] text-[#896EE2] hover:underline font-heading font-bold cursor-pointer"
                         >
                           Reset to Suggestion
                         </button>
@@ -981,7 +993,7 @@ export default function ResumeActionCenter({
                         rows={3}
                         value={item.editableText}
                         onChange={(e) => handleUpdateEditableText(item.actionId, e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-black/60 border border-emerald-500/30 focus:border-emerald-400 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none transition resize-none font-sans leading-relaxed"
+                        className="w-full px-4 py-2.5 bg-white border-2 border-[#0D0431] rounded-xl text-xs text-[#0D0431] placeholder-[#0D0431]/40 focus:outline-none focus:bg-[#FEF9CF] transition resize-none font-sans font-medium leading-relaxed shadow-[2px_2px_0_0_#0D0431]"
                       />
                     </div>
                   </div>
@@ -989,45 +1001,37 @@ export default function ResumeActionCenter({
               </div>
 
               {/* Modal Footer */}
-              <div className="border-t border-white/[0.08] pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
-                <div className="text-xs text-neutral-400 font-mono">
+              <div className="border-t-2 border-[#0D0431] px-6 py-4 bg-[#FEF9CF] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+                <div className="text-xs text-[#0D0431]/70 font-mono font-semibold">
                   {previewItems.length} optimization{previewItems.length !== 1 ? "s" : ""} will be merged into resume
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <button
+                    type="button"
                     onClick={() => setPreviewModalOpen(false)}
                     disabled={isApplying}
-                    className="px-4 py-2 bg-white/[0.05] hover:bg-white/[0.1] text-neutral-300 rounded-xl text-xs transition"
+                    className="px-4 py-2 bg-white hover:bg-[#FEF9CF] border-2 border-[#0D0431] text-[#0D0431] rounded-xl text-xs font-heading font-bold shadow-[2px_2px_0_0_#0D0431] transition cursor-pointer"
                   >
                     Cancel
                   </button>
 
-                  <button
+                  <CaideButton
                     onClick={handleConfirmApply}
                     disabled={isApplying}
-                    className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-semibold transition ${
-                      isApplying
-                        ? "bg-white/10 text-neutral-400 cursor-not-allowed"
-                        : "bg-white text-black hover:bg-neutral-200 shadow-lg shadow-white/5 active:scale-[0.99]"
-                    }`}
+                    variant="stacked-yellow"
+                    size="md"
                   >
                     {isApplying ? (
-                      <>
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                        {applyStep === 1
-                          ? "Analyzing Target Role..."
-                          : applyStep === 2
-                          ? "Applying Changes..."
-                          : "Recalculating ATS..."}
-                      </>
+                      applyStep === 1
+                        ? "Analyzing Target Role..."
+                        : applyStep === 2
+                        ? "Applying Changes..."
+                        : "Recalculating ATS..."
                     ) : (
-                      <>
-                        <Check className="w-3.5 h-3.5" />
-                        Apply Changes & Recalculate ATS
-                      </>
+                      "Apply Changes & Recalculate ATS"
                     )}
-                  </button>
+                  </CaideButton>
                 </div>
               </div>
 

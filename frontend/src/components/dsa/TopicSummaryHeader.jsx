@@ -15,6 +15,7 @@ import {
   Building2,
   Briefcase,
 } from "lucide-react";
+import CaideBadge from "@/components/caide/CaideBadge";
 
 export default function TopicSummaryHeader({ dsaData, targetCompany = "", targetJobRole = "" }) {
   const summary = dsaData?.summary || {};
@@ -30,34 +31,31 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
   const strongest = summary.strongestTopics?.[0];
   const weakest = summary.largestGapTopic || summary.weakestTopics?.[0];
 
-  const getLevelColor = (level) => {
-    if (level === null || level === undefined) return "text-zinc-500";
-    if (level >= 8.5) return "text-emerald-400";
-    if (level >= 7.0) return "text-zinc-200";
-    if (level >= 5.0) return "text-amber-400";
-    return "text-rose-400";
-  };
-
   return (
-    <div className="rounded-xl bg-[#121215] border border-zinc-800/90 p-5 md:p-6 space-y-6">
+    <div className="rounded-3xl bg-white border-2 border-[#0D0431] p-6 md:p-8 space-y-6 shadow-[6px_6px_0_0_#0D0431]">
       {/* Top Banner Row: Overall Level & LeetCode Sync */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-mono uppercase tracking-wider text-[#0D0431] flex items-center gap-1.5 font-black bg-[#E4CDFB] px-3 py-1 rounded-full border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+              <Code2 className="w-3.5 h-3.5" />
+              Topic Analysis
+            </span>
+
             {isConnected ? (
-              <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">
-                <CheckCircle2 className="w-2.5 h-2.5" />
+              <span className="inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-[#D3F8C6] text-[#0D0431] border-2 border-[#0D0431] font-mono font-bold shadow-[2px_2px_0_0_#0D0431]">
+                <CheckCircle2 className="w-3 h-3 text-[#0D0431]" />
                 LeetCode Verified
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700 font-mono">
+              <span className="inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-[#FEF9CF] text-[#0D0431] border-2 border-[#0D0431] font-mono font-bold shadow-[2px_2px_0_0_#0D0431]">
                 Standalone Mode
               </span>
             )}
 
             {(targetCompany || targetJobRole) && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-300 border border-zinc-800 font-mono flex items-center gap-1">
-                <Target className="w-2.5 h-2.5 text-zinc-400" />
+              <span className="text-xs px-3 py-1 rounded-full bg-[#FEDF6A] text-[#0D0431] border-2 border-[#0D0431] font-mono font-bold shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1">
+                <Target className="w-3 h-3 text-[#0D0431]" />
                 Target: {targetCompany || "Any"}{targetJobRole ? ` · ${targetJobRole}` : ""}
               </span>
             )}
@@ -65,23 +63,23 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
 
           <div className="flex items-baseline gap-3">
             <div className="flex items-baseline gap-1.5">
-              <span className={`text-4xl md:text-5xl font-bold font-mono tracking-tight ${getLevelColor(overallLevel)}`}>
+              <span className="text-5xl md:text-6xl font-black font-heading tracking-tight text-[#0D0431]">
                 {overallLevel !== null ? overallLevel.toFixed(1) : "—"}
               </span>
-              <span className="text-sm md:text-base font-mono text-zinc-500">/ 10.0</span>
+              <span className="text-sm md:text-base font-mono font-bold text-[#0D0431]/60">/ 10.0</span>
             </div>
 
-            <div className="hidden sm:flex flex-col text-xs text-zinc-400 pl-4 border-l border-zinc-800 space-y-0.5 font-mono">
-              <div className="text-zinc-200 font-semibold">
+            <div className="hidden sm:flex flex-col text-xs text-[#0D0431] pl-4 border-l-2 border-[#0D0431]/20 space-y-0.5 font-mono font-semibold">
+              <div className="text-[#0D0431] font-black">
                 {overallScore !== null ? `${overallScore}/100 Placement Score` : "Uncalculated"}
               </div>
-              <div className="text-[11px] text-zinc-500">
+              <div className="text-[11px] text-[#0D0431]/70">
                 {analyzedCount} of {totalCount} topics evaluated ({coveragePercent}%)
               </div>
             </div>
           </div>
 
-          <p className="text-xs text-zinc-400 max-w-xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#0D0431]/80 max-w-xl leading-relaxed font-sans font-medium">
             {isConnected
               ? `Multi-topic proficiency derived from ${leetcodeUser?.totalSolved || 0} solved problems on LeetCode (@${leetcodeUser?.username}), weighted across difficulty tiers and algorithmic breadth.`
               : "Connect your public LeetCode handle in Profile to calculate dynamic topic proficiency and pinpoint company-specific skill gaps."}
@@ -89,62 +87,62 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
         </div>
 
         {/* LeetCode Sync / Connect Status Widget */}
-        <div className="bg-zinc-900/90 border border-zinc-800 p-4 rounded-xl shrink-0 flex flex-col justify-between space-y-3 self-start lg:self-auto min-w-[260px]">
+        <div className="bg-[#FEF9CF] border-2 border-[#0D0431] p-5 rounded-2xl shadow-[4px_4px_0_0_#0D0431] shrink-0 flex flex-col justify-between space-y-3 self-start lg:self-auto min-w-[280px]">
           {isConnected && leetcodeUser ? (
             <div className="space-y-2.5 font-mono text-xs">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-zinc-500 text-[11px]">LeetCode Solved</span>
+                <span className="text-[#0D0431]/70 font-bold text-[11px]">LeetCode Solved</span>
                 <a
                   href={leetcodeUser.profileUrl || `https://leetcode.com/u/${leetcodeUser.username}/`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-amber-400 hover:text-amber-300 font-semibold inline-flex items-center gap-1"
+                  className="text-[#0D0431] hover:text-[#896EE2] font-black inline-flex items-center gap-1 underline underline-offset-2"
                 >
                   <span>@{leetcodeUser.username}</span>
-                  <ExternalLink className="w-2.5 h-2.5" />
+                  <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
 
               {/* Solved Big Numbers & Difficulty Breakdown Badges */}
               <div className="flex items-baseline justify-between pt-1">
-                <span className="text-2xl font-bold text-zinc-100 font-mono">
+                <span className="text-3xl font-black text-[#0D0431] font-heading">
                   {leetcodeUser.totalSolved || 0}
                 </span>
                 <div className="flex items-center gap-1.5 text-[10px]">
-                  <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-[#D3F8C6] text-[#0D0431] border-2 border-[#0D0431] font-bold shadow-[1px_1px_0_0_#0D0431]">
                     {leetcodeUser.easySolved || 0}E
                   </span>
-                  <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-[#FEDF6A] text-[#0D0431] border-2 border-[#0D0431] font-bold shadow-[1px_1px_0_0_#0D0431]">
                     {leetcodeUser.mediumSolved || 0}M
                   </span>
-                  <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-[#FFC5B7] text-[#0D0431] border-2 border-[#0D0431] font-bold shadow-[1px_1px_0_0_#0D0431]">
                     {leetcodeUser.hardSolved || 0}H
                   </span>
                 </div>
               </div>
 
               {leetcodeUser.ranking && (
-                <div className="flex items-center justify-between text-zinc-300 text-[11px] pt-1 border-t border-zinc-800/80">
-                  <span className="text-zinc-500">Global Rank:</span>
-                  <span className="text-amber-300 font-semibold">#{leetcodeUser.ranking.toLocaleString()}</span>
+                <div className="flex items-center justify-between text-[#0D0431] text-[11px] pt-2 border-t-2 border-[#0D0431]/15 font-bold">
+                  <span className="text-[#0D0431]/70">Global Rank:</span>
+                  <span className="text-[#0D0431] font-black">#{leetcodeUser.ranking.toLocaleString()}</span>
                 </div>
               )}
             </div>
           ) : (
-            <div className="space-y-2">
-              <div className="flex items-center gap-1.5 text-zinc-300 text-xs font-semibold">
-                <Code2 className="w-4 h-4 text-purple-400" />
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2 text-[#0D0431] text-xs font-heading font-black">
+                <Code2 className="w-4 h-4 text-[#0D0431]" />
                 <span>Connect LeetCode</span>
               </div>
-              <p className="text-[11px] text-zinc-400 leading-snug">
+              <p className="text-[11px] text-[#0D0431]/75 leading-snug font-medium font-sans">
                 Import verified problem statistics for automated topic gap detection.
               </p>
               <Link
                 to="/app/profile"
-                className="w-full inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md bg-zinc-100 hover:bg-zinc-200 text-zinc-950 text-xs font-medium transition-colors"
+                className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3.5 rounded-xl bg-[#896EE2] hover:bg-[#7859D9] text-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] hover:scale-105 active:scale-95 text-xs font-mono font-bold transition-all"
               >
                 <span>Connect Profile</span>
-                <ArrowRight className="w-3 h-3" />
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           )}
@@ -152,16 +150,16 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
       </div>
 
       {/* Highlights Grid: Strongest, Weakest / Largest Gap, Coverage */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2 border-t border-zinc-800/80">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t-2 border-[#0D0431]/15">
         {/* Strongest Topic Card */}
-        <div className="bg-[#16161a] border border-emerald-900/30 rounded-xl p-3.5 space-y-1.5">
+        <div className="bg-[#D4FDF7] border-2 border-[#0D0431] rounded-2xl p-4 space-y-2 shadow-[4px_4px_0_0_#0D0431]">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1 font-semibold">
-              <Trophy className="w-3 h-3" />
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#0D0431] flex items-center gap-1 font-black">
+              <Trophy className="w-3.5 h-3.5" />
               Strongest Topic
             </span>
             {strongest && (
-              <span className="text-[10px] font-mono text-emerald-400 font-bold">
+              <span className="text-[10px] font-mono text-[#0D0431] font-black px-2 py-0.5 rounded-full bg-white border border-[#0D0431]">
                 {strongest.currentLevel !== null ? `${strongest.currentLevel.toFixed(1)}/10` : ""}
               </span>
             )}
@@ -169,25 +167,25 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
 
           {strongest ? (
             <div>
-              <div className="text-sm font-semibold text-zinc-100">{strongest.name}</div>
-              <div className="text-[11px] text-zinc-400 font-mono mt-0.5">
+              <div className="text-sm font-heading font-black text-[#0D0431]">{strongest.name}</div>
+              <div className="text-[11px] text-[#0D0431]/75 font-mono font-semibold mt-0.5">
                 {strongest.problemsSolved} solved · {strongest.category}
               </div>
             </div>
           ) : (
-            <div className="text-xs text-zinc-500 italic">No topic data available yet</div>
+            <div className="text-xs text-[#0D0431]/60 italic font-medium">No topic data available yet</div>
           )}
         </div>
 
         {/* Weakest / Largest Gap Card */}
-        <div className="bg-[#16161a] border border-amber-900/30 rounded-xl p-3.5 space-y-1.5">
+        <div className="bg-[#FFC5B7] border-2 border-[#0D0431] rounded-2xl p-4 space-y-2 shadow-[4px_4px_0_0_#0D0431]">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 flex items-center gap-1 font-semibold">
-              <AlertCircle className="w-3 h-3" />
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#0D0431] flex items-center gap-1 font-black">
+              <AlertCircle className="w-3.5 h-3.5" />
               Priority Focus Area
             </span>
             {weakest?.gap !== null && weakest?.gap !== undefined && (
-              <span className={`text-[10px] font-mono font-bold ${weakest.gap < 0 ? "text-amber-400" : "text-emerald-400"}`}>
+              <span className="text-[10px] font-mono font-black text-[#0D0431] px-2 py-0.5 rounded-full bg-white border border-[#0D0431]">
                 {weakest.gap < 0 ? `${weakest.gap.toFixed(1)} Gap` : "Target Met"}
               </span>
             )}
@@ -195,34 +193,36 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
 
           {weakest ? (
             <div>
-              <div className="text-sm font-semibold text-zinc-100">{weakest.name}</div>
-              <div className="text-[11px] text-zinc-400 font-mono mt-0.5">
+              <div className="text-sm font-heading font-black text-[#0D0431]">{weakest.name}</div>
+              <div className="text-[11px] text-[#0D0431]/75 font-mono font-semibold mt-0.5">
                 Level: {weakest.currentLevel !== null ? weakest.currentLevel.toFixed(1) : "—"} · Req:{" "}
                 {weakest.requiredLevel !== null ? weakest.requiredLevel.toFixed(1) : "—"}
               </div>
             </div>
           ) : (
-            <div className="text-xs text-zinc-500 italic">No target benchmark configured</div>
+            <div className="text-xs text-[#0D0431]/60 italic font-medium">No target benchmark configured</div>
           )}
         </div>
 
         {/* Taxonomy Breadth Coverage Card */}
-        <div className="bg-[#16161a] border border-zinc-800 rounded-xl p-3.5 space-y-1.5">
+        <div className="bg-[#CDE1FF] border-2 border-[#0D0431] rounded-2xl p-4 space-y-2 shadow-[4px_4px_0_0_#0D0431]">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-1 font-semibold">
-              <ShieldCheck className="w-3 h-3 text-zinc-400" />
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#0D0431] flex items-center gap-1 font-black">
+              <ShieldCheck className="w-3.5 h-3.5" />
               Taxonomy Breadth
             </span>
-            <span className="text-[10px] font-mono text-zinc-300 font-bold">{coveragePercent}%</span>
+            <span className="text-[10px] font-mono text-[#0D0431] font-black px-2 py-0.5 rounded-full bg-white border border-[#0D0431]">
+              {coveragePercent}%
+            </span>
           </div>
 
           <div>
-            <div className="text-sm font-semibold text-zinc-100">
+            <div className="text-sm font-heading font-black text-[#0D0431]">
               {analyzedCount} of {totalCount} Topics
             </div>
-            <div className="w-full bg-zinc-900 rounded-full h-1.5 mt-2 overflow-hidden">
+            <div className="w-full bg-white border-2 border-[#0D0431] rounded-full h-3 mt-2 overflow-hidden p-[1px]">
               <div
-                className="bg-zinc-200 h-full rounded-full transition-all duration-500"
+                className="bg-[#896EE2] h-full rounded-full transition-all duration-500"
                 style={{ width: `${coveragePercent}%` }}
               />
             </div>

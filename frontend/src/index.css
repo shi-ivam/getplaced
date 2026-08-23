@@ -1,22 +1,302 @@
 @import "tailwindcss";
 
 @theme {
-  --font-inter: 'Inter', sans-serif;
-  --font-dmsans: 'DM Sans', sans-serif;
-  --font-heading: 'Inter', sans-serif;
-  --font-sans: 'DM Sans', sans-serif;
+  --font-unbounded: 'Unbounded', sans-serif;
+  --font-heading: 'Plus Jakarta Sans', 'Unbounded', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Primary Platform Palette */
+  --color-brand-primary: #17103D;
+  --color-brand-primary-hover: #24195A;
+  --color-brand-accent: #FFD84D;
+  --color-brand-accent-hover: #FEDF6A;
+  --color-brand-bg: #F8F8F5;
+  --color-brand-surface: #FFFFFF;
+  --color-brand-surface-secondary: #F2F0FA;
+  --color-brand-border: #E2DEEC;
+  --color-brand-border-strong: #C8C3D8;
+  --color-brand-text: #17103D;
+  --color-brand-muted: #6F6A80;
+
+  /* Semantic State Colors */
+  --color-semantic-mint: #0D7A68;
+  --color-semantic-mint-bg: #D8FAF4;
+  --color-semantic-amber: #9E6700;
+  --color-semantic-amber-bg: #FEF6D6;
+  --color-semantic-coral: #C7382B;
+  --color-semantic-coral-bg: #FFE8E5;
+  --color-semantic-blue: #1D58B5;
+  --color-semantic-blue-bg: #E3EEFF;
+  --color-semantic-purple: #6E44FF;
+  --color-semantic-purple-bg: #EFEAFF;
+
+  /* Legacy Caide Tokens (Mapped to modern palette) */
+  --color-caide-dark: #17103D;
+  --color-caide-black: #17103D;
+  --color-caide-white: #FFFFFF;
+  --color-caide-light-grey: #F8F8F5;
+  --color-caide-purple: #6E44FF;
+  --color-caide-brand: #17103D;
+  --color-caide-light-purple: #EFEAFF;
+  --color-caide-dark-lavender: #8B85A8;
+  --color-caide-blue: #1D58B5;
+  --color-caide-light-blue: #E3EEFF;
+  --color-caide-faded-blue: #F0F5FF;
+  --color-caide-green: #0D7A68;
+  --color-caide-light-green: #D8FAF4;
+  --color-caide-dark-green: #0A6354;
+  --color-caide-lime: #DDF7D0;
+  --color-caide-pale-lime: #EEFAEA;
+  --color-caide-yellow: #FFD84D;
+  --color-caide-light-yellow: #FEF9CF;
+  --color-caide-dark-yellow: #FEDF6A;
+  --color-caide-orange: #FFE8E5;
+  --color-caide-dark-orange: #C7382B;
+}
+
+:root {
+  --swatch--dark: #17103D;
+  --swatch--black: #17103D;
+  --swatch--light: #FFFFFF;
+  --swatch--light-grey: #F8F8F5;
+  --swatch--purple: #6E44FF;
+  --swatch--brand: #17103D;
+  --swatch--light-purple: #EFEAFF;
+  --swatch--blue: #1D58B5;
+  --swatch--light-blue: #E3EEFF;
+  --swatch--light-green: #D8FAF4;
+  --swatch--dark-green: #0D7A68;
+  --swatch--lime: #DDF7D0;
+  --swatch--pale-lime: #EEFAEA;
+  --swatch--yellow: #FFD84D;
+  --swatch--light-yellow: #FEF9CF;
+  --swatch--dark-yellow: #FEDF6A;
+  --swatch--orange: #FFE8E5;
+  --swatch--dark-orange: #C7382B;
+
+  --drop-shadow-default: 0 2px 8px rgba(23, 16, 61, 0.05);
+  --drop-shadow-lg: 0 6px 16px rgba(23, 16, 61, 0.07);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 html, body, #root {
-  background-color: #1A312C;
-  color: #FFF4E1;
-  font-family: 'DM Sans', sans-serif;
+  background-color: #F8F8F5;
+  color: #17103D;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   min-height: 100%;
   margin: 0;
   padding: 0;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Inter', sans-serif;
-  letter-spacing: -0.02em;
+  font-family: 'Plus Jakarta Sans', 'Unbounded', sans-serif;
+  letter-spacing: -0.015em;
+  color: #17103D;
+}
+
+/* Subtle Modern Shadows */
+.u-drop-shadow {
+  box-shadow: 0 2px 8px rgba(23, 16, 61, 0.04), 0 1px 2px rgba(23, 16, 61, 0.02);
+}
+.u-drop-shadow-lg {
+  box-shadow: 0 6px 18px rgba(23, 16, 61, 0.06), 0 2px 6px rgba(23, 16, 61, 0.03);
+}
+.u-drop-shadow-xl {
+  box-shadow: 0 12px 32px rgba(23, 16, 61, 0.08), 0 4px 12px rgba(23, 16, 61, 0.04);
+}
+.u-drop-shadow-sm {
+  box-shadow: 0 1px 3px rgba(23, 16, 61, 0.04);
+}
+.u-drop-shadow-purple {
+  box-shadow: 0 4px 14px rgba(110, 68, 255, 0.15);
+}
+.u-drop-shadow-yellow {
+  box-shadow: 0 4px 14px rgba(255, 216, 77, 0.25);
+}
+.u-drop-shadow-white {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Subtle Outline Grids */
+.u-grid-outline-top {
+  border-top: 1px solid #E2DEEC;
+}
+.u-grid-outline-bottom {
+  border-bottom: 1px solid #E2DEEC;
+}
+.u-grid-outline-right {
+  border-right: 1px solid #E2DEEC;
+}
+.u-grid-outline-left {
+  border-left: 1px solid #E2DEEC;
+}
+.u-grid-outline-all {
+  border: 1px solid #E2DEEC;
+}
+
+/* Subtle Secondary Background Grid Pattern (8-12% opacity) */
+.u-background-grid-dark-2 {
+  background-size: 3.5rem 3.5rem;
+  background-image: radial-gradient(circle, rgba(23, 16, 61, 0.07) 1px, transparent 1px);
+}
+
+.u-background-grid-dark-4 {
+  background-size: 3.5rem 3.5rem;
+  background-image: radial-gradient(circle, rgba(23, 16, 61, 0.09) 1px, transparent 1px);
+}
+
+.u-background-grid-dark-5 {
+  background-size: 3.5rem 3.5rem;
+  background-image: radial-gradient(circle, rgba(23, 16, 61, 0.08) 1px, transparent 1px);
+}
+
+.u-background-grid-white-5 {
+  background-size: 3.5rem 3.5rem;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+}
+
+.u-background-grid-white-11 {
+  background-size: 3.5rem 3.5rem;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+}
+
+.u-background-grid-orange {
+  background-size: 3.5rem 3.5rem;
+  background-image: radial-gradient(circle, rgba(199, 56, 43, 0.06) 1px, transparent 1px);
+}
+
+.u-background-grid-purple {
+  background-size: 3.5rem 3.5rem;
+  background-image: radial-gradient(circle, rgba(110, 68, 255, 0.06) 1px, transparent 1px);
+}
+
+.u-background-grid-yellow {
+  background-size: 3.5rem 3.5rem;
+  background-image: radial-gradient(circle, rgba(255, 216, 77, 0.12) 1.2px, transparent 1.2px);
+}
+
+.u-background-grid-green {
+  background-size: 3.5rem 3.5rem;
+  background-image: radial-gradient(circle, rgba(13, 122, 104, 0.06) 1px, transparent 1px);
+}
+
+/* Polished Tactile Buttons */
+.btn_wrap {
+  position: relative;
+  display: inline-block;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.btn_inner_wrap {
+  position: relative;
+}
+
+.btn_inner {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.35rem;
+  background-color: #17103D;
+  border: 1px solid #17103D;
+  border-radius: 0.75rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  transition: all 180ms ease;
+  user-select: none;
+  box-shadow: 0 2px 6px rgba(23, 16, 61, 0.12);
+}
+
+.btn_inner:hover {
+  background-color: #24195A;
+  border-color: #24195A;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(23, 16, 61, 0.18);
+}
+
+.btn_inner:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(23, 16, 61, 0.1);
+}
+
+.btn_layer {
+  display: none;
+}
+
+/* Secondary Button Styling */
+.btn_secondary_wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background-color: #FFFFFF;
+  color: #17103D;
+  border: 1px solid #E2DEEC;
+  border-radius: 0.75rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(23, 16, 61, 0.04);
+  transition: all 180ms ease;
+  cursor: pointer;
+}
+
+.btn_secondary_wrap:hover {
+  background-color: #F2F0FA;
+  border-color: #C8C3D8;
+  color: #17103D;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(23, 16, 61, 0.08);
+}
+
+.btn_secondary_wrap:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(23, 16, 61, 0.04);
+}
+
+.btn_secondary_wrap.is-purple {
+  background-color: #EFEAFF;
+  color: #6E44FF;
+  border-color: #E2DEEC;
+}
+
+.btn_secondary_wrap.is-purple:hover {
+  background-color: #6E44FF;
+  color: #FFFFFF;
+  border-color: #6E44FF;
+}
+
+.btn_secondary_wrap.is-light {
+  background-color: #FFFFFF;
+  color: #17103D;
+}
+
+/* Clean Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D8D4E5;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B4AFD0;
 }

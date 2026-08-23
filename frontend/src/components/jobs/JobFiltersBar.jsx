@@ -13,6 +13,7 @@ import {
   TrendingUp,
   Tag,
 } from "lucide-react";
+import CaideBadge from "@/components/caide/CaideBadge";
 
 export const ROLE_OPTIONS = [
   { id: "ALL", label: "All Roles" },
@@ -99,23 +100,23 @@ export default function JobFiltersBar({
   return (
     <div className="space-y-3">
       {/* Search Input Bar + Quick Sort */}
-      <div className="p-3 sm:p-4 rounded-3xl bg-[#24231F] border border-[#3A3831] shadow-2xl backdrop-blur-md space-y-3">
+      <div className="p-4 sm:p-5 rounded-3xl bg-white border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-3">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {/* Main Search Input */}
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-[#A8A59C] absolute left-4 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#0D0431]/60 absolute left-4 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search by job title, company name, skills (e.g. Java, React, Go), or city..."
-              className="w-full pl-11 pr-10 py-3 bg-[#11110F] border border-[#3A3831] rounded-2xl text-xs sm:text-sm text-[#FAF8F2] placeholder-[#8C8980] focus:outline-none focus:border-purple-400 transition-all font-sans"
+              className="w-full pl-11 pr-10 py-3 bg-white border-2 border-[#0D0431] rounded-2xl text-xs sm:text-sm text-[#0D0431] placeholder-[#0D0431]/40 shadow-[3px_3px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] focus:shadow-[4px_4px_0_0_#0D0431] transition-all font-sans font-medium"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => onSearchChange("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#8C8980] hover:text-[#FAF8F2]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#0D0431]/60 hover:text-[#0D0431] cursor-pointer"
                 aria-label="Clear Search"
               >
                 <X className="w-3.5 h-3.5" />
@@ -129,22 +130,22 @@ export default function JobFiltersBar({
               <select
                 value={sort}
                 onChange={(e) => onSortChange(e.target.value)}
-                className="w-full sm:w-auto appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-semibold py-3 pl-3.5 pr-8 rounded-2xl focus:outline-none focus:border-purple-400 transition-all cursor-pointer font-sans"
+                className="w-full sm:w-auto appearance-none bg-white border-2 border-[#0D0431] text-[#0D0431] text-xs font-bold py-3 pl-3.5 pr-8 rounded-2xl shadow-[3px_3px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] transition-all cursor-pointer font-sans"
               >
                 {SORT_OPTIONS.map((s) => (
-                  <option key={s.id} value={s.id} className="bg-[#11110F] text-[#FAF8F2]">
+                  <option key={s.id} value={s.id} className="bg-white text-[#0D0431]">
                     Sort: {s.label}
                   </option>
                 ))}
               </select>
-              <ChevronDown className="w-3.5 h-3.5 text-[#8C8980] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <ChevronDown className="w-3.5 h-3.5 text-[#0D0431] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
 
             {/* Mobile Filter Toggle Button */}
             <button
               type="button"
               onClick={() => setShowMobileFilters(!showMobileFilters)}
-              className="sm:hidden p-3 rounded-2xl bg-[#11110F] border border-[#3A3831] text-[#FAF8F2] flex items-center justify-center shrink-0"
+              className="sm:hidden p-3 rounded-2xl bg-white border-2 border-[#0D0431] text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center shrink-0 cursor-pointer"
               aria-label="Toggle Filters"
             >
               <SlidersHorizontal className="w-4 h-4" />
@@ -156,22 +157,22 @@ export default function JobFiltersBar({
         <div
           className={`${
             showMobileFilters ? "flex" : "hidden sm:flex"
-          } flex-wrap items-center gap-2.5 pt-3 border-t border-[#3A3831]`}
+          } flex-wrap items-center gap-2.5 pt-3 border-t-2 border-[#0D0431]/10`}
         >
           {/* Role Filter */}
           <div className="relative">
             <select
               value={role}
               onChange={(e) => onRoleChange(e.target.value)}
-              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-purple-400 transition-all cursor-pointer"
+              className="appearance-none bg-white border-2 border-[#0D0431] hover:bg-[#FEF9CF] text-[#0D0431] text-xs font-bold py-2 pl-3 pr-7 rounded-xl shadow-[2px_2px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] transition-all cursor-pointer font-sans"
             >
               {ROLE_OPTIONS.map((r) => (
-                <option key={r.id} value={r.id} className="bg-[#11110F] text-[#FAF8F2]">
+                <option key={r.id} value={r.id} className="bg-white text-[#0D0431]">
                   Role: {r.label}
                 </option>
               ))}
             </select>
-            <ChevronDown className="w-3 h-3 text-[#8C8980] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-3 h-3 text-[#0D0431] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
           {/* Location Filter */}
@@ -179,15 +180,15 @@ export default function JobFiltersBar({
             <select
               value={location}
               onChange={(e) => onLocationChange(e.target.value)}
-              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-purple-400 transition-all cursor-pointer"
+              className="appearance-none bg-white border-2 border-[#0D0431] hover:bg-[#FEF9CF] text-[#0D0431] text-xs font-bold py-2 pl-3 pr-7 rounded-xl shadow-[2px_2px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] transition-all cursor-pointer font-sans"
             >
               {LOCATION_OPTIONS.map((loc) => (
-                <option key={loc.id} value={loc.id} className="bg-[#11110F] text-[#FAF8F2]">
+                <option key={loc.id} value={loc.id} className="bg-white text-[#0D0431]">
                   Location: {loc.label}
                 </option>
               ))}
             </select>
-            <ChevronDown className="w-3 h-3 text-[#8C8980] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-3 h-3 text-[#0D0431] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
           {/* Work Mode Filter */}
@@ -195,15 +196,15 @@ export default function JobFiltersBar({
             <select
               value={workMode}
               onChange={(e) => onWorkModeChange(e.target.value)}
-              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-purple-400 transition-all cursor-pointer"
+              className="appearance-none bg-white border-2 border-[#0D0431] hover:bg-[#FEF9CF] text-[#0D0431] text-xs font-bold py-2 pl-3 pr-7 rounded-xl shadow-[2px_2px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] transition-all cursor-pointer font-sans"
             >
               {WORK_MODE_OPTIONS.map((wm) => (
-                <option key={wm.id} value={wm.id} className="bg-[#11110F] text-[#FAF8F2]">
+                <option key={wm.id} value={wm.id} className="bg-white text-[#0D0431]">
                   Mode: {wm.label}
                 </option>
               ))}
             </select>
-            <ChevronDown className="w-3 h-3 text-[#8C8980] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-3 h-3 text-[#0D0431] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
           {/* Experience Filter */}
@@ -211,15 +212,15 @@ export default function JobFiltersBar({
             <select
               value={experience}
               onChange={(e) => onExperienceChange(e.target.value)}
-              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-purple-400 transition-all cursor-pointer"
+              className="appearance-none bg-white border-2 border-[#0D0431] hover:bg-[#FEF9CF] text-[#0D0431] text-xs font-bold py-2 pl-3 pr-7 rounded-xl shadow-[2px_2px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] transition-all cursor-pointer font-sans"
             >
               {EXPERIENCE_OPTIONS.map((exp) => (
-                <option key={exp.id} value={exp.id} className="bg-[#11110F] text-[#FAF8F2]">
+                <option key={exp.id} value={exp.id} className="bg-white text-[#0D0431]">
                   Exp: {exp.label}
                 </option>
               ))}
             </select>
-            <ChevronDown className="w-3 h-3 text-[#8C8980] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-3 h-3 text-[#0D0431] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
           {/* Min Salary Filter */}
@@ -227,14 +228,14 @@ export default function JobFiltersBar({
             <select
               value={minSalary}
               onChange={(e) => onMinSalaryChange(Number(e.target.value))}
-              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-purple-400 transition-all cursor-pointer"
+              className="appearance-none bg-white border-2 border-[#0D0431] hover:bg-[#FEF9CF] text-[#0D0431] text-xs font-bold py-2 pl-3 pr-7 rounded-xl shadow-[2px_2px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] transition-all cursor-pointer font-sans"
             >
-              <option value={0} className="bg-[#11110F] text-[#FAF8F2]">Salary: Any</option>
-              <option value={1000000} className="bg-[#11110F] text-[#FAF8F2]">Salary: ₹10L+ / yr</option>
-              <option value={1800000} className="bg-[#11110F] text-[#FAF8F2]">Salary: ₹18L+ / yr</option>
-              <option value={2400000} className="bg-[#11110F] text-[#FAF8F2]">Salary: ₹24L+ / yr</option>
+              <option value={0} className="bg-white text-[#0D0431]">Salary: Any</option>
+              <option value={1000000} className="bg-white text-[#0D0431]">Salary: ₹10L+ / yr</option>
+              <option value={1800000} className="bg-white text-[#0D0431]">Salary: ₹18L+ / yr</option>
+              <option value={2400000} className="bg-white text-[#0D0431]">Salary: ₹24L+ / yr</option>
             </select>
-            <ChevronDown className="w-3 h-3 text-[#8C8980] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-3 h-3 text-[#0D0431] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
           {/* Reset Filters Pill */}
@@ -242,7 +243,7 @@ export default function JobFiltersBar({
             <button
               type="button"
               onClick={onResetFilters}
-              className="px-3 py-2 rounded-xl bg-[#11110F] hover:bg-[#1A1916] text-rose-300 hover:text-rose-200 border border-rose-500/30 text-xs font-medium transition-all flex items-center gap-1.5 ml-auto"
+              className="px-3 py-1.5 rounded-xl bg-[#FFC5B7] hover:bg-[#F85B52] hover:text-white text-[#0D0431] border-2 border-[#0D0431] text-xs font-bold transition-all shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1.5 ml-auto cursor-pointer"
             >
               <RotateCcw className="w-3 h-3" />
               <span>Reset</span>
@@ -252,17 +253,17 @@ export default function JobFiltersBar({
 
         {/* Quick Skill Tags Bar */}
         <div className="flex items-center gap-1.5 overflow-x-auto pt-2 no-scrollbar text-xs">
-          <span className="text-[10px] font-mono uppercase text-[#8C8980] font-bold tracking-wider shrink-0 mr-1 flex items-center gap-1">
-            <Tag className="w-3 h-3 text-purple-400" />
+          <span className="text-[10px] font-heading font-bold uppercase text-[#0D0431] tracking-wider shrink-0 mr-1 flex items-center gap-1">
+            <Tag className="w-3 h-3 text-[#896EE2]" />
             Skills:
           </span>
           <button
             type="button"
             onClick={() => onSelectSkill("ALL")}
-            className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all shrink-0 border ${
+            className={`px-3 py-1 rounded-full text-xs font-mono font-bold transition-all shrink-0 border-2 border-[#0D0431] cursor-pointer ${
               selectedSkill === "ALL"
-                ? "bg-white text-zinc-950 border-white font-bold"
-                : "bg-[#11110F] text-[#A8A59C] border-[#3A3831] hover:text-[#FAF8F2] hover:border-[#4A473F]"
+                ? "bg-[#0D0431] text-white shadow-[2px_2px_0_0_#FEDF6A]"
+                : "bg-white text-[#0D0431] hover:bg-[#FEF9CF] shadow-[2px_2px_0_0_#0D0431]"
             }`}
           >
             All
@@ -274,10 +275,10 @@ export default function JobFiltersBar({
                 key={skill}
                 type="button"
                 onClick={() => onSelectSkill(isSelected ? "ALL" : skill)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all shrink-0 border ${
+                className={`px-3 py-1 rounded-full text-xs font-mono font-bold transition-all shrink-0 border-2 border-[#0D0431] cursor-pointer ${
                   isSelected
-                    ? "bg-white text-zinc-950 border-white font-bold shadow-sm"
-                    : "bg-[#11110F] text-[#A8A59C] border-[#3A3831] hover:text-[#FAF8F2] hover:border-[#4A473F]"
+                    ? "bg-[#0D0431] text-white shadow-[2px_2px_0_0_#FEDF6A]"
+                    : "bg-white text-[#0D0431] hover:bg-[#FEF9CF] shadow-[2px_2px_0_0_#0D0431]"
                 }`}
               >
                 {skill}
@@ -289,3 +290,4 @@ export default function JobFiltersBar({
     </div>
   );
 }
+

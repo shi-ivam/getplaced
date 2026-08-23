@@ -24,10 +24,15 @@ import {
   Play,
   Check,
   RotateCcw,
+  Compass,
 } from "lucide-react";
 import { leetcodeService } from "@/services/leetcodeService";
 import LeetCodeSubmissionAnalysis from "@/components/leetcode/LeetCodeSubmissionAnalysis";
 import SheetsHub from "@/components/sheets/SheetsHub";
+import CaideCard from "@/components/caide/CaideCard";
+import CaideBadge from "@/components/caide/CaideBadge";
+import CaideButton from "@/components/caide/CaideButton";
+import CaideToggle from "@/components/caide/CaideToggle";
 
 const CURATED_LISTS = [
   { id: "all", label: "All Problems", icon: Layers },
@@ -44,7 +49,7 @@ export default function CodingArena() {
 
   const containerRef = useRef(null);
 
-  // Pillar Workspace Tab: 'overview' | 'practice' | 'topics' | 'submissions' | 'learning'
+  // Pillar Workspace Tab: 'overview' | 'practice' | 'sheets' | 'submissions'
   const [workspaceTab, setWorkspaceTab] = useState(initialTab);
 
   // State for Problems Catalog
@@ -103,7 +108,7 @@ export default function CodingArena() {
     if (containerRef.current) {
       gsap.fromTo(
         containerRef.current.querySelectorAll(".gsap-reveal"),
-        { opacity: 0, y: 14 },
+        { opacity: 0, y: 16 },
         { opacity: 1, y: 0, duration: 0.45, stagger: 0.06, ease: "power2.out" }
       );
     }
@@ -187,55 +192,67 @@ export default function CodingArena() {
     }
   };
 
-  const getDifficultyColor = (diff) => {
+  const getDifficultyBadgeTheme = (diff) => {
     switch (diff?.toLowerCase()) {
       case "easy":
-        return "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
+        return "mint";
       case "medium":
-        return "text-amber-400 bg-amber-500/10 border-amber-500/20";
+        return "yellow";
       case "hard":
-        return "text-rose-400 bg-rose-500/10 border-rose-500/20";
+        return "coral";
       default:
-        return "text-zinc-400 bg-zinc-800 border-zinc-700";
+        return "light-purple";
     }
   };
 
   return (
-    <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-zinc-100 p-4 md:p-8 lg:p-10 font-sans selection:bg-zinc-800 selection:text-white">
-      <div ref={containerRef} className="max-w-6xl mx-auto space-y-8">
+    <main
+      ref={containerRef}
+      className="min-h-screen bg-[#FEF9CF] u-background-grid-yellow text-[#0D0431] overflow-x-hidden w-full font-sans selection:bg-[#FEDF6A] selection:text-[#0D0431] py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
+    >
+      <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Workspace Top Header */}
-        <header className="gsap-reveal flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-zinc-800 pb-6">
-          <div className="space-y-1.5 max-w-3xl">
-            <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight">
+        <header className="gsap-reveal flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b-2 border-[#0D0431] pb-6">
+          <div className="space-y-2 max-w-2xl">
+            <CaideBadge theme="light-purple">
+              Coding Practice & DSA Catalog
+            </CaideBadge>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black text-[#0D0431] tracking-tight">
               Coding Arena
             </h1>
-            <p className="text-zinc-400 text-xs leading-relaxed max-w-2xl">
-              Solve interview coding challenges with real-time test evaluations, topic gap tracking, and structured study plans.
+            <p className="text-xs sm:text-sm text-[#0D0431]/80 font-sans leading-relaxed">
+              Solve interview coding challenges with real-time test evaluations, topic gap tracking, and structured placement curricula.
             </p>
           </div>
 
           {/* Action CTAs */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <button
+            <CaideButton
               onClick={handlePickRandom}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs transition-colors cursor-pointer font-mono"
+              variant="stacked-yellow"
+              size="sm"
+              icon={false}
             >
-              <Shuffle className="w-3.5 h-3.5" />
-              <span>Pick Random</span>
-            </button>
-            <Link
+              <span className="flex items-center gap-1.5 font-bold text-[#0D0431]">
+                <Shuffle className="w-4 h-4" /> Pick Random
+              </span>
+            </CaideButton>
+            <CaideButton
               to="/app/coding/two-sum"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 font-medium text-xs transition-colors font-mono"
+              variant="secondary"
+              size="sm"
+              icon={false}
             >
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
-              <span>Daily Problem</span>
-            </Link>
+              <span className="flex items-center gap-1.5 font-bold">
+                <Zap className="w-4 h-4 text-[#FEDF6A]" /> Daily Problem
+              </span>
+            </CaideButton>
           </div>
         </header>
 
         {/* 4 Workspace Pillar Tabs */}
-        <nav className="gsap-reveal flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs">
+        <nav className="gsap-reveal flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
           {[
             { id: "overview", label: "Overview", icon: Layers },
             { id: "sheets", label: "Study Plans", icon: Sparkles },
@@ -249,13 +266,13 @@ export default function CodingArena() {
                 key={tab.id}
                 type="button"
                 onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold font-sans transition-all border-2 border-[#0D0431] shrink-0 cursor-pointer ${
                   isActive
-                    ? "bg-zinc-100 text-zinc-950 font-semibold shadow-sm"
-                    : "bg-[#121215] hover:bg-zinc-850 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+                    ? "bg-[#0D0431] text-white shadow-[3px_3px_0_0_#FEDF6A]"
+                    : "bg-white text-[#0D0431] hover:bg-[#FEDF6A] shadow-[2px_2px_0_0_#0D0431]"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-zinc-950" : "text-zinc-400"}`} />
+                <Icon className="w-3.5 h-3.5" />
                 <span>{tab.label}</span>
               </button>
             );
@@ -265,62 +282,66 @@ export default function CodingArena() {
         {/* TAB 1: OVERVIEW */}
         {workspaceTab === "overview" && (
           <div className="space-y-6">
-            {/* Quick Hero Banner */}
-            <section className="gsap-reveal rounded-2xl bg-[#121215] border border-zinc-800 p-6 md:p-8 space-y-6">
+            {/* Quick Hero Banner Card */}
+            <CaideCard
+              theme="white"
+              shadow="lg"
+              className="gsap-reveal p-6 sm:p-8 space-y-6"
+            >
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
-                      <Sparkles className="w-3 h-3 text-purple-400" />
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-[#E4CDFB] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                      <Sparkles className="w-3.5 h-3.5 text-[#0D0431]" />
                       DSA Readiness Score
                     </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 font-mono font-medium">
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#FEF9CF] text-[#0D0431] border-2 border-[#0D0431] font-mono font-bold">
                       25% Weight
                     </span>
                   </div>
 
                   <div className="flex items-baseline gap-3">
-                    <span className="text-4xl md:text-5xl font-bold font-mono text-zinc-100 tracking-tight">
+                    <span className="text-5xl sm:text-6xl font-heading font-black text-[#0D0431] tracking-tight">
                       {leetcodeProfile?.totalSolved
                         ? Math.min(100, Math.round((leetcodeProfile.totalSolved / 150) * 100))
                         : solvedCount > 0
                         ? Math.min(100, Math.round((solvedCount / 150) * 100))
                         : 0}
                     </span>
-                    <span className="text-lg font-mono text-zinc-500">/ 100</span>
+                    <span className="text-xl font-heading font-bold text-[#0D0431]/50">/ 100</span>
 
-                    <div className="hidden sm:flex flex-col text-xs text-zinc-400 pl-4 border-l border-zinc-800 space-y-0.5 font-mono">
+                    <div className="hidden sm:flex flex-col text-xs text-[#0D0431]/80 pl-4 border-l-2 border-[#0D0431] space-y-1 font-mono">
                       <div>
-                        Target Benchmark: <span className="text-zinc-200">85 / 100</span>
+                        Target Benchmark: <span className="font-bold text-[#0D0431]">85 / 100</span>
                       </div>
                       <div>
-                        Status: <span className="text-emerald-400">
+                        Status: <span className="font-bold text-[#346538] bg-[#D4FDF7] px-2 py-0.5 rounded border border-[#0D0431]">
                           {((leetcodeProfile?.totalSolved || solvedCount) >= 120) ? "Competitive" : "In Progress"}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <p className="text-xs text-zinc-400 max-w-xl leading-relaxed font-sans">
+                  <p className="text-xs sm:text-sm text-[#0D0431]/80 max-w-xl leading-relaxed font-sans font-medium">
                     Evaluated across Arrays, Trees, Dynamic Programming, and Graph algorithms with automated testcase evaluation.
                   </p>
                 </div>
 
                 {/* Score vs Target Box */}
-                <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-1 gap-3 bg-zinc-900 border border-zinc-800 p-4 rounded-xl shrink-0 text-xs font-mono">
+                <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-1 gap-3 bg-[#FEF9CF] border-2 border-[#0D0431] p-4 rounded-2xl shadow-[3px_3px_0_0_#0D0431] shrink-0 text-xs font-mono">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6">
-                    <span className="text-zinc-500 text-[11px]">Total Solved</span>
-                    <span className="font-semibold text-purple-400">
+                    <span className="text-[#0D0431]/70 font-bold uppercase text-[10px]">Total Solved</span>
+                    <span className="font-heading font-bold text-[#0D0431] text-sm">
                       {leetcodeProfile?.totalSolved || solvedCount} / {stats.total || "2,800+"}
                     </span>
                   </div>
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6 border-l lg:border-l-0 lg:border-t border-zinc-800 pl-3 lg:pl-0 lg:pt-2">
-                    <span className="text-zinc-500 text-[11px]">Target</span>
-                    <span className="font-semibold text-zinc-300">150 Problems</span>
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6 border-l-2 lg:border-l-0 lg:border-t-2 border-[#0D0431]/20 pl-3 lg:pl-0 lg:pt-2">
+                    <span className="text-[#0D0431]/70 font-bold uppercase text-[10px]">Target</span>
+                    <span className="font-heading font-bold text-[#0D0431] text-sm">150 Problems</span>
                   </div>
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6 border-l lg:border-l-0 lg:border-t border-zinc-800 pl-3 lg:pl-0 lg:pt-2">
-                    <span className="text-zinc-500 text-[11px]">Acceptance</span>
-                    <span className="font-semibold text-emerald-400">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6 border-l-2 lg:border-l-0 lg:border-t-2 border-[#0D0431]/20 pl-3 lg:pl-0 lg:pt-2">
+                    <span className="text-[#0D0431]/70 font-bold uppercase text-[10px]">Acceptance</span>
+                    <span className="font-heading font-bold text-[#346538] text-sm">
                       {leetcodeProfile?.acceptanceRate ? `${leetcodeProfile.acceptanceRate}%` : solvedCount > 0 ? "100%" : "Unassessed"}
                     </span>
                   </div>
@@ -328,130 +349,154 @@ export default function CodingArena() {
               </div>
 
               {/* Progress Bar */}
-              <div className="space-y-1.5 pt-2 border-t border-zinc-800">
-                <div className="flex justify-between text-[11px] font-mono text-zinc-500">
+              <div className="space-y-2 pt-4 border-t-2 border-[#0D0431]">
+                <div className="flex justify-between text-xs font-mono font-bold text-[#0D0431]/80">
                   <span>Solved: {solvedCount} problems</span>
                   <span>Target Benchmark: 150 problems</span>
                 </div>
-                <div className="relative w-full bg-zinc-950 rounded-full h-2 overflow-hidden border border-zinc-800">
+                <div className="relative w-full bg-white rounded-full h-3.5 overflow-hidden border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                   <div
-                    className="h-full rounded-full bg-purple-500 transition-all duration-500"
-                    style={{ width: `${Math.min(100, Math.max(10, (solvedCount / 150) * 100))}%` }}
+                    className="h-full rounded-full bg-[#FEDF6A] border-r-2 border-[#0D0431] transition-all duration-500"
+                    style={{ width: `${Math.min(100, Math.max(8, (solvedCount / 150) * 100))}%` }}
                   />
                 </div>
               </div>
-            </section>
+            </CaideCard>
 
-            {/* 4 Bento Stat Cards */}
-            <section className="gsap-reveal grid grid-cols-2 md:grid-cols-4 gap-3.5">
-              <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800 flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-purple-400 shrink-0">
-                  <Trophy className="w-4 h-4" />
+            {/* 4 Bento Stat Cards with Pastel Accents */}
+            <section className="gsap-reveal grid grid-cols-2 md:grid-cols-4 gap-4">
+              <CaideCard
+                theme="white"
+                className="p-4 sm:p-5 flex items-center gap-4"
+              >
+                <div className="w-11 h-11 rounded-xl bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center text-[#0D0431] shrink-0">
+                  <Trophy className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-[11px] font-mono text-zinc-500">Total Solved</div>
-                  <div className="text-lg font-bold font-mono text-zinc-100 flex items-baseline gap-1">
+                  <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431]/60">Total Solved</div>
+                  <div className="text-xl font-heading font-black text-[#0D0431] flex items-baseline gap-1 mt-0.5">
                     <span>{solvedCount}</span>
-                    <span className="text-xs font-normal text-zinc-500">/ {stats.total}</span>
+                    <span className="text-xs font-normal text-[#0D0431]/50">/ {stats.total}</span>
                   </div>
                 </div>
-              </div>
+              </CaideCard>
 
-              <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800 flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold font-mono text-xs shrink-0">
+              <CaideCard
+                theme="light-green"
+                className="p-4 sm:p-5 flex items-center gap-4"
+              >
+                <div className="w-11 h-11 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center text-[#346538] font-heading font-black text-sm shrink-0">
                   E
                 </div>
                 <div>
-                  <div className="text-[11px] font-mono text-zinc-500">Easy Solved</div>
-                  <div className="text-lg font-bold font-mono text-emerald-400 flex items-baseline gap-1">
+                  <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431]/60">Easy Solved</div>
+                  <div className="text-xl font-heading font-black text-[#0D0431] flex items-baseline gap-1 mt-0.5">
                     <span>{solvedEasy}</span>
-                    <span className="text-xs font-normal text-zinc-500">/ {stats.easy}</span>
+                    <span className="text-xs font-normal text-[#0D0431]/50">/ {stats.easy}</span>
                   </div>
                 </div>
-              </div>
+              </CaideCard>
 
-              <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800 flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-bold font-mono text-xs shrink-0">
+              <CaideCard
+                theme="light-yellow"
+                className="p-4 sm:p-5 flex items-center gap-4"
+              >
+                <div className="w-11 h-11 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center text-[#956400] font-heading font-black text-sm shrink-0">
                   M
                 </div>
                 <div>
-                  <div className="text-[11px] font-mono text-zinc-500">Medium Solved</div>
-                  <div className="text-lg font-bold font-mono text-amber-400 flex items-baseline gap-1">
+                  <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431]/60">Medium Solved</div>
+                  <div className="text-xl font-heading font-black text-[#0D0431] flex items-baseline gap-1 mt-0.5">
                     <span>{solvedMed}</span>
-                    <span className="text-xs font-normal text-zinc-500">/ {stats.medium}</span>
+                    <span className="text-xs font-normal text-[#0D0431]/50">/ {stats.medium}</span>
                   </div>
                 </div>
-              </div>
+              </CaideCard>
 
-              <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800 flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 font-bold font-mono text-xs shrink-0">
+              <CaideCard
+                theme="white"
+                className="p-4 sm:p-5 flex items-center gap-4"
+              >
+                <div className="w-11 h-11 rounded-xl bg-[#FFC5B7] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center text-[#0D0431] font-heading font-black text-sm shrink-0">
                   H
                 </div>
                 <div>
-                  <div className="text-[11px] font-mono text-zinc-500">Hard Solved</div>
-                  <div className="text-lg font-bold font-mono text-rose-400 flex items-baseline gap-1">
+                  <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431]/60">Hard Solved</div>
+                  <div className="text-xl font-heading font-black text-[#0D0431] flex items-baseline gap-1 mt-0.5">
                     <span>{solvedHard}</span>
-                    <span className="text-xs font-normal text-zinc-500">/ {stats.hard}</span>
+                    <span className="text-xs font-normal text-[#0D0431]/50">/ {stats.hard}</span>
                   </div>
                 </div>
-              </div>
+              </CaideCard>
             </section>
 
             {/* Quick Action Matrix Grid */}
-            <section className="gsap-reveal grid grid-cols-1 md:grid-cols-3 gap-3.5">
-              <div
+            <section className="gsap-reveal grid grid-cols-1 md:grid-cols-3 gap-4">
+              <CaideCard
+                theme="white"
+                hoverEffect={true}
                 onClick={() => handleTabChange("practice")}
-                className="bg-[#121215] border border-zinc-800 hover:border-zinc-700 rounded-xl p-5 space-y-2.5 cursor-pointer transition-colors group"
+                className="p-5 sm:p-6 space-y-3 cursor-pointer"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Terminal className="w-4 h-4 text-purple-400" />
-                    <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-white">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-[#E4CDFB] border-2 border-[#0D0431] flex items-center justify-center text-[#0D0431]">
+                      <Terminal className="w-4 h-4" />
+                    </div>
+                    <h4 className="font-heading font-bold text-sm text-[#0D0431]">
                       Problem Catalog
                     </h4>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-white transition-transform group-hover:translate-x-0.5" />
+                  <ChevronRight className="w-4 h-4 text-[#0D0431]" />
                 </div>
-                <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                <p className="text-xs text-[#0D0431]/75 leading-relaxed font-sans">
                   Browse catalog with difficulty filters, curated tracks, and interactive editor.
                 </p>
-              </div>
+              </CaideCard>
 
-              <div
+              <CaideCard
+                theme="white"
+                hoverEffect={true}
                 onClick={() => handleTabChange("sheets")}
-                className="bg-[#121215] border border-zinc-800 hover:border-zinc-700 rounded-xl p-5 space-y-2.5 cursor-pointer transition-colors group"
+                className="p-5 sm:p-6 space-y-3 cursor-pointer"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-emerald-400" />
-                    <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-white">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-[#D4FDF7] border-2 border-[#0D0431] flex items-center justify-center text-[#0D0431]">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <h4 className="font-heading font-bold text-sm text-[#0D0431]">
                       Study Plans
                     </h4>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-white transition-transform group-hover:translate-x-0.5" />
+                  <ChevronRight className="w-4 h-4 text-[#0D0431]" />
                 </div>
-                <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                <p className="text-xs text-[#0D0431]/75 leading-relaxed font-sans">
                   Curated topic study plans with structured milestone tracking.
                 </p>
-              </div>
+              </CaideCard>
 
-              <div
+              <CaideCard
+                theme="white"
+                hoverEffect={true}
                 onClick={() => handleTabChange("submissions")}
-                className="bg-[#121215] border border-zinc-800 hover:border-zinc-700 rounded-xl p-5 space-y-2.5 cursor-pointer transition-colors group"
+                className="p-5 sm:p-6 space-y-3 cursor-pointer"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-purple-400" />
-                    <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-white">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-[#FEDF6A] border-2 border-[#0D0431] flex items-center justify-center text-[#0D0431]">
+                      <Activity className="w-4 h-4" />
+                    </div>
+                    <h4 className="font-heading font-bold text-sm text-[#0D0431]">
                       Submission Activity
                     </h4>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-white transition-transform group-hover:translate-x-0.5" />
+                  <ChevronRight className="w-4 h-4 text-[#0D0431]" />
                 </div>
-                <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                <p className="text-xs text-[#0D0431]/75 leading-relaxed font-sans">
                   Review problem submissions, runtime stats, and execution logs.
                 </p>
-              </div>
+              </CaideCard>
             </section>
           </div>
         )}
@@ -467,7 +512,7 @@ export default function CodingArena() {
         {workspaceTab === "practice" && (
           <div className="space-y-6">
             {/* Curated Track Tabs */}
-            <div className="gsap-reveal flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs">
+            <div className="gsap-reveal flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
               {CURATED_LISTS.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeCuratedTrack === tab.id;
@@ -479,25 +524,29 @@ export default function CodingArena() {
                       setPage(1);
                       if (tab.id !== "all") setSelectedTag("all");
                     }}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium whitespace-nowrap transition-all cursor-pointer ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold font-sans transition-all border-2 border-[#0D0431] shrink-0 cursor-pointer ${
                       isActive
-                        ? "bg-zinc-100 text-zinc-950 font-semibold shadow-sm"
-                        : "bg-[#121215] hover:bg-zinc-850 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+                        ? "bg-[#0D0431] text-white shadow-[3px_3px_0_0_#FEDF6A]"
+                        : "bg-white text-[#0D0431] hover:bg-[#FEF9CF] shadow-[2px_2px_0_0_#0D0431]"
                     }`}
                   >
-                    <Icon className={`w-3.5 h-3.5 ${isActive ? "text-zinc-950" : "text-zinc-400"}`} />
+                    <Icon className="w-3.5 h-3.5" />
                     <span>{tab.label}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Filter and Search Bar */}
-            <div className="gsap-reveal bg-[#121215] border border-zinc-800 rounded-xl p-4 space-y-3.5">
+            {/* Filter and Search Bar Card */}
+            <CaideCard
+              theme="white"
+              shadow="lg"
+              className="gsap-reveal p-5 space-y-4"
+            >
               <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
                 {/* Search Input */}
                 <div className="relative flex-1">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0D0431]/50" />
                   <input
                     type="text"
                     placeholder="Search problem title, tags, or ID..."
@@ -506,12 +555,12 @@ export default function CodingArena() {
                       setSearchQuery(e.target.value);
                       setPage(1);
                     }}
-                    className="w-full pl-10 pr-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors font-mono"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-[#0D0431] rounded-xl text-xs font-sans font-medium text-[#0D0431] placeholder-[#0D0431]/40 shadow-[3px_3px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] transition-all"
                   />
                 </div>
 
                 {/* Difficulty Buttons */}
-                <div className="flex items-center gap-1 p-1 bg-zinc-900 border border-zinc-800 rounded-lg">
+                <div className="flex items-center gap-1.5 p-1 bg-[#FEF9CF] border-2 border-[#0D0431] rounded-xl shadow-[2px_2px_0_0_#0D0431]">
                   {["all", "Easy", "Medium", "Hard"].map((d) => (
                     <button
                       key={d}
@@ -519,16 +568,10 @@ export default function CodingArena() {
                         setSelectedDifficulty(d.toLowerCase());
                         setPage(1);
                       }}
-                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer font-mono ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold font-sans transition-all cursor-pointer ${
                         selectedDifficulty === d.toLowerCase()
-                          ? d === "Easy"
-                            ? "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20"
-                            : d === "Medium"
-                            ? "bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20"
-                            : d === "Hard"
-                            ? "bg-rose-500/10 text-rose-400 font-semibold border border-rose-500/20"
-                            : "bg-zinc-100 text-zinc-950 font-semibold"
-                          : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                          ? "bg-[#0D0431] text-white shadow-sm"
+                          : "text-[#0D0431]/70 hover:text-[#0D0431] hover:bg-white"
                       }`}
                     >
                       {d === "all" ? "All Levels" : d}
@@ -537,7 +580,7 @@ export default function CodingArena() {
                 </div>
 
                 {/* Sort Selector */}
-                <div className="flex items-center gap-2 font-mono">
+                <div className="flex items-center gap-2">
                   <select
                     value={`${sortBy}-${sortOrder}`}
                     onChange={(e) => {
@@ -545,7 +588,7 @@ export default function CodingArena() {
                       setSortBy(sb);
                       setSortOrder(so);
                     }}
-                    className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-300 focus:outline-none focus:border-zinc-600 cursor-pointer"
+                    className="px-3.5 py-2.5 bg-white border-2 border-[#0D0431] rounded-xl text-xs font-bold font-sans text-[#0D0431] shadow-[3px_3px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] cursor-pointer"
                   >
                     <option value="question_id-asc">Sort: ID (Ascending)</option>
                     <option value="question_id-desc">Sort: ID (Descending)</option>
@@ -558,55 +601,61 @@ export default function CodingArena() {
 
               {/* Topic Tag Chips */}
               {tags.length > 0 && (
-                <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-zinc-800 font-mono">
-                  <span className="text-[11px] text-zinc-500 flex items-center gap-1 mr-1">
-                    <Filter className="w-3 h-3" /> Topics:
+                <div className="flex items-center gap-2 flex-wrap pt-3 border-t-2 border-[#0D0431]/15">
+                  <span className="text-xs font-mono font-bold text-[#0D0431]/70 flex items-center gap-1 mr-1">
+                    <Filter className="w-3.5 h-3.5" /> Topics:
                   </span>
                   <button
                     onClick={() => {
                       setSelectedTag("all");
                       setPage(1);
                     }}
-                    className={`px-2.5 py-1 rounded-md text-[11px] transition-colors cursor-pointer ${
+                    className={`px-3 py-1 rounded-full text-xs font-bold font-sans border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer ${
                       selectedTag === "all"
-                        ? "bg-zinc-100 text-zinc-950 font-semibold"
-                        : "bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+                        ? "bg-[#0D0431] text-white"
+                        : "bg-white text-[#0D0431] hover:bg-[#FEDF6A]"
                     }`}
                   >
-                    All
+                    All Topics
                   </button>
-                  {tags.map(({ tag }) => (
+                  {tags.map(({ tag, count }) => (
                     <button
                       key={tag}
                       onClick={() => {
                         setSelectedTag(selectedTag === tag ? "all" : tag);
                         setPage(1);
                       }}
-                      className={`px-2.5 py-1 rounded-md text-[11px] transition-colors cursor-pointer ${
+                      className={`px-3 py-1 rounded-full text-xs font-bold font-sans border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1.5 transition-all cursor-pointer ${
                         selectedTag === tag
-                          ? "bg-zinc-100 text-zinc-950 font-semibold"
-                          : "bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800 hover:border-zinc-700"
+                          ? "bg-[#0D0431] text-white"
+                          : "bg-white text-[#0D0431] hover:bg-[#FEDF6A]"
                       }`}
                     >
-                      {tag}
+                      <span>{tag}</span>
+                      <span className="text-[10px] font-mono opacity-75">({count})</span>
                     </button>
                   ))}
                 </div>
               )}
-            </div>
+            </CaideCard>
 
-            {/* Problems List Table */}
-            <div className="gsap-reveal bg-[#121215] border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
-              <div className="p-4 border-b border-zinc-800 flex items-center justify-between font-mono">
-                <div className="text-xs font-semibold text-zinc-300 flex items-center gap-2">
+            {/* Problems List Table Bento Card */}
+            <CaideCard
+              theme="white"
+              shadow="lg"
+              className="gsap-reveal overflow-hidden"
+            >
+              {/* Header */}
+              <div className="p-4 sm:p-5 bg-[#FEF9CF] border-b-2 border-[#0D0431] flex items-center justify-between">
+                <div className="text-xs sm:text-sm font-heading font-black text-[#0D0431] flex items-center gap-2">
                   <span>Problem Catalog</span>
-                  <span className="px-2 py-0.5 rounded-full bg-zinc-900 text-[11px] text-zinc-400 border border-zinc-800">
+                  <span className="px-2.5 py-0.5 rounded-full bg-white text-xs font-mono font-bold text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                     Showing {problems.length} of {totalCount}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-zinc-400">
-                  <span className="text-[11px]">Per page:</span>
+                <div className="flex items-center gap-2 text-xs font-bold text-[#0D0431]">
+                  <span className="text-[11px] font-mono">Per page:</span>
                   {[20, 50, 100].map((sz) => (
                     <button
                       key={sz}
@@ -614,10 +663,10 @@ export default function CodingArena() {
                         setPageSize(sz);
                         setPage(1);
                       }}
-                      className={`px-2 py-1 rounded text-xs cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold border-2 border-[#0D0431] transition-all cursor-pointer ${
                         pageSize === sz
-                          ? "bg-zinc-100 text-zinc-950 font-semibold"
-                          : "hover:bg-zinc-800 text-zinc-400"
+                          ? "bg-[#0D0431] text-white shadow-[2px_2px_0_0_#FEDF6A]"
+                          : "bg-white text-[#0D0431] hover:bg-[#FEDF6A] shadow-[2px_2px_0_0_#0D0431]"
                       }`}
                     >
                       {sz}
@@ -628,120 +677,121 @@ export default function CodingArena() {
 
               {loading ? (
                 <div className="p-16 text-center space-y-3">
-                  <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-xs text-zinc-400 font-mono">Loading problem catalog...</p>
+                  <div className="w-8 h-8 border-4 border-[#0D0431] border-t-transparent rounded-full animate-spin mx-auto" />
+                  <p className="text-xs font-mono font-bold text-[#0D0431]">Loading problem catalog...</p>
                 </div>
               ) : error ? (
                 <div className="p-12 text-center space-y-3">
-                  <p className="text-rose-400 text-xs font-mono">{error}</p>
-                  <button
+                  <p className="text-[#F85B52] text-xs font-mono font-bold">{error}</p>
+                  <CaideButton
                     onClick={() => setPage(page)}
-                    className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-xs text-white rounded-lg cursor-pointer font-mono"
+                    variant="secondary"
+                    size="sm"
+                    icon={false}
                   >
                     Retry
-                  </button>
+                  </CaideButton>
                 </div>
               ) : problems.length === 0 ? (
                 <div className="p-16 text-center space-y-3">
-                  <Code2 className="w-8 h-8 text-zinc-600 mx-auto" />
-                  <h3 className="text-xs font-semibold text-zinc-300">No matching problems found</h3>
-                  <p className="text-xs text-zinc-500">Adjust your search query, difficulty, or tag filters.</p>
+                  <Code2 className="w-10 h-10 text-[#0D0431]/40 mx-auto" />
+                  <h3 className="text-sm font-heading font-black text-[#0D0431]">No matching problems found</h3>
+                  <p className="text-xs text-[#0D0431]/70 font-sans">Adjust your search query, difficulty, or tag filters.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-zinc-800 text-[11px] font-mono text-zinc-400 uppercase tracking-wider bg-zinc-950/40">
-                        <th className="py-3 px-4 w-14 text-center">Status</th>
-                        <th className="py-3 px-4 w-16">#</th>
-                        <th className="py-3 px-4">Title</th>
-                        <th className="py-3 px-4 w-28">Difficulty</th>
-                        <th className="py-3 px-4 hidden md:table-cell">Topics</th>
-                        <th className="py-3 px-4 w-24 text-right">Action</th>
+                      <tr className="border-b-2 border-[#0D0431] text-[11px] font-mono font-bold text-[#0D0431] uppercase tracking-wider bg-[#FEF9CF]/50">
+                        <th className="py-3.5 px-4 w-14 text-center">Status</th>
+                        <th className="py-3.5 px-4 w-16">#</th>
+                        <th className="py-3.5 px-4">Title</th>
+                        <th className="py-3.5 px-4 w-28">Difficulty</th>
+                        <th className="py-3.5 px-4 hidden md:table-cell">Topics</th>
+                        <th className="py-3.5 px-4 w-28 text-right">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-800 text-xs">
+                    <tbody className="divide-y-2 divide-[#0D0431]/10 text-xs">
                       {problems.map((prob) => {
                         const isSolved = !!solvedMap[prob.task_id];
                         return (
                           <tr
                             key={prob.id}
-                            className="hover:bg-zinc-900/60 transition-colors group cursor-pointer"
+                            className="hover:bg-[#FEF9CF]/60 transition-colors group cursor-pointer"
                             onClick={() => navigate(`/app/coding/${prob.task_id}`)}
                           >
-                            <td className="py-3.5 px-4 text-center">
+                            <td className="py-4 px-4 text-center">
                               {isSolved ? (
-                                <div className="inline-flex items-center justify-center text-emerald-400" title="Solved">
+                                <div className="inline-flex items-center justify-center text-[#346538] bg-[#D4FDF7] border-2 border-[#0D0431] rounded-full p-0.5 shadow-[1px_1px_0_0_#0D0431]" title="Solved">
                                   <CheckCircle2 className="w-4 h-4" />
                                 </div>
                               ) : (
-                                <div className="inline-flex items-center justify-center text-zinc-600">
+                                <div className="inline-flex items-center justify-center text-[#0D0431]/30">
                                   <Circle className="w-3.5 h-3.5" />
                                 </div>
                               )}
                             </td>
 
-                            <td className="py-3.5 px-4 font-mono text-xs text-zinc-400">
+                            <td className="py-4 px-4 font-mono font-bold text-xs text-[#0D0431]/70">
                               {prob.question_id}
                             </td>
 
-                            <td className="py-3.5 px-4">
+                            <td className="py-4 px-4">
                               <div className="space-y-0.5">
                                 <Link
                                   to={`/app/coding/${prob.task_id}`}
-                                  className="font-medium text-zinc-200 group-hover:text-purple-400 transition-colors flex items-center gap-2"
+                                  className="font-bold text-[#0D0431] group-hover:underline transition-colors flex items-center gap-2 text-sm"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <span>{prob.title}</span>
                                 </Link>
                                 {prob.preview && (
-                                  <p className="text-[11px] text-zinc-500 line-clamp-1 max-w-xl font-sans">
+                                  <p className="text-xs text-[#0D0431]/70 line-clamp-1 max-w-xl font-sans">
                                     {prob.preview}
                                   </p>
                                 )}
                               </div>
                             </td>
 
-                            <td className="py-3.5 px-4">
-                              <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold font-mono border ${getDifficultyColor(
-                                  prob.difficulty
-                                )}`}
+                            <td className="py-4 px-4">
+                              <CaideBadge
+                                theme={getDifficultyBadgeTheme(prob.difficulty)}
+                                size="sm"
                               >
                                 {prob.difficulty}
-                              </span>
+                              </CaideBadge>
                             </td>
 
-                            <td className="py-3.5 px-4 hidden md:table-cell">
+                            <td className="py-4 px-4 hidden md:table-cell">
                               <div className="flex flex-wrap gap-1.5 max-w-md">
                                 {prob.tags?.slice(0, 3).map((t) => (
                                   <span
                                     key={t}
-                                    className="px-2 py-0.5 bg-zinc-900 text-zinc-400 rounded text-[10px] font-mono border border-zinc-800"
+                                    className="px-2 py-0.5 bg-[#FEF9CF] text-[#0D0431] rounded-md text-[10px] font-mono font-bold border border-[#0D0431]"
                                   >
                                     {t}
                                   </span>
                                 ))}
                                 {prob.tags?.length > 3 && (
-                                  <span className="px-1.5 py-0.5 text-zinc-500 text-[10px] font-mono">
+                                  <span className="px-1.5 py-0.5 text-[#0D0431]/60 text-[10px] font-mono font-bold">
                                     +{prob.tags.length - 3}
                                   </span>
                                 )}
                               </div>
                             </td>
 
-                            <td className="py-3.5 px-4 text-right">
+                            <td className="py-4 px-4 text-right">
                               <Link
                                 to={`/app/coding/${prob.task_id}`}
                                 onClick={(e) => e.stopPropagation()}
-                                className={`inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium font-mono transition-colors ${
+                                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold font-sans border-2 border-[#0D0431] transition-all shadow-[2px_2px_0_0_#0D0431] hover:-translate-y-0.5 ${
                                   isSolved
-                                    ? "bg-zinc-800 hover:bg-zinc-700 text-emerald-400 border border-emerald-500/20"
-                                    : "bg-zinc-100 hover:bg-white text-zinc-950 font-semibold"
+                                    ? "bg-[#D4FDF7] text-[#0D0431]"
+                                    : "bg-[#FEDF6A] text-[#0D0431]"
                                 }`}
                               >
                                 <span>{isSolved ? "Review" : "Solve"}</span>
-                                <ChevronRight className="w-3 h-3" />
+                                <ChevronRight className="w-3.5 h-3.5" />
                               </Link>
                             </td>
                           </tr>
@@ -753,23 +803,23 @@ export default function CodingArena() {
               )}
 
               {/* Pagination Footer */}
-              <div className="p-4 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-zinc-400">
+              <div className="p-4 border-t-2 border-[#0D0431] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono font-bold text-[#0D0431]">
                 <div>
-                  Page <span className="font-semibold text-zinc-200">{page}</span> of{" "}
-                  <span className="font-semibold text-zinc-200">{totalPages}</span> ({totalCount} total problems)
+                  Page <span className="underline">{page}</span> of{" "}
+                  <span className="underline">{totalPages}</span> ({totalCount} total problems)
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page <= 1 || loading}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-300 transition-colors cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] hover:bg-[#FEF9CF] disabled:opacity-40 disabled:cursor-not-allowed text-[#0D0431] transition-all cursor-pointer"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
                     <span>Prev</span>
                   </button>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     {[...Array(Math.min(5, totalPages))].map((_, i) => {
                       let pageNum =
                         page <= 3
@@ -782,10 +832,10 @@ export default function CodingArena() {
                         <button
                           key={pageNum}
                           onClick={() => setPage(pageNum)}
-                          className={`w-7 h-7 rounded-md font-mono text-xs transition-colors cursor-pointer ${
+                          className={`w-8 h-8 rounded-lg font-mono text-xs font-bold border-2 border-[#0D0431] transition-all cursor-pointer ${
                             page === pageNum
-                              ? "bg-zinc-100 text-zinc-950 font-bold"
-                              : "bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400"
+                              ? "bg-[#0D0431] text-white shadow-[2px_2px_0_0_#FEDF6A]"
+                              : "bg-white text-[#0D0431] hover:bg-[#FEF9CF] shadow-[2px_2px_0_0_#0D0431]"
                           }`}
                         >
                           {pageNum}
@@ -797,14 +847,14 @@ export default function CodingArena() {
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page >= totalPages || loading}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-300 transition-colors cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] hover:bg-[#FEF9CF] disabled:opacity-40 disabled:cursor-not-allowed text-[#0D0431] transition-all cursor-pointer"
                   >
                     <span>Next</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
-            </div>
+            </CaideCard>
           </div>
         )}
 

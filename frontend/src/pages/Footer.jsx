@@ -1,105 +1,102 @@
-import React from "react";
-import { ArrowRight, Github, Twitter, Linkedin, Mail } from "lucide-react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { ArrowRight, Github, Linkedin, Mail, Check } from "lucide-react";
+import { Link } from "react-router-dom";
 import { SUPPORT_EMAIL } from "@/config/api";
 
 export default function Footer() {
-  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (email) {
+      setSubscribed(true);
+      setTimeout(() => setSubscribed(false), 4000);
+      setEmail("");
+    }
+  };
 
   return (
-    <footer className="relative w-full bg-[#09090b] text-zinc-400 pt-16 pb-10 border-t border-zinc-800/80 overflow-hidden">
-      <div className="max-w-6xl mx-auto px-4 md:px-6 relative z-10">
-        
-        {/* Call to Action Banner */}
-        <div className="mb-16 rounded-2xl bg-zinc-900/60 p-6 md:p-10 border border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight mb-2">
-              Start Placement Preparation
-            </h3>
-            <p className="text-zinc-400 text-sm max-w-lg">
-              Practice technical interviews, benchmark resumes against ATS criteria, and track preparation milestones.
-            </p>
-          </div>
-
-          <button
-            onClick={() => navigate("/register")}
-            className="shrink-0 px-6 py-3 rounded-lg bg-zinc-100 text-zinc-950 font-semibold text-xs uppercase tracking-wider hover:bg-white transition-all flex items-center gap-2 group cursor-pointer"
-          >
-            <span>Get Started</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform text-zinc-950" />
-          </button>
-        </div>
-
-        {/* Footer Navigation Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-zinc-800">
-          
-          {/* Brand */}
-          <div className="space-y-3">
-            <div className="flex items-center">
-              <span className="text-base font-bold text-white tracking-tight font-sans">
-                get<span className="text-purple-400">Placed</span>
+    <footer className="w-full bg-[#17103D] text-white pt-16 pb-12 border-t border-[#24195A]">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 text-left">
+          {/* Brand & Mission */}
+          <div className="md:col-span-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-[#FFD84D] text-[#17103D] flex items-center justify-center font-heading font-black text-sm">
+                GP
+              </div>
+              <span className="text-xl font-heading font-black text-white tracking-tight">
+                Get<span className="text-[#FFD84D]">Placed</span>
               </span>
             </div>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Technical interview simulations, resume ATS scoring, and structured preparation roadmaps.
+
+            <p className="text-xs sm:text-sm text-white/70 leading-relaxed max-w-sm">
+              The modern career operating system for engineering students. Master DSA, polish resumes, simulate interviews, and monitor academic readiness.
             </p>
+
+            {/* Newsletter */}
+            <form onSubmit={handleSubscribe} className="pt-2 max-w-sm flex gap-2">
+              <input
+                type="email"
+                placeholder="Enter email for placement updates..."
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs text-white placeholder-white/50 focus:outline-none focus:border-[#FFD84D]"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-xl bg-[#FFD84D] hover:bg-[#FEDF6A] text-[#17103D] text-xs font-bold transition-colors cursor-pointer shrink-0"
+              >
+                {subscribed ? "Subscribed!" : "Subscribe"}
+              </button>
+            </form>
           </div>
 
-          {/* Links 1 */}
-          <div>
-            <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-300 font-semibold mb-3">Platform</h4>
-            <ul className="space-y-2 text-xs">
-              <li><a href="#hero" className="hover:text-white transition-colors">Interview Simulator</a></li>
-              <li><a href="#features" className="hover:text-white transition-colors">Feature Overview</a></li>
-              <li><a href="#resume" className="hover:text-white transition-colors">Resume Scoring</a></li>
-              <li><a href="#calendar" className="hover:text-white transition-colors">Preparation Schedule</a></li>
+          {/* Quick Links */}
+          <div className="md:col-span-2 space-y-2 text-xs">
+            <h4 className="font-bold uppercase tracking-wider text-white/90 text-[11px]">
+              Platform
+            </h4>
+            <ul className="space-y-1.5 text-white/70">
+              <li><Link to="/app" className="hover:text-white transition-colors">Dashboard</Link></li>
+              <li><Link to="/app/coding" className="hover:text-white transition-colors">Coding Workspace</Link></li>
+              <li><Link to="/app/sheets" className="hover:text-white transition-colors">DSA Sheets (28)</Link></li>
+              <li><Link to="/app/resume" className="hover:text-white transition-colors">Resume ATS</Link></li>
+              <li><Link to="/app/interview" className="hover:text-white transition-colors">Mock Interviews</Link></li>
             </ul>
           </div>
 
-          {/* Links 2 */}
-          <div>
-            <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-300 font-semibold mb-3">Security</h4>
-            <ul className="space-y-2 text-xs">
-              <li><a href="#security" className="hover:text-white transition-colors">AES-256 Encryption</a></li>
-              <li><a href="#security" className="hover:text-white transition-colors">SOC-2 Protocols</a></li>
+          <div className="md:col-span-2 space-y-2 text-xs">
+            <h4 className="font-bold uppercase tracking-wider text-white/90 text-[11px]">
+              Intelligence
+            </h4>
+            <ul className="space-y-1.5 text-white/70">
+              <li><Link to="/app/jobs" className="hover:text-white transition-colors">Jobs Market</Link></li>
+              <li><Link to="/app/role-fit" className="hover:text-white transition-colors">Role Fit AI</Link></li>
+              <li><Link to="/app/can-i-apply" className="hover:text-white transition-colors">Can I Apply?</Link></li>
+              <li><Link to="/app/academics" className="hover:text-white transition-colors">Academics</Link></li>
+              <li><Link to="/app/vtop" className="hover:text-white transition-colors">VTOP Sync</Link></li>
+            </ul>
+          </div>
+
+          <div className="md:col-span-3 space-y-2 text-xs">
+            <h4 className="font-bold uppercase tracking-wider text-white/90 text-[11px]">
+              Policies & Support
+            </h4>
+            <ul className="space-y-1.5 text-white/70">
               <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-              <li><a href="#hero" className="hover:text-white transition-colors">System Telemetry</a></li>
+              <li><Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+              <li><a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-white transition-colors">Contact Support</a></li>
             </ul>
           </div>
-
-          {/* Connect */}
-          <div>
-            <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-300 font-semibold mb-3">Contact</h4>
-            <div className="flex space-x-2.5 mb-3 text-zinc-400">
-              <a href="https://github.com/getplaced" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:text-white transition-colors">
-                <Github className="w-3.5 h-3.5" />
-              </a>
-              <a href="https://twitter.com/getplaced" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:text-white transition-colors">
-                <Twitter className="w-3.5 h-3.5" />
-              </a>
-              <a href="https://linkedin.com/company/getplaced" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:text-white transition-colors">
-                <Linkedin className="w-3.5 h-3.5" />
-              </a>
-              <a href={`mailto:${SUPPORT_EMAIL}`} className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:text-white transition-colors">
-                <Mail className="w-3.5 h-3.5" />
-              </a>
-            </div>
-            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-xs text-zinc-400 font-mono hover:text-white transition-colors">
-              {SUPPORT_EMAIL}
-            </a>
-          </div>
-
         </div>
 
-        {/* Bottom Copyright */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-3">
-          <p>&copy; {new Date().getFullYear()} getPlaced. All rights reserved.</p>
-          <div className="flex space-x-5 text-xs">
-            <Link to="/terms" className="hover:text-zinc-300 transition-colors">Terms</Link>
-            <Link to="/privacy" className="hover:text-zinc-300 transition-colors">Privacy</Link>
-          </div>
+        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/60">
+          <span>&copy; {new Date().getFullYear()} GetPlaced Career Operating System. All rights reserved.</span>
+          <span>Encrypted candidate intelligence enclave.</span>
         </div>
-
       </div>
     </footer>
   );

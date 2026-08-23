@@ -149,6 +149,15 @@ const handleJobRecommendations = async (req, res) => {
 
 app.get("/job-recommendations", handleJobRecommendations);
 
+// Error Handler Middleware (ensures JSON errors for registration and auth)
+app.use((err, req, res, next) => {
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode).json({
+    message: err.message,
+    stack: process.env.NODE_ENV === "production" ? null : err.stack,
+  });
+});
+
 app.listen(PORT, () => {
   console.log("Server listening on port: " + PORT)
 })
