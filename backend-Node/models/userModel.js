@@ -45,6 +45,19 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: null,
     },
+    branch: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    activeBacklogs: {
+      type: Number,
+      default: 0,
+    },
+    historyOfBacklogs: {
+      type: Number,
+      default: 0,
+    },
     targetJobRole: {
       type: String,
       trim: true,
@@ -91,6 +104,10 @@ const userSchema = mongoose.Schema(
     resumeAnalysis: {
       type: mongoose.Schema.Types.Mixed,
       default: null,
+    },
+    resumeVersions: {
+      type: [mongoose.Schema.Types.Mixed],
+      default: [],
     },
   },
   {

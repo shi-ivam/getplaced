@@ -19,6 +19,7 @@ router.route("/message").post(protect, sendMessage);
 router.route("/clear-chat").post(protect, clearChat);
 router.route("/quick-suggestions").get(protect, getQuickSuggestions);
 router.route("/apply-profile").post(protect, applyProfile);
+router.route("/apply-onboarding").post(protect, applyProfile);
 router.route("/connect-github").post(protect, connectGitHub);
 router.route("/connect-leetcode").post(protect, connectLeetCode);
 router.route("/connect-vtop").post(protect, connectVtop);

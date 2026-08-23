@@ -48,6 +48,8 @@ export function LoginForm({ className = "", ...rest }) {
       } else if (ctaParam) {
         const feature = getCtaFeature(ctaParam);
         destination = feature?.targetPath || "/app";
+      } else if (res.data && res.data.onboardingCompleted === false) {
+        destination = "/onboarding";
       }
 
       navigate(destination);

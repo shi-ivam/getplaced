@@ -59,20 +59,39 @@ export async function getOrCreateCoachSession(userId, user = null) {
           targetTimelineWeeks: user?.targetTimelineWeeks ?? null,
         },
         messages: [
-          {
-            sender: "coach",
-            text: `Hey${userName ? ` ${userName}` : ""}, I'm **getPlacedAI**, your placement coach.\n\nWhat are you working on today?`,
-            chips: [
-              "Audit my profile for Google",
-              "What DSA problems should I solve today?",
-              "How do I boost my ATS resume score?",
-              "Set target to Microsoft SDE",
-            ],
-            timestamp: new Date(),
-            metadata: {
-              isGreeting: true,
-            },
-          },
+          !user?.onboardingCompleted
+            ? {
+                sender: "coach",
+                text: `Hey${userName ? ` ${userName}` : ""}! Welcome to **getPlaced** 👋 I'm your AI Career Coach.\n\nLet's calibrate your placement profile so I can build your personalized roadmap and readiness score.\n\nFirst, **what is your dream target company and role** (e.g. Google SDE, Microsoft SWE, Amazon Frontend)?`,
+                chips: [
+                  "Google — SDE",
+                  "Microsoft — Software Engineer",
+                  "Amazon — SDE-1",
+                  "Atlassian — Full Stack",
+                  "I'm still exploring",
+                ],
+                timestamp: new Date(),
+                metadata: {
+                  isGreeting: true,
+                  isOnboarding: true,
+                  step: 1,
+                },
+              }
+            : {
+                sender: "coach",
+                text: `Hey${userName ? ` ${userName}` : ""}, I'm **getPlacedAI**, your placement coach.\n\nWhat are you working on today?`,
+                chips: [
+                  "Audit my profile for Google",
+                  "What DSA problems should I solve today?",
+                  "How do I boost my ATS resume score?",
+                  "Set target to Microsoft SDE",
+                ],
+                timestamp: new Date(),
+                metadata: {
+                  isGreeting: true,
+                  isOnboarding: false,
+                },
+              },
         ],
       });
     } catch (err) {
@@ -259,24 +278,39 @@ export async function clearCoachChatHistory(userId) {
   let session = await CoachConversation.findOne({ userId });
   const user = await User.findById(userId);
   const userName = user?.name || "";
+  const isOnboarding = !user?.onboardingCompleted;
 
   if (!session) {
     session = await getOrCreateCoachSession(userId, user);
   }
 
   session.messages = [
-    {
-      sender: "coach",
-      text: `Chat reset. Hey${userName ? ` ${userName}` : ""}, I'm **getPlacedAI**. What would you like to work on?`,
-      chips: [
-        "Audit my profile for Google",
-        "What DSA problems should I solve today?",
-        "How do I boost my ATS resume score?",
-        "Show my 8-week placement sprint",
-      ],
-      timestamp: new Date(),
-      metadata: { isGreeting: true },
-    },
+    isOnboarding
+      ? {
+          sender: "coach",
+          text: `Hey${userName ? ` ${userName}` : ""}! Welcome to **getPlaced** 👋 Let's calibrate your placement profile.\n\n**What is your dream target company and role** (e.g. Google SDE, Microsoft SWE, Amazon Frontend)?`,
+          chips: [
+            "Google — SDE",
+            "Microsoft — Software Engineer",
+            "Amazon — SDE-1",
+            "Atlassian — Full Stack",
+            "I'm still exploring",
+          ],
+          timestamp: new Date(),
+          metadata: { isGreeting: true, isOnboarding: true, step: 1 },
+        }
+      : {
+          sender: "coach",
+          text: `Chat reset. Hey${userName ? ` ${userName}` : ""}, I'm **getPlacedAI**. What would you like to work on today?`,
+          chips: [
+            "Audit my profile for my target company",
+            "What DSA problems should I solve today?",
+            "How do I boost my ATS resume score?",
+            "Show my 8-week placement sprint",
+          ],
+          timestamp: new Date(),
+          metadata: { isGreeting: true, isOnboarding: false },
+        },
   ];
   await session.save();
   return session;
@@ -537,10 +571,34 @@ export async function connectVtopInCoach(userId, params = {}) {
 }
 
 export async function saveResumeAnalysisInCoach(userId, { resumeScore, resumeText, resumeAnalysis, filename }) {
+  const user = await User.findById(userId);
+  const scoreVal = resumeScore !== undefined && resumeScore !== null ? Number(resumeScore) : (resumeAnalysis?.ats_score ?? 70);
+
+  const newVersion = {
+    id: `ver-${Date.now()}`,
+    timestamp: new Date().toISOString(),
+    filename: filename || "resume.pdf",
+    targetRole: resumeAnalysis?.target_role || user?.targetJobRole || "Software Engineer",
+    atsScore: scoreVal,
+    scoreTier: resumeAnalysis?.score_tier || "Tier 2",
+    matchedKeywords: (resumeAnalysis?.matched_keywords || []).map((k) =>
+      typeof k === "string" ? k : k.keyword || ""
+    ),
+    missingKeywords: (resumeAnalysis?.missing_keywords || []).map((k) =>
+      typeof k === "string" ? k : k.keyword || ""
+    ),
+    summaryCritique: resumeAnalysis?.summary_critique || "",
+    fullEvaluation: resumeAnalysis,
+  };
+
+  const existingVersions = Array.isArray(user?.resumeVersions) ? user.resumeVersions : [];
+  const updatedVersions = [newVersion, ...existingVersions.filter((v) => v?.id !== newVersion.id)].slice(0, 25);
+
   await User.findByIdAndUpdate(userId, {
-    resumeScore,
+    resumeScore: scoreVal,
     resumeText,
     resumeAnalysis,
+    resumeVersions: updatedVersions,
   });
 
   const session = await CoachConversation.findOne({ userId });
@@ -552,11 +610,11 @@ export async function saveResumeAnalysisInCoach(userId, { resumeScore, resumeTex
     session.connectedProfiles.resume = {
       provided: true,
       filename: filename || "resume.pdf",
-      score: resumeScore,
+      score: scoreVal,
       extractedSkills: matchedKeywords,
       analysis: resumeAnalysis,
     };
-    session.extractedProfile.resumeScore = resumeScore;
+    session.extractedProfile.resumeScore = scoreVal;
     session.extractedProfile.resumeText = resumeText;
     session.extractedProfile.resumeAnalysis = resumeAnalysis;
     await session.save();

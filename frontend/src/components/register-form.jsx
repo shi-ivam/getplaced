@@ -49,13 +49,13 @@ export function RegisterForm({ className = "", ...rest }) {
         localStorage.setItem("getplaced_user", JSON.stringify(res.data));
       }
 
-      // Determine redirect path
-      let destination = "/app";
+      // Determine redirect path - default to AI Coach onboarding calibration
+      let destination = "/onboarding";
       if (redirectParam) {
         destination = redirectParam;
       } else if (ctaParam) {
         const feature = getCtaFeature(ctaParam);
-        destination = feature?.targetPath || "/app";
+        destination = feature?.targetPath || "/onboarding";
       }
 
       navigate(destination);

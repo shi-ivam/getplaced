@@ -152,9 +152,29 @@ export default function Academics() {
     }
   };
 
-  const currentCgpa = academicData?.currentCgpa ?? (semesters.some((s) => s.sgpa !== null) ? null : 8.84);
-  const targetCgpa = academicData?.targetCgpa ?? 9.0;
-  const completedCount = semesters.filter((s) => s.isCompleted && s.sgpa !== null && !isNaN(s.sgpa)).length;
+  const completedSems = semesters.filter(
+    (s) => s.isCompleted && s.sgpa !== null && !isNaN(s.sgpa)
+  );
+
+  let derivedCgpa = null;
+  if (completedSems.length > 0) {
+    const totalGradedCredits = completedSems.reduce(
+      (acc, s) => acc + (Number(s.credits) || 20),
+      0
+    );
+    const totalWeightedPoints = completedSems.reduce(
+      (acc, s) => acc + Number(s.sgpa) * (Number(s.credits) || 20),
+      0
+    );
+    derivedCgpa =
+      totalGradedCredits > 0
+        ? Number((totalWeightedPoints / totalGradedCredits).toFixed(2))
+        : null;
+  }
+
+  const currentCgpa = academicData?.currentCgpa ?? derivedCgpa;
+  const targetCgpa = academicData?.targetCgpa ?? (currentCgpa ? Math.min(10.0, Number((currentCgpa + 0.5).toFixed(2))) : 9.0);
+  const completedCount = completedSems.length;
 
   return (
     <div ref={containerRef} className="space-y-6 pb-20">
@@ -209,11 +229,11 @@ export default function Academics() {
             Current CGPA
           </span>
           <div className="text-2xl sm:text-3xl font-black text-[#17103D]">
-            {Number(currentCgpa).toFixed(2)}
+            {currentCgpa !== null && !isNaN(currentCgpa) ? Number(currentCgpa).toFixed(2) : "—"}
           </div>
           <p className="text-[11px] text-[#0D7A68] font-semibold flex items-center gap-1">
             <TrendingUp className="w-3 h-3" />
-            <span>Top Tier-1 Eligible</span>
+            <span>{currentCgpa && currentCgpa >= 8.0 ? "Top Tier-1 Eligible" : currentCgpa ? "Review Cutoffs" : "Grades Unassessed"}</span>
           </p>
         </div>
 
@@ -225,7 +245,9 @@ export default function Academics() {
             {Number(targetCgpa).toFixed(2)}
           </div>
           <p className="text-[11px] text-[#6F6A80]">
-            Delta: +{Math.max(0, targetCgpa - currentCgpa).toFixed(2)} needed
+            {currentCgpa !== null
+              ? `Delta: +${Math.max(0, targetCgpa - currentCgpa).toFixed(2)} needed`
+              : "Target Benchmark"}
           </p>
         </div>
 
@@ -268,7 +290,7 @@ export default function Academics() {
           </div>
 
           <span className="text-xs font-mono font-bold text-[#6E44FF]">
-            Avg: {currentCgpa}
+            Avg: {currentCgpa !== null && !isNaN(currentCgpa) ? Number(currentCgpa).toFixed(2) : "—"}
           </span>
         </div>
 

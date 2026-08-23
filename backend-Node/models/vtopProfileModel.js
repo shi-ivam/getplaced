@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const markItemSchema = new mongoose.Schema({
   title: { type: String, required: true }, // e.g. "CAT 1", "CAT 2", "DA 1", "DA 2", "FAT"
+  assessmentType: { type: String, default: "" },
   score: { type: Number, default: 0 },
   maxScore: { type: Number, default: null },
   weightage: { type: Number, default: 0 },

@@ -694,13 +694,14 @@ function parseAttendanceDetails(html) {
 
             let pct = pctIdx >= 0 ? parseFloat($(cells[pctIdx]).text().replace("%", "").trim()) : NaN;
             if (isNaN(pct)) {
-              pct = !isNaN(attended) && !isNaN(total) && total > 0 ? Number(((attended / total) * 100).toFixed(1)) : 100;
+              pct = !isNaN(attended) && !isNaN(total) && total > 0 ? Number(((attended / total) * 100).toFixed(1)) : (total === 0 ? null : 0);
             }
 
             if (code && code.length >= 4 && !isNaN(attended) && !isNaN(total) && total >= 0) {
               totalAttended += attended;
               totalConducted += total;
-              const status = pct < 75 ? "debarred" : pct < 80 ? "warning" : "safe";
+              const numericPct = pct ?? 0;
+              const status = numericPct < 75 ? "debarred" : numericPct < 80 ? "warning" : "safe";
 
               attendanceList.push({
                 code,
@@ -723,7 +724,7 @@ function parseAttendanceDetails(html) {
     attendanceList,
     totalAttended,
     totalConducted,
-    overallPercentage: totalConducted > 0 ? Number(((totalAttended / totalConducted) * 100).toFixed(1)) : 85,
+    overallPercentage: totalConducted > 0 ? Number(((totalAttended / totalConducted) * 100).toFixed(1)) : null,
   };
 }
 
@@ -775,6 +776,7 @@ function parseStudentMarks(html) {
             if (title && !title.toLowerCase().includes("total") && !title.toLowerCase().includes("grand")) {
               marksItems.push({
                 title,
+                assessmentType: title,
                 score,
                 maxScore,
                 weightage,
@@ -939,11 +941,11 @@ async function harvestVtopLiveDetails(client, authorizedId, csrf, vtopDoc, semes
             slot: c.slot,
             venue: c.venue,
             faculty: c.faculty,
-            attendance: { attended: 36, total: 40, percentage: 90.0, status: "safe" },
+            attendance: { attended: 0, total: 0, percentage: null, status: "safe" },
             marks: [],
             totalWeightedMark: 0,
             maxWeightedTotal: 100,
-            grade: "A",
+            grade: "",
           });
         });
       }
@@ -998,7 +1000,7 @@ async function harvestVtopLiveDetails(client, authorizedId, csrf, vtopDoc, semes
               marks: [],
               totalWeightedMark: 0,
               maxWeightedTotal: 100,
-              grade: "A",
+              grade: "",
             });
           }
         });

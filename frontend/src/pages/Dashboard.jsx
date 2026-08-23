@@ -26,7 +26,9 @@ import {
   Award,
 } from "lucide-react";
 import { NODE_API_URL, PY_API_URL } from "@/config/api";
+import confetti from "canvas-confetti";
 import GpBadge from "@/components/gp/GpBadge";
+import GpButton, { GpArrow } from "@/components/gp/GpButton";
 import LevelComparisonTable from "@/components/ui/LevelComparisonTable";
 import DsaTopicAnalysis from "@/components/dsa/DsaTopicAnalysis";
 import WhatToDoNext from "@/components/dashboard/WhatToDoNext";
@@ -42,14 +44,43 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showExplainModal, setShowExplainModal] = useState(false);
 
-  // Multi-Pillar Placement Audit Modal State
+  // Multi-Pillar Placement Audit / Celebration Modal State
   const [showAuditModal, setShowAuditModal] = useState(isOnboardingAudit);
-  const [auditStep, setAuditStep] = useState(1);
-  const [auditCompleted, setAuditCompleted] = useState(false);
-  const [auditResumeUploading, setAuditResumeUploading] = useState(false);
-  const [auditResumeError, setAuditResumeError] = useState("");
-  const auditIntervalRef = useRef(null);
-  const hasAutoStartedRef = useRef(false);
+
+  // Trigger celebration confetti on arrival with ?onboarding=complete
+  useEffect(() => {
+    if (isOnboardingAudit) {
+      setShowAuditModal(true);
+      try {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#896EE2", "#FEDF6A", "#D4FDF7", "#F85B52", "#17103D"],
+        });
+      } catch (e) {}
+    }
+  }, [isOnboardingAudit]);
+
+  const handleDismissAuditModal = () => {
+    setShowAuditModal(false);
+    if (searchParams.has("onboarding")) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("onboarding");
+      setSearchParams(nextParams, { replace: true });
+    }
+  };
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && showAuditModal) {
+        handleDismissAuditModal();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showAuditModal]);
 
   const containerRef = useRef(null);
 
@@ -105,6 +136,43 @@ export default function Dashboard() {
 
   return (
     <div ref={containerRef} className="space-y-6 pb-20">
+      {/* Prominent AI Onboarding Calibration Banner for new / uncalibrated candidates */}
+      {userProfile && userProfile.onboardingCompleted === false && (
+        <div className="bg-[#FEF9CF] border-2 border-[#0D0431] rounded-3xl p-6 sm:p-7 shadow-[6px_6px_0_0_#0D0431] relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="space-y-2.5 max-w-2xl">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#E4CDFB] text-[#0D0431] border border-[#0D0431] flex items-center gap-1.5 shadow-[2px_2px_0_0_#0D0431]">
+                <span className="w-2 h-2 rounded-full bg-[#896EE2] animate-pulse" />
+                <span>AI Calibration Pending</span>
+              </span>
+              <span className="text-xs font-mono font-bold text-[#0D0431]/70">
+                Step 1/6 Calibration
+              </span>
+            </div>
+
+            <div>
+              <h2 className="text-xl sm:text-2xl font-heading font-black text-[#0D0431] tracking-tight flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#896EE2] shrink-0" />
+                <span>Complete Your AI Placement Calibration</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-[#0D0431]/80 mt-1 leading-relaxed font-sans font-medium">
+                Connect your target ambition, GitHub proof, LeetCode DSA, and academic baselines with your personal AI Career Coach to generate your personalized placement roadmap.
+              </p>
+            </div>
+          </div>
+
+          <div className="shrink-0 flex items-center gap-3">
+            <GpButton
+              to="/app/coach?onboarding=true"
+              variant="stacked"
+              size="md"
+            >
+              Launch AI Placement Coach
+            </GpButton>
+          </div>
+        </div>
+      )}
+
       {/* Hero Career Readiness Banner */}
       <div className="bg-white border border-[#E2DEEC] rounded-2xl p-6 sm:p-7 shadow-[0_2px_8px_rgba(23,16,61,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-3 max-w-2xl">
@@ -340,6 +408,114 @@ export default function Dashboard() {
       <div className="bg-white border border-[#E2DEEC] rounded-2xl p-6 shadow-sm">
         <DsaTopicAnalysis />
       </div>
+
+      {/* Onboarding Completion Celebration / Audit Modal */}
+      {showAuditModal && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleDismissAuditModal();
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0D0431]/80 backdrop-blur-sm animate-in fade-in duration-200"
+        >
+          <div className="w-full max-w-xl bg-[#FEF9CF] border-2 border-[#0D0431] rounded-3xl p-6 sm:p-8 space-y-6 shadow-[8px_8px_0_0_#0D0431] max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between border-b-2 border-[#0D0431] pb-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-[#D4FDF7] text-[#0D0431] border border-[#0D0431]">
+                    Calibration Complete 🎉
+                  </span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-heading font-black text-[#0D0431] tracking-tight">
+                  Placement Profile Active!
+                </h2>
+                <p className="text-xs text-[#0D0431]/80 font-medium">
+                  Your AI Career Coach has synthesized your target benchmark and readiness baseline.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleDismissAuditModal}
+                className="w-8 h-8 rounded-xl border-2 border-[#0D0431] bg-white hover:bg-[#FFC5B7] flex items-center justify-center text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="space-y-4">
+              {/* Target & Readiness Summary */}
+              <div className="p-4 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono uppercase font-bold text-[#0D0431]/60 tracking-wider">
+                    Target Role & Ambition
+                  </span>
+                  <div className="font-heading font-black text-base text-[#0D0431]">
+                    {targetCompany} · {targetRole}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 bg-[#FEF9CF] px-3.5 py-2 rounded-xl border-2 border-[#0D0431] shrink-0">
+                  <Award className="w-5 h-5 text-[#896EE2]" />
+                  <div>
+                    <span className="text-[10px] font-mono font-bold text-[#0D0431]/70 block">Readiness</span>
+                    <span className="font-heading font-black text-lg text-[#0D0431]">{overallScore}%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4 Pillars Calibrated */}
+              <div className="grid grid-cols-2 gap-3 font-mono text-xs">
+                <div className="p-3 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                  <span className="text-[10px] text-[#0D0431]/70 block">DSA Benchmark</span>
+                  <span className="font-bold text-[#0D0431]">{codingScore}% score</span>
+                </div>
+                <div className="p-3 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                  <span className="text-[10px] text-[#0D0431]/70 block">Project Evidence</span>
+                  <span className="font-bold text-[#0D0431]">{devScore}% score</span>
+                </div>
+                <div className="p-3 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                  <span className="text-[10px] text-[#0D0431]/70 block">Resume ATS</span>
+                  <span className="font-bold text-[#0D0431]">{resumeScore}/100</span>
+                </div>
+                <div className="p-3 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                  <span className="text-[10px] text-[#0D0431]/70 block">Academics</span>
+                  <span className="font-bold text-[#0D0431]">{userProfile?.cgpa || "8.80"} CGPA</span>
+                </div>
+              </div>
+
+              {/* Encouraging Note */}
+              <div className="p-3.5 rounded-2xl bg-[#E4CDFB] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-xs text-[#0D0431] font-medium flex items-center gap-2.5">
+                <Sparkles className="w-4 h-4 text-[#0D0431] shrink-0" />
+                <span>Your personalized milestone roadmap and daily practice questions are ready!</span>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+              <GpButton
+                onClick={handleDismissAuditModal}
+                variant="stacked"
+                size="md"
+                className="w-full sm:flex-1"
+              >
+                Explore Career Dashboard
+              </GpButton>
+
+              <GpButton
+                to="/app/roadmap"
+                onClick={handleDismissAuditModal}
+                variant="secondary"
+                size="md"
+                className="w-full sm:flex-1"
+              >
+                View Milestone Roadmap
+              </GpButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

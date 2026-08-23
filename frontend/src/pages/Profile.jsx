@@ -151,10 +151,12 @@ export default function Profile() {
     college: "",
     degree: "",
     customDegree: "",
+    branch: "",
     graduationYear: "",
     cgpa: "",
     tenthPercentage: "",
     twelfthPercentage: "",
+    activeBacklogs: "",
     targetJobRole: "",
     targetCompany: "",
     locationPreference: "",
@@ -184,6 +186,7 @@ export default function Profile() {
             college: data.college || "",
             degree: degreeValue,
             customDegree: customDegreeVal,
+            branch: data.branch || "",
             graduationYear: data.graduationYear ? String(data.graduationYear) : "",
             cgpa: data.cgpa !== null && data.cgpa !== undefined ? String(data.cgpa) : "",
             tenthPercentage:
@@ -194,6 +197,10 @@ export default function Profile() {
               data.twelfthPercentage !== null && data.twelfthPercentage !== undefined
                 ? String(data.twelfthPercentage)
                 : "",
+            activeBacklogs:
+              data.activeBacklogs !== null && data.activeBacklogs !== undefined
+                ? String(data.activeBacklogs)
+                : "0",
             targetJobRole: data.targetJobRole || "",
             targetCompany: data.targetCompany || "",
             locationPreference: data.locationPreference || "",
@@ -329,12 +336,15 @@ export default function Profile() {
         name: formData.name.trim(),
         college: formData.college.trim(),
         degree: effectiveDegree,
+        branch: formData.branch?.trim() || "",
         graduationYear: formData.graduationYear ? Number(formData.graduationYear) : null,
         cgpa: formData.cgpa !== "" ? Number(formData.cgpa) : null,
         tenthPercentage:
           formData.tenthPercentage !== "" ? Number(formData.tenthPercentage) : null,
         twelfthPercentage:
           formData.twelfthPercentage !== "" ? Number(formData.twelfthPercentage) : null,
+        activeBacklogs:
+          formData.activeBacklogs !== "" ? Number(formData.activeBacklogs) : 0,
         targetJobRole: formData.targetJobRole.trim(),
         targetCompany: formData.targetCompany.trim(),
         locationPreference: formData.locationPreference.trim(),
@@ -528,6 +538,20 @@ export default function Profile() {
               {errors.college && <p className="text-[11px] text-[#C7382B] mt-1">{errors.college}</p>}
             </div>
 
+            <div>
+              <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                Branch / Discipline
+              </label>
+              <input
+                name="branch"
+                type="text"
+                value={formData.branch}
+                onChange={handleChange}
+                placeholder="e.g. Computer Science & Engineering"
+                className="w-full bg-white border border-[#E2DEEC] rounded-xl px-3.5 py-2 text-sm text-[#17103D] focus:outline-none focus:border-[#6E44FF]"
+              />
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
@@ -568,7 +592,7 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 pt-1">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
               <div>
                 <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
                   CGPA (0-10) *
@@ -588,7 +612,7 @@ export default function Profile() {
 
               <div>
                 <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
-                  10th Grade %
+                  10th %
                 </label>
                 <input
                   name="tenthPercentage"
@@ -603,7 +627,7 @@ export default function Profile() {
 
               <div>
                 <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
-                  12th Grade %
+                  12th %
                 </label>
                 <input
                   name="twelfthPercentage"
@@ -612,6 +636,21 @@ export default function Profile() {
                   value={formData.twelfthPercentage}
                   onChange={handleChange}
                   placeholder="89.0"
+                  className="w-full bg-white border border-[#E2DEEC] rounded-xl px-3 py-2 text-sm text-[#17103D] focus:outline-none focus:border-[#6E44FF] font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#6F6A80] mb-1">
+                  Backlogs
+                </label>
+                <input
+                  name="activeBacklogs"
+                  type="number"
+                  min="0"
+                  value={formData.activeBacklogs}
+                  onChange={handleChange}
+                  placeholder="0"
                   className="w-full bg-white border border-[#E2DEEC] rounded-xl px-3 py-2 text-sm text-[#17103D] focus:outline-none focus:border-[#6E44FF] font-mono"
                 />
               </div>

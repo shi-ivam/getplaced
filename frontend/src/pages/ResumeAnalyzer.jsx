@@ -9,8 +9,8 @@ import GpCard from "@/components/gp/GpCard";
 import GpButton from "@/components/gp/GpButton";
 
 const DEFAULT_DEMO_DATA = {
-  name: "Richard Gomez",
-  role: "Senior Software Engineer Candidate",
+  name: "Sample Candidate Resume",
+  role: "Software Engineer Candidate",
   atsScore: 92,
   insights: [
     { skill: "System Design", score: 92 },
@@ -99,16 +99,18 @@ const ResumeAnalyzer = () => {
       try {
         const pyRes = await axios.post(`${PY_API_URL}/analyze-resume`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
-          timeout: 5000,
+          timeout: 10000,
         });
         if (pyRes.data) {
-          parsedScore = pyRes.data.ats_score || pyRes.data.score || 88;
-          if (pyRes.data.matched_keywords) {
-            parsedKeywords = Array.isArray(pyRes.data.matched_keywords)
-              ? pyRes.data.matched_keywords.map(k => (typeof k === "string" ? k : k?.keyword || String(k))).filter(Boolean)
+          const resObj = pyRes.data.data || pyRes.data;
+          parsedScore = resObj.ats_score || resObj.score || 88;
+          const rawKw = resObj.matched_keywords || pyRes.data.matched_keywords;
+          if (rawKw) {
+            parsedKeywords = Array.isArray(rawKw)
+              ? rawKw.map(k => (typeof k === "string" ? k : k?.keyword || String(k))).filter(Boolean)
               : [];
           }
-          if (pyRes.data.skills) parsedInsights = pyRes.data.skills;
+          if (resObj.skills) parsedInsights = resObj.skills;
         }
       } catch (pyErr) {
         const nameLen = file.name.length;

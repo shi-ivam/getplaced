@@ -80,9 +80,11 @@ app.add_middleware(
         "http://127.0.0.1:3000",
         "http://localhost:8080",
         "http://127.0.0.1:8080",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
         "http://localhost",
-        "*"
     ],
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -150,6 +152,7 @@ class SectionOptimizeRequest(BaseModel):
     target_role: Optional[str] = "Software Engineer"
     job_description: Optional[str] = None
 
+@app.post("/analyze-resume")
 @app.post("/analyze-resume/")
 async def analyze_resume_legacy(file: UploadFile = File(...), job_description: str = Form("")):
     """Legacy compatibility endpoint returning analysis and detailed JSON payload."""

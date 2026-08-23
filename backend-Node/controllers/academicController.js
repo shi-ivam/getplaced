@@ -78,10 +78,13 @@ export const updateAcademicProfile = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(userId, {
     college: academic.college,
     degree: academic.degree,
+    branch: academic.branch,
     graduationYear: academic.graduationYear,
     cgpa: academic.currentCgpa,
     tenthPercentage: academic.tenthPercentage,
     twelfthPercentage: academic.twelfthPercentage,
+    activeBacklogs: academic.activeBacklogs,
+    historyOfBacklogs: academic.historyOfBacklogs,
   });
 
   const targetCalc = calculateTargetCgpaRequirement(

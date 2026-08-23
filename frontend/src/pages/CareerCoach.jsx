@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams, Link } from "react-router-dom";
 import axios from "axios";
 import confetti from "canvas-confetti";
 import {
@@ -29,23 +29,29 @@ import {
   Layers,
   Terminal,
   Activity,
+  Zap,
+  BookOpen,
+  Briefcase,
+  Award,
+  BarChart3,
+  CheckCircle2,
+  Compass,
 } from "lucide-react";
 import { NODE_API_URL, PY_API_URL } from "@/config/api";
 import MarkdownRenderer from "@/components/coach/MarkdownRenderer";
 import ToolExecutionAccordion from "@/components/coach/ToolExecutionAccordion";
 import ActionCard from "@/components/coach/ActionCard";
-import GpBadge from "@/components/gp/GpBadge";
 import GpButton, { GpArrow } from "@/components/gp/GpButton";
+import GpBadge from "@/components/gp/GpBadge";
 import GpCard from "@/components/gp/GpCard";
 
 const STEPS_MAP = [
-  { step: 1, label: "Ambition" },
-  { step: 2, label: "Academics" },
-  { step: 3, label: "Resume" },
-  { step: 4, label: "GitHub" },
-  { step: 5, label: "LeetCode" },
-  { step: 6, label: "Skills" },
-  { step: 7, label: "Roadmap" },
+  { step: 1, label: "Target Ambition", shortLabel: "Ambition" },
+  { step: 2, label: "Academics", shortLabel: "Academics" },
+  { step: 3, label: "GitHub Proof", shortLabel: "GitHub" },
+  { step: 4, label: "LeetCode DSA", shortLabel: "LeetCode" },
+  { step: 5, label: "Skills Calibration", shortLabel: "Skills" },
+  { step: 6, label: "Report & Synthesis", shortLabel: "Synthesis" },
 ];
 
 export default function CareerCoach() {
@@ -556,14 +562,21 @@ export default function CareerCoach() {
     setApplyingProfile(true);
     try {
       await axios.post(
-        `${NODE_API_URL}/api/coach/apply-profile`,
+        `${NODE_API_URL}/api/coach/apply-onboarding`,
         { extractedProfile },
         { withCredentials: true }
       );
       navigate("/app?onboarding=complete");
     } catch (err) {
-      console.error("Failed to apply profile:", err);
-      navigate("/app");
+      console.error("Failed to apply onboarding profile:", err);
+      try {
+        await axios.post(
+          `${NODE_API_URL}/api/coach/apply-profile`,
+          { extractedProfile },
+          { withCredentials: true }
+        );
+      } catch (e2) {}
+      navigate("/app?onboarding=complete");
     } finally {
       setApplyingProfile(false);
     }
@@ -573,58 +586,64 @@ export default function CareerCoach() {
   const isGhConnected = Boolean(connectedProfiles?.github?.connected);
   const isLcConnected = Boolean(connectedProfiles?.leetcode?.connected);
 
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const isOnboardingParam = searchParams.get("onboarding") === "true";
+  const isOnboardingPath = location.pathname.startsWith("/onboarding");
+  const isOnboardingMode = isOnboardingPath || (isOnboardingParam && !isCompleted);
+
+  const dynamicStepPercent = Math.round((onboardingStep / STEPS_MAP.length) * 100);
+  const rawProgress = profileCompletion > 0 ? profileCompletion : dynamicStepPercent;
   const progressPercent = isCompleted
     ? 100
-    : Math.min(100, Math.max(profileCompletion || 0, Math.round((onboardingStep / STEPS_MAP.length) * 100)));
+    : Math.min(100, Math.max(15, rawProgress));
+
+  const QUICK_MODULES = [
+    { label: "DSA Sheets", path: "/app/sheets", icon: Zap, bg: "bg-[#FEDF6A]" },
+    { label: "Sandbox IDE", path: "/app/coding", icon: Terminal, bg: "bg-[#E4CDFB]" },
+    { label: "ATS Resume", path: "/app/resume", icon: FileText, bg: "bg-[#D4FDF7]" },
+    { label: "Mock Interview", path: "/app/interview", icon: Sparkles, bg: "bg-[#FFC5B7]" },
+    { label: "Sprint Roadmap", path: "/app/roadmap", icon: Compass, bg: "bg-[#FEF9CF]" },
+    { label: "Live Jobs", path: "/app/job", icon: Briefcase, bg: "bg-white" },
+  ];
 
   return (
     <div className="w-full min-h-screen bg-[#FEF9CF] u-background-grid-yellow text-[#0D0431] font-sans selection:bg-[#FEDF6A] selection:text-[#0D0431] flex flex-col justify-between">
       
-      {/* 1. TOP EDITORIAL NAVIGATION BAR WITH PROGRESS BAR */}
+      {/* 1. TOP EDITORIAL NAVIGATION BAR */}
       <header className="border-b-2 border-[#0D0431] bg-white/95 backdrop-blur sticky top-0 z-30 flex flex-col shadow-sm">
-        {/* Top Progress Bar Strip */}
-        <div className="w-full h-2 bg-[#FEF9CF] overflow-hidden relative border-b border-[#0D0431]">
-          <div
-            className="h-full bg-[#896EE2] transition-all duration-500 ease-out border-r-2 border-[#0D0431]"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
+        {/* Onboarding Top Progress Bar Strip (Shown only in Onboarding mode) */}
+        {isOnboardingMode && (
+          <div className="w-full h-2 bg-[#FEF9CF] overflow-hidden relative border-b border-[#0D0431]">
+            <div
+              className="h-full bg-[#896EE2] transition-all duration-500 ease-out border-r-2 border-[#0D0431]"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        )}
 
         <div className="px-4 sm:px-8 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="font-heading font-black text-base md:text-lg tracking-tight text-[#0D0431]">
+            <Link to={isOnboardingMode ? "/onboarding" : "/app"} className="font-heading font-black text-base md:text-lg tracking-tight text-[#0D0431] no-underline">
               get<span className="text-[#896EE2]">Placed</span>
-            </span>
-            <span className="text-[#0D0431]/40 font-black">/</span>
-            <GpBadge theme="light-purple">
-              <Sparkles className="w-3.5 h-3.5 mr-1 text-[#0D0431]" />
-              Career Coach
-            </GpBadge>
-          </div>
+            </Link>
 
-          {/* Minimal Progress Sequence */}
-          <nav aria-label="Onboarding Progress" className="hidden md:flex items-center gap-2">
-            {STEPS_MAP.map((s, idx) => {
-              const isPast = onboardingStep > s.step || isCompleted;
-              const isCurrent = onboardingStep === s.step && !isCompleted;
-              return (
-                <div key={s.step} className="flex items-center gap-1.5">
-                  <span
-                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border transition-all ${
-                      isCurrent
-                        ? "bg-[#FEDF6A] text-[#0D0431] border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
-                        : isPast
-                        ? "bg-[#D4FDF7] text-[#0D0431] border-[#0D0431]"
-                        : "bg-white text-[#0D0431]/40 border-[#0D0431]/30"
-                    }`}
-                  >
-                    0{s.step} {s.label}
-                  </span>
-                  {idx < STEPS_MAP.length - 1 && <span className="text-[#0D0431]/30 text-[10px] font-black">·</span>}
-                </div>
-              );
-            })}
-          </nav>
+            {isOnboardingMode ? (
+              <GpBadge theme="light-purple" size="sm">
+                Placement Calibration
+              </GpBadge>
+            ) : (
+              <div className="hidden sm:flex items-center gap-2">
+                <GpBadge theme="mint" size="sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block mr-1 animate-pulse" />
+                  Autonomous Coach
+                </GpBadge>
+                <span className="text-xs font-mono font-bold text-[#0D0431]/70">
+                  Target: {extractedProfile?.targetCompany || "Google"} · {extractedProfile?.targetJobRole || "SDE"}
+                </span>
+              </div>
+            )}
+          </div>
 
           {/* Action Controls */}
           <div className="flex items-center gap-2">
@@ -644,7 +663,7 @@ export default function CareerCoach() {
               className="lg:hidden px-3 py-1.5 rounded-xl text-xs font-bold text-[#0D0431] border-2 border-[#0D0431] bg-[#FEDF6A] transition-all shadow-[2px_2px_0_0_#0D0431] cursor-pointer font-mono flex items-center gap-1"
             >
               <Activity className="w-3.5 h-3.5 text-[#0D0431]" />
-              <span>{mobileActiveTab === "chat" ? "Profile" : "Chat"}</span>
+              <span>{mobileActiveTab === "chat" ? (isOnboardingMode ? "Profile" : "Radar") : "Chat"}</span>
             </button>
 
             <button
@@ -656,15 +675,77 @@ export default function CareerCoach() {
               <span className="hidden sm:inline">Edit Target</span>
             </button>
 
-            <GpButton
-              onClick={handleFinalizeAndEnterDashboard}
-              variant="stacked"
-              size="sm"
-            >
-              Dashboard
-            </GpButton>
+            {isOnboardingMode ? (
+              <GpButton
+                onClick={handleFinalizeAndEnterDashboard}
+                variant="stacked"
+                size="sm"
+              >
+                Dashboard →
+              </GpButton>
+            ) : (
+              <GpButton
+                to="/app"
+                variant="stacked"
+                size="sm"
+              >
+                Dashboard
+              </GpButton>
+            )}
           </div>
         </div>
+
+        {/* Stepper Breadcrumbs Bar (Shown in Onboarding mode) */}
+        {isOnboardingMode && (
+          <div className="hidden sm:flex items-center justify-between px-8 py-2 bg-[#FAF7EE] border-t border-[#0D0431]/20 font-mono text-[11px] font-bold text-[#0D0431]/80 overflow-x-auto">
+            <div className="flex items-center gap-3">
+              {STEPS_MAP.map((st, idx) => {
+                const isActive = onboardingStep === st.step;
+                const isPassed = onboardingStep > st.step || isCompleted;
+                return (
+                  <div key={st.step} className="flex items-center gap-2">
+                    <span
+                      className={`px-2 py-0.5 rounded-md border flex items-center gap-1 ${
+                        isActive
+                          ? "bg-[#FEDF6A] border-[#0D0431] text-[#0D0431] font-black shadow-[1px_1px_0_0_#0D0431]"
+                          : isPassed
+                          ? "bg-[#D4FDF7] border-[#0D0431]/40 text-[#0D0431]"
+                          : "bg-white/60 border-zinc-300 text-zinc-400"
+                      }`}
+                    >
+                      {isPassed && <Check className="w-2.5 h-2.5 text-emerald-600" />}
+                      <span>{st.step}. {st.shortLabel}</span>
+                    </span>
+                    {idx < STEPS_MAP.length - 1 && <ChevronRight className="w-3 h-3 text-zinc-400" />}
+                  </div>
+                );
+              })}
+            </div>
+            <span className="text-[10px] text-[#0D0431]/60">
+              Calibration {profileCompletion}% Complete
+            </span>
+          </div>
+        )}
+
+        {/* Quick Modules Toolbar (Shown in Day-to-Day Coach mode) */}
+        {!isOnboardingMode && (
+          <div className="hidden md:flex items-center gap-2 px-8 py-2 bg-[#FAF7EE] border-t border-[#0D0431]/20 font-mono text-xs font-bold text-[#0D0431] overflow-x-auto">
+            <span className="text-[11px] text-[#0D0431]/60 uppercase tracking-wider mr-1">Workspace Hub:</span>
+            {QUICK_MODULES.map((m) => {
+              const IconComponent = m.icon;
+              return (
+                <Link
+                  key={m.label}
+                  to={m.path}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl border-2 border-[#0D0431] text-[11px] text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] hover:scale-[1.02] active:scale-[0.98] transition-all no-underline ${m.bg}`}
+                >
+                  <IconComponent className="w-3 h-3" />
+                  <span>{m.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </header>
 
       {/* 2. MAIN CONVERSATIONAL WORKSPACE */}
@@ -693,7 +774,7 @@ export default function CareerCoach() {
             }`}
           >
             <Activity className="w-3.5 h-3.5 text-[#0D0431]" />
-            <span>Profile ({profileCompletion}%)</span>
+            <span>{isOnboardingMode ? `Profile (${profileCompletion}%)` : `Radar (${readinessSnapshot?.overallScore || 74})`}</span>
           </button>
         </div>
 
@@ -707,15 +788,27 @@ export default function CareerCoach() {
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-[#0D0431] animate-pulse" />
                 <span className="text-[#0D0431] font-heading font-black flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-[#896EE2]" />
-                  <span>AI Career Coach</span>
+                  <span>{isOnboardingMode ? "Placement Calibration Assistant" : "AI Career Coach • Daily Mentorship"}</span>
                 </span>
               </div>
               <div className="flex items-center gap-3 font-mono text-[11px] text-[#0D0431] font-bold">
-                <span>Active Analysis</span>
-                <span>·</span>
-                <span className="px-2 py-0.5 rounded-full bg-[#E4CDFB] border border-[#0D0431]">
-                  {profileCompletion}% complete
-                </span>
+                {isOnboardingMode ? (
+                  <>
+                    <span>Step {onboardingStep} of 6</span>
+                    <span>·</span>
+                    <span className="px-2 py-0.5 rounded-full bg-[#E4CDFB] border border-[#0D0431]">
+                      {profileCompletion}% calibrated
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span>Active SDE Track</span>
+                    <span>·</span>
+                    <span className="px-2 py-0.5 rounded-full bg-[#D4FDF7] border border-[#0D0431]">
+                      Readiness: {readinessSnapshot?.overallScore || 74}/100
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 
@@ -844,7 +937,11 @@ export default function CareerCoach() {
 
               <input
                 type="text"
-                placeholder="Ask about target requirements, benchmark gaps, preparation advice..."
+                placeholder={
+                  isOnboardingMode
+                    ? "Answer coach questions, confirm target role, link GitHub/LeetCode..."
+                    : "Ask about target company requirements, today's DSA drills, roadmap sprints..."
+                }
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 disabled={sending}
@@ -862,7 +959,7 @@ export default function CareerCoach() {
             </form>
           </div>
 
-          {/* Right Column: Dynamic Candidate Telemetry & Evidence Ledger (4 cols on lg) */}
+          {/* Right Column: Candidate Telemetry & Evidence Ledger (4 cols on lg) */}
           <aside
             className={`${
               mobileActiveTab === "telemetry" ? "block" : "hidden lg:block"
@@ -875,7 +972,7 @@ export default function CareerCoach() {
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-[#896EE2]" />
                   <h2 className="text-xs font-heading font-black uppercase tracking-wider text-[#0D0431]">
-                    Candidate Profile
+                    {isOnboardingMode ? "Calibration Ledger" : "Placement Telemetry"}
                   </h2>
                 </div>
                 <button
@@ -890,9 +987,9 @@ export default function CareerCoach() {
               {/* Target Ambition Badge */}
               <div className="p-4 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] space-y-2">
                 <div className="flex items-center justify-between text-[11px] font-mono font-bold">
-                  <span className="text-[#0D0431]/70 uppercase tracking-wider">Target Benchmark</span>
+                  <span className="text-[#0D0431]/70 uppercase tracking-wider">Target Goal</span>
                   <span className="text-[#0D0431] bg-[#FEDF6A] px-2 py-0.5 rounded-md border border-[#0D0431]">
-                    {readinessSnapshot?.targetBenchmark || 80}/100 Goal
+                    {readinessSnapshot?.targetBenchmark || 80}/100 Bar
                   </span>
                 </div>
                 <div className="text-sm font-bold text-[#0D0431] flex items-center gap-2 font-heading">
@@ -905,9 +1002,9 @@ export default function CareerCoach() {
 
               {/* Readiness Score Breakdown (if available) */}
               {readinessSnapshot && (
-                <div className="space-y-2.5 pt-1">
+                <div className="space-y-3 pt-1">
                   <div className="flex items-center justify-between font-mono text-xs font-bold">
-                    <span className="text-[#0D0431]">Readiness Score</span>
+                    <span className="text-[#0D0431]">Placement Readiness</span>
                     <span className="text-sm font-black text-[#0D0431]">
                       {readinessSnapshot.overallScore} / 100
                     </span>
@@ -922,13 +1019,81 @@ export default function CareerCoach() {
                     <span>Status: {readinessSnapshot.statusLabel || "Active"}</span>
                     <span>Gap: {Math.max(0, (readinessSnapshot.targetBenchmark || 80) - (readinessSnapshot.overallScore || 0))} pts</span>
                   </div>
+
+                  {/* Readiness Dimension Pills */}
+                  {readinessSnapshot.breakdown && (
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#0D0431]/20 text-[11px] font-mono font-bold text-[#0D0431]">
+                      <div className="p-2 rounded-xl bg-[#FAF7EE] border border-[#0D0431] flex items-center justify-between">
+                        <span>💻 DSA</span>
+                        <span>{readinessSnapshot.breakdown.dsa ?? 65}%</span>
+                      </div>
+                      <div className="p-2 rounded-xl bg-[#FAF7EE] border border-[#0D0431] flex items-center justify-between">
+                        <span>🛠️ Projects</span>
+                        <span>{readinessSnapshot.breakdown.projects ?? 70}%</span>
+                      </div>
+                      <div className="p-2 rounded-xl bg-[#FAF7EE] border border-[#0D0431] flex items-center justify-between">
+                        <span>📄 Resume</span>
+                        <span>{readinessSnapshot.breakdown.resume ?? 75}%</span>
+                      </div>
+                      <div className="p-2 rounded-xl bg-[#FAF7EE] border border-[#0D0431] flex items-center justify-between">
+                        <span>📘 Academics</span>
+                        <span>{readinessSnapshot.breakdown.academics ?? 80}%</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Day-to-Day Quick Sprint Actions (Shown only in Day-to-Day Coach mode) */}
+              {!isOnboardingMode && (
+                <div className="pt-3 border-t-2 border-[#0D0431] space-y-2">
+                  <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#0D0431]/70 block">
+                    Daily Drill Commands
+                  </span>
+                  <div className="grid grid-cols-1 gap-1.5 font-mono text-[11px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => handleSendMessage("What 3 high-impact DSA problems should I solve today for my target company?")}
+                      className="p-2.5 rounded-xl bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-left flex items-center justify-between cursor-pointer transition-all"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <Zap className="w-3.5 h-3.5 text-[#0D0431]" />
+                        <span>Today's 3 DSA Problems</span>
+                      </span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSendMessage("Audit my ATS resume keywords and tell me top 3 action fixes")}
+                      className="p-2.5 rounded-xl bg-[#D4FDF7] hover:bg-[#BDF6ED] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-left flex items-center justify-between cursor-pointer transition-all"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-[#0D0431]" />
+                        <span>Audit ATS Resume Gaps</span>
+                      </span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSendMessage("Give me a behavioral interview question tailored to my target company using STAR")}
+                      className="p-2.5 rounded-xl bg-[#E4CDFB] hover:bg-[#D5B9F7] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-left flex items-center justify-between cursor-pointer transition-all"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[#0D0431]" />
+                        <span>Behavioral Mock Question</span>
+                      </span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
               )}
 
               {/* Evidence Connections */}
               <div className="pt-3 border-t-2 border-[#0D0431] space-y-3">
                 <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#0D0431]/70 block">
-                  Connected Accounts
+                  Connected Proof of Work
                 </span>
 
                 {/* VTOP Academics */}
@@ -1061,24 +1226,48 @@ export default function CareerCoach() {
 
               {/* Bottom Actions */}
               <div className="pt-3 border-t-2 border-[#0D0431] space-y-2.5">
-                <GpButton
-                  onClick={handleFinalizeAndEnterDashboard}
-                  disabled={applyingProfile}
-                  variant="stacked"
-                  size="md"
-                  fullWidth
-                >
-                  {applyingProfile ? "Saving..." : "Enter Dashboard"}
-                </GpButton>
+                {isOnboardingMode ? (
+                  <>
+                    <GpButton
+                      onClick={handleFinalizeAndEnterDashboard}
+                      disabled={applyingProfile}
+                      variant="stacked"
+                      size="md"
+                      fullWidth
+                    >
+                      {applyingProfile ? "Applying Profile..." : "Apply Inferred Profile & Continue to Dashboard"}
+                    </GpButton>
 
-                <GpButton
-                  onClick={handleApplyProfile}
-                  variant="outline"
-                  size="sm"
-                  fullWidth
-                >
-                  View Roadmap
-                </GpButton>
+                    <GpButton
+                      onClick={handleApplyProfile}
+                      variant="outline"
+                      size="sm"
+                      fullWidth
+                    >
+                      View Milestone Roadmap
+                    </GpButton>
+                  </>
+                ) : (
+                  <>
+                    <GpButton
+                      to="/app/roadmap"
+                      variant="stacked"
+                      size="md"
+                      fullWidth
+                    >
+                      Open Placement Roadmap →
+                    </GpButton>
+
+                    <GpButton
+                      to="/app"
+                      variant="outline"
+                      size="sm"
+                      fullWidth
+                    >
+                      Return to Dashboard
+                    </GpButton>
+                  </>
+                )}
               </div>
 
             </div>

@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler"
 import User from "../models/userModel.js"
+import AcademicProfile from "../models/academicProfileModel.js"
 import generateToken from "../utils/generateToken.js"
 import { normalizeIdentifier } from "../models/companyRequirementModel.js"
 
@@ -111,16 +112,21 @@ const getUserProfile = asyncHandler(async (req, res) => {
     const targetRoleNormalized = user.targetRoleNormalized || normalizeIdentifier(targetJobRole)
     const targetCompanyNormalized = user.targetCompanyNormalized || normalizeIdentifier(targetCompany)
 
+    const academic = await AcademicProfile.findOne({ userId: user._id })
+
     res.status(200).json({
       _id: user._id,
       name: user.name,
       email: user.email,
-      college: user.college || "",
-      degree: user.degree || "",
-      graduationYear: user.graduationYear ?? null,
-      cgpa: user.cgpa ?? null,
-      tenthPercentage: user.tenthPercentage ?? null,
-      twelfthPercentage: user.twelfthPercentage ?? null,
+      college: user.college || academic?.college || "",
+      degree: user.degree || academic?.degree || "",
+      branch: user.branch || academic?.branch || "",
+      graduationYear: user.graduationYear ?? academic?.graduationYear ?? null,
+      cgpa: user.cgpa ?? academic?.currentCgpa ?? null,
+      tenthPercentage: user.tenthPercentage ?? academic?.tenthPercentage ?? null,
+      twelfthPercentage: user.twelfthPercentage ?? academic?.twelfthPercentage ?? null,
+      activeBacklogs: user.activeBacklogs ?? academic?.activeBacklogs ?? 0,
+      historyOfBacklogs: user.historyOfBacklogs ?? academic?.historyOfBacklogs ?? 0,
       targetJobRole,
       targetRole: targetJobRole,
       targetRoleNormalized,
@@ -131,6 +137,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
       resumeScore: user.resumeScore ?? null,
       resumeText: user.resumeText || "",
       resumeAnalysis: user.resumeAnalysis || null,
+      resumeVersions: user.resumeVersions || [],
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     })
@@ -156,10 +163,13 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     email,
     college,
     degree,
+    branch,
     graduationYear,
     cgpa,
     tenthPercentage,
     twelfthPercentage,
+    activeBacklogs,
+    historyOfBacklogs,
     targetJobRole,
     targetRole,
     targetCompany,
@@ -168,6 +178,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     resumeScore,
     resumeText,
     resumeAnalysis,
+    resumeVersions,
     password,
   } = req.body
 
@@ -181,6 +192,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
   if (resumeAnalysis !== undefined) {
     user.resumeAnalysis = resumeAnalysis
+  }
+
+  if (resumeVersions !== undefined && Array.isArray(resumeVersions)) {
+    user.resumeVersions = resumeVersions
   }
 
   if (onboardingCompleted !== undefined) {
@@ -209,6 +224,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       throw new Error("Degree is required")
     }
     user.degree = degree.trim()
+  }
+
+  if (branch !== undefined) {
+    user.branch = typeof branch === "string" ? branch.trim() : ""
   }
 
   if (graduationYear !== undefined && graduationYear !== null && graduationYear !== "") {
@@ -251,6 +270,20 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     user.twelfthPercentage = null
   }
 
+  if (activeBacklogs !== undefined && activeBacklogs !== null && activeBacklogs !== "") {
+    const parsedActiveBacklogs = Number(activeBacklogs)
+    if (!isNaN(parsedActiveBacklogs) && parsedActiveBacklogs >= 0) {
+      user.activeBacklogs = parsedActiveBacklogs
+    }
+  }
+
+  if (historyOfBacklogs !== undefined && historyOfBacklogs !== null && historyOfBacklogs !== "") {
+    const parsedHistoryBacklogs = Number(historyOfBacklogs)
+    if (!isNaN(parsedHistoryBacklogs) && parsedHistoryBacklogs >= 0) {
+      user.historyOfBacklogs = parsedHistoryBacklogs
+    }
+  }
+
   const roleInput = targetJobRole !== undefined ? targetJobRole : targetRole
   if (roleInput !== undefined) {
     if (typeof roleInput !== "string" || !roleInput.trim()) {
@@ -284,6 +317,24 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
   const updatedUser = await user.save()
 
+  // Simultaneously synchronize AcademicProfile collection
+  let academic = await AcademicProfile.findOne({ userId: updatedUser._id })
+  if (!academic) {
+    academic = new AcademicProfile({ userId: updatedUser._id })
+  }
+
+  if (updatedUser.college !== undefined) academic.college = updatedUser.college
+  if (updatedUser.degree !== undefined) academic.degree = updatedUser.degree
+  if (updatedUser.branch !== undefined) academic.branch = updatedUser.branch
+  if (updatedUser.graduationYear !== undefined) academic.graduationYear = updatedUser.graduationYear
+  if (updatedUser.cgpa !== undefined) academic.currentCgpa = updatedUser.cgpa
+  if (updatedUser.tenthPercentage !== undefined) academic.tenthPercentage = updatedUser.tenthPercentage
+  if (updatedUser.twelfthPercentage !== undefined) academic.twelfthPercentage = updatedUser.twelfthPercentage
+  if (updatedUser.activeBacklogs !== undefined) academic.activeBacklogs = updatedUser.activeBacklogs
+  if (updatedUser.historyOfBacklogs !== undefined) academic.historyOfBacklogs = updatedUser.historyOfBacklogs
+
+  await academic.save()
+
   const finalJobRole = updatedUser.targetJobRole || ""
   const finalCompany = updatedUser.targetCompany || ""
   const finalRoleNormalized = updatedUser.targetRoleNormalized || normalizeIdentifier(finalJobRole)
@@ -295,10 +346,13 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     email: updatedUser.email,
     college: updatedUser.college || "",
     degree: updatedUser.degree || "",
+    branch: updatedUser.branch || "",
     graduationYear: updatedUser.graduationYear ?? null,
     cgpa: updatedUser.cgpa ?? null,
     tenthPercentage: updatedUser.tenthPercentage ?? null,
     twelfthPercentage: updatedUser.twelfthPercentage ?? null,
+    activeBacklogs: updatedUser.activeBacklogs ?? 0,
+    historyOfBacklogs: updatedUser.historyOfBacklogs ?? 0,
     targetJobRole: finalJobRole,
     targetRole: finalJobRole,
     targetRoleNormalized: finalRoleNormalized,

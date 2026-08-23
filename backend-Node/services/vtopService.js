@@ -15,28 +15,41 @@ export async function getOrCreateVtopProfile(userId) {
  */
 export function computeVtopPlacementImpact(vtopProfile) {
   if (!vtopProfile) return null;
-  const cgpa = Number(vtopProfile.currentCgpa) || 0;
+  const cgpa =
+    vtopProfile.currentCgpa !== null && vtopProfile.currentCgpa !== undefined && !isNaN(Number(vtopProfile.currentCgpa))
+      ? Number(vtopProfile.currentCgpa)
+      : null;
   const activeArrears = Number(vtopProfile.activeBacklogs) || 0;
   const historyArrears = Number(vtopProfile.historyOfBacklogs) || 0;
-  const overallAttendance = Number(vtopProfile.overallAttendancePercentage) || 85.0;
-  const creditsEarned = Number(vtopProfile.totalCreditsEarned) || 118;
+  const overallAttendance =
+    vtopProfile.overallAttendancePercentage !== null &&
+    vtopProfile.overallAttendancePercentage !== undefined &&
+    !isNaN(Number(vtopProfile.overallAttendancePercentage))
+      ? Number(vtopProfile.overallAttendancePercentage)
+      : null;
+  const creditsEarned = Number(vtopProfile.totalCreditsEarned) || 0;
   const creditsRequired = Number(vtopProfile.totalCreditsRequired) || 160;
 
   // Tier Eligibility
-  const superDreamEligible = cgpa >= 9.0 && activeArrears === 0 && historyArrears === 0;
-  const dreamEligible = cgpa >= 7.5 && activeArrears === 0 && historyArrears <= 1;
-  const regularEligible = cgpa >= 6.0 && activeArrears <= 1;
+  const superDreamEligible = cgpa !== null && cgpa >= 9.0 && activeArrears === 0 && historyArrears === 0;
+  const dreamEligible = cgpa !== null && cgpa >= 7.5 && activeArrears === 0 && historyArrears <= 1;
+  const regularEligible = cgpa !== null && cgpa >= 6.0 && activeArrears <= 1;
 
   // Active courses analysis & debarment risk
   const currentSemester = vtopProfile.semesters?.find((s) => s.semesterId === vtopProfile.activeSemesterId) || vtopProfile.semesters?.[0];
   const activeCourses = currentSemester?.courses || [];
 
   const courseRiskList = activeCourses.map((c) => {
-    const attended = c.attendance?.attended || 0;
-    const total = c.attendance?.total || 0;
-    const pct = total > 0 ? Number(((attended / total) * 100).toFixed(1)) : 100;
-    const isDebarred = pct < 75.0;
-    const isWarning = pct >= 75.0 && pct < 80.0;
+    const attended = Number(c.attendance?.attended) || 0;
+    const total = Number(c.attendance?.total) || 0;
+    const pct =
+      c.attendance?.percentage !== null && c.attendance?.percentage !== undefined && !isNaN(Number(c.attendance?.percentage))
+        ? Number(c.attendance.percentage)
+        : total > 0
+        ? Number(((attended / total) * 100).toFixed(1))
+        : null;
+    const isDebarred = pct !== null && pct < 75.0;
+    const isWarning = pct !== null && pct >= 75.0 && pct < 80.0;
 
     // How many classes can be safely missed without dropping below 75%
     // (attended) / (total + x) >= 0.75  => attended >= 0.75*(total + x) => x <= (attended / 0.75) - total
@@ -47,7 +60,7 @@ export function computeVtopPlacementImpact(vtopProfile) {
     // (attended + y) / (total + y) >= 0.75 => attended + y >= 0.75*total + 0.75*y => 0.25*y >= 0.75*total - attended
     // y = (3*total - 4*attended)
     let requiredToRecover = 0;
-    if (pct < 75.0) {
+    if (pct !== null && pct < 75.0) {
       requiredToRecover = Math.max(0, Math.ceil(3 * total - 4 * attended));
     }
 
@@ -66,7 +79,7 @@ export function computeVtopPlacementImpact(vtopProfile) {
       safeBunks,
       requiredToRecover,
       currentMarksTotal: c.totalWeightedMark || 0,
-      predictedGrade: c.grade || "A",
+      predictedGrade: c.grade || "",
     };
   });
 
@@ -86,20 +99,22 @@ export function computeVtopPlacementImpact(vtopProfile) {
     coreCsCredits += g.credits;
   });
 
-  const coreCsGpa = coreCsCredits > 0 ? Number((coreCsPoints / coreCsCredits).toFixed(2)) : cgpa;
+  const coreCsGpa = coreCsCredits > 0 ? Number((coreCsPoints / coreCsCredits).toFixed(2)) : (cgpa ?? 0);
 
   // Overall Placement Academic Score (0 - 100)
+  const effectiveCgpa = cgpa ?? 0;
+  const effectiveAttendance = overallAttendance ?? 0;
   let placementAcademicScore = Math.round(
-    (cgpa / 10) * 50 + // 50 pts for CGPA
+    (effectiveCgpa / 10) * 50 + // 50 pts for CGPA
       (activeArrears === 0 ? 25 : 0) + // 25 pts for zero backlogs
-      (overallAttendance >= 85 ? 15 : overallAttendance >= 75 ? 10 : 0) + // 15 pts for attendance
+      (effectiveAttendance >= 85 ? 15 : effectiveAttendance >= 75 ? 10 : 0) + // 15 pts for attendance
       (coreCsGpa >= 8.5 ? 10 : 5) // 10 pts for Core CS
   );
 
   return {
     cgpa,
     targetGoal: 9.0,
-    cgpaDeltaToSuperDream: Number((9.0 - cgpa).toFixed(2)),
+    cgpaDeltaToSuperDream: cgpa !== null ? Number((9.0 - cgpa).toFixed(2)) : null,
     activeArrears,
     historyArrears,
     overallAttendance,

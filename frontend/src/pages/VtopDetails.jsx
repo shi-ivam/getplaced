@@ -193,6 +193,93 @@ export default function VtopDetails() {
     }
   };
 
+  function getAssessmentMark(course, targetType) {
+  if (!course) return "Not available";
+  const normTarget = targetType.toUpperCase().trim(); // 'CAT1' or 'CAT2'
+  const directKey = normTarget.toLowerCase();
+
+  if (course[directKey] !== undefined && course[directKey] !== null && course[directKey] !== "") {
+    return course[directKey];
+  }
+  if (course[normTarget] !== undefined && course[normTarget] !== null && course[normTarget] !== "") {
+    return course[normTarget];
+  }
+
+  const marks = course.marks;
+  if (!marks) return "Not available";
+
+  const isMatchingTitle = (titleStr, target) => {
+    if (!titleStr || typeof titleStr !== "string") return false;
+    const clean = titleStr.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (target === "CAT1") {
+      return (
+        clean === "cat1" ||
+        clean === "cat01" ||
+        clean === "cati" ||
+        clean === "cat1theory" ||
+        clean === "cat1lab" ||
+        clean.includes("continuousassessmenttest1") ||
+        clean.includes("continuousassessmenttesti") ||
+        clean.includes("assessmenttest1") ||
+        clean.includes("assessmenttesti")
+      );
+    }
+    if (target === "CAT2") {
+      return (
+        clean === "cat2" ||
+        clean === "cat02" ||
+        clean === "catii" ||
+        clean === "cat2theory" ||
+        clean === "cat2lab" ||
+        clean.includes("continuousassessmenttest2") ||
+        clean.includes("continuousassessmenttestii") ||
+        clean.includes("assessmenttest2") ||
+        clean.includes("assessmenttestii")
+      );
+    }
+    return false;
+  };
+
+  // If marks is an Array
+  if (Array.isArray(marks)) {
+    const item = marks.find((m) => {
+      if (!m) return false;
+      const title = m.title || m.assessmentType || m.name || m.type || "";
+      return isMatchingTitle(title, normTarget);
+    });
+
+    if (item) {
+      if (item.score !== undefined && item.score !== null) {
+        return item.maxScore ? `${item.score}/${item.maxScore}` : String(item.score);
+      }
+      if (item.weightage !== undefined && item.weightage !== null) {
+        return item.maxWeightage ? `${item.weightage}/${item.maxWeightage}` : String(item.weightage);
+      }
+    }
+    return "Not available";
+  }
+
+  // If marks is an Object
+  if (typeof marks === "object") {
+    if (marks[directKey] !== undefined && marks[directKey] !== null) {
+      const val = marks[directKey];
+      return typeof val === "object" ? (val.score ?? val.weightage ?? "Not available") : val;
+    }
+    if (marks[normTarget] !== undefined && marks[normTarget] !== null) {
+      const val = marks[normTarget];
+      return typeof val === "object" ? (val.score ?? val.weightage ?? "Not available") : val;
+    }
+
+    for (const [key, val] of Object.entries(marks)) {
+      if (isMatchingTitle(key, normTarget)) {
+        return typeof val === "object" && val !== null ? (val.score ?? val.weightage ?? "Not available") : val;
+      }
+    }
+  }
+
+  return "Not available";
+}
+
   const isConnected = Boolean(vtopData && vtopData.regNo);
 
   // Active semester courses
@@ -214,14 +301,16 @@ export default function VtopDetails() {
       );
     }
     if (courseFilter === "warning") {
-      return (c.attendance?.percentage || 100) < 75;
+      const attPct = c.attendance?.percentage;
+      return attPct !== null && attPct !== undefined && attPct < 75;
     }
     return true;
   });
 
-  const attendanceAlerts = activeCourses.filter(
-    (c) => (c.attendance?.percentage || 100) < 75
-  );
+  const attendanceAlerts = activeCourses.filter((c) => {
+    const attPct = c.attendance?.percentage;
+    return attPct !== null && attPct !== undefined && attPct < 75;
+  });
 
   const formatSyncTime = (timestamp) => {
     if (!timestamp) return "Never";
@@ -337,10 +426,10 @@ export default function VtopDetails() {
                 Overall Attendance
               </span>
               <GpBadge
-                theme={(vtopData.overallAttendancePercentage || 0) >= 75 ? "mint" : "coral"}
+                theme={(vtopData.overallAttendancePercentage ?? 0) >= 75 ? "mint" : "coral"}
                 size="sm"
               >
-                {(vtopData.overallAttendancePercentage || 0) >= 75 ? "Safe" : "Warning"}
+                {(vtopData.overallAttendancePercentage ?? 0) >= 75 ? "Safe" : "Warning"}
               </GpBadge>
             </div>
             <div className="text-2xl sm:text-3xl font-black text-[#17103D]">
@@ -386,7 +475,7 @@ export default function VtopDetails() {
             </div>
             <div className="text-2xl sm:text-3xl font-black text-[#17103D]">
               {vtopData.totalCreditsRequired
-                ? Math.round(((vtopData.totalCreditsEarned || 0) / vtopData.totalCreditsRequired) * 100)
+                ? Math.round(((vtopData.totalCreditsEarned ?? 0) / vtopData.totalCreditsRequired) * 100)
                 : 0}
               %
             </div>
@@ -397,7 +486,7 @@ export default function VtopDetails() {
                   width: `${Math.min(
                     100,
                     vtopData.totalCreditsRequired
-                      ? ((vtopData.totalCreditsEarned || 0) / vtopData.totalCreditsRequired) * 100
+                      ? ((vtopData.totalCreditsEarned ?? 0) / vtopData.totalCreditsRequired) * 100
                       : 0
                   )}%`,
                 }}
@@ -422,7 +511,7 @@ export default function VtopDetails() {
               >
                 <div className="font-bold text-[#17103D] truncate">{c.title || c.code}</div>
                 <div className="text-[#C7382B] font-semibold">
-                  Current: {c.attendance?.percentage}% (Min 75% needed)
+                  Current: {c.attendance?.percentage != null ? `${c.attendance.percentage}%` : "0%"} (Min 75% needed)
                 </div>
                 <div className="text-[11px] text-[#6F6A80]">
                   {c.attendance?.attended || 0} / {c.attendance?.total || 0} classes
@@ -545,10 +634,10 @@ export default function VtopDetails() {
                           </span>
                         </td>
                         <td className="py-2.5 px-3 text-center font-mono text-[#17103D]">
-                          {c.cat1 ?? (c.marks?.cat1 ?? "Not available")}
+                          {getAssessmentMark(c, "CAT1")}
                         </td>
                         <td className="py-2.5 px-3 text-center font-mono text-[#17103D]">
-                          {c.cat2 ?? (c.marks?.cat2 ?? "Not available")}
+                          {getAssessmentMark(c, "CAT2")}
                         </td>
                         <td className="py-2.5 px-3 text-center font-bold text-[#6E44FF]">
                           {c.grade || "—"}

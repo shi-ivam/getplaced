@@ -27,7 +27,9 @@ import ResumeReportOverview from "@/components/resume/ResumeReportOverview";
 import ResumeVersionHistory from "@/components/resume/ResumeVersionHistory";
 import ResumeBuilderEditor, { DEFAULT_BUILDER_DATA } from "@/components/resume/ResumeBuilderEditor";
 
-const STORAGE_KEY = "getplaced_resume_versions";
+const getUserStorageKey = (userId) => {
+  return userId ? `getplaced_resume_versions_${userId}` : "getplaced_resume_versions_anon";
+};
 
 const DEMO_STRUCTURED_ACTIONS = [
   {
@@ -97,21 +99,45 @@ export default function AnalyzeResume() {
 
   // Version History State
   const [versions, setVersions] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [isProfileLinked, setIsProfileLinked] = useState(false);
+
+  const recordVersionSnapshot = (evalData, resumeTextVal, filename = "resume.pdf", activeUserId = null) => {
+    if (!evalData || evalData.ats_score === undefined) return;
+    const newVersion = {
+      id: `ver-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      filename: filename,
+      targetRole: targetRole || "Software Engineer",
+      atsScore: evalData.ats_score,
+      scoreTier: evalData.score_tier || "Tier 2",
+      matchedKeywords: (evalData.matched_keywords || []).map((k) => (typeof k === "string" ? k : k.keyword || "")),
+      missingKeywords: (evalData.missing_keywords || []).map((k) => (typeof k === "string" ? k : k.keyword || "")),
+      summaryCritique: evalData.summary_critique || "",
+      fullEvaluation: evalData,
+      resumeText: resumeTextVal || rawText,
+    };
+
+    setVersions((prev) => {
+      const updated = [newVersion, ...prev.filter((v) => v.id !== newVersion.id)].slice(0, 25);
+      const targetUid = activeUserId || currentUserId;
+      const userKey = getUserStorageKey(targetUid);
+      try {
+        localStorage.setItem(userKey, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
 
   useEffect(() => {
     const initResumeIntelligence = async () => {
+      let resolvedUserId = null;
       try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed)) {
-            setVersions(parsed);
-          }
+        const rawUser = localStorage.getItem("getplaced_user");
+        if (rawUser) {
+          resolvedUserId = JSON.parse(rawUser)?._id;
         }
-      } catch (e) {
-        console.warn("Could not read resume history:", e);
-      }
+      } catch (e) {}
 
       try {
         const [profileRes, coachRes] = await Promise.allSettled([
@@ -121,6 +147,33 @@ export default function AnalyzeResume() {
 
         const profileData = profileRes.status === "fulfilled" ? profileRes.value?.data : null;
         const coachData = coachRes.status === "fulfilled" ? coachRes.value?.data : null;
+
+        if (profileData?._id) {
+          resolvedUserId = profileData._id;
+        }
+        if (resolvedUserId) {
+          setCurrentUserId(resolvedUserId);
+        }
+
+        // Load per-user versions from database profile, fallback to user-scoped local storage
+        let userVersions = [];
+        if (profileData?.resumeVersions && Array.isArray(profileData.resumeVersions) && profileData.resumeVersions.length > 0) {
+          userVersions = profileData.resumeVersions;
+        } else {
+          try {
+            const userKey = getUserStorageKey(resolvedUserId);
+            const saved = localStorage.getItem(userKey);
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed)) {
+                userVersions = parsed;
+              }
+            }
+          } catch (e) {
+            console.warn("Could not read user resume history:", e);
+          }
+        }
+        setVersions(userVersions);
 
         const liveAnalysis =
           profileData?.resumeAnalysis ||
@@ -222,6 +275,9 @@ export default function AnalyzeResume() {
       setActions(actionItems);
       setActiveTab("actions");
 
+      // Record snapshot to history
+      recordVersionSnapshot(evalData, extractedResumeText, file ? file.name : "resume.pdf");
+
       // Save to history & backend profile
       try {
         await axios.post(
@@ -256,6 +312,9 @@ export default function AnalyzeResume() {
       if (newEval.structured_actions) {
         setActions(newEval.structured_actions);
       }
+      if (newEval.ats_score !== undefined) {
+        recordVersionSnapshot(newEval, updatedResumeText || rawText, "action_optimized_resume.txt");
+      }
     }
     if (updatedResumeText) {
       setRawText(updatedResumeText);
@@ -281,6 +340,8 @@ export default function AnalyzeResume() {
       const actionItems = evalData.structured_actions || DEMO_STRUCTURED_ACTIONS;
       setActions(actionItems);
       setActiveTab("overview");
+
+      recordVersionSnapshot(evalData, compiledText, "builder_resume.txt");
 
       try {
         await axios.post(

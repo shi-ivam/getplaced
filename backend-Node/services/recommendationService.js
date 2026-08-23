@@ -143,7 +143,7 @@ export async function getNextRecommendedActions(user) {
       estimatedMinutes: 25,
       impactReadinessBoost: "+3.0%",
       actionUrl: "/app/interview",
-      actionLabel: "Start Interview Prep",
+      actionLabel: "Start AI Interview",
       icon: "BrainCog",
       badgeColor: "indigo",
       dueToday: false,

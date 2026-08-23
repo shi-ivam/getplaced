@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Home,
-  User,
   Briefcase,
   FileText,
   Terminal,
@@ -52,7 +51,7 @@ const NAV_SECTIONS = [
       { title: "Study Sheets", url: "/app/sheets", icon: Layers },
       { title: "Dev Projects", url: "/app/development", icon: FolderGit2 },
       { title: "Resume ATS", url: "/app/resume", icon: FileText },
-      { title: "Interview Prep", url: "/app/interview", icon: Sparkles },
+      { title: "AI Interview", url: "/app/interview", icon: Sparkles, badge: "AI" },
       { title: "HR & Behavioral", url: "/app/hr-prep", icon: HelpCircle },
       { title: "Company Intel", url: "/app/company-intel", icon: Building2 },
     ],
@@ -72,12 +71,6 @@ const NAV_SECTIONS = [
     items: [
       { title: "Academics", url: "/app/academics", icon: GraduationCap },
       { title: "VTOP Sync", url: "/app/vtop", icon: GraduationCap, badge: "Live" },
-    ],
-  },
-  {
-    label: "Account",
-    items: [
-      { title: "Candidate Profile", url: "/app/profile", icon: User },
     ],
   },
 ];
