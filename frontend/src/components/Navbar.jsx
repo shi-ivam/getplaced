@@ -9,11 +9,11 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const navLinks = [
-    { label: "Features", path: "#features", isAnchor: true },
+    { label: "Features", path: "/#features", isAnchor: true },
     { label: "DSA Sheets", cta: "sheets", path: "/app/sheets" },
     { label: "ATS Resume", cta: "resume", path: "/app/resume" },
     { label: "Mock Interviews", cta: "interview", path: "/app/interview" },
-    { label: "FAQs", path: "#faqs", isAnchor: true },
+    { label: "FAQs", path: "/#faqs", isAnchor: true },
   ];
 
   return (
@@ -58,7 +58,7 @@ export default function Navbar() {
         {/* Action Buttons */}
         <div className="hidden md:flex items-center space-x-3">
           <Link
-            to={getCtaHref("resume", "login")}
+            to="/login"
             className="text-xs font-bold text-[#17103D] hover:text-[#6E44FF] px-3 py-1.5 transition-colors"
           >
             Log in
@@ -108,7 +108,7 @@ export default function Navbar() {
           ))}
           <div className="pt-3 border-t border-[#E2DEEC] flex flex-col space-y-2">
             <Link
-              to={getCtaHref("resume", "login")}
+              to="/login"
               onClick={() => setIsOpen(false)}
               className="w-full text-center py-2 text-xs font-bold text-[#17103D]"
             >

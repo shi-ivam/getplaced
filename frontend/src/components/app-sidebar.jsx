@@ -4,7 +4,6 @@ import {
   User,
   Briefcase,
   FileText,
-  Code2,
   Terminal,
   GraduationCap,
   Target,
@@ -17,6 +16,9 @@ import {
   ShieldCheck,
   Building2,
   HelpCircle,
+  TrendingUp,
+  Swords,
+  Award,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -30,6 +32,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const NAV_SECTIONS = [
@@ -39,6 +42,7 @@ const NAV_SECTIONS = [
       { title: "Overview", url: "/app", icon: Home },
       { title: "Career Roadmap", url: "/app/roadmap", icon: Target },
       { title: "Career Coach", url: "/app/coach", icon: Sparkles, badge: "AI" },
+      { title: "Progress Tracker", url: "/app/progress", icon: TrendingUp },
     ],
   },
   {
@@ -49,14 +53,18 @@ const NAV_SECTIONS = [
       { title: "Dev Projects", url: "/app/development", icon: FolderGit2 },
       { title: "Resume ATS", url: "/app/resume", icon: FileText },
       { title: "Interview Prep", url: "/app/interview", icon: Sparkles },
+      { title: "HR & Behavioral", url: "/app/hr-prep", icon: HelpCircle },
+      { title: "Company Intel", url: "/app/company-intel", icon: Building2 },
     ],
   },
   {
-    label: "Applications",
+    label: "Applications & Arena",
     items: [
       { title: "Jobs Market", url: "/app/jobs", icon: Briefcase },
       { title: "Role Fit AI", url: "/app/role-fit", icon: Compass },
       { title: "Can I Apply?", url: "/app/can-i-apply", icon: ShieldCheck },
+      { title: "Placement Arena", url: "/app/arena", icon: Swords },
+      { title: "Milestones", url: "/app/milestones", icon: Award },
     ],
   },
   {
@@ -77,8 +85,13 @@ const NAV_SECTIONS = [
 export default function AppSidebar({ className = "" }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isMobile, setOpenMobile } = useSidebar();
   const [userName, setUserName] = useState("Candidate");
   const [targetCompany, setTargetCompany] = useState("");
+
+  const handleNavClick = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
   useEffect(() => {
     try {
@@ -115,14 +128,32 @@ export default function AppSidebar({ className = "" }) {
   };
 
   const isCurrentActive = (url) => {
+    const currentPath = location.pathname;
     if (url === "/app") {
-      return location.pathname === "/app";
+      return currentPath === "/app";
     }
-    return location.pathname.startsWith(url);
+    if (currentPath.startsWith(url)) {
+      return true;
+    }
+    // Route aliases
+    if (url === "/app/jobs" && currentPath.startsWith("/app/job")) {
+      return true;
+    }
+    if (url === "/app/role-fit" && currentPath.startsWith("/app/which-role-fits-me")) {
+      return true;
+    }
+    if (url === "/app/sheets" && currentPath.startsWith("/app/dsa")) {
+      return true;
+    }
+    if (url === "/app/coding" && currentPath.startsWith("/app/problems")) {
+      return true;
+    }
+    return false;
   };
 
   const initials = userName
     .split(" ")
+    .filter(Boolean)
     .map((w) => w[0])
     .join("")
     .slice(0, 2)
@@ -130,13 +161,14 @@ export default function AppSidebar({ className = "" }) {
 
   return (
     <Sidebar
-      className={`border-r border-[#E2DEEC] bg-[#FFFFFF] text-[#17103D] w-[235px] shrink-0 ${className}`}
+      className={`border-r border-[#E2DEEC] bg-[#FFFFFF] text-[#17103D] w-64 shrink-0 ${className}`}
     >
       <SidebarContent className="flex flex-col justify-between h-full bg-white px-3 py-3.5">
         <div className="space-y-4">
           {/* 1. Platform Brand Header */}
           <Link
             to="/app"
+            onClick={handleNavClick}
             className="flex items-center gap-2.5 px-2 py-1 group transition-all"
           >
             <div className="w-8 h-8 rounded-xl bg-[#17103D] flex items-center justify-center text-[#FFD84D] font-black text-sm shadow-sm group-hover:bg-[#24195A] transition-colors">
@@ -155,6 +187,7 @@ export default function AppSidebar({ className = "" }) {
           {/* 2. CANDIDATE PROFILE AT THE TOP */}
           <Link
             to="/app/profile"
+            onClick={handleNavClick}
             className="flex items-center gap-2.5 p-2 rounded-2xl bg-[#F8F8F5] hover:bg-[#F2F0FA] border border-[#E2DEEC] transition-all group shadow-sm"
           >
             <div className="w-8 h-8 rounded-full bg-[#17103D] text-[#FFD84D] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
@@ -194,7 +227,7 @@ export default function AppSidebar({ className = "" }) {
                                 : "text-[#17103D]/80 hover:text-[#17103D] hover:bg-[#F2F0FA]"
                             }`}
                           >
-                            <Link to={item.url} className="flex items-center gap-2.5">
+                            <Link to={item.url} onClick={handleNavClick} className="flex items-center gap-2.5">
                               <Icon
                                 className={`w-4 h-4 shrink-0 ${
                                   active ? "text-[#FFD84D]" : "text-[#6F6A80]"
@@ -203,7 +236,7 @@ export default function AppSidebar({ className = "" }) {
                               <span className="truncate">{item.title}</span>
                               {item.badge && (
                                 <span
-                                  className={`ml-auto text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                                  className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
                                     active
                                       ? "bg-white/20 text-white"
                                       : "bg-[#EFEAFF] text-[#6E44FF]"

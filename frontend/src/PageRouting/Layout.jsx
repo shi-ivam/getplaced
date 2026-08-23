@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useLocation, Link } from "react-router-dom";
+import axios from "axios";
+import { NODE_API_URL } from "@/config/api";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/app-sidebar";
 import GlobalCoachSidekick from "@/components/coach/GlobalCoachSidekick";
@@ -9,6 +11,35 @@ import { Search, Sparkles, User, Bell } from "lucide-react";
 export default function Layout() {
   const location = useLocation();
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [userName, setUserName] = useState("Candidate");
+
+  // Load candidate info for header avatar
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("getplaced_user");
+      if (stored) {
+        const u = JSON.parse(stored);
+        if (u.name) setUserName(u.name);
+      }
+    } catch (e) {
+      console.warn("Could not read stored user:", e);
+    }
+
+    axios
+      .get(`${NODE_API_URL}/api/users/profile`, { withCredentials: true })
+      .then((res) => {
+        if (res.data?.name) setUserName(res.data.name);
+      })
+      .catch(() => {});
+  }, [location.pathname]);
+
+  const initials = userName
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "GP";
 
   // Keyboard shortcut Cmd+K or Ctrl+K
   useEffect(() => {
@@ -81,7 +112,7 @@ export default function Layout() {
                 className="w-8 h-8 rounded-full bg-[#17103D] text-[#FFD84D] flex items-center justify-center font-bold text-xs hover:scale-105 transition-transform shadow-sm"
                 title="View Profile Settings"
               >
-                GP
+                {initials}
               </Link>
             </div>
           </header>
