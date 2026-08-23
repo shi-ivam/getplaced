@@ -1,5 +1,7 @@
 # getPlaced
 
+🌐 **Live Deployment:** [https://getplaced.siqht.in](https://getplaced.siqht.in)
+
 AI-powered placement preparation and career development platform designed to supercharge interview readiness, resume optimization, and DSA progress tracking.
 
 ## Tech Stack
