@@ -112,10 +112,20 @@ Respond strictly in valid JSON matching this schema:
         if isinstance(res, dict) and "questions" in res and len(res["questions"]) > 0:
             return res["questions"]
     except Exception as e:
-        logger.error(f"AI question generation failed: {e}")
-        raise RuntimeError(f"Interview question generation failed: {e}")
+        logger.warning(f"AI question generation failed ({e}). Falling back to curated questions.")
 
-    raise RuntimeError("Failed to generate interview questions from AI model.")
+    # Graceful fallback to CURATED_HR_QUESTIONS
+    target_count = max(1, count)
+    fallback_questions = []
+    for idx in range(target_count):
+        source_q = CURATED_HR_QUESTIONS[idx % len(CURATED_HR_QUESTIONS)]
+        copied = dict(source_q)
+        copied["id"] = idx + 1
+        if difficulty:
+            copied["difficulty"] = difficulty
+        fallback_questions.append(copied)
+
+    return fallback_questions
 
 def evaluate_interview_answer(
     question: str,
