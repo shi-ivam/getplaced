@@ -7,68 +7,68 @@ export default function ToolExecutionAccordion({ toolCalls = [], executionSummar
   if (!toolCalls || toolCalls.length === 0) return null;
 
   return (
-    <div className="mb-3 rounded-xl border border-zinc-800 bg-zinc-950/60 overflow-hidden text-xs">
+    <div className="mb-3 rounded-2xl border border-[#E2DEEC] bg-[#F8F8F5] overflow-hidden text-xs shadow-xs">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-3.5 py-2 flex items-center justify-between text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 transition-colors font-mono cursor-pointer"
+        className="w-full px-3.5 py-2.5 flex items-center justify-between text-[#17103D] hover:bg-[#F2F0FA] transition-colors font-mono cursor-pointer"
       >
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-full bg-zinc-900 text-zinc-400 flex items-center justify-center border border-zinc-800">
-            <Wrench className="w-2.5 h-2.5" />
+          <div className="w-5 h-5 rounded-lg bg-[#EFEAFF] text-[#6E44FF] flex items-center justify-center border border-[#E2DEEC]">
+            <Wrench className="w-3 h-3" />
           </div>
-          <span className="text-[10px] font-semibold text-zinc-400 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded tracking-wide">
-            {toolCalls.length} Tool {toolCalls.length === 1 ? "Action" : "Actions"}
+          <span className="text-[11px] font-bold text-[#6E44FF] bg-[#EFEAFF] border border-[#E2DEEC] px-2 py-0.5 rounded-md tracking-wide">
+            {toolCalls.length} Tool {toolCalls.length === 1 ? "Action" : "Actions"} Executed
           </span>
         </div>
-        <div className="flex items-center gap-1.5 text-zinc-500">
-          <span className="text-[10px]">{isOpen ? "Hide Details" : "View Details"}</span>
+        <div className="flex items-center gap-1.5 text-[#6F6A80] font-sans font-medium text-xs">
+          <span>{isOpen ? "Hide Details" : "View Details"}</span>
           {isOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
         </div>
       </button>
 
       {isOpen && (
-        <div className="p-3 border-t border-zinc-800 bg-zinc-950/90 space-y-2 font-sans">
+        <div className="p-3 border-t border-[#E2DEEC] bg-white space-y-2.5 font-sans">
           {toolCalls.map((call, idx) => {
             const isError = call.status === "ERROR" || call.status === "FAILED" || Boolean(call.error);
             return (
               <div
                 key={idx}
-                className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 flex flex-col gap-1.5 text-[11px]"
+                className="p-3 rounded-xl bg-[#F8F8F5] border border-[#E2DEEC] flex flex-col gap-1.5 text-[11px]"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 font-mono text-zinc-200">
-                    <Wrench className="w-3 h-3 text-zinc-400" />
-                    <span className="font-semibold text-zinc-300">{call.name || `Tool #${idx + 1}`}</span>
+                  <div className="flex items-center gap-2 font-mono text-[#17103D]">
+                    <Wrench className="w-3.5 h-3.5 text-[#6E44FF]" />
+                    <span className="font-bold text-[#17103D]">{call.name || `Tool #${idx + 1}`}</span>
                   </div>
                   <span
-                    className={`flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded border ${
+                    className={`flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full border font-semibold ${
                       isError
-                        ? "text-rose-400 bg-rose-500/10 border-rose-500/20"
-                        : "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                        ? "text-[#C7382B] bg-[#FFE8E5] border-[#C7382B]/25"
+                        : "text-[#0D7A68] bg-[#D8FAF4] border-[#0D7A68]/25"
                     }`}
                   >
-                    {isError ? <AlertCircle className="w-2.5 h-2.5" /> : <CheckCircle2 className="w-2.5 h-2.5" />}
+                    {isError ? <AlertCircle className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
                     <span>{call.status || (isError ? "FAILED" : "SUCCESS")}</span>
                   </span>
                 </div>
 
                 {call.summary && (
-                  <p className="text-zinc-300 text-[11px] leading-relaxed">
+                  <p className="text-[#17103D] text-xs leading-relaxed font-medium">
                     {call.summary}
                   </p>
                 )}
 
                 {call.error && (
-                  <p className="text-rose-400 text-[10px] font-mono bg-rose-950/30 p-1.5 rounded border border-rose-900/40">
+                  <p className="text-[#C7382B] text-[11px] font-mono bg-[#FFE8E5] p-2 rounded-lg border border-[#C7382B]/20">
                     {String(call.error)}
                   </p>
                 )}
 
                 {call.args && (typeof call.args === "object" ? Object.keys(call.args).length > 0 : Boolean(call.args)) && (
-                  <div className="text-[10px] font-mono text-zinc-400 bg-zinc-950 px-2.5 py-1.5 rounded-lg border border-zinc-800 overflow-x-auto break-all">
-                    <span className="text-zinc-500">args:</span>{" "}
-                    <span>{typeof call.args === "object" ? JSON.stringify(call.args) : String(call.args)}</span>
+                  <div className="text-[10px] font-mono text-[#FFD84D] bg-[#17103D] px-3 py-2 rounded-lg border border-[#24195A] overflow-x-auto break-all">
+                    <span className="text-white/60">args:</span>{" "}
+                    <span className="text-white">{typeof call.args === "object" ? JSON.stringify(call.args) : String(call.args)}</span>
                   </div>
                 )}
               </div>

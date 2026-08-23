@@ -156,6 +156,84 @@ export const leetcodeService = {
     return response.data;
   },
 
+  // AI Coding Assistant Real-time Streaming with Resilient Fallback
+  async streamAIAssist(slugOrId, code, queryType = "hint", errorMessage = null, { onChunk, onDone, onError }) {
+    try {
+      const response = await fetch(`${API_BASE}/${slugOrId}/ai-assist-stream`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code,
+          query_type: queryType,
+          error_message: errorMessage,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Streaming endpoint returned HTTP ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+      let receivedChunk = false;
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || "";
+
+        for (const block of lines) {
+          const trimmed = block.trim();
+          if (!trimmed.startsWith("data:")) continue;
+          const payload = trimmed.slice(5).trim();
+
+          if (payload === "[DONE]") {
+            onDone?.();
+            return;
+          }
+
+          try {
+            const data = JSON.parse(payload);
+            if (data.error) {
+              throw new Error(data.error);
+            }
+            if (data.chunk) {
+              receivedChunk = true;
+              onChunk?.(data.chunk);
+            }
+          } catch (jsonErr) {
+            console.warn("Could not parse SSE JSON chunk:", payload, jsonErr);
+          }
+        }
+      }
+
+      if (receivedChunk) {
+        onDone?.();
+        return;
+      }
+      throw new Error("No stream chunks received.");
+    } catch (streamErr) {
+      console.warn("Stream failed, attempting fallback to standard AI endpoint:", streamErr.message);
+      try {
+        const fallbackRes = await this.askAIAssist(slugOrId, code, queryType, errorMessage);
+        if (fallbackRes?.response) {
+          onChunk?.(fallbackRes.response);
+          onDone?.();
+        } else {
+          onError?.(new Error("AI returned empty guidance."));
+        }
+      } catch (fallbackErr) {
+        onError?.(fallbackErr);
+      }
+    }
+  },
+
   // --- Backend Database Workspace Storage Syncing ---
 
   async fetchWorkspaceState() {

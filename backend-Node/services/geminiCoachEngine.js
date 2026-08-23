@@ -21,7 +21,7 @@ import { getProgressAnalytics, logUserActivity } from "./progressService.js";
 import { DSA_TOPICS } from "../config/dsaTaxonomy.js";
 
 // Resolve Google GenAI API Key
-function getApiKey() {
+export function getApiKey() {
   if (process.env.GOOGLE_API_KEY && process.env.GOOGLE_API_KEY !== "your_gemini_api_key") {
     return process.env.GOOGLE_API_KEY.trim();
   }
@@ -50,8 +50,23 @@ function getApiKey() {
   return "";
 }
 
-const API_KEY = getApiKey();
-const aiClient = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
+let API_KEY = getApiKey();
+let aiClient = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
+
+/**
+ * Dynamically resolves and caches the GoogleGenAI client at runtime.
+ */
+export function getActiveAiClient(injectedClient = null) {
+  if (injectedClient) return injectedClient;
+  if (aiClient) return aiClient;
+  const key = getApiKey();
+  if (key) {
+    API_KEY = key;
+    aiClient = new GoogleGenAI({ apiKey: key });
+    return aiClient;
+  }
+  return null;
+}
 
 // Model Cascade for high resilience and quota management
 const MODEL_CASCADE = [
@@ -841,6 +856,79 @@ FORMATTING, EDITORIAL TASTE & CONTENT SIMPLIFICATION:
 - Conclude responses with 2-3 concise, actionable next steps or drill suggestions.`;
 }
 
+/**
+ * Sanitizes conversation history for Gemini API:
+ * - Converts message history (sender: "user" -> role: "user", sender: "coach" -> role: "model")
+ * - Merges consecutive turns of the same role into one single turn with combined text (\n\n)
+ * - Appends userMessage properly without creating consecutive user turns
+ * - Ensures conversation starts with role: "user" (shifts any initial leading model message)
+ */
+export function sanitizeGeminiContents(conversationHistory = [], userMessage = "") {
+  const rawList = Array.isArray(conversationHistory) ? conversationHistory.slice(-10) : [];
+  const normalized = [];
+
+  for (const item of rawList) {
+    if (!item) continue;
+    let role = null;
+    if (item.sender === "user" || item.role === "user") {
+      role = "user";
+    } else if (item.sender === "coach" || item.sender === "model" || item.role === "model") {
+      role = "model";
+    }
+
+    if (!role) continue;
+
+    let text = "";
+    if (typeof item.text === "string") {
+      text = item.text.trim();
+    } else if (Array.isArray(item.parts)) {
+      text = item.parts.map((p) => (typeof p === "string" ? p : p?.text || "")).join("\n").trim();
+    } else if (typeof item.content === "string") {
+      text = item.content.trim();
+    }
+
+    if (!text) continue;
+
+    normalized.push({ role, text });
+  }
+
+  const cleanUserMsg = typeof userMessage === "string" ? userMessage.trim() : (userMessage?.text ? String(userMessage.text).trim() : "");
+
+  // Append userMessage if not already the last item in normalized history
+  if (cleanUserMsg) {
+    const lastItem = normalized[normalized.length - 1];
+    if (!lastItem || lastItem.role !== "user" || lastItem.text !== cleanUserMsg) {
+      normalized.push({ role: "user", text: cleanUserMsg });
+    }
+  }
+
+  // Merge consecutive turns of the same role into one single turn
+  const merged = [];
+  for (const item of normalized) {
+    if (merged.length > 0 && merged[merged.length - 1].role === item.role) {
+      merged[merged.length - 1].text += `\n\n${item.text}`;
+    } else {
+      merged.push({ role: item.role, text: item.text });
+    }
+  }
+
+  // Ensure conversation starts with role: "user" (shift any initial leading model message)
+  while (merged.length > 0 && merged[0].role !== "user") {
+    merged.shift();
+  }
+
+  // Fallback to at least one user message if history was completely empty or stripped
+  if (merged.length === 0) {
+    merged.push({ role: "user", text: cleanUserMsg || "Hello" });
+  }
+
+  // Format into standard Gemini contents structure
+  return merged.map((m) => ({
+    role: m.role,
+    parts: [{ text: m.text }],
+  }));
+}
+
 // Autonomous Multi-Turn Gemini Agent Loop
 export async function runGeminiCoachTurn({
   userMessage,
@@ -850,7 +938,7 @@ export async function runGeminiCoachTurn({
   maxToolTurns = 5,
   injectedClient = null,
 }) {
-  const activeAiClient = injectedClient || aiClient;
+  const activeAiClient = getActiveAiClient(injectedClient);
   if (!activeAiClient) {
     return {
       replyText: "AI Engine Configuration Note: Google GenAI API Key is required. Please set GOOGLE_API_KEY in your environment or root `.API_KEY` file.",
@@ -865,21 +953,8 @@ export async function runGeminiCoachTurn({
   const systemInstruction = buildCoachSystemPrompt(user?.name, user);
   const toolDeclarations = [{ functionDeclarations: COACH_TOOL_DECLARATIONS }];
 
-  // Build conversation history contents for Gemini
-  const contents = [];
-
-  // Include up to last 10 turns of history for rich context
-  const recentHistory = Array.isArray(conversationHistory) ? conversationHistory.slice(-10) : [];
-  for (const h of recentHistory) {
-    if (h.sender === "user") {
-      contents.push({ role: "user", parts: [{ text: h.text }] });
-    } else if (h.sender === "coach") {
-      contents.push({ role: "model", parts: [{ text: h.text }] });
-    }
-  }
-
-  // Append current user prompt
-  contents.push({ role: "user", parts: [{ text: String(userMessage || "") }] });
+  // Build sanitized conversation history contents for Gemini
+  const contents = sanitizeGeminiContents(conversationHistory, userMessage);
 
   const toolCallsExecuted = [];
   const executionSummary = [];
@@ -926,6 +1001,8 @@ export async function runGeminiCoachTurn({
         contents.push(response.candidates[0].content);
       }
 
+      const functionResponseParts = [];
+
       // Execute each tool in sequence
       for (const call of functionCalls) {
         const toolName = call.name;
@@ -943,17 +1020,19 @@ export async function runGeminiCoachTurn({
         executionSummary.push(telemetry.summary);
         accumulatedMutations = { ...accumulatedMutations, ...mutations };
 
-        // Append function response turn for Gemini
+        functionResponseParts.push({
+          functionResponse: {
+            name: toolName,
+            response: result,
+          },
+        });
+      }
+
+      // Batch all function executions into a single message with role: "user"
+      if (functionResponseParts.length > 0) {
         contents.push({
           role: "user",
-          parts: [
-            {
-              functionResponse: {
-                name: toolName,
-                response: result,
-              },
-            },
-          ],
+          parts: functionResponseParts,
         });
       }
     } else {

@@ -1,21 +1,16 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import {
-  AlertCircle,
-  Loader2,
-  Sparkles,
-  KeyRound,
-  Eye,
-  EyeOff,
-  ArrowRight,
-  ShieldCheck,
-} from "lucide-react";
+import { AlertCircle, Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
-import GpBadge from "@/components/gp/GpBadge";
+import { getCtaFeature } from "@/config/ctaFeatures";
 
 export function LoginForm({ className = "", ...rest }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
+  const ctaParam = searchParams.get("cta") || searchParams.get("feature");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -46,23 +41,24 @@ export function LoginForm({ className = "", ...rest }) {
         localStorage.setItem("getplaced_user", JSON.stringify(res.data));
       }
 
-      if (res.data && res.data.onboardingCompleted === false) {
-        navigate("/app");
-      } else {
-        navigate("/app");
+      // Determine redirect path
+      let destination = "/app";
+      if (redirectParam) {
+        destination = redirectParam;
+      } else if (ctaParam) {
+        const feature = getCtaFeature(ctaParam);
+        destination = feature?.targetPath || "/app";
       }
+
+      navigate(destination);
     } catch (err) {
-      console.error("Login attempt error:", err);
+      console.error("Login error:", err);
       if (!err.response) {
-        setError("Connection failed. Please check your internet connection and try again.");
-      } else if (err.response.status === 404) {
-        setError("No account exists with this email address.");
-      } else if (err.response.status === 401) {
-        setError("Email or password is incorrect. Please check your credentials.");
+        setError("Connection failed. Please check your internet connection.");
+      } else if (err.response.status === 404 || err.response.status === 401) {
+        setError("Invalid email or password.");
       } else {
-        setError(
-          err.response?.data?.message || "We could not complete sign in. Please try again."
-        );
+        setError(err.response?.data?.message || "Sign in failed. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -76,123 +72,85 @@ export function LoginForm({ className = "", ...rest }) {
   };
 
   return (
-    <div className={`w-full max-w-md mx-auto ${className}`} {...rest}>
-      <div className="bg-white border border-[#E2DEEC] rounded-2xl p-6 sm:p-8 shadow-[0_8px_30px_rgba(23,16,61,0.06)] space-y-6 text-[#17103D]">
-        {/* Header */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <GpBadge theme="light-purple" size="sm">
-              <KeyRound className="w-3.5 h-3.5 mr-1" />
-              Secure Sign In
-            </GpBadge>
-            <Link to="/" className="text-xs text-[#6F6A80] hover:text-[#17103D] font-medium">
-              Back to Home &rarr;
-            </Link>
-          </div>
-
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#17103D] tracking-tight">
-              Sign In to GetPlaced
-            </h1>
-            <p className="text-xs sm:text-sm text-[#6F6A80] mt-1">
-              Access your personalized placement readiness cockpit and roadmap.
-            </p>
-          </div>
+    <form onSubmit={handleSubmit} className={`space-y-4 w-full ${className}`} {...rest}>
+      {/* Error Alert */}
+      {error && (
+        <div className="p-3.5 rounded-lg bg-[#FDEBEC] border border-[#F5C2C4] text-[#9F2F2D] text-sm font-medium flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{error}</span>
         </div>
+      )}
 
-        {/* Error Alert */}
-        {error && (
-          <div className="p-3.5 rounded-xl bg-[#FFE8E5] border border-[#FFC5B7] text-[#C7382B] text-xs font-semibold flex items-center gap-2.5 animate-in fade-in duration-150">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label htmlFor="email" className="block text-xs font-semibold text-[#6F6A80]">
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="candidate@university.edu"
-              required
-              disabled={loading}
-              className="w-full bg-[#F8F8F5] border border-[#E2DEEC] rounded-xl px-3.5 py-2.5 text-sm text-[#17103D] placeholder-[#6F6A80]/50 focus:outline-none focus:border-[#6E44FF] focus:ring-2 focus:ring-[#6E44FF]/10 transition-all"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label htmlFor="password" className="block text-xs font-semibold text-[#6F6A80]">
-                Password
-              </label>
-            </div>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
-                required
-                disabled={loading}
-                className="w-full bg-[#F8F8F5] border border-[#E2DEEC] rounded-xl px-3.5 py-2.5 text-sm text-[#17103D] placeholder-[#6F6A80]/50 focus:outline-none focus:border-[#6E44FF] focus:ring-2 focus:ring-[#6E44FF]/10 transition-all pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6F6A80] hover:text-[#17103D] transition-colors"
-                title={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-
-          <div className="pt-2 space-y-3">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 rounded-xl bg-[#17103D] hover:bg-[#24195A] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-[#FFD84D]" />
-                  <span>Authenticating...</span>
-                </>
-              ) : (
-                <>
-                  <span>Sign In</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={handleAutofillDemo}
-              disabled={loading}
-              className="w-full py-2 rounded-xl border border-[#E2DEEC] bg-[#F8F8F5] hover:bg-[#F2F0FA] text-[#17103D] text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#6E44FF]" />
-              <span>Fill Demo Credentials</span>
-            </button>
-          </div>
-
-          <div className="pt-4 border-t border-[#E2DEEC] text-center text-xs text-[#6F6A80]">
-            Don&apos;t have an account yet?{" "}
-            <Link to="/register" className="font-bold text-[#6E44FF] hover:underline">
-              Create free account
-            </Link>
-          </div>
-        </form>
+      <div className="space-y-1.5">
+        <label htmlFor="email" className="block text-sm font-medium text-[#111111]">
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="name@university.edu"
+          required
+          disabled={loading}
+          className="w-full bg-white border border-[#EAEAEA] rounded-lg px-3.5 py-2.5 text-sm text-[#111111] placeholder-[#787774]/50 focus:outline-none focus:border-[#111111] transition-colors"
+        />
       </div>
-    </div>
+
+      <div className="space-y-1.5">
+        <label htmlFor="password" className="block text-sm font-medium text-[#111111]">
+          Password
+        </label>
+        <div className="relative">
+          <input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••••••"
+            required
+            disabled={loading}
+            className="w-full bg-white border border-[#EAEAEA] rounded-lg px-3.5 py-2.5 text-sm text-[#111111] placeholder-[#787774]/50 focus:outline-none focus:border-[#111111] transition-colors pr-10"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            tabIndex={-1}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#787774] hover:text-[#111111] transition-colors"
+          >
+            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+
+      <div className="pt-2 space-y-2">
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-2.5 rounded-lg bg-[#111111] hover:bg-[#333333] active:scale-[0.99] text-white text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Signing in...</span>
+            </>
+          ) : (
+            <>
+              <span>Sign In</span>
+              <ArrowRight className="w-4 h-4" />
+            </>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleAutofillDemo}
+          disabled={loading}
+          className="w-full py-2 text-xs font-medium text-[#787774] hover:text-[#111111] transition-colors cursor-pointer text-center"
+        >
+          Fill demo account (test@example.com)
+        </button>
+      </div>
+    </form>
   );
 }

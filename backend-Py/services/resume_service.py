@@ -515,6 +515,7 @@ def improve_bullet_point(bullet: str, target_role: Optional[str] = None, keyword
     """
     kw_str = ", ".join(keywords) if keywords else "industry standards"
     role_str = target_role or "Software Engineer"
+    bullet_json = json.dumps(bullet)
 
     prompt = f"""
 Rewrite this resume bullet point into top-tier, high-impact statements following Google's XYZ formula ("Accomplished [X], as measured by [Y], by doing [Z]").
@@ -523,11 +524,11 @@ Target Role: {role_str}
 Keywords/Skills to consider: {kw_str}
 
 Original Bullet:
-\"{bullet}\"
+{bullet_json}
 
 Return strictly valid JSON with this structure:
 {{
-  "original": "{bullet}",
+  "original": {bullet_json},
   "improved_xyz": "<primary high impact XYZ rewrite>",
   "alternative_versions": [
     "<alternative version focusing on speed/performance>",
@@ -543,6 +544,8 @@ Return strictly valid JSON with this structure:
         raw = query_gemini(prompt, json_mode=True)
         res = extract_json(raw)
         if isinstance(res, dict) and "improved_xyz" in res:
+            if not res.get("original"):
+                res["original"] = bullet
             return res
     except Exception as e:
         logger.error(f"Gemini bullet improver failed: {e}")
@@ -555,6 +558,7 @@ def optimize_resume_section(section_type: str, content: str, target_role: Option
     Optimizes a specific resume section (Summary, Experience, Projects, Skills) for target role/JD.
     """
     role = target_role or "Software Engineer"
+    section_json = json.dumps(section_type)
     prompt = f"""
 Optimize this resume section ({section_type}) for a candidate targeting '{role}'.
 {"Target Job Description: " + job_description[:1500] if job_description else ""}
@@ -566,7 +570,7 @@ Current Section Content:
 
 Return strictly valid JSON:
 {{
-  "section_type": "{section_type}",
+  "section_type": {section_json},
   "optimized_content": "<polished, professional, ATS-optimized version with strong phrasing and keywords>",
   "suggestions": [
     "<specific reason why this phrasing is superior>",
@@ -579,6 +583,8 @@ Return strictly valid JSON:
         raw = query_gemini(prompt, json_mode=True)
         res = extract_json(raw)
         if isinstance(res, dict) and "optimized_content" in res:
+            if not res.get("section_type"):
+                res["section_type"] = section_type
             return res
     except Exception as e:
         logger.error(f"Section optimization failed: {e}")

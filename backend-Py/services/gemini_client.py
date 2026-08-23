@@ -70,29 +70,70 @@ def query_gemini(prompt: str, system_instruction: Optional[str] = None, json_mod
 
 def extract_json(text: str) -> Any:
     """
-    Safely extracts and parses JSON from model output that might contain markdown fences or extra text.
+    Safely extracts and parses JSON from model output that might contain markdown fences,
+    trailing commas, or conversational padding.
     """
     if not text:
         return None
 
     cleaned = text.strip()
-    if cleaned.startswith("```json"):
+
+    # 1. Direct parse attempt
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        pass
+
+    # 2. Strip markdown fences if present
+    fence_match = re.search(r"```(?:json|JSON)?\s*([\s\S]*?)\s*```", cleaned)
+    if fence_match:
+        fence_content = fence_match.group(1).strip()
+        try:
+            return json.loads(fence_content)
+        except json.JSONDecodeError:
+            cleaned = fence_content
+
+    if cleaned.startswith("```json") or cleaned.startswith("```JSON"):
         cleaned = cleaned[7:]
     elif cleaned.startswith("```"):
         cleaned = cleaned[3:]
     if cleaned.endswith("```"):
         cleaned = cleaned[:-3]
-
     cleaned = cleaned.strip()
 
     try:
         return json.loads(cleaned)
     except json.JSONDecodeError:
-        match = re.search(r"(\{.*\}|\[.*\])", cleaned, re.DOTALL)
-        if match:
-            try:
-                return json.loads(match.group(1))
-            except json.JSONDecodeError:
-                pass
+        pass
 
-        raise ValueError(f"Failed to parse JSON from AI response: {text[:200]}...")
+    # 3. Locate outermost JSON object or array
+    match = re.search(r"(\{[\s\S]*\}|\[[\s\S]*\])", cleaned)
+    candidate = match.group(1).strip() if match else cleaned
+
+    try:
+        return json.loads(candidate)
+    except json.JSONDecodeError:
+        pass
+
+    # 4. Remove trailing commas before closing braces/brackets
+    no_trailing = re.sub(r",\s*([\]}])", r"\1", candidate)
+    try:
+        return json.loads(no_trailing)
+    except json.JSONDecodeError:
+        pass
+
+    # 5. Try fixing trailing commas across full cleaned text
+    no_trailing_all = re.sub(r",\s*([\]}])", r"\1", cleaned)
+    try:
+        return json.loads(no_trailing_all)
+    except json.JSONDecodeError:
+        pass
+
+    match_all = re.search(r"(\{[\s\S]*\}|\[[\s\S]*\])", no_trailing_all)
+    if match_all:
+        try:
+            return json.loads(match_all.group(1).strip())
+        except json.JSONDecodeError:
+            pass
+
+    raise ValueError(f"Failed to parse JSON from AI response: {text[:200]}...")

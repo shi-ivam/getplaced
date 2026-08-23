@@ -1,11 +1,25 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Cpu, FileSearch, Code2, Sparkles, Target, BarChart3, Bot, Zap, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
+import {
+  Cpu,
+  FileSearch,
+  Code2,
+  Sparkles,
+  Target,
+  BarChart3,
+  Bot,
+  Zap,
+  CheckCircle2,
+  XCircle,
+  ArrowRight,
+} from "lucide-react";
 import axios from "axios";
 import { NODE_API_URL } from "@/config/api";
 import GpBadge from "@/components/gp/GpBadge";
 import GpCard from "@/components/gp/GpCard";
 import GpButton from "@/components/gp/GpButton";
+import { getCtaHref } from "@/utils/authUtils";
 
 const FeaturesGrid = () => {
   const [telemetryData, setTelemetryData] = useState({
@@ -169,149 +183,185 @@ const FeaturesGrid = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           
           {/* Bento Card 1: Technical Interview Simulation (Span 2) */}
-          <GpCard
-            theme="light-purple"
-            shadow="lg"
-            className="col-span-1 md:col-span-2 p-8 flex flex-col justify-between"
+          <Link
+            to={getCtaHref("interview", "login", "/app/interview")}
+            className="col-span-1 md:col-span-2 block group text-inherit"
           >
-            <div>
-              <div className="w-12 h-12 rounded-2xl bg-white border-2 border-[#0D0431] flex items-center justify-center text-[#0D0431] mb-6 shadow-[3px_3px_0_0_#0D0431]">
-                <Bot className="w-6 h-6 text-[#896EE2]" />
+            <GpCard
+              theme="light-purple"
+              shadow="lg"
+              className="p-8 flex flex-col justify-between h-full group-hover:border-[#6E44FF] transition-all group-hover:-translate-y-1"
+            >
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-white border-2 border-[#0D0431] flex items-center justify-center text-[#0D0431] mb-6 shadow-[3px_3px_0_0_#0D0431] group-hover:scale-105 transition-transform">
+                  <Bot className="w-6 h-6 text-[#896EE2]" />
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-2xl font-heading font-bold text-[#0D0431]">
+                    Technical Interview Simulation
+                  </h3>
+                  <ArrowRight className="w-5 h-5 text-[#0D0431] opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <p className="text-[#0D0431]/80 text-sm leading-relaxed mb-6 font-medium">
+                  Simulate high-stakes coding, architectural, and behavioral rounds with intelligent AI interviewers that challenge your assumptions in real time.
+                </p>
               </div>
-              <h3 className="text-2xl font-heading font-bold text-[#0D0431] mb-2">
-                Technical Interview Simulation
-              </h3>
-              <p className="text-[#0D0431]/80 text-sm leading-relaxed mb-6 font-medium">
-                Simulate high-stakes coding, architectural, and behavioral rounds with intelligent AI interviewers that challenge your assumptions in real time.
-              </p>
-            </div>
 
-            <div className="p-4 rounded-xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
-              <div className="flex justify-between text-xs font-mono font-bold text-[#0D0431] mb-2">
-                <span>AI_ASSESSMENT</span>
-                <span className="text-[#896EE2]">{telemetryData.accuracy} ACCURACY</span>
+              <div className="p-4 rounded-xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
+                <div className="flex justify-between text-xs font-mono font-bold text-[#0D0431] mb-2">
+                  <span>AI_ASSESSMENT</span>
+                  <span className="text-[#896EE2]">{telemetryData.accuracy} ACCURACY</span>
+                </div>
+                <div className="h-3 w-full bg-[#E4CDFB] rounded-full border border-[#0D0431] overflow-hidden">
+                  <div className="h-full bg-[#896EE2] w-[94%] rounded-full" />
+                </div>
               </div>
-              <div className="h-3 w-full bg-[#E4CDFB] rounded-full border border-[#0D0431] overflow-hidden">
-                <div className="h-full bg-[#896EE2] w-[94%] rounded-full" />
-              </div>
-            </div>
-          </GpCard>
+            </GpCard>
+          </Link>
 
           {/* Bento Card 2: ATS Resume Score (Span 2) */}
-          <GpCard
-            theme="pale-lime"
-            shadow="lg"
-            className="col-span-1 md:col-span-2 p-8 flex flex-col justify-between"
+          <Link
+            to={getCtaHref("resume", "login", "/app/resume")}
+            className="col-span-1 md:col-span-2 block group text-inherit"
           >
-            <div>
-              <div className="w-12 h-12 rounded-2xl bg-white border-2 border-[#0D0431] flex items-center justify-center text-[#0D0431] mb-6 shadow-[3px_3px_0_0_#0D0431]">
-                <FileSearch className="w-6 h-6 text-[#0D0431]" />
+            <GpCard
+              theme="pale-lime"
+              shadow="lg"
+              className="p-8 flex flex-col justify-between h-full group-hover:border-[#0D7A68] transition-all group-hover:-translate-y-1"
+            >
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-white border-2 border-[#0D0431] flex items-center justify-center text-[#0D0431] mb-6 shadow-[3px_3px_0_0_#0D0431] group-hover:scale-105 transition-transform">
+                  <FileSearch className="w-6 h-6 text-[#0D0431]" />
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-2xl font-heading font-bold text-[#0D0431]">
+                    ATS Resume Optimization
+                  </h3>
+                  <ArrowRight className="w-5 h-5 text-[#0D0431] opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <p className="text-[#0D0431]/80 text-sm leading-relaxed mb-6 font-medium">
+                  Instant parsing against real hiring rubrics. Discover missing tech stacks, verify action verbs, and format for maximum recruiter callback rates.
+                </p>
               </div>
-              <h3 className="text-2xl font-heading font-bold text-[#0D0431] mb-2">
-                ATS Resume Optimization
-              </h3>
-              <p className="text-[#0D0431]/80 text-sm leading-relaxed mb-6 font-medium">
-                Instant parsing against real hiring rubrics. Discover missing tech stacks, verify action verbs, and format for maximum recruiter callback rates.
-              </p>
-            </div>
 
-            <div className="p-4 rounded-xl bg-white border-2 border-[#0D0431] flex items-center justify-between shadow-[3px_3px_0_0_#0D0431]">
-              <div className="font-heading font-bold text-xs text-[#0D0431] uppercase">Verified ATS Score</div>
-              <div className="text-3xl font-heading font-black text-[#0D0431]">{telemetryData.atsScore}%</div>
-            </div>
-          </GpCard>
+              <div className="p-4 rounded-xl bg-white border-2 border-[#0D0431] flex items-center justify-between shadow-[3px_3px_0_0_#0D0431]">
+                <div className="font-heading font-bold text-xs text-[#0D0431] uppercase">Verified ATS Score</div>
+                <div className="text-3xl font-heading font-black text-[#0D0431]">{telemetryData.atsScore}%</div>
+              </div>
+            </GpCard>
+          </Link>
 
           {/* Bento Card 3: 2800+ Question Arena */}
-          <GpCard
-            theme="light-blue"
-            shadow="default"
-            className="col-span-1 md:col-span-1 p-6 flex flex-col justify-between"
+          <Link
+            to={getCtaHref("coding", "login", "/app/coding")}
+            className="col-span-1 md:col-span-1 block group text-inherit"
           >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-white border-2 border-[#0D0431] flex items-center justify-center mb-4 shadow-[2px_2px_0_0_#0D0431]">
-                <Code2 className="w-5 h-5 text-[#63A0F8]" />
+            <GpCard
+              theme="light-blue"
+              shadow="default"
+              className="p-6 flex flex-col justify-between h-full group-hover:border-[#1D58B5] transition-all group-hover:-translate-y-1"
+            >
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-white border-2 border-[#0D0431] flex items-center justify-center mb-4 shadow-[2px_2px_0_0_#0D0431] group-hover:scale-105 transition-transform">
+                  <Code2 className="w-5 h-5 text-[#63A0F8]" />
+                </div>
+                <h4 className="font-heading font-bold text-lg text-[#0D0431] mb-1">
+                  2,800+ Problem Arena
+                </h4>
+                <p className="text-xs text-[#0D0431]/75 font-medium leading-relaxed">
+                  Monaco IDE sandbox with multi-language execution, custom test suites, and LeetCode sync.
+                </p>
               </div>
-              <h4 className="font-heading font-bold text-lg text-[#0D0431] mb-1">
-                2,800+ Problem Arena
-              </h4>
-              <p className="text-xs text-[#0D0431]/75 font-medium leading-relaxed">
-                Monaco IDE sandbox with multi-language execution, custom test suites, and LeetCode sync.
-              </p>
-            </div>
-            <div className="mt-4 pt-3 border-t-2 border-[#0D0431] flex items-center justify-between text-xs font-bold text-[#0D0431]">
-              <span>Explore Arena</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </GpCard>
+              <div className="mt-4 pt-3 border-t-2 border-[#0D0431] flex items-center justify-between text-xs font-bold text-[#0D0431]">
+                <span>Explore Arena</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </GpCard>
+          </Link>
 
           {/* Bento Card 4: Company Dossiers */}
-          <GpCard
-            theme="white"
-            shadow="default"
-            className="col-span-1 md:col-span-1 p-6 flex flex-col justify-between"
+          <Link
+            to={getCtaHref("company_intel", "login", "/app/company-intel")}
+            className="col-span-1 md:col-span-1 block group text-inherit"
           >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-[#FEDF6A] border-2 border-[#0D0431] flex items-center justify-center mb-4 shadow-[2px_2px_0_0_#0D0431]">
-                <BarChart3 className="w-5 h-5 text-[#0D0431]" />
+            <GpCard
+              theme="white"
+              shadow="default"
+              className="p-6 flex flex-col justify-between h-full group-hover:border-[#9E6700] transition-all group-hover:-translate-y-1"
+            >
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-[#FEDF6A] border-2 border-[#0D0431] flex items-center justify-center mb-4 shadow-[2px_2px_0_0_#0D0431] group-hover:scale-105 transition-transform">
+                  <BarChart3 className="w-5 h-5 text-[#0D0431]" />
+                </div>
+                <h4 className="font-heading font-bold text-lg text-[#0D0431] mb-1">
+                  Company Intelligence
+                </h4>
+                <p className="text-xs text-[#0D0431]/75 font-medium leading-relaxed">
+                  Detailed breakdowns of hiring bars, CTC brackets, interview round formats, and recent candidate questions.
+                </p>
               </div>
-              <h4 className="font-heading font-bold text-lg text-[#0D0431] mb-1">
-                Company Intelligence
-              </h4>
-              <p className="text-xs text-[#0D0431]/75 font-medium leading-relaxed">
-                Detailed breakdowns of hiring bars, CTC brackets, interview round formats, and recent candidate questions.
-              </p>
-            </div>
-            <div className="mt-4 pt-3 border-t-2 border-[#0D0431] flex items-center justify-between text-xs font-bold text-[#0D0431]">
-              <span>View Intel</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </GpCard>
+              <div className="mt-4 pt-3 border-t-2 border-[#0D0431] flex items-center justify-between text-xs font-bold text-[#0D0431]">
+                <span>View Intel</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </GpCard>
+          </Link>
 
           {/* Bento Card 5: Behavioral STAR Engine */}
-          <GpCard
-            theme="light-green"
-            shadow="default"
-            className="col-span-1 md:col-span-1 p-6 flex flex-col justify-between"
+          <Link
+            to={getCtaHref("hr_prep", "login", "/app/hr-prep")}
+            className="col-span-1 md:col-span-1 block group text-inherit"
           >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-white border-2 border-[#0D0431] flex items-center justify-center mb-4 shadow-[2px_2px_0_0_#0D0431]">
-                <Sparkles className="w-5 h-5 text-[#0D0431]" />
+            <GpCard
+              theme="light-green"
+              shadow="default"
+              className="p-6 flex flex-col justify-between h-full group-hover:border-[#0D7A68] transition-all group-hover:-translate-y-1"
+            >
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-white border-2 border-[#0D0431] flex items-center justify-center mb-4 shadow-[2px_2px_0_0_#0D0431] group-hover:scale-105 transition-transform">
+                  <Sparkles className="w-5 h-5 text-[#0D0431]" />
+                </div>
+                <h4 className="font-heading font-bold text-lg text-[#0D0431] mb-1">
+                  HR & STAR Prep
+                </h4>
+                <p className="text-xs text-[#0D0431]/75 font-medium leading-relaxed">
+                  Structure storytelling with Situation, Task, Action, and Result frameworks analyzed by AI.
+                </p>
               </div>
-              <h4 className="font-heading font-bold text-lg text-[#0D0431] mb-1">
-                HR & STAR Prep
-              </h4>
-              <p className="text-xs text-[#0D0431]/75 font-medium leading-relaxed">
-                Structure storytelling with Situation, Task, Action, and Result frameworks analyzed by AI.
-              </p>
-            </div>
-            <div className="mt-4 pt-3 border-t-2 border-[#0D0431] flex items-center justify-between text-xs font-bold text-[#0D0431]">
-              <span>Practice STAR</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </GpCard>
+              <div className="mt-4 pt-3 border-t-2 border-[#0D0431] flex items-center justify-between text-xs font-bold text-[#0D0431]">
+                <span>Practice STAR</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </GpCard>
+          </Link>
 
           {/* Bento Card 6: Readiness Score */}
-          <GpCard
-            theme="white"
-            shadow="default"
-            className="col-span-1 md:col-span-1 p-6 flex flex-col justify-between"
+          <Link
+            to={getCtaHref("roadmap", "login", "/app/roadmap")}
+            className="col-span-1 md:col-span-1 block group text-inherit"
           >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-[#FFC5B7] border-2 border-[#0D0431] flex items-center justify-center mb-4 shadow-[2px_2px_0_0_#0D0431]">
-                <Target className="w-5 h-5 text-[#0D0431]" />
+            <GpCard
+              theme="white"
+              shadow="default"
+              className="p-6 flex flex-col justify-between h-full group-hover:border-[#6E44FF] transition-all group-hover:-translate-y-1"
+            >
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-[#FFC5B7] border-2 border-[#0D0431] flex items-center justify-center mb-4 shadow-[2px_2px_0_0_#0D0431] group-hover:scale-105 transition-transform">
+                  <Target className="w-5 h-5 text-[#0D0431]" />
+                </div>
+                <h4 className="font-heading font-bold text-lg text-[#0D0431] mb-1">
+                  Readiness Index ({telemetryData.readinessScore}/100)
+                </h4>
+                <p className="text-xs text-[#0D0431]/75 font-medium leading-relaxed">
+                  Dynamic telemetry score synthesizing DSA performance, speech confidence, and resume quality.
+                </p>
               </div>
-              <h4 className="font-heading font-bold text-lg text-[#0D0431] mb-1">
-                Readiness Index ({telemetryData.readinessScore}/100)
-              </h4>
-              <p className="text-xs text-[#0D0431]/75 font-medium leading-relaxed">
-                Dynamic telemetry score synthesizing DSA performance, speech confidence, and resume quality.
-              </p>
-            </div>
-            <div className="mt-4 pt-3 border-t-2 border-[#0D0431] flex items-center justify-between text-xs font-bold text-[#0D0431]">
-              <span>Score Breakdown</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </GpCard>
+              <div className="mt-4 pt-3 border-t-2 border-[#0D0431] flex items-center justify-between text-xs font-bold text-[#0D0431]">
+                <span>Score Breakdown</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </GpCard>
+          </Link>
 
         </div>
 

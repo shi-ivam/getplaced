@@ -208,9 +208,9 @@ export default function CodingArena() {
   return (
     <main
       ref={containerRef}
-      className="min-h-screen bg-[#FEF9CF] u-background-grid-yellow text-[#0D0431] overflow-x-hidden w-full font-sans selection:bg-[#FEDF6A] selection:text-[#0D0431] py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
+      className="w-full min-w-0 font-sans selection:bg-[#FEDF6A] selection:text-[#0D0431] py-2 sm:py-4 overflow-x-hidden"
     >
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="w-full max-w-6xl mx-auto space-y-8 min-w-0">
         
         {/* Workspace Top Header */}
         <header className="gsap-reveal flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b-2 border-[#0D0431] pb-6">

@@ -7,10 +7,11 @@ import requests
 import pdfplumber
 import pytesseract
 from pdf2image import convert_from_path
+import json
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 import google.generativeai as genai
 
@@ -26,7 +27,7 @@ from services.leetcode_service import (
     init_db
 )
 from services.code_runner import run_sample_tests, submit_solution
-from services.ai_assistant import get_ai_code_assistance
+from services.ai_assistant import get_ai_code_assistance, stream_ai_code_assistance
 from services.sheets_service import (
     get_all_sheets_overview,
     get_sheet_details,
@@ -550,6 +551,38 @@ def ai_assist_endpoint(slug_or_id: str, req: AIAssistRequest):
         return {"response": feedback, "query_type": req.query_type}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI Assistance failed: {str(e)}")
+
+@app.post("/api/problems/{slug_or_id}/ai-assist-stream")
+async def ai_assist_stream_endpoint(slug_or_id: str, req: AIAssistRequest):
+    prob = get_problem_by_slug_or_id(slug_or_id)
+    if not prob:
+        raise HTTPException(status_code=404, detail=f"Problem '{slug_or_id}' not found.")
+
+    async def event_stream():
+        try:
+            for text_chunk in stream_ai_code_assistance(
+                problem_title=prob["title"],
+                problem_description=prob["problem_description"],
+                user_code=req.code,
+                query_type=req.query_type,
+                error_message=req.error_message
+            ):
+                if text_chunk:
+                    yield f"data: {json.dumps({'chunk': text_chunk})}\n\n"
+            yield "data: [DONE]\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+            "Content-Type": "text/event-stream; charset=utf-8",
+        }
+    )
 
 
 # ==========================================

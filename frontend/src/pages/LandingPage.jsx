@@ -6,6 +6,7 @@ import FeaturesGrid from "./Feature";
 import Footer from "./Footer";
 import GpMarquee from "../components/gp/GpMarquee";
 import GpBadge from "../components/gp/GpBadge";
+import { getCtaHref } from "@/utils/authUtils";
 import {
   ChevronDown,
   ArrowRight,
@@ -30,30 +31,40 @@ function WorkflowSection() {
       title: "Set Ambition & Profile",
       desc: "Select your dream employer (e.g. Microsoft, Google) and target role to calibrate your benchmark roadmap.",
       icon: Target,
+      cta: "roadmap",
+      targetPath: "/app/roadmap",
     },
     {
       num: "02",
       title: "Master DSA Playlists",
       desc: "Solve structured topic sheets (Striver A2Z, Blind 75, SDE 180) with offline tutorials and Monaco IDE sandboxes.",
       icon: Code2,
+      cta: "sheets",
+      targetPath: "/app/sheets",
     },
     {
       num: "03",
       title: "Optimize ATS Resume",
       desc: "Audit your resume against company screening algorithms and apply 1-click XYZ impact rewrites.",
       icon: FileText,
+      cta: "resume",
+      targetPath: "/app/resume",
     },
     {
       num: "04",
       title: "Simulate Mock Interviews",
       desc: "Practice technical architecture and STAR behavioral questions with adaptive AI feedback.",
       icon: BrainCog,
+      cta: "interview",
+      targetPath: "/app/interview",
     },
     {
       num: "05",
       title: "Apply with High Confidence",
       desc: "Match verified readiness against curated job openings and university eligibility criteria.",
       icon: ShieldCheck,
+      cta: "jobs",
+      targetPath: "/app/jobs",
     },
   ];
 
@@ -76,24 +87,32 @@ function WorkflowSection() {
           {steps.map((s, idx) => {
             const Icon = s.icon;
             return (
-              <div
+              <Link
                 key={idx}
-                className="p-5 rounded-2xl bg-white border border-[#E2DEEC] shadow-sm flex flex-col justify-between space-y-3 hover:border-[#6E44FF] transition-all hover:-translate-y-0.5"
+                to={getCtaHref(s.cta, "login", s.targetPath)}
+                className="p-5 rounded-2xl bg-white border border-[#E2DEEC] shadow-sm flex flex-col justify-between space-y-3 hover:border-[#6E44FF] transition-all hover:-translate-y-1 group block"
               >
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold text-[#6E44FF] bg-[#EFEAFF] px-2 py-0.5 rounded-lg">
+                    <span className="text-xs font-mono font-bold text-[#6E44FF] bg-[#EFEAFF] px-2 py-0.5 rounded-lg group-hover:bg-[#6E44FF] group-hover:text-white transition-colors">
                       {s.num}
                     </span>
-                    <Icon className="w-4 h-4 text-[#17103D]" />
+                    <Icon className="w-4 h-4 text-[#17103D] group-hover:text-[#6E44FF] transition-colors" />
                   </div>
 
-                  <h3 className="text-sm font-bold text-[#17103D]">{s.title}</h3>
+                  <h3 className="text-sm font-bold text-[#17103D] group-hover:text-[#6E44FF] transition-colors">
+                    {s.title}
+                  </h3>
                   <p className="text-xs text-[#6F6A80] leading-relaxed">
                     {s.desc}
                   </p>
                 </div>
-              </div>
+
+                <div className="pt-2 flex items-center gap-1 text-[11px] font-bold text-[#6E44FF] opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span>Explore Step</span>
+                  <ArrowRight className="w-3 h-3" />
+                </div>
+              </Link>
             );
           })}
         </div>
@@ -204,8 +223,8 @@ function FinalCtaSection() {
 
         <div className="pt-2">
           <Link
-            to="/register"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-[#FFD84D] hover:bg-[#FEDF6A] text-[#17103D] font-bold text-sm transition-all shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+            to={getCtaHref("general", "register")}
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-[#FFD84D] hover:bg-[#FEDF6A] text-[#17103D] font-bold text-sm transition-all shadow-lg hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
           >
             <span>Get Started for Free</span>
             <ArrowRight className="w-4 h-4" />

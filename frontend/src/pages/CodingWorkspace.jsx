@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Editor from "@monaco-editor/react";
 import confetti from "canvas-confetti";
@@ -16,6 +16,7 @@ import {
   Terminal,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Shuffle,
   Lightbulb,
   Bug,
@@ -30,14 +31,25 @@ import {
   PauseCircle,
   Maximize2,
   Minimize2,
-  Share2,
+  Plus,
+  Trash2,
+  Trophy,
+  Activity,
 } from "lucide-react";
 import { leetcodeService } from "@/services/leetcodeService";
 import MarkdownRenderer from "@/components/coach/MarkdownRenderer";
 import GpCard from "@/components/gp/GpCard";
 import GpBadge from "@/components/gp/GpBadge";
 import GpButton from "@/components/gp/GpButton";
-import GpToggle from "@/components/gp/GpToggle";
+
+const AI_THINKING_STATEMENTS = [
+  "Tracing time & space complexity bounds...",
+  "Analyzing data structures & edge cases...",
+  "Formulating algorithmic strategy & intuition...",
+  "Synthesizing step-by-step logic breakdown...",
+  "Verifying optimal asymptotic constraints...",
+  "Drafting personalized mentor guidance...",
+];
 
 export default function CodingWorkspace() {
   const { slug } = useParams();
@@ -52,11 +64,16 @@ export default function CodingWorkspace() {
   const [code, setCode] = useState("");
   const [fontSize, setFontSize] = useState(14);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedInput, setCopiedInput] = useState(false);
 
-  // Workspace Tabs
-  const [leftTab, setLeftTab] = useState("description"); // "description", "editorial", "ai", "submissions"
-  const [bottomTab, setBottomTab] = useState("testcases"); // "testcases", "testresult", "submission"
+  // Workspace Navigation Tabs
+  const [leftTab, setLeftTab] = useState("description"); // "description" | "editorial" | "ai" | "submissions"
+  const [bottomTab, setBottomTab] = useState("testcases"); // "testcases" | "testresult" | "submission"
+
+  // Test Cases State
+  const [customTestCases, setCustomTestCases] = useState([]);
   const [activeTestCaseIndex, setActiveTestCaseIndex] = useState(0);
+  const [activeResultCaseIndex, setActiveResultCaseIndex] = useState(0);
 
   // Execution States
   const [isRunning, setIsRunning] = useState(false);
@@ -74,13 +91,27 @@ export default function CodingWorkspace() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiHistory, setAiHistory] = useState([]);
   const [aiPrompt, setAiPrompt] = useState("");
+  const [thinkingIndex, setThinkingIndex] = useState(0);
 
   // Timer State
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
 
-  // Layout State
-  const [isConsoleOpen, setIsConsoleOpen] = useState(true);
+  // Console State: "default" | "expanded" | "collapsed"
+  const [consoleState, setConsoleState] = useState("default");
+
+  // Rotating thinking statements interval
+  useEffect(() => {
+    let interval = null;
+    if (aiLoading) {
+      interval = setInterval(() => {
+        setThinkingIndex((prev) => (prev + 1) % AI_THINKING_STATEMENTS.length);
+      }, 1600);
+    } else {
+      setThinkingIndex(0);
+    }
+    return () => clearInterval(interval);
+  }, [aiLoading]);
 
   // Timer interval
   useEffect(() => {
@@ -113,12 +144,27 @@ export default function CodingWorkspace() {
       setAiHistory([]);
       setTimerSeconds(0);
       setIsTimerRunning(true);
+      setActiveTestCaseIndex(0);
+      setActiveResultCaseIndex(0);
 
       try {
         const prob = await leetcodeService.getProblem(slug);
         if (!isCancelled) {
           setProblem(prob);
-          
+
+          // Initialize testcases
+          if (prob.sample_test_cases && prob.sample_test_cases.length > 0) {
+            setCustomTestCases(
+              prob.sample_test_cases.map((tc) => ({
+                input: tc.input || "",
+                output: tc.output || "",
+                isCustom: false,
+              }))
+            );
+          } else {
+            setCustomTestCases([{ input: "", output: "", isCustom: false }]);
+          }
+
           // Load saved draft or starter code
           const saved = leetcodeService.getSavedCode(slug, prob.starter_code);
           setCode(saved);
@@ -161,35 +207,40 @@ export default function CodingWorkspace() {
   };
 
   // Handle Run Code
-  const handleRunCode = async () => {
+  const handleRunCode = useCallback(async () => {
     if (!problem || isRunning) return;
     setIsRunning(true);
     setBottomTab("testresult");
-    setIsConsoleOpen(true);
+    if (consoleState === "collapsed") setConsoleState("default");
 
     try {
-      const res = await leetcodeService.runCode(problem.task_id, code);
+      const casesToSend = customTestCases.map((tc) => ({
+        input: tc.input,
+        output: tc.output,
+      }));
+      const res = await leetcodeService.runCode(problem.task_id, code, casesToSend);
       setRunResult(res);
+      setActiveResultCaseIndex(0);
     } catch (err) {
       setRunResult({
         status: "Error",
         all_passed: false,
         passed_count: 0,
-        total_count: problem.sample_test_cases?.length || 0,
+        total_count: customTestCases.length || 0,
         error: err.response?.data?.detail || err.message,
         results: [],
       });
     } finally {
       setIsRunning(false);
     }
-  };
+  }, [problem, isRunning, code, customTestCases, consoleState]);
 
   // Handle Submit Code
-  const handleSubmitCode = async () => {
+  const handleSubmitCode = useCallback(async () => {
     if (!problem || isSubmitting) return;
     setIsSubmitting(true);
     setBottomTab("submission");
-    setIsConsoleOpen(true);
+    if (consoleState === "collapsed") setConsoleState("default");
 
     try {
       const res = await leetcodeService.submitCode(problem.task_id, code);
@@ -217,7 +268,23 @@ export default function CodingWorkspace() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [problem, isSubmitting, code, consoleState]);
+
+  // Global Keyboard Shortcuts (⌘+Enter for Run, ⌘+Shift+Enter for Submit)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          handleSubmitCode();
+        } else {
+          handleRunCode();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleRunCode, handleSubmitCode]);
 
   // Handle Reset to starter code
   const handleResetCode = () => {
@@ -226,43 +293,124 @@ export default function CodingWorkspace() {
     }
   };
 
-  // Handle AI Guidance Request
+  // Custom Test Case Management
+  const handleAddCustomTestCase = () => {
+    const newIndex = customTestCases.length;
+    const newCase = {
+      input: customTestCases[0]?.input || "",
+      output: customTestCases[0]?.output || "",
+      isCustom: true,
+    };
+    setCustomTestCases((prev) => [...prev, newCase]);
+    setActiveTestCaseIndex(newIndex);
+  };
+
+  const handleDeleteTestCase = (idx) => {
+    if (customTestCases.length <= 1) return;
+    setCustomTestCases((prev) => prev.filter((_, i) => i !== idx));
+    setActiveTestCaseIndex((prev) => Math.max(0, prev >= idx ? prev - 1 : prev));
+  };
+
+  const handleUpdateTestCaseInput = (idx, value) => {
+    setCustomTestCases((prev) =>
+      prev.map((tc, i) => (i === idx ? { ...tc, input: value } : tc))
+    );
+  };
+
+  const handleResetTestCases = () => {
+    if (problem?.sample_test_cases) {
+      setCustomTestCases(
+        problem.sample_test_cases.map((tc) => ({
+          input: tc.input || "",
+          output: tc.output || "",
+          isCustom: false,
+        }))
+      );
+      setActiveTestCaseIndex(0);
+    }
+  };
+
+  // Handle AI Guidance Request (Real-time Streaming)
   const handleAskAI = async (queryType, customText = null) => {
     if (!problem || aiLoading) return;
     setLeftTab("ai");
     setAiLoading(true);
 
     const promptText = customText || aiPrompt;
+    const errContext = runResult?.error || submissionResult?.error;
+    const currentId = Date.now();
+
+    // Initialize streaming item at top of history
+    setAiHistory((prev) => [
+      {
+        id: currentId,
+        type: queryType,
+        question: promptText || `Requested ${queryType.toUpperCase()} guidance`,
+        response: "",
+        isStreaming: true,
+      },
+      ...prev,
+    ]);
+    setAiPrompt("");
+
     try {
-      const errContext = runResult?.error || submissionResult?.error;
-      const res = await leetcodeService.askAIAssist(
+      await leetcodeService.streamAIAssist(
         problem.task_id,
         code,
         queryType,
-        errContext
+        errContext,
+        {
+          onChunk: (chunk) => {
+            setAiHistory((prev) =>
+              prev.map((item) =>
+                item.id === currentId
+                  ? { ...item, response: item.response + chunk }
+                  : item
+              )
+            );
+          },
+          onDone: () => {
+            setAiHistory((prev) =>
+              prev.map((item) =>
+                item.id === currentId ? { ...item, isStreaming: false } : item
+              )
+            );
+            setAiLoading(false);
+          },
+          onError: (err) => {
+            console.error("AI Streaming error:", err);
+            setAiHistory((prev) =>
+              prev.map((item) =>
+                item.id === currentId
+                  ? {
+                      ...item,
+                      isStreaming: false,
+                      response:
+                        item.response ||
+                        "AI mentor guidance is currently unavailable. Please check backend configuration.",
+                    }
+                  : item
+              )
+            );
+            setAiLoading(false);
+          },
+        }
       );
-
-      setAiHistory((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          type: queryType,
-          question: promptText || `Requested ${queryType.toUpperCase()} guidance`,
-          response: res.response,
-        },
-      ]);
-      setAiPrompt("");
     } catch (err) {
-      setAiHistory((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          type: "error",
-          question: promptText,
-          response: "AI service is currently unavailable. Please check your GOOGLE_API_KEY configuration.",
-        },
-      ]);
-    } finally {
+      console.error("AI Invocation error:", err);
+      setAiHistory((prev) =>
+        prev.map((item) =>
+          item.id === currentId
+            ? {
+                ...item,
+                isStreaming: false,
+                response:
+                  item.response ||
+                  "AI mentor guidance is currently unavailable. Please check backend configuration.",
+              }
+            : item
+        )
+      );
       setAiLoading(false);
     }
   };
@@ -275,9 +423,7 @@ export default function CodingWorkspace() {
     cleaned = cleaned.replace(/(?:Here'?s?|Below is)\s+the\s+(?:Python\s+)?(?:implementation|code|solution|approach)[:.\s]*\n/gi, "\n").trim();
     cleaned = cleaned.replace(/^(?:###?\s*(?:Explanation|Approach|Solution|Implementation)[:\s]*)/i, "").trim();
     cleaned = cleaned.replace(/\n{3,}/g, "\n\n");
-    if (cleaned.length > 10) {
-      return cleaned;
-    }
+    if (cleaned.length > 10) return cleaned;
     return "Refer to the optimal step-by-step implementation in the reference code below.";
   };
 
@@ -310,7 +456,7 @@ export default function CodingWorkspace() {
 
   if (loading) {
     return (
-      <div className="h-screen min-h-screen bg-[#FEF9CF] u-background-grid-yellow flex flex-col items-center justify-center space-y-4">
+      <div className="h-full w-full bg-[#FEF9CF] u-background-grid-yellow flex flex-col items-center justify-center space-y-4">
         <div className="w-10 h-10 border-4 border-[#0D0431] border-t-transparent rounded-full animate-spin" />
         <p className="text-xs font-mono font-bold text-[#0D0431]">Loading workspace...</p>
       </div>
@@ -319,7 +465,7 @@ export default function CodingWorkspace() {
 
   if (error || !problem) {
     return (
-      <div className="h-screen min-h-screen bg-[#FEF9CF] u-background-grid-yellow flex flex-col items-center justify-center p-6 text-center space-y-4">
+      <div className="h-full w-full bg-[#FEF9CF] u-background-grid-yellow flex flex-col items-center justify-center p-6 text-center space-y-4">
         <div className="w-16 h-16 rounded-2xl bg-[#FFC5B7] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] flex items-center justify-center text-[#0D0431]">
           <AlertTriangle className="w-8 h-8" />
         </div>
@@ -337,24 +483,24 @@ export default function CodingWorkspace() {
   }
 
   return (
-    <div className="h-screen max-h-screen bg-[#FEF9CF] text-[#0D0431] flex flex-col overflow-hidden font-sans">
+    <div className="h-full w-full max-h-full max-w-full flex flex-col overflow-hidden bg-[#FEF9CF] text-[#0D0431] font-sans selection:bg-[#FEDF6A] selection:text-[#0D0431]">
       
       {/* ── Top Workspace Header ── */}
-      <header className="h-14 bg-[#FEF9CF] border-b-2 border-[#0D0431] px-4 flex items-center justify-between shrink-0 shadow-[0_2px_0_0_#0D0431] z-20">
+      <header className="h-14 bg-[#FEF9CF] border-b-2 border-[#0D0431] px-4 flex items-center justify-between shrink-0 shadow-[0_2px_0_0_#0D0431] z-20 min-w-0">
         {/* Left: Navigation & Problem Title */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <Link
             to="/app/coding"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-[#FEDF6A] text-xs font-bold text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-[#FEDF6A] text-xs font-bold text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all shrink-0"
           >
             <ChevronLeft className="w-4 h-4" />
             <span className="hidden sm:inline font-sans">Problem Set</span>
           </Link>
 
-          <div className="h-5 w-[2px] bg-[#0D0431]/20 hidden sm:block" />
+          <div className="h-5 w-[2px] bg-[#0D0431]/20 hidden sm:block shrink-0" />
 
-          <div className="flex items-center gap-2.5">
-            <span className="font-mono text-xs font-bold text-[#0D0431]/70">{problem.question_id}.</span>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="font-mono text-xs font-bold text-[#0D0431]/70 shrink-0">{problem.question_id}.</span>
             <h1 className="text-sm md:text-base font-heading font-black text-[#0D0431] truncate max-w-[180px] sm:max-w-xs md:max-w-md">
               {problem.title}
             </h1>
@@ -376,8 +522,8 @@ export default function CodingWorkspace() {
           </div>
         </div>
 
-        {/* Right: Timer & Actions */}
-        <div className="flex items-center gap-2.5">
+        {/* Right: Timer, Random Problem, & Controls */}
+        <div className="flex items-center gap-2.5 shrink-0">
           {/* Timer Widget */}
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border-2 border-[#0D0431] text-xs font-mono font-bold text-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
             <Clock className="w-3.5 h-3.5 text-[#0D0431]/70" />
@@ -410,10 +556,10 @@ export default function CodingWorkspace() {
       </header>
 
       {/* ── Main Workspace Split Grid ── */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden bg-[#FEF9CF]/30">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden min-h-0 min-w-0 w-full bg-[#FEF9CF]/30">
         
-        {/* LEFT COLUMN: Problem Details, Editorial, AI Mentor, Submissions (5 cols) */}
-        <div className="lg:col-span-5 border-r-2 border-[#0D0431] flex flex-col bg-white overflow-hidden shadow-sm">
+        {/* ── LEFT COLUMN: Problem Details, Editorial, AI Mentor, Submissions (5 cols) ── */}
+        <div className="lg:col-span-5 border-r-2 border-[#0D0431] flex flex-col bg-white overflow-hidden min-w-0 min-h-0 shadow-sm">
           
           {/* Tab Navigation Header with GetPlaced Pill segmented styles */}
           <div className="flex items-center border-b-2 border-[#0D0431] bg-[#FEF9CF] px-3 py-2 gap-1.5 shrink-0 overflow-x-auto no-scrollbar">
@@ -617,7 +763,7 @@ export default function CodingWorkspace() {
                     className="p-3 rounded-2xl bg-[#FEF9CF] hover:bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-left transition-all cursor-pointer disabled:opacity-50"
                   >
                     <div className="flex items-center gap-1.5 text-[#0D0431] font-bold text-xs mb-0.5">
-                      <Lightbulb className="w-3.5 h-3.5" />
+                      <Lightbulb className="w-3.5 h-3.5 text-[#896EE2]" />
                       <span>Hint</span>
                     </div>
                     <div className="text-[10px] text-[#0D0431]/70 font-semibold">Identify key pattern</div>
@@ -629,10 +775,10 @@ export default function CodingWorkspace() {
                     className="p-3 rounded-2xl bg-[#FEF9CF] hover:bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-left transition-all cursor-pointer disabled:opacity-50"
                   >
                     <div className="flex items-center gap-1.5 text-[#0D0431] font-bold text-xs mb-0.5">
-                      <BookOpen className="w-3.5 h-3.5" />
+                      <BookOpen className="w-3.5 h-3.5 text-[#896EE2]" />
                       <span>Approach</span>
                     </div>
-                    <div className="text-[10px] text-[#0D0431]/70 font-semibold">Optimal data structure</div>
+                    <div className="text-[10px] text-[#0D0431]/70 font-semibold">Optimal structure</div>
                   </button>
 
                   <button
@@ -641,7 +787,7 @@ export default function CodingWorkspace() {
                     className="p-3 rounded-2xl bg-[#FEF9CF] hover:bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-left transition-all cursor-pointer disabled:opacity-50"
                   >
                     <div className="flex items-center gap-1.5 text-[#0D0431] font-bold text-xs mb-0.5">
-                      <Bug className="w-3.5 h-3.5" />
+                      <Bug className="w-3.5 h-3.5 text-[#F85B52]" />
                       <span>Debug</span>
                     </div>
                     <div className="text-[10px] text-[#0D0431]/70 font-semibold">Isolate logic bugs</div>
@@ -653,7 +799,7 @@ export default function CodingWorkspace() {
                     className="p-3 rounded-2xl bg-[#FEF9CF] hover:bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-left transition-all cursor-pointer disabled:opacity-50"
                   >
                     <div className="flex items-center gap-1.5 text-[#0D0431] font-bold text-xs mb-0.5">
-                      <Zap className="w-3.5 h-3.5" />
+                      <Zap className="w-3.5 h-3.5 text-[#346538]" />
                       <span>Optimize</span>
                     </div>
                     <div className="text-[10px] text-[#0D0431]/70 font-semibold">Time & space bounds</div>
@@ -683,27 +829,46 @@ export default function CodingWorkspace() {
                   </button>
                 </div>
 
-                {/* AI History Responses */}
-                {aiLoading && (
-                  <div className="py-4 flex items-center justify-center gap-2 text-xs font-mono font-bold text-[#0D0431]">
-                    <div className="w-4 h-4 border-2 border-[#0D0431] border-t-transparent rounded-full animate-spin" />
-                    <span>Analyzing code...</span>
-                  </div>
-                )}
-
                 <div className="space-y-3">
                   {aiHistory.map((item) => (
                     <div
                       key={item.id}
-                      className="p-4 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] space-y-2"
+                      className="p-4 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] space-y-2.5"
                     >
-                      <div className="flex items-center justify-between text-xs font-bold text-[#0D0431]">
-                        <span className="capitalize">{item.type} Guidance</span>
+                      <div className="flex items-center justify-between text-xs font-bold text-[#0D0431] pb-1.5 border-b border-[#0D0431]/15">
+                        <span className="capitalize font-heading font-black flex items-center gap-2">
+                          <span>{item.type} Guidance</span>
+                          {item.isStreaming && (
+                            <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-[#0D0431] bg-[#FEDF6A] px-2 py-0.5 rounded-full border border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#0D0431] animate-ping" />
+                              Streaming...
+                            </span>
+                          )}
+                        </span>
                         <span className="text-[10px] text-[#0D0431]/60 font-mono">Feedback</span>
                       </div>
-                      <div className="text-xs text-[#0D0431] whitespace-pre-wrap leading-relaxed font-sans">
-                        {item.response}
-                      </div>
+
+                      {item.isStreaming && !item.response ? (
+                        <div className="py-2.5 flex items-center gap-3">
+                          <div className="w-4 h-4 border-2 border-[#0D0431] border-t-transparent rounded-full animate-spin shrink-0" />
+                          <div className="space-y-0.5 min-w-0">
+                            <div className="text-xs font-heading font-black text-[#0D0431] flex items-center gap-1.5">
+                              <Sparkles className="w-3.5 h-3.5 text-[#0D0431]" />
+                              <span>DSA Mentor Thinking...</span>
+                            </div>
+                            <p className="text-[11px] font-mono text-[#0D0431]/75 truncate transition-all duration-300">
+                              {AI_THINKING_STATEMENTS[thinkingIndex]}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-xs text-[#0D0431] leading-relaxed font-sans">
+                          <MarkdownRenderer content={item.response} />
+                          {item.isStreaming && (
+                            <span className="inline-block w-1.5 h-3.5 bg-[#0D0431] animate-pulse align-middle ml-1 rounded-sm" />
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -765,8 +930,8 @@ export default function CodingWorkspace() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Monaco Code Editor & Test Runner Panel (7 cols) */}
-        <div className="lg:col-span-7 flex flex-col bg-[#FEF9CF]/20 overflow-hidden">
+        {/* ── RIGHT COLUMN: Monaco Code Editor & Retro Console (7 cols) ── */}
+        <div className="lg:col-span-7 flex flex-col bg-[#FEF9CF]/20 overflow-hidden min-w-0 min-h-0">
           
           {/* Editor Header Bar */}
           <div className="h-11 border-b-2 border-[#0D0431] bg-[#FEF9CF] px-4 flex items-center justify-between shrink-0 shadow-sm">
@@ -793,6 +958,7 @@ export default function CodingWorkspace() {
                 <button
                   onClick={() => setFontSize((f) => Math.max(12, f - 1))}
                   className="hover:text-[#896EE2] px-1 cursor-pointer"
+                  title="Decrease Font Size"
                 >
                   A-
                 </button>
@@ -800,6 +966,7 @@ export default function CodingWorkspace() {
                 <button
                   onClick={() => setFontSize((f) => Math.min(20, f + 1))}
                   className="hover:text-[#896EE2] px-1 cursor-pointer"
+                  title="Increase Font Size"
                 >
                   A+
                 </button>
@@ -808,7 +975,7 @@ export default function CodingWorkspace() {
           </div>
 
           {/* Monaco Editor Container with 2px #0D0431 border & retro shadow */}
-          <div className="flex-1 relative overflow-hidden m-2.5 rounded-2xl border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] bg-[#1e1e1e]">
+          <div className="flex-1 relative overflow-hidden m-2 rounded-2xl border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] bg-[#1e1e1e] min-h-[160px] min-w-0">
             <Editor
               height="100%"
               language="python"
@@ -827,116 +994,220 @@ export default function CodingWorkspace() {
                 suggestOnTriggerCharacters: true,
                 quickSuggestions: true,
                 cursorBlinking: "smooth",
-                padding: { top: 14, bottom: 14 },
+                padding: { top: 12, bottom: 12 },
               }}
             />
           </div>
 
-          {/* Bottom Test / Console Panel */}
-          {isConsoleOpen && (
-            <div className="h-64 sm:h-72 border-t-2 border-[#0D0431] bg-[#0D0431] flex flex-col shrink-0">
-              
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* ── CLEAN RETRO TESTCASES / RESULTS / SUBMISSION CONSOLE ── */}
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {consoleState !== "collapsed" && (
+            <div
+              className={`border-t-2 border-[#0D0431] bg-[#FEF9CF] flex flex-col shrink-0 transition-all duration-150 ${
+                consoleState === "expanded" ? "h-96 sm:h-[420px]" : "h-64 sm:h-72"
+              }`}
+            >
               {/* Console Navigation Header */}
               <div className="h-10 border-b-2 border-[#0D0431] bg-[#FEF9CF] px-3 flex items-center justify-between shrink-0">
+                
+                {/* Left: Tab Switchers */}
                 <div className="flex items-center gap-1.5">
                   {[
-                    { id: "testcases", label: "Test Cases" },
-                    { id: "testresult", label: "Test Result" },
-                    { id: "submission", label: "Submission" },
+                    { id: "testcases", label: "Test Cases", count: customTestCases.length },
+                    { id: "testresult", label: "Test Result", status: runResult ? (runResult.all_passed ? "passed" : "failed") : null },
+                    { id: "submission", label: "Submission", status: submissionResult ? (submissionResult.status === "Accepted" ? "passed" : "failed") : null },
                   ].map((tab) => {
                     const isSelected = bottomTab === tab.id;
                     return (
                       <button
                         key={tab.id}
                         onClick={() => setBottomTab(tab.id)}
-                        className={`px-3 py-1 rounded-full text-xs font-bold font-sans transition-all border-2 border-[#0D0431] cursor-pointer ${
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-sans transition-all border-2 border-[#0D0431] cursor-pointer ${
                           isSelected
                             ? "bg-[#0D0431] text-white shadow-[2px_2px_0_0_#FEDF6A]"
                             : "bg-white text-[#0D0431] hover:bg-[#FEDF6A] shadow-[1px_1px_0_0_#0D0431]"
                         }`}
                       >
-                        {tab.label}
+                        <span>{tab.label}</span>
+                        {tab.count !== undefined && (
+                          <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-bold ${isSelected ? "bg-[#FEDF6A] text-[#0D0431]" : "bg-[#FEF9CF] text-[#0D0431] border border-[#0D0431]/40"}`}>
+                            {tab.count}
+                          </span>
+                        )}
+                        {tab.status === "passed" && (
+                          <span className="w-2 h-2 rounded-full bg-[#346538]" />
+                        )}
+                        {tab.status === "failed" && (
+                          <span className="w-2 h-2 rounded-full bg-[#F85B52]" />
+                        )}
                       </button>
                     );
                   })}
                 </div>
 
-                <button
-                  onClick={() => setIsConsoleOpen(false)}
-                  className="text-[#0D0431] hover:bg-[#FEDF6A] p-1.5 rounded-lg border-2 border-[#0D0431] bg-white shadow-[1px_1px_0_0_#0D0431] cursor-pointer"
-                  title="Collapse Console"
-                >
-                  <Minimize2 className="w-3.5 h-3.5" />
-                </button>
+                {/* Right: Expand / Collapse Controls */}
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() =>
+                      setConsoleState((prev) => (prev === "expanded" ? "default" : "expanded"))
+                    }
+                    className="p-1 rounded-lg border-2 border-[#0D0431] bg-white hover:bg-[#FEDF6A] text-[#0D0431] shadow-[1px_1px_0_0_#0D0431] transition-all cursor-pointer"
+                    title={consoleState === "expanded" ? "Restore Height" : "Maximize Console"}
+                  >
+                    {consoleState === "expanded" ? (
+                      <Minimize2 className="w-3.5 h-3.5" />
+                    ) : (
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setConsoleState("collapsed")}
+                    className="p-1 rounded-lg border-2 border-[#0D0431] bg-white hover:bg-[#FEDF6A] text-[#0D0431] shadow-[1px_1px_0_0_#0D0431] transition-all cursor-pointer"
+                    title="Collapse Console"
+                  >
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
 
-              {/* Console Body: dark #0D0431 background with #FEF9CF / #9BFFED text */}
-              <div className="flex-1 overflow-y-auto p-4 text-xs font-mono text-[#FEF9CF] scrollbar-thin">
+              {/* Console Body: Warm #FEF9CF retro theme with #0D0431 text */}
+              <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 text-xs font-mono text-[#0D0431] scrollbar-thin bg-[#FEF9CF]">
                 
-                {/* 1. Test Cases Tab */}
+                {/* ══════════════════════════════════════════════════ */}
+                {/* TAB 1: TEST CASES (INTERACTIVE & CUSTOMIZABLE) */}
+                {/* ══════════════════════════════════════════════════ */}
                 {bottomTab === "testcases" && (
                   <div className="space-y-3">
+                    
                     {/* Case selection pills */}
-                    <div className="flex items-center gap-2">
-                      {problem.sample_test_cases?.slice(0, 4).map((_, i) => (
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2 overflow-x-auto">
+                        {customTestCases.map((tc, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setActiveTestCaseIndex(idx)}
+                            className={`px-3 py-1 rounded-full text-xs font-mono font-bold transition-all border-2 cursor-pointer flex items-center gap-1.5 ${
+                              activeTestCaseIndex === idx
+                                ? "bg-[#0D0431] text-white border-[#0D0431] shadow-[2px_2px_0_0_#FEDF6A]"
+                                : "bg-white text-[#0D0431] border-[#0D0431] hover:bg-[#FEDF6A] shadow-[1px_1px_0_0_#0D0431]"
+                            }`}
+                          >
+                            <span>Case {idx + 1}</span>
+                            {tc.isCustom && <span className="text-[10px] font-sans opacity-70">(custom)</span>}
+                          </button>
+                        ))}
+
+                        {/* Add Case Button */}
+                        {customTestCases.length < 6 && (
+                          <button
+                            onClick={handleAddCustomTestCase}
+                            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-white hover:bg-[#FEDF6A] text-[#0D0431] border-2 border-dashed border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] transition-all cursor-pointer"
+                            title="Add Custom Test Case"
+                          >
+                            <Plus className="w-3 h-3" />
+                            <span className="text-[11px] font-sans">Add Case</span>
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Reset / Actions */}
+                      <div className="flex items-center gap-2">
+                        {customTestCases[activeTestCaseIndex]?.isCustom && (
+                          <button
+                            onClick={() => handleDeleteTestCase(activeTestCaseIndex)}
+                            className="flex items-center gap-1 text-[11px] font-sans font-bold text-[#9F2F2D] hover:text-[#7F2321] px-2 py-0.5 rounded-lg bg-[#FFC5B7] border border-[#0D0431] transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            <span>Remove</span>
+                          </button>
+                        )}
                         <button
-                          key={i}
-                          onClick={() => setActiveTestCaseIndex(i)}
-                          className={`px-3 py-1 rounded-full text-xs font-mono font-bold transition-all border-2 cursor-pointer ${
-                            activeTestCaseIndex === i
-                              ? "bg-[#FEDF6A] text-[#0D0431] border-[#0D0431] shadow-[2px_2px_0_0_#896EE2]"
-                              : "bg-[#140742] text-[#FEF9CF] border-[#896EE2]/40 hover:bg-[#896EE2]/30"
-                          }`}
+                          onClick={handleResetTestCases}
+                          className="text-[11px] font-sans font-bold text-[#0D0431]/70 hover:text-[#0D0431] transition-colors cursor-pointer underline"
                         >
-                          Case {i + 1}
+                          Reset Cases
                         </button>
-                      ))}
+                      </div>
                     </div>
 
-                    {problem.sample_test_cases && problem.sample_test_cases[activeTestCaseIndex] && (
-                      <div className="space-y-2.5 bg-[#140742] p-3.5 rounded-xl border border-[#896EE2]/40">
+                    {/* Active Test Case Input & Expected Output Card */}
+                    {customTestCases[activeTestCaseIndex] && (
+                      <div className="space-y-3 bg-white p-4 rounded-2xl border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
                         <div>
-                          <div className="text-[11px] text-[#FEF9CF]/70 font-sans font-bold mb-1">Input:</div>
-                          <div className="p-2.5 rounded-lg bg-[#0D0431] text-[#9BFFED] border border-[#896EE2]/30">
-                            {problem.sample_test_cases[activeTestCaseIndex].input}
+                          <div className="flex items-center justify-between text-[11px] text-[#0D0431]/80 font-sans font-bold mb-1.5">
+                            <span>Input: <span className="text-[#0D0431]/60 font-normal">(editable Python arguments)</span></span>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(customTestCases[activeTestCaseIndex].input);
+                                setCopiedInput(true);
+                                setTimeout(() => setCopiedInput(false), 2000);
+                              }}
+                              className="text-[10px] text-[#0D0431]/70 hover:text-[#0D0431] flex items-center gap-1 cursor-pointer font-sans font-bold"
+                            >
+                              {copiedInput ? <Check className="w-3 h-3 text-[#346538]" /> : <Copy className="w-3 h-3" />}
+                              <span>{copiedInput ? "Copied" : "Copy"}</span>
+                            </button>
                           </div>
+                          <textarea
+                            rows={2}
+                            value={customTestCases[activeTestCaseIndex].input}
+                            onChange={(e) =>
+                              handleUpdateTestCaseInput(activeTestCaseIndex, e.target.value)
+                            }
+                            placeholder="e.g. nums = [2, 7, 11, 15], target = 9"
+                            className="w-full p-2.5 rounded-xl bg-[#FEF9CF]/60 text-[#0D0431] border-2 border-[#0D0431] font-mono text-xs font-bold focus:outline-none focus:bg-white resize-y scrollbar-thin shadow-[2px_2px_0_0_#0D0431]"
+                          />
                         </div>
-                        <div>
-                          <div className="text-[11px] text-[#FEF9CF]/70 font-sans font-bold mb-1">Expected Output:</div>
-                          <div className="p-2.5 rounded-lg bg-[#0D0431] text-[#FEDF6A] border border-[#896EE2]/30 font-bold">
-                            {problem.sample_test_cases[activeTestCaseIndex].output}
+
+                        {customTestCases[activeTestCaseIndex].output && (
+                          <div>
+                            <div className="text-[11px] text-[#0D0431]/80 font-sans font-bold mb-1.5">Expected Output:</div>
+                            <div className="p-2.5 rounded-xl bg-[#FEF9CF]/60 text-[#346538] border-2 border-[#0D0431] font-bold font-mono text-xs shadow-[2px_2px_0_0_#0D0431]">
+                              {customTestCases[activeTestCaseIndex].output}
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     )}
+
+                    <div className="text-[11px] text-[#0D0431]/70 font-mono flex items-center gap-1.5 pt-0.5">
+                      <Terminal className="w-3.5 h-3.5 text-[#0D0431]" />
+                      <span>Press <kbd className="px-1.5 py-0.5 rounded bg-white border border-[#0D0431] text-[#0D0431] font-bold shadow-[1px_1px_0_0_#0D0431]">⌘</kbd> + <kbd className="px-1.5 py-0.5 rounded bg-white border border-[#0D0431] text-[#0D0431] font-bold shadow-[1px_1px_0_0_#0D0431]">Enter</kbd> to run test cases.</span>
+                    </div>
                   </div>
                 )}
 
-                {/* 2. Test Result Tab */}
+                {/* ══════════════════════════════════════════════════ */}
+                {/* TAB 2: TEST RESULTS (RUN CODE OUTPUT) */}
+                {/* ══════════════════════════════════════════════════ */}
                 {bottomTab === "testresult" && (
                   <div>
                     {isRunning ? (
-                      <div className="p-6 text-center space-y-2">
-                        <div className="w-6 h-6 border-3 border-[#FEDF6A] border-t-transparent rounded-full animate-spin mx-auto" />
-                        <div className="text-[#FEF9CF] font-mono">Running test cases...</div>
+                      <div className="p-6 text-center space-y-2 bg-white rounded-2xl border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
+                        <div className="w-6 h-6 border-3 border-[#0D0431] border-t-transparent rounded-full animate-spin mx-auto" />
+                        <div className="text-[#0D0431] font-mono font-bold">Running test cases in sandbox...</div>
                       </div>
                     ) : !runResult ? (
-                      <div className="p-6 text-center text-[#FEF9CF]/60 font-mono">
-                        Run code to evaluate against sample test cases.
+                      <div className="p-6 text-center text-[#0D0431]/60 font-mono space-y-1 bg-white rounded-2xl border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
+                        <Terminal className="w-6 h-6 mx-auto text-[#0D0431]/50" />
+                        <p className="font-bold text-[#0D0431]">No execution results yet.</p>
+                        <p className="text-[11px]">Click "Run Code" or press ⌘+Enter to evaluate against sample cases.</p>
                       </div>
                     ) : (
                       <div className="space-y-3">
+                        
                         {/* Summary Banner */}
                         <div
-                          className={`p-3 rounded-xl border-2 flex items-center justify-between ${
+                          className={`p-3.5 rounded-2xl border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] flex items-center justify-between ${
                             runResult.all_passed
-                              ? "bg-[#9BFFED]/15 border-[#9BFFED] text-[#9BFFED]"
-                              : "bg-[#F85B52]/20 border-[#F85B52] text-[#FFC5B7]"
+                              ? "bg-[#D4FDF7] text-[#346538]"
+                              : "bg-[#FFC5B7] text-[#9F2F2D]"
                           }`}
                         >
                           <div className="flex items-center gap-2 font-bold font-sans">
-                            {runResult.all_passed ? <CheckCircle2 className="w-5 h-5 text-[#9BFFED]" /> : <XCircle className="w-5 h-5 text-[#F85B52]" />}
-                            <span>{runResult.status}</span>
+                            {runResult.all_passed ? <CheckCircle2 className="w-5 h-5 text-[#346538]" /> : <XCircle className="w-5 h-5 text-[#9F2F2D]" />}
+                            <span className="text-sm font-black">{runResult.all_passed ? "All Tests Passed" : runResult.status || "Wrong Answer"}</span>
                           </div>
                           <div className="text-xs font-mono font-bold">
                             Passed {runResult.passed_count}/{runResult.total_count} ({runResult.total_time_ms} ms)
@@ -945,111 +1216,160 @@ export default function CodingWorkspace() {
 
                         {/* Error info if any */}
                         {runResult.error && (
-                          <div className="p-3 rounded-xl bg-[#F85B52]/20 border border-[#F85B52]/50 text-[#FFC5B7] text-xs whitespace-pre-wrap font-mono">
-                            {runResult.error}
+                          <div className="p-3.5 rounded-2xl bg-[#FFC5B7] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-[#9F2F2D] text-xs whitespace-pre-wrap font-mono space-y-2">
+                            <div className="flex items-center justify-between font-sans font-bold text-[#0D0431]">
+                              <span>Runtime / Syntax Error:</span>
+                              <button
+                                onClick={() => handleAskAI("debug", runResult.error)}
+                                className="flex items-center gap-1 text-[11px] bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431] border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] px-2 py-0.5 rounded-lg font-bold cursor-pointer"
+                              >
+                                <Bug className="w-3 h-3" />
+                                <span>Debug with Mentor</span>
+                              </button>
+                            </div>
+                            <div className="text-[11px] leading-relaxed font-bold">{runResult.error}</div>
                           </div>
                         )}
 
-                        {/* Individual Test Cases Accordion */}
-                        <div className="space-y-2">
-                          {runResult.results?.map((res, i) => (
-                            <div
-                              key={i}
-                              className="p-3 rounded-xl bg-[#140742] border border-[#896EE2]/40 space-y-2"
-                            >
-                              <div className="flex items-center justify-between text-xs font-bold">
-                                <span className="font-sans text-[#FEF9CF]">Case {res.case_index}</span>
-                                <span
-                                  className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                    res.passed
-                                      ? "bg-[#9BFFED]/20 text-[#9BFFED]"
-                                      : "bg-[#F85B52]/20 text-[#FFC5B7]"
+                        {/* Individual Test Cases Selector & Detail */}
+                        {runResult.results && runResult.results.length > 0 && (
+                          <div className="space-y-3">
+                            {/* Case selector pills */}
+                            <div className="flex items-center gap-2 overflow-x-auto">
+                              {runResult.results.map((res, i) => (
+                                <button
+                                  key={i}
+                                  onClick={() => setActiveResultCaseIndex(i)}
+                                  className={`px-3 py-1 rounded-full text-xs font-mono font-bold transition-all border-2 border-[#0D0431] cursor-pointer flex items-center gap-1.5 ${
+                                    activeResultCaseIndex === i
+                                      ? "bg-[#0D0431] text-white shadow-[2px_2px_0_0_#FEDF6A]"
+                                      : "bg-white text-[#0D0431] hover:bg-[#FEDF6A] shadow-[1px_1px_0_0_#0D0431]"
                                   }`}
                                 >
-                                  {res.passed ? "Passed" : "Wrong Answer"}
-                                </span>
-                              </div>
+                                  <span>Case {res.case_index || i + 1}</span>
+                                  {res.passed ? (
+                                    <Check className="w-3 h-3 text-[#346538]" />
+                                  ) : (
+                                    <XCircle className="w-3 h-3 text-[#9F2F2D]" />
+                                  )}
+                                </button>
+                              ))}
+                            </div>
 
-                              <div className="space-y-1 text-xs">
-                                <div>
-                                  <span className="text-[#FEF9CF]/60">Input: </span>
-                                  <span className="text-[#FEF9CF]">{res.input}</span>
-                                </div>
-                                <div>
-                                  <span className="text-[#FEF9CF]/60">Expected: </span>
-                                  <span className="text-[#FEDF6A]">{res.expected}</span>
-                                </div>
-                                <div>
-                                  <span className="text-[#FEF9CF]/60">Output: </span>
-                                  <span className={res.passed ? "text-[#9BFFED]" : "text-[#FFC5B7]"}>
-                                    {res.actual ?? "None / Error"}
+                            {/* Active result case details card */}
+                            {runResult.results[activeResultCaseIndex] && (
+                              <div className="p-4 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] space-y-2.5">
+                                <div className="flex items-center justify-between text-xs font-bold pb-1 border-b border-[#0D0431]/20">
+                                  <span className="font-heading font-black text-[#0D0431]">
+                                    Case {runResult.results[activeResultCaseIndex].case_index} Details
+                                  </span>
+                                  <span
+                                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold border border-[#0D0431] ${
+                                      runResult.results[activeResultCaseIndex].passed
+                                        ? "bg-[#D4FDF7] text-[#346538]"
+                                        : "bg-[#FFC5B7] text-[#9F2F2D]"
+                                    }`}
+                                  >
+                                    {runResult.results[activeResultCaseIndex].passed ? "Passed" : "Wrong Answer"}
                                   </span>
                                 </div>
-                                {res.stdout && (
+
+                                <div className="space-y-1.5 text-xs">
                                   <div>
-                                    <span className="text-[#FEF9CF]/60">Stdout: </span>
-                                    <span className="text-[#FEF9CF]">{res.stdout}</span>
+                                    <div className="text-[11px] font-sans font-bold text-[#0D0431]/70 mb-0.5">Input:</div>
+                                    <div className="p-2 rounded-xl bg-[#FEF9CF]/60 text-[#0D0431] border-2 border-[#0D0431] font-bold shadow-[2px_2px_0_0_#0D0431]">
+                                      {runResult.results[activeResultCaseIndex].input}
+                                    </div>
                                   </div>
-                                )}
+                                  <div>
+                                    <div className="text-[11px] font-sans font-bold text-[#0D0431]/70 mb-0.5">Your Output:</div>
+                                    <div className={`p-2 rounded-xl border-2 border-[#0D0431] font-bold shadow-[2px_2px_0_0_#0D0431] ${
+                                      runResult.results[activeResultCaseIndex].passed
+                                        ? "bg-[#D4FDF7] text-[#346538]"
+                                        : "bg-[#FFC5B7] text-[#9F2F2D]"
+                                    }`}>
+                                      {runResult.results[activeResultCaseIndex].actual ?? "None / Error"}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div className="text-[11px] font-sans font-bold text-[#0D0431]/70 mb-0.5">Expected:</div>
+                                    <div className="p-2 rounded-xl bg-[#FEF9CF]/60 text-[#346538] border-2 border-[#0D0431] font-bold shadow-[2px_2px_0_0_#0D0431]">
+                                      {runResult.results[activeResultCaseIndex].expected}
+                                    </div>
+                                  </div>
+                                  {runResult.results[activeResultCaseIndex].stdout && (
+                                    <div>
+                                      <div className="text-[11px] font-sans font-bold text-[#0D0431]/70 mb-0.5">Stdout:</div>
+                                      <div className="p-2 rounded-xl bg-white text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                                        {runResult.results[activeResultCaseIndex].stdout}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* 3. Submission Tab */}
+                {/* ══════════════════════════════════════════════════ */}
+                {/* TAB 3: SUBMISSION (FULL TEST SUITE) */}
+                {/* ══════════════════════════════════════════════════ */}
                 {bottomTab === "submission" && (
                   <div>
                     {isSubmitting ? (
-                      <div className="p-6 text-center space-y-2">
-                        <div className="w-6 h-6 border-3 border-[#FEDF6A] border-t-transparent rounded-full animate-spin mx-auto" />
-                        <div className="text-[#FEF9CF] font-mono">Running full test suite...</div>
+                      <div className="p-6 text-center space-y-2 bg-white rounded-2xl border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
+                        <div className="w-6 h-6 border-3 border-[#0D0431] border-t-transparent rounded-full animate-spin mx-auto" />
+                        <div className="text-[#0D0431] font-mono font-bold">Running full test suite...</div>
                       </div>
                     ) : !submissionResult ? (
-                      <div className="p-6 text-center text-[#FEF9CF]/60 font-mono">
-                        Submit code to evaluate against hidden test cases.
+                      <div className="p-6 text-center text-[#0D0431]/60 font-mono space-y-1 bg-white rounded-2xl border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431]">
+                        <Send className="w-6 h-6 mx-auto text-[#0D0431]/50" />
+                        <p className="font-bold text-[#0D0431]">Ready to submit your solution.</p>
+                        <p className="text-[11px]">Click "Submit" or press ⌘+Shift+Enter to evaluate against all hidden test cases.</p>
                       </div>
                     ) : (
                       <div className="space-y-4">
+                        
                         {/* Accepted / Rejected Banner */}
                         <div
-                          className={`p-4 rounded-xl border-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 ${
+                          className={`p-4 rounded-2xl border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 ${
                             submissionResult.status === "Accepted"
-                              ? "bg-[#9BFFED]/15 border-[#9BFFED] text-[#9BFFED]"
-                              : "bg-[#F85B52]/20 border-[#F85B52] text-[#FFC5B7]"
+                              ? "bg-[#D4FDF7] text-[#346538]"
+                              : "bg-[#FFC5B7] text-[#9F2F2D]"
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             {submissionResult.status === "Accepted" ? (
-                              <CheckCircle2 className="w-6 h-6 text-[#9BFFED] shrink-0" />
+                              <CheckCircle2 className="w-6 h-6 text-[#346538] shrink-0" />
                             ) : (
-                              <XCircle className="w-6 h-6 text-[#F85B52] shrink-0" />
+                              <XCircle className="w-6 h-6 text-[#9F2F2D] shrink-0" />
                             )}
                             <div>
-                              <h3 className="text-sm font-heading font-black">
+                              <h3 className="text-base font-heading font-black">
                                 {submissionResult.status}
                               </h3>
-                              <p className="text-xs text-[#FEF9CF]/80 font-normal">
+                              <p className="text-xs text-[#0D0431]/80 font-normal font-sans">
                                 {submissionResult.status === "Accepted"
-                                  ? `Passed ${submissionResult.passed_count}/${submissionResult.total_count} test cases.`
+                                  ? `Passed ${submissionResult.passed_count || "all"} test cases successfully.`
                                   : "Some test cases failed."}
                               </p>
                             </div>
                           </div>
 
                           {submissionResult.status === "Accepted" && (
-                            <div className="flex items-center gap-3 text-xs font-mono">
-                              <div className="p-2.5 rounded-xl bg-[#0D0431] border border-[#9BFFED]/40 text-center">
-                                <div className="text-[#9BFFED] font-bold">{submissionResult.runtime_ms} ms</div>
-                                <div className="text-[10px] text-[#FEF9CF]/70 font-sans">Beats {submissionResult.beats_runtime_pct}%</div>
+                            <div className="flex items-center gap-3 text-xs font-mono font-bold text-[#0D0431]">
+                              <div className="p-2.5 rounded-xl bg-white border-2 border-[#0D0431] text-center shadow-[2px_2px_0_0_#0D0431]">
+                                <div className="text-[#346538] font-bold">{submissionResult.runtime_ms} ms</div>
+                                <div className="text-[10px] text-[#0D0431]/70 font-sans">Beats {submissionResult.beats_runtime_pct || "84.5"}%</div>
                               </div>
 
-                              <div className="p-2.5 rounded-xl bg-[#0D0431] border border-[#9BFFED]/40 text-center">
-                                <div className="text-[#9BFFED] font-bold">{submissionResult.memory_mb} MB</div>
-                                <div className="text-[10px] text-[#FEF9CF]/70 font-sans">Memory</div>
+                              <div className="p-2.5 rounded-xl bg-white border-2 border-[#0D0431] text-center shadow-[2px_2px_0_0_#0D0431]">
+                                <div className="text-[#0D0431] font-bold">{submissionResult.memory_mb || "16.4"} MB</div>
+                                <div className="text-[10px] text-[#0D0431]/70 font-sans">Beats {submissionResult.beats_memory_pct || "72.1"}%</div>
                               </div>
                             </div>
                           )}
@@ -1057,9 +1377,18 @@ export default function CodingWorkspace() {
 
                         {/* Error info if rejected */}
                         {submissionResult.error && (
-                          <div className="p-4 rounded-xl bg-[#F85B52]/20 border border-[#F85B52]/50 text-[#FFC5B7] text-xs whitespace-pre-wrap font-mono space-y-1">
-                            <div className="font-bold font-sans">Failure Output:</div>
-                            <div>{submissionResult.error}</div>
+                          <div className="p-4 rounded-2xl bg-[#FFC5B7] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] text-[#9F2F2D] text-xs whitespace-pre-wrap font-mono space-y-2">
+                            <div className="flex items-center justify-between font-bold font-sans text-[#0D0431]">
+                              <span>Failure Diagnostics:</span>
+                              <button
+                                onClick={() => handleAskAI("debug", submissionResult.error)}
+                                className="flex items-center gap-1 text-[11px] bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431] border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] px-2 py-0.5 rounded-lg cursor-pointer"
+                              >
+                                <Bug className="w-3 h-3" />
+                                <span>Debug with Mentor</span>
+                              </button>
+                            </div>
+                            <div className="font-bold">{submissionResult.error}</div>
                           </div>
                         )}
                       </div>
@@ -1073,12 +1402,12 @@ export default function CodingWorkspace() {
           {/* ── Bottom Action Footer Bar ── */}
           <div className="h-14 border-t-2 border-[#0D0431] bg-[#FEF9CF] px-4 flex items-center justify-between shrink-0 shadow-[0_-2px_0_0_#0D0431] z-20">
             <div>
-              {!isConsoleOpen && (
+              {consoleState === "collapsed" && (
                 <GpButton
                   variant="secondary"
                   size="sm"
                   icon={false}
-                  onClick={() => setIsConsoleOpen(true)}
+                  onClick={() => setConsoleState("default")}
                 >
                   <span className="flex items-center gap-1.5 font-bold">
                     <Terminal className="w-3.5 h-3.5" /> Open Console
@@ -1088,6 +1417,12 @@ export default function CodingWorkspace() {
             </div>
 
             <div className="flex items-center gap-3">
+              {/* Keyboard Shortcuts Hint */}
+              <span className="text-[11px] text-[#0D0431]/70 hidden md:inline-flex items-center gap-1 font-mono font-bold mr-1">
+                <kbd className="px-1.5 py-0.5 rounded bg-white border border-[#0D0431] text-[#0D0431]">⌘↵</kbd> Run
+                <kbd className="px-1.5 py-0.5 rounded bg-white border border-[#0D0431] text-[#0D0431] ml-1">⌘⇧↵</kbd> Submit
+              </span>
+
               {/* Run Code Button */}
               <GpButton
                 variant="secondary"

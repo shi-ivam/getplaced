@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ArrowRight, Github, Linkedin, Mail, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SUPPORT_EMAIL } from "@/config/api";
+import { getCtaHref } from "@/utils/authUtils";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
@@ -60,11 +61,11 @@ export default function Footer() {
               Platform
             </h4>
             <ul className="space-y-1.5 text-white/70">
-              <li><Link to="/app" className="hover:text-white transition-colors">Dashboard</Link></li>
-              <li><Link to="/app/coding" className="hover:text-white transition-colors">Coding Workspace</Link></li>
-              <li><Link to="/app/sheets" className="hover:text-white transition-colors">DSA Sheets (28)</Link></li>
-              <li><Link to="/app/resume" className="hover:text-white transition-colors">Resume ATS</Link></li>
-              <li><Link to="/app/interview" className="hover:text-white transition-colors">Mock Interviews</Link></li>
+              <li><Link to={getCtaHref("general", "login", "/app")} className="hover:text-white transition-colors">Dashboard</Link></li>
+              <li><Link to={getCtaHref("coding", "login", "/app/coding")} className="hover:text-white transition-colors">Coding Workspace</Link></li>
+              <li><Link to={getCtaHref("sheets", "login", "/app/sheets")} className="hover:text-white transition-colors">DSA Sheets (28)</Link></li>
+              <li><Link to={getCtaHref("resume", "login", "/app/resume")} className="hover:text-white transition-colors">Resume ATS</Link></li>
+              <li><Link to={getCtaHref("interview", "login", "/app/interview")} className="hover:text-white transition-colors">Mock Interviews</Link></li>
             </ul>
           </div>
 
@@ -73,11 +74,11 @@ export default function Footer() {
               Intelligence
             </h4>
             <ul className="space-y-1.5 text-white/70">
-              <li><Link to="/app/jobs" className="hover:text-white transition-colors">Jobs Market</Link></li>
-              <li><Link to="/app/role-fit" className="hover:text-white transition-colors">Role Fit AI</Link></li>
-              <li><Link to="/app/can-i-apply" className="hover:text-white transition-colors">Can I Apply?</Link></li>
-              <li><Link to="/app/academics" className="hover:text-white transition-colors">Academics</Link></li>
-              <li><Link to="/app/vtop" className="hover:text-white transition-colors">VTOP Sync</Link></li>
+              <li><Link to={getCtaHref("jobs", "login", "/app/jobs")} className="hover:text-white transition-colors">Jobs Market</Link></li>
+              <li><Link to={getCtaHref("role_fit", "login", "/app/role-fit")} className="hover:text-white transition-colors">Role Fit AI</Link></li>
+              <li><Link to={getCtaHref("can_i_apply", "login", "/app/can-i-apply")} className="hover:text-white transition-colors">Can I Apply?</Link></li>
+              <li><Link to={getCtaHref("academics", "login", "/app/academics")} className="hover:text-white transition-colors">Academics</Link></li>
+              <li><Link to={getCtaHref("academics", "login", "/app/vtop")} className="hover:text-white transition-colors">VTOP Sync</Link></li>
             </ul>
           </div>
 

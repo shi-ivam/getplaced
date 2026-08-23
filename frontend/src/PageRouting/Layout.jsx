@@ -86,12 +86,18 @@ export default function Layout() {
             </div>
           </header>
 
-          {/* Full height scrollable view with max width 1400px */}
-          <div className="flex-1 flex flex-col min-h-0 h-full overflow-y-auto">
-            <div className="w-full max-w-[1400px] mx-auto p-4 sm:p-6 md:p-8 flex-1">
+          {/* Workspace full bleed vs standard page layout */}
+          {location.pathname.startsWith("/app/coding/") || location.pathname.startsWith("/app/problems/") ? (
+            <div className="flex-1 flex flex-col min-h-0 h-full w-full overflow-hidden p-0">
               <Outlet />
             </div>
-          </div>
+          ) : (
+            <div className="flex-1 flex flex-col min-h-0 h-full overflow-y-auto">
+              <div className="w-full max-w-[1400px] mx-auto p-4 sm:p-6 md:p-8 flex-1 min-w-0">
+                <Outlet />
+              </div>
+            </div>
+          )}
 
           {/* Spotlight Command Palette (Cmd + K) */}
           <SpotlightCommandPalette

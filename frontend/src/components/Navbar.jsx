@@ -2,10 +2,19 @@ import React, { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { getCtaHref } from "@/utils/authUtils";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+
+  const navLinks = [
+    { label: "Features", path: "#features", isAnchor: true },
+    { label: "DSA Sheets", cta: "sheets", path: "/app/sheets" },
+    { label: "ATS Resume", cta: "resume", path: "/app/resume" },
+    { label: "Mock Interviews", cta: "interview", path: "/app/interview" },
+    { label: "FAQs", path: "#faqs", isAnchor: true },
+  ];
 
   return (
     <header className="fixed top-3 left-0 right-0 z-50 px-4 sm:px-6 max-w-6xl mx-auto">
@@ -25,14 +34,8 @@ export default function Navbar() {
 
         {/* Desktop Links */}
         <div className="hidden lg:flex items-center space-x-6 text-xs font-semibold text-[#6F6A80]">
-          {[
-            { label: "Features", path: "#features" },
-            { label: "DSA Sheets", path: "/app/sheets" },
-            { label: "ATS Resume", path: "/app/resume" },
-            { label: "Mock Interviews", path: "/app/interview" },
-            { label: "FAQs", path: "#faqs" },
-          ].map((link) => (
-            link.path.startsWith("#") ? (
+          {navLinks.map((link) => (
+            link.isAnchor ? (
               <a
                 key={link.label}
                 href={link.path}
@@ -43,7 +46,7 @@ export default function Navbar() {
             ) : (
               <Link
                 key={link.label}
-                to={link.path}
+                to={getCtaHref(link.cta, "login", link.path)}
                 className="text-[#6F6A80] hover:text-[#17103D] transition-colors"
               >
                 {link.label}
@@ -55,13 +58,13 @@ export default function Navbar() {
         {/* Action Buttons */}
         <div className="hidden md:flex items-center space-x-3">
           <Link
-            to="/login"
+            to={getCtaHref("resume", "login")}
             className="text-xs font-bold text-[#17103D] hover:text-[#6E44FF] px-3 py-1.5 transition-colors"
           >
             Log in
           </Link>
           <Link
-            to="/register"
+            to={getCtaHref("general", "register")}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#17103D] hover:bg-[#24195A] text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
           >
             <span>Start Free</span>
@@ -82,14 +85,8 @@ export default function Navbar() {
       {/* Mobile Drawer */}
       {isOpen && (
         <div className="mt-2 bg-white text-[#17103D] border border-[#E2DEEC] rounded-2xl p-5 shadow-xl flex flex-col space-y-3 lg:hidden animate-in fade-in slide-in-from-top-2 duration-150">
-          {[
-            { label: "Features", path: "#features" },
-            { label: "DSA Sheets", path: "/app/sheets" },
-            { label: "ATS Resume", path: "/app/resume" },
-            { label: "Mock Interviews", path: "/app/interview" },
-            { label: "FAQs", path: "#faqs" },
-          ].map((link) => (
-            link.path.startsWith("#") ? (
+          {navLinks.map((link) => (
+            link.isAnchor ? (
               <a
                 key={link.label}
                 href={link.path}
@@ -101,7 +98,7 @@ export default function Navbar() {
             ) : (
               <Link
                 key={link.label}
-                to={link.path}
+                to={getCtaHref(link.cta, "login", link.path)}
                 onClick={() => setIsOpen(false)}
                 className="font-semibold text-xs py-1.5 text-[#17103D] hover:text-[#6E44FF]"
               >
@@ -111,14 +108,14 @@ export default function Navbar() {
           ))}
           <div className="pt-3 border-t border-[#E2DEEC] flex flex-col space-y-2">
             <Link
-              to="/login"
+              to={getCtaHref("resume", "login")}
               onClick={() => setIsOpen(false)}
               className="w-full text-center py-2 text-xs font-bold text-[#17103D]"
             >
               Sign In
             </Link>
             <Link
-              to="/register"
+              to={getCtaHref("general", "register")}
               onClick={() => setIsOpen(false)}
               className="w-full text-center py-2 text-xs font-bold bg-[#17103D] text-white rounded-xl shadow-sm"
             >

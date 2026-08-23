@@ -26,13 +26,16 @@ function cleanLinkChildren(children) {
   return children;
 }
 
-function CodeBlock({ node, inline, className, children, ...props }) {
+function CodeBlock({ node, inline, className, children, onNavigate, ...props }) {
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
 
   const match = /language-(\w+)/.exec(className || "");
   const language = match ? match[1].toLowerCase() : "";
   const codeString = String(children).replace(/\n$/, "");
+
+  // In react-markdown v9+, inline is undefined on code elements. Check for language or newlines.
+  const isInline = inline !== undefined ? inline : (!match && !String(children).includes("\n"));
 
   const handleCopy = () => {
     try {
@@ -44,9 +47,9 @@ function CodeBlock({ node, inline, className, children, ...props }) {
     }
   };
 
-  if (inline) {
+  if (isInline) {
     return (
-      <code className="px-1.5 py-0.5 rounded bg-[#F2F0FA] text-[#17103D] font-mono text-[11px] font-semibold border border-[#E2DEEC] break-words" {...props}>
+      <code className="px-1.5 py-0.5 rounded-md bg-[#FEF9CF] text-[#0D0431] font-mono text-[11px] font-bold border border-[#0D0431]/40 break-words" {...props}>
         {children}
       </code>
     );
@@ -84,7 +87,10 @@ function CodeBlock({ node, inline, className, children, ...props }) {
           {isExecutableLang && (
             <button
               type="button"
-              onClick={() => navigate("/app/coding")}
+              onClick={() => {
+                onNavigate?.();
+                navigate("/app/coding");
+              }}
               className="flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer font-mono"
             >
               <Terminal className="w-3 h-3 text-[#FFD84D]" />
@@ -102,7 +108,7 @@ function CodeBlock({ node, inline, className, children, ...props }) {
   );
 }
 
-function CustomLink({ href = "", children, ...props }) {
+function CustomLink({ href = "", children, onNavigate, ...props }) {
   const navigate = useNavigate();
 
   if (!href) return <span>{children}</span>;
@@ -114,7 +120,10 @@ function CustomLink({ href = "", children, ...props }) {
   const handleClick = (e) => {
     if (isInternalApp) {
       e.preventDefault();
+      onNavigate?.();
       navigate(href);
+    } else {
+      onNavigate?.();
     }
   };
 
@@ -140,7 +149,7 @@ function CustomLink({ href = "", children, ...props }) {
   );
 }
 
-export default function MarkdownRenderer({ content }) {
+export default function MarkdownRenderer({ content, onNavigate }) {
   if (!content) return null;
 
   return (
@@ -149,8 +158,8 @@ export default function MarkdownRenderer({ content }) {
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
         components={{
-          code: CodeBlock,
-          a: CustomLink,
+          code: (props) => <CodeBlock {...props} onNavigate={onNavigate} />,
+          a: (props) => <CustomLink {...props} onNavigate={onNavigate} />,
           h1: ({ node, ...props }) => (
             <h1 className="text-sm font-bold text-[#17103D] tracking-tight mt-3 mb-1.5 pb-1 border-b border-[#E2DEEC]" {...props} />
           ),
