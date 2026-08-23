@@ -2,9 +2,9 @@ import React, { useEffect } from "react";
 import { FiX } from "react-icons/fi";
 
 /**
- * Caide Retro Bento Modal with 6px drop shadow & crisp borders
+ * GetPlaced Retro Bento Modal with 6px drop shadow & crisp borders
  */
-export default function CaideModal({
+export default function GpModal({
   isOpen,
   onClose,
   title,

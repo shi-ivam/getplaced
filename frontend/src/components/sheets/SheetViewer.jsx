@@ -25,7 +25,7 @@ import {
 import { sheetsService } from "@/services/sheetsService";
 import SheetArticleModal from "./SheetArticleModal";
 import SheetVideoModal from "./SheetVideoModal";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 
 export default function SheetViewer({ sheetId, onBack }) {
   const [sheet, setSheet] = useState(null);

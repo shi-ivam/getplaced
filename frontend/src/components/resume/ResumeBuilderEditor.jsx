@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { PY_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideButton from "@/components/caide/CaideButton";
+import GpBadge from "@/components/gp/GpBadge";
+import GpCard from "@/components/gp/GpCard";
+import GpButton from "@/components/gp/GpButton";
 
 export default function ResumeBuilderEditor({
   builderData,
@@ -127,7 +127,7 @@ export default function ResumeBuilderEditor({
     <div className="space-y-6">
       
       {/* Header Deck */}
-      <CaideCard theme="white" shadow="lg" rounded="3xl" className="p-6 sm:p-7 space-y-6">
+      <GpCard theme="white" shadow="lg" rounded="3xl" className="p-6 sm:p-7 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#0D0431] pb-5">
           <div className="space-y-1">
             <h2 className="text-sm font-heading font-bold uppercase tracking-wider text-[#0D0431] flex items-center gap-2">
@@ -148,13 +148,13 @@ export default function ResumeBuilderEditor({
               <Download className="w-3.5 h-3.5" />
               <span>Export JSON</span>
             </button>
-            <CaideButton
+            <GpButton
               onClick={handleSendToATS}
               variant="stacked-yellow"
               size="sm"
             >
               Evaluate ATS Score
-            </CaideButton>
+            </GpButton>
           </div>
         </div>
 
@@ -319,7 +319,7 @@ export default function ResumeBuilderEditor({
           </div>
         </div>
 
-      </CaideCard>
+      </GpCard>
 
       {/* Bullet Improvement Modal */}
       {bulletImprovementModal && (

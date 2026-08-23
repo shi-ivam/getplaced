@@ -13,7 +13,7 @@ import {
   TrendingUp,
   Tag,
 } from "lucide-react";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 
 export const ROLE_OPTIONS = [
   { id: "ALL", label: "All Roles" },

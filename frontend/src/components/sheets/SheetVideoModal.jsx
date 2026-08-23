@@ -42,7 +42,7 @@ export default function SheetVideoModal({ videoUrl, title, onClose }) {
         onClick={(e) => e.stopPropagation()}
         className="bg-white border-2 border-[#0D0431] rounded-3xl shadow-[8px_8px_0_0_#0D0431] max-w-3xl w-full max-h-[88vh] flex flex-col overflow-hidden p-0 animate-in zoom-in-95 duration-200"
       >
-        {/* Modal Header (Caide Bento Style with #FEF9CF titlebar) */}
+        {/* Modal Header (GetPlaced Bento Style with #FEF9CF titlebar) */}
         <div className="px-6 py-4 bg-[#FEF9CF] border-b-2 border-[#0D0431] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3 min-w-0 pr-4">
             <div className="p-2 rounded-xl bg-[#FFC5B7] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] shrink-0">

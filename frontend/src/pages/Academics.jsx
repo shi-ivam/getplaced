@@ -27,7 +27,7 @@ import {
   Check,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 import TargetCutoffCalculator from "@/components/academics/TargetCutoffCalculator";
 import CompanyEligibilityFilter from "@/components/academics/CompanyEligibilityFilter";
 

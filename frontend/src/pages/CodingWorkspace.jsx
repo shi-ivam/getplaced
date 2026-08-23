@@ -34,10 +34,10 @@ import {
 } from "lucide-react";
 import { leetcodeService } from "@/services/leetcodeService";
 import MarkdownRenderer from "@/components/coach/MarkdownRenderer";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideButton from "@/components/caide/CaideButton";
-import CaideToggle from "@/components/caide/CaideToggle";
+import GpCard from "@/components/gp/GpCard";
+import GpBadge from "@/components/gp/GpBadge";
+import GpButton from "@/components/gp/GpButton";
+import GpToggle from "@/components/gp/GpToggle";
 
 export default function CodingWorkspace() {
   const { slug } = useParams();
@@ -325,13 +325,13 @@ export default function CodingWorkspace() {
         </div>
         <h2 className="text-2xl font-heading font-black text-[#0D0431]">Problem Not Found</h2>
         <p className="text-xs sm:text-sm text-[#0D0431]/80 max-w-md font-medium">{error || "Could not locate problem."}</p>
-        <CaideButton
+        <GpButton
           to="/app/coding"
           variant="stacked-yellow"
           icon={false}
         >
           <span className="font-bold text-[#0D0431]">Return to Problem Set</span>
-        </CaideButton>
+        </GpButton>
       </div>
     );
   }
@@ -358,20 +358,20 @@ export default function CodingWorkspace() {
             <h1 className="text-sm md:text-base font-heading font-black text-[#0D0431] truncate max-w-[180px] sm:max-w-xs md:max-w-md">
               {problem.title}
             </h1>
-            <CaideBadge
+            <GpBadge
               theme={getDifficultyBadgeTheme(problem.difficulty)}
               size="sm"
             >
               {problem.difficulty}
-            </CaideBadge>
+            </GpBadge>
             {isSolved && (
-              <CaideBadge
+              <GpBadge
                 theme="mint"
                 size="sm"
                 className="hidden sm:inline-flex"
               >
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#346538]" /> Solved
-              </CaideBadge>
+              </GpBadge>
             )}
           </div>
         </div>
@@ -415,7 +415,7 @@ export default function CodingWorkspace() {
         {/* LEFT COLUMN: Problem Details, Editorial, AI Mentor, Submissions (5 cols) */}
         <div className="lg:col-span-5 border-r-2 border-[#0D0431] flex flex-col bg-white overflow-hidden shadow-sm">
           
-          {/* Tab Navigation Header with Caide Pill segmented styles */}
+          {/* Tab Navigation Header with GetPlaced Pill segmented styles */}
           <div className="flex items-center border-b-2 border-[#0D0431] bg-[#FEF9CF] px-3 py-2 gap-1.5 shrink-0 overflow-x-auto no-scrollbar">
             {[
               { id: "description", label: "Description", icon: FileText },
@@ -456,16 +456,16 @@ export default function CodingWorkspace() {
                     {problem.question_id}. {problem.title}
                   </h2>
                   <div className="flex items-center gap-2 mt-2.5">
-                    <CaideBadge
+                    <GpBadge
                       theme={getDifficultyBadgeTheme(problem.difficulty)}
                       size="sm"
                     >
                       {problem.difficulty}
-                    </CaideBadge>
+                    </GpBadge>
                     {isSolved && (
-                      <CaideBadge theme="mint" size="sm">
+                      <GpBadge theme="mint" size="sm">
                         <CheckCircle2 className="w-3.5 h-3.5 text-[#346538]" /> Solved
-                      </CaideBadge>
+                      </GpBadge>
                     )}
                   </div>
                 </div>
@@ -515,13 +515,13 @@ export default function CodingWorkspace() {
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {problem.tags.map((tag) => (
-                        <CaideBadge
+                        <GpBadge
                           key={tag}
                           theme="light-purple"
                           size="sm"
                         >
                           {tag}
-                        </CaideBadge>
+                        </GpBadge>
                       ))}
                     </div>
                   </div>
@@ -584,14 +584,14 @@ export default function CodingWorkspace() {
                     </div>
                   </div>
                 ) : (
-                  <CaideButton
+                  <GpButton
                     onClick={handleLoadEditorial}
                     variant="stacked-yellow"
                     fullWidth
                     icon={false}
                   >
                     <span className="font-bold text-[#0D0431]">Reveal Editorial Solution</span>
-                  </CaideButton>
+                  </GpButton>
                 )}
               </div>
             )}
@@ -772,9 +772,9 @@ export default function CodingWorkspace() {
           <div className="h-11 border-b-2 border-[#0D0431] bg-[#FEF9CF] px-4 flex items-center justify-between shrink-0 shadow-sm">
             <div className="flex items-center gap-2">
               <Code2 className="w-4 h-4 text-[#0D0431]" />
-              <CaideBadge theme="yellow" size="sm">
+              <GpBadge theme="yellow" size="sm">
                 Python 3
-              </CaideBadge>
+              </GpBadge>
             </div>
 
             <div className="flex items-center gap-2">
@@ -1074,7 +1074,7 @@ export default function CodingWorkspace() {
           <div className="h-14 border-t-2 border-[#0D0431] bg-[#FEF9CF] px-4 flex items-center justify-between shrink-0 shadow-[0_-2px_0_0_#0D0431] z-20">
             <div>
               {!isConsoleOpen && (
-                <CaideButton
+                <GpButton
                   variant="secondary"
                   size="sm"
                   icon={false}
@@ -1083,13 +1083,13 @@ export default function CodingWorkspace() {
                   <span className="flex items-center gap-1.5 font-bold">
                     <Terminal className="w-3.5 h-3.5" /> Open Console
                   </span>
-                </CaideButton>
+                </GpButton>
               )}
             </div>
 
             <div className="flex items-center gap-3">
               {/* Run Code Button */}
-              <CaideButton
+              <GpButton
                 variant="secondary"
                 size="md"
                 icon={false}
@@ -1100,10 +1100,10 @@ export default function CodingWorkspace() {
                   <Play className="w-4 h-4 text-[#FEDF6A]" />
                   <span>{isRunning ? "Running..." : "Run Code"}</span>
                 </span>
-              </CaideButton>
+              </GpButton>
 
               {/* Submit Button */}
-              <CaideButton
+              <GpButton
                 variant="stacked-yellow"
                 size="md"
                 icon={false}
@@ -1114,7 +1114,7 @@ export default function CodingWorkspace() {
                   <Send className="w-4 h-4" />
                   <span>{isSubmitting ? "Submitting..." : "Submit"}</span>
                 </span>
-              </CaideButton>
+              </GpButton>
             </div>
           </div>
         </div>

@@ -14,7 +14,7 @@ import {
   Briefcase,
   ArrowRight,
 } from "lucide-react";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 
 export default function JobCard({
   job,
@@ -73,9 +73,9 @@ export default function JobCard({
                 {job.title}
               </h3>
               {matchScore != null && (
-                <CaideBadge theme={getScoreBadgeTheme(matchScore)} size="sm">
+                <GpBadge theme={getScoreBadgeTheme(matchScore)} size="sm">
                   {matchScore}% Match
-                </CaideBadge>
+                </GpBadge>
               )}
             </div>
 
@@ -198,9 +198,9 @@ export default function JobCard({
         </div>
 
         {matchScore != null ? (
-          <CaideBadge theme={getScoreBadgeTheme(matchScore)} size="sm">
+          <GpBadge theme={getScoreBadgeTheme(matchScore)} size="sm">
             {matchScore}% Match
-          </CaideBadge>
+          </GpBadge>
         ) : (
           <span className="text-xs font-semibold text-[#6E44FF] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
             <span>Details</span>

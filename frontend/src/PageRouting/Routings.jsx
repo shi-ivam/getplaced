@@ -28,8 +28,8 @@ import VtopDetails from '@/pages/VtopDetails'
 import PrivacyProtection from '@/pages/PrivacyProtection'
 import CanIApply from '@/pages/CanIApply'
 import WhichRoleFitsMe from '@/pages/WhichRoleFitsMe'
-import CaideBadge from '@/components/caide/CaideBadge'
-import CaideButton, { CaideArrow } from '@/components/caide/CaideButton'
+import GpBadge from '@/components/gp/GpBadge'
+import GpButton, { GpArrow } from '@/components/gp/GpButton'
 
 function TermsPage() {
   return (
@@ -40,13 +40,13 @@ function TermsPage() {
             to="/"
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border-2 border-[#0D0431] text-xs font-mono font-bold text-[#0D0431] shadow-[3px_3px_0_0_#0D0431] hover:bg-[#FEDF6A] transition-all"
           >
-            <CaideArrow className="w-3.5 h-3.5 rotate-180" />
+            <GpArrow className="w-3.5 h-3.5 rotate-180" />
             <span>Return to Home</span>
           </Link>
 
-          <CaideBadge theme="light-purple">
+          <GpBadge theme="light-purple">
             Platform Policies
-          </CaideBadge>
+          </GpBadge>
         </div>
 
         <div className="bg-white border-2 border-[#0D0431] rounded-3xl p-6 sm:p-10 md:p-12 shadow-[8px_8px_0_0_#0D0431] space-y-8">
@@ -102,13 +102,13 @@ function TermsPage() {
               Last Updated: August 2026 • getPlaced Platform
             </span>
 
-            <CaideButton
+            <GpButton
               to="/app"
               variant="stacked"
               size="md"
             >
               Enter Dashboard
-            </CaideButton>
+            </GpButton>
           </div>
         </div>
       </div>

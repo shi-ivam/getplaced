@@ -3,7 +3,7 @@ import React from "react";
 /**
  * Modern Clean Status Badge Component
  */
-export default function CaideBadge({
+export default function GpBadge({
   children,
   className = "",
   theme = "light-purple", // "light-purple" | "yellow" | "mint" | "lime" | "blue" | "coral" | "dark"

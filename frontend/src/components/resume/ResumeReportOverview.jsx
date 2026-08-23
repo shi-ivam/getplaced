@@ -14,7 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import jsPDF from "jspdf";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 
 export default function ResumeReportOverview({
   evaluation,
@@ -87,9 +87,9 @@ export default function ResumeReportOverview({
               <h3 className="text-lg font-bold text-[#17103D]">
                 ATS Score: {score >= 80 ? "Strong Placement Ready" : score >= 60 ? "Competitive" : "Needs Optimization"}
               </h3>
-              <CaideBadge theme={score >= 80 ? "mint" : score >= 60 ? "yellow" : "coral"} size="sm">
+              <GpBadge theme={score >= 80 ? "mint" : score >= 60 ? "yellow" : "coral"} size="sm">
                 {evaluation.score_tier || "Scored"}
-              </CaideBadge>
+              </GpBadge>
             </div>
             <p className="text-xs text-[#6F6A80] max-w-xl leading-relaxed">
               {evaluation.summary_critique || "Your resume has been audited against top company applicant tracking systems."}

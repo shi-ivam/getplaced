@@ -34,9 +34,9 @@ import { NODE_API_URL, PY_API_URL } from "@/config/api";
 import MarkdownRenderer from "@/components/coach/MarkdownRenderer";
 import ToolExecutionAccordion from "@/components/coach/ToolExecutionAccordion";
 import ActionCard from "@/components/coach/ActionCard";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideButton, { CaideArrow } from "@/components/caide/CaideButton";
-import CaideCard from "@/components/caide/CaideCard";
+import GpBadge from "@/components/gp/GpBadge";
+import GpButton, { GpArrow } from "@/components/gp/GpButton";
+import GpCard from "@/components/gp/GpCard";
 
 const STEPS_MAP = [
   { step: 1, label: "Ambition" },
@@ -596,10 +596,10 @@ export default function CareerCoach() {
               get<span className="text-[#896EE2]">Placed</span>
             </span>
             <span className="text-[#0D0431]/40 font-black">/</span>
-            <CaideBadge theme="light-purple">
+            <GpBadge theme="light-purple">
               <Sparkles className="w-3.5 h-3.5 mr-1 text-[#0D0431]" />
               Career Coach
-            </CaideBadge>
+            </GpBadge>
           </div>
 
           {/* Minimal Progress Sequence */}
@@ -656,13 +656,13 @@ export default function CareerCoach() {
               <span className="hidden sm:inline">Edit Target</span>
             </button>
 
-            <CaideButton
+            <GpButton
               onClick={handleFinalizeAndEnterDashboard}
               variant="stacked"
               size="sm"
             >
               Dashboard
-            </CaideButton>
+            </GpButton>
           </div>
         </div>
       </header>
@@ -1061,7 +1061,7 @@ export default function CareerCoach() {
 
               {/* Bottom Actions */}
               <div className="pt-3 border-t-2 border-[#0D0431] space-y-2.5">
-                <CaideButton
+                <GpButton
                   onClick={handleFinalizeAndEnterDashboard}
                   disabled={applyingProfile}
                   variant="stacked"
@@ -1069,16 +1069,16 @@ export default function CareerCoach() {
                   fullWidth
                 >
                   {applyingProfile ? "Saving..." : "Enter Dashboard"}
-                </CaideButton>
+                </GpButton>
 
-                <CaideButton
+                <GpButton
                   onClick={handleApplyProfile}
                   variant="outline"
                   size="sm"
                   fullWidth
                 >
                   View Roadmap
-                </CaideButton>
+                </GpButton>
               </div>
 
             </div>
@@ -1186,7 +1186,7 @@ export default function CareerCoach() {
                 >
                   Cancel
                 </button>
-                <CaideButton
+                <GpButton
                   type="submit"
                   disabled={vtopLoading || !vtopUsername}
                   variant="stacked"
@@ -1194,7 +1194,7 @@ export default function CareerCoach() {
                   className="flex-1"
                 >
                   {vtopLoading ? "Verifying..." : "Verify VTOP"}
-                </CaideButton>
+                </GpButton>
               </div>
             </form>
           </div>
@@ -1254,7 +1254,7 @@ export default function CareerCoach() {
                 >
                   Cancel
                 </button>
-                <CaideButton
+                <GpButton
                   type="submit"
                   disabled={ghLoading || !ghInput.trim()}
                   variant="stacked"
@@ -1262,7 +1262,7 @@ export default function CareerCoach() {
                   className="flex-1"
                 >
                   {ghLoading ? "Linking..." : "Link GitHub"}
-                </CaideButton>
+                </GpButton>
               </div>
             </form>
           </div>
@@ -1322,7 +1322,7 @@ export default function CareerCoach() {
                 >
                   Cancel
                 </button>
-                <CaideButton
+                <GpButton
                   type="submit"
                   disabled={lcLoading || !lcInput.trim()}
                   variant="stacked-yellow"
@@ -1330,7 +1330,7 @@ export default function CareerCoach() {
                   className="flex-1"
                 >
                   {lcLoading ? "Linking..." : "Link LeetCode"}
-                </CaideButton>
+                </GpButton>
               </div>
             </form>
           </div>
@@ -1392,7 +1392,7 @@ export default function CareerCoach() {
                 >
                   Cancel
                 </button>
-                <CaideButton
+                <GpButton
                   onClick={() => handleUploadResumeDirect()}
                   disabled={resumeUploading || !resumeFile}
                   variant="stacked"
@@ -1400,7 +1400,7 @@ export default function CareerCoach() {
                   className="flex-1"
                 >
                   {resumeUploading ? "Analyzing..." : "Analyze ATS"}
-                </CaideButton>
+                </GpButton>
               </div>
             </div>
           </div>
@@ -1485,14 +1485,14 @@ export default function CareerCoach() {
                 >
                   Cancel
                 </button>
-                <CaideButton
+                <GpButton
                   type="submit"
                   variant="stacked"
                   size="sm"
                   className="flex-1"
                 >
                   Save Changes
-                </CaideButton>
+                </GpButton>
               </div>
             </form>
           </div>

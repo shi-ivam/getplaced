@@ -4,9 +4,9 @@ import { FileCheck, Sparkles, CheckCircle2, TrendingUp, Zap, ArrowUpRight, Uploa
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { NODE_API_URL, PY_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideButton from "@/components/caide/CaideButton";
+import GpBadge from "@/components/gp/GpBadge";
+import GpCard from "@/components/gp/GpCard";
+import GpButton from "@/components/gp/GpButton";
 
 const DEFAULT_DEMO_DATA = {
   name: "Richard Gomez",
@@ -160,9 +160,9 @@ const ResumeAnalyzer = () => {
         
         {/* Section Header */}
         <div className="flex flex-col items-center text-center max-w-3xl mx-auto space-y-4">
-          <CaideBadge theme="light-purple">
+          <GpBadge theme="light-purple">
             100% Recruiter-Proof
-          </CaideBadge>
+          </GpBadge>
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-black tracking-tight text-[#0D0431]">
             Resume Analysis & Competency Matrix
           </h2>
@@ -176,7 +176,7 @@ const ResumeAnalyzer = () => {
           
           {/* Left ATS Score Card (5 Cols) */}
           <div className="lg:col-span-5">
-            <CaideCard
+            <GpCard
               theme="white"
               shadow="lg"
               className="p-6 sm:p-8 flex flex-col justify-between h-full space-y-6"
@@ -282,12 +282,12 @@ const ResumeAnalyzer = () => {
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
-            </CaideCard>
+            </GpCard>
           </div>
 
           {/* Right Radar Chart Analysis (7 Cols) */}
           <div className="lg:col-span-7">
-            <CaideCard
+            <GpCard
               theme="white"
               shadow="lg"
               className="p-6 sm:p-8 flex flex-col justify-between h-full space-y-4"
@@ -319,7 +319,7 @@ const ResumeAnalyzer = () => {
                   {resumeData.isDemo ? "Upload file to analyze custom profile" : "Custom candidate profile loaded"}
                 </span>
               </div>
-            </CaideCard>
+            </GpCard>
           </div>
 
         </div>

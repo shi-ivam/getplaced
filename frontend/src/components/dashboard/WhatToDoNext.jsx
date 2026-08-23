@@ -20,7 +20,7 @@ import {
   Flame,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 
 const CATEGORY_ICONS = {
   dsa: Code2,
@@ -149,9 +149,9 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <CaideBadge theme="light-purple" size="sm">
+                  <GpBadge theme="light-purple" size="sm">
                     {task.badgeLabel || "Next Step"}
-                  </CaideBadge>
+                  </GpBadge>
                   <span className="text-[11px] text-[#6F6A80] font-mono flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {task.estimatedTime || "15 mins"}

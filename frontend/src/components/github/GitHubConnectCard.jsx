@@ -30,9 +30,9 @@ import {
   X,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideButton, { CaideArrow } from "@/components/caide/CaideButton";
-import CaideCard from "@/components/caide/CaideCard";
+import GpBadge from "@/components/gp/GpBadge";
+import GpButton, { GpArrow } from "@/components/gp/GpButton";
+import GpCard from "@/components/gp/GpCard";
 
 const LANGUAGE_COLORS = {
   JavaScript: "#f1e05a",
@@ -327,9 +327,9 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
             <div className="flex items-center gap-2">
               <h3 className="font-heading font-black text-xl text-[#0D0431]">GitHub Portfolio</h3>
               {connected && (
-                <CaideBadge theme="mint">
+                <GpBadge theme="mint">
                   Connected
-                </CaideBadge>
+                </GpBadge>
               )}
             </div>
             {!connected && (
@@ -444,10 +444,10 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
               </p>
             </div>
 
-            <CaideBadge theme="mint">
+            <GpBadge theme="mint">
               <ShieldCheck className="w-3.5 h-3.5 mr-1" />
               Public Read-Only
-            </CaideBadge>
+            </GpBadge>
           </div>
 
           <form onSubmit={handleConnect} className="flex flex-col sm:flex-row items-stretch gap-3 pt-1">
@@ -471,14 +471,14 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
               )}
             </div>
 
-            <CaideButton
+            <GpButton
               type="submit"
               disabled={connecting || !inputUsername.trim()}
               variant="stacked"
               size="md"
             >
               {connecting ? "Connecting..." : "Connect GitHub"}
-            </CaideButton>
+            </GpButton>
           </form>
         </div>
       )}
@@ -530,9 +530,9 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                     {projectScore}/100
                   </div>
                 </div>
-                <CaideBadge theme={getScoreBadgeTheme(projectScore)}>
+                <GpBadge theme={getScoreBadgeTheme(projectScore)}>
                   {profile.scoreTier || "Strong"}
-                </CaideBadge>
+                </GpBadge>
               </div>
             </div>
           </div>

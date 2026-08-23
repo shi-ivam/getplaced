@@ -1,9 +1,9 @@
 import React from "react";
 
 /**
- * Multi-layer 3D Floating Notification Card matching Caide.io Hero & Features
+ * Multi-layer 3D Floating Notification Card matching GetPlaced Hero & Features
  */
-export default function CaideNotification({
+export default function GpNotification({
   tag = "New email",
   time = "Now",
   title = "Re: Acme's LATAM expansion...",

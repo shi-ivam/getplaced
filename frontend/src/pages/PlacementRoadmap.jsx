@@ -24,9 +24,9 @@ import {
   Check,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideButton, { CaideArrow } from "@/components/caide/CaideButton";
-import CaideCard from "@/components/caide/CaideCard";
+import GpBadge from "@/components/gp/GpBadge";
+import GpButton, { GpArrow } from "@/components/gp/GpButton";
+import GpCard from "@/components/gp/GpCard";
 
 const TASK_TYPE_ICONS = {
   dsa: Code2,
@@ -160,13 +160,13 @@ export default function PlacementRoadmap() {
         <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b-2 border-[#0D0431]">
           <div className="space-y-2.5 max-w-3xl">
             <div className="flex items-center gap-2">
-              <CaideBadge theme="light-purple">
+              <GpBadge theme="light-purple">
                 <Compass className="w-3.5 h-3.5 mr-1" />
                 Preparation Trajectory
-              </CaideBadge>
-              <CaideBadge theme="mint">
+              </GpBadge>
+              <GpBadge theme="mint">
                 {roadmap?.timelineWeeks || 8} Weeks Plan
-              </CaideBadge>
+              </GpBadge>
             </div>
             
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black tracking-tight text-[#0D0431]">
@@ -183,13 +183,13 @@ export default function PlacementRoadmap() {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <CaideButton
+            <GpButton
               onClick={() => setShowConfigModal(true)}
               variant="stacked"
               size="md"
             >
               Adjust Timeline
-            </CaideButton>
+            </GpButton>
           </div>
         </header>
 
@@ -381,7 +381,7 @@ export default function PlacementRoadmap() {
                           className="inline-flex items-center gap-1.5 text-xs font-bold font-mono text-[#0D0431] hover:underline"
                         >
                           <span>Execute Milestone</span>
-                          <CaideArrow className="w-3.5 h-3.5" />
+                          <GpArrow className="w-3.5 h-3.5" />
                         </Link>
 
                         {task.completed && (
@@ -475,13 +475,13 @@ export default function PlacementRoadmap() {
                 >
                   Cancel
                 </button>
-                <CaideButton
+                <GpButton
                   onClick={handleRegenerateRoadmap}
                   variant="stacked-yellow"
                   size="md"
                 >
                   Recalibrate
-                </CaideButton>
+                </GpButton>
               </div>
             </div>
           </div>

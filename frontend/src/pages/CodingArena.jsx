@@ -29,10 +29,10 @@ import {
 import { leetcodeService } from "@/services/leetcodeService";
 import LeetCodeSubmissionAnalysis from "@/components/leetcode/LeetCodeSubmissionAnalysis";
 import SheetsHub from "@/components/sheets/SheetsHub";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideButton from "@/components/caide/CaideButton";
-import CaideToggle from "@/components/caide/CaideToggle";
+import GpCard from "@/components/gp/GpCard";
+import GpBadge from "@/components/gp/GpBadge";
+import GpButton from "@/components/gp/GpButton";
+import GpToggle from "@/components/gp/GpToggle";
 
 const CURATED_LISTS = [
   { id: "all", label: "All Problems", icon: Layers },
@@ -215,9 +215,9 @@ export default function CodingArena() {
         {/* Workspace Top Header */}
         <header className="gsap-reveal flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b-2 border-[#0D0431] pb-6">
           <div className="space-y-2 max-w-2xl">
-            <CaideBadge theme="light-purple">
+            <GpBadge theme="light-purple">
               Coding Practice & DSA Catalog
-            </CaideBadge>
+            </GpBadge>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black text-[#0D0431] tracking-tight">
               Coding Arena
             </h1>
@@ -228,7 +228,7 @@ export default function CodingArena() {
 
           {/* Action CTAs */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <CaideButton
+            <GpButton
               onClick={handlePickRandom}
               variant="stacked-yellow"
               size="sm"
@@ -237,8 +237,8 @@ export default function CodingArena() {
               <span className="flex items-center gap-1.5 font-bold text-[#0D0431]">
                 <Shuffle className="w-4 h-4" /> Pick Random
               </span>
-            </CaideButton>
-            <CaideButton
+            </GpButton>
+            <GpButton
               to="/app/coding/two-sum"
               variant="secondary"
               size="sm"
@@ -247,7 +247,7 @@ export default function CodingArena() {
               <span className="flex items-center gap-1.5 font-bold">
                 <Zap className="w-4 h-4 text-[#FEDF6A]" /> Daily Problem
               </span>
-            </CaideButton>
+            </GpButton>
           </div>
         </header>
 
@@ -283,7 +283,7 @@ export default function CodingArena() {
         {workspaceTab === "overview" && (
           <div className="space-y-6">
             {/* Quick Hero Banner Card */}
-            <CaideCard
+            <GpCard
               theme="white"
               shadow="lg"
               className="gsap-reveal p-6 sm:p-8 space-y-6"
@@ -361,11 +361,11 @@ export default function CodingArena() {
                   />
                 </div>
               </div>
-            </CaideCard>
+            </GpCard>
 
             {/* 4 Bento Stat Cards with Pastel Accents */}
             <section className="gsap-reveal grid grid-cols-2 md:grid-cols-4 gap-4">
-              <CaideCard
+              <GpCard
                 theme="white"
                 className="p-4 sm:p-5 flex items-center gap-4"
               >
@@ -379,9 +379,9 @@ export default function CodingArena() {
                     <span className="text-xs font-normal text-[#0D0431]/50">/ {stats.total}</span>
                   </div>
                 </div>
-              </CaideCard>
+              </GpCard>
 
-              <CaideCard
+              <GpCard
                 theme="light-green"
                 className="p-4 sm:p-5 flex items-center gap-4"
               >
@@ -395,9 +395,9 @@ export default function CodingArena() {
                     <span className="text-xs font-normal text-[#0D0431]/50">/ {stats.easy}</span>
                   </div>
                 </div>
-              </CaideCard>
+              </GpCard>
 
-              <CaideCard
+              <GpCard
                 theme="light-yellow"
                 className="p-4 sm:p-5 flex items-center gap-4"
               >
@@ -411,9 +411,9 @@ export default function CodingArena() {
                     <span className="text-xs font-normal text-[#0D0431]/50">/ {stats.medium}</span>
                   </div>
                 </div>
-              </CaideCard>
+              </GpCard>
 
-              <CaideCard
+              <GpCard
                 theme="white"
                 className="p-4 sm:p-5 flex items-center gap-4"
               >
@@ -427,12 +427,12 @@ export default function CodingArena() {
                     <span className="text-xs font-normal text-[#0D0431]/50">/ {stats.hard}</span>
                   </div>
                 </div>
-              </CaideCard>
+              </GpCard>
             </section>
 
             {/* Quick Action Matrix Grid */}
             <section className="gsap-reveal grid grid-cols-1 md:grid-cols-3 gap-4">
-              <CaideCard
+              <GpCard
                 theme="white"
                 hoverEffect={true}
                 onClick={() => handleTabChange("practice")}
@@ -452,9 +452,9 @@ export default function CodingArena() {
                 <p className="text-xs text-[#0D0431]/75 leading-relaxed font-sans">
                   Browse catalog with difficulty filters, curated tracks, and interactive editor.
                 </p>
-              </CaideCard>
+              </GpCard>
 
-              <CaideCard
+              <GpCard
                 theme="white"
                 hoverEffect={true}
                 onClick={() => handleTabChange("sheets")}
@@ -474,9 +474,9 @@ export default function CodingArena() {
                 <p className="text-xs text-[#0D0431]/75 leading-relaxed font-sans">
                   Curated topic study plans with structured milestone tracking.
                 </p>
-              </CaideCard>
+              </GpCard>
 
-              <CaideCard
+              <GpCard
                 theme="white"
                 hoverEffect={true}
                 onClick={() => handleTabChange("submissions")}
@@ -496,7 +496,7 @@ export default function CodingArena() {
                 <p className="text-xs text-[#0D0431]/75 leading-relaxed font-sans">
                   Review problem submissions, runtime stats, and execution logs.
                 </p>
-              </CaideCard>
+              </GpCard>
             </section>
           </div>
         )}
@@ -538,7 +538,7 @@ export default function CodingArena() {
             </div>
 
             {/* Filter and Search Bar Card */}
-            <CaideCard
+            <GpCard
               theme="white"
               shadow="lg"
               className="gsap-reveal p-5 space-y-4"
@@ -637,10 +637,10 @@ export default function CodingArena() {
                   ))}
                 </div>
               )}
-            </CaideCard>
+            </GpCard>
 
             {/* Problems List Table Bento Card */}
-            <CaideCard
+            <GpCard
               theme="white"
               shadow="lg"
               className="gsap-reveal overflow-hidden"
@@ -683,14 +683,14 @@ export default function CodingArena() {
               ) : error ? (
                 <div className="p-12 text-center space-y-3">
                   <p className="text-[#F85B52] text-xs font-mono font-bold">{error}</p>
-                  <CaideButton
+                  <GpButton
                     onClick={() => setPage(page)}
                     variant="secondary"
                     size="sm"
                     icon={false}
                   >
                     Retry
-                  </CaideButton>
+                  </GpButton>
                 </div>
               ) : problems.length === 0 ? (
                 <div className="p-16 text-center space-y-3">
@@ -754,12 +754,12 @@ export default function CodingArena() {
                             </td>
 
                             <td className="py-4 px-4">
-                              <CaideBadge
+                              <GpBadge
                                 theme={getDifficultyBadgeTheme(prob.difficulty)}
                                 size="sm"
                               >
                                 {prob.difficulty}
-                              </CaideBadge>
+                              </GpBadge>
                             </td>
 
                             <td className="py-4 px-4 hidden md:table-cell">
@@ -854,7 +854,7 @@ export default function CodingArena() {
                   </button>
                 </div>
               </div>
-            </CaideCard>
+            </GpCard>
           </div>
         )}
 

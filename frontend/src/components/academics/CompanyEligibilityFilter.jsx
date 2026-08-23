@@ -16,8 +16,8 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpCard from "@/components/gp/GpCard";
+import GpBadge from "@/components/gp/GpBadge";
 
 const STATUS_CONFIG = {
   Eligible: {
@@ -73,7 +73,7 @@ export default function CompanyEligibilityFilter({ academicData }) {
   });
 
   return (
-    <CaideCard
+    <GpCard
       theme="white"
       shadow="default"
       className="p-6 md:p-8 space-y-6"
@@ -86,9 +86,9 @@ export default function CompanyEligibilityFilter({ academicData }) {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <CaideBadge theme="blue" size="sm">
+              <GpBadge theme="blue" size="sm">
                 Drive Screening Matrix
-              </CaideBadge>
+              </GpBadge>
             </div>
             <h3 className="text-xl sm:text-2xl font-heading font-black text-[#0D0431] tracking-tight mt-0.5">
               Company Academic Eligibility Screening
@@ -165,10 +165,10 @@ export default function CompanyEligibilityFilter({ academicData }) {
                     </span>
                   </div>
 
-                  <CaideBadge theme={cfg.theme} size="sm">
+                  <GpBadge theme={cfg.theme} size="sm">
                     <IconComp className="w-3.5 h-3.5 mr-1" />
                     {cfg.badgeText}
-                  </CaideBadge>
+                  </GpBadge>
                 </div>
 
                 {/* Criteria Grid */}
@@ -230,6 +230,6 @@ export default function CompanyEligibilityFilter({ academicData }) {
           );
         })}
       </div>
-    </CaideCard>
+    </GpCard>
   );
 }

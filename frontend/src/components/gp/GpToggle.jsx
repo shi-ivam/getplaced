@@ -1,9 +1,9 @@
 import React from "react";
 
 /**
- * Pill shaped segmented toggle switch matching Caide.io
+ * Pill shaped segmented toggle switch matching GetPlaced
  */
-export default function CaideToggle({
+export default function GpToggle({
   options = [],
   value,
   onChange,

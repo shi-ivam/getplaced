@@ -25,9 +25,9 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { PY_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideButton from "@/components/caide/CaideButton";
+import GpBadge from "@/components/gp/GpBadge";
+import GpCard from "@/components/gp/GpCard";
+import GpButton from "@/components/gp/GpButton";
 
 const CATEGORY_THEMES = {
   Keywords: "mint",
@@ -379,7 +379,7 @@ export default function ResumeActionCenter({
     <div className="space-y-6">
       
       {/* 1. Header & Summary Statistics Strip */}
-      <CaideCard theme="white" shadow="lg" rounded="3xl" className="p-5 sm:p-7 space-y-6">
+      <GpCard theme="white" shadow="lg" rounded="3xl" className="p-5 sm:p-7 space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-[#0D0431] pb-5">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -387,9 +387,9 @@ export default function ResumeActionCenter({
               <h2 className="text-base font-heading font-black uppercase tracking-wider text-[#0D0431]">
                 Resume Action Center
               </h2>
-              <CaideBadge theme="light-purple" size="sm">
+              <GpBadge theme="light-purple" size="sm">
                 Recommendation Engine
-              </CaideBadge>
+              </GpBadge>
             </div>
             <p className="text-xs text-[#0D0431]/70 font-sans font-medium">
               Select specific recommendations, preview suggested enhancements, and calculate ATS impact.
@@ -479,13 +479,13 @@ export default function ResumeActionCenter({
             )}
 
             {selectedIds.size > 0 && (
-              <CaideButton
+              <GpButton
                 onClick={handleFixSelected}
                 variant="stacked-yellow"
                 size="sm"
               >
                 Apply Selected ({selectedIds.size})
-              </CaideButton>
+              </GpButton>
             )}
           </div>
         </div>
@@ -513,7 +513,7 @@ export default function ResumeActionCenter({
             </span>
           </div>
         </div>
-      </CaideCard>
+      </GpCard>
 
       {/* 2. Success Banner (Displayed after changes applied) */}
       <AnimatePresence>
@@ -532,9 +532,9 @@ export default function ResumeActionCenter({
                 <div>
                   <h3 className="text-base font-heading font-black text-[#0D0431] flex items-center gap-2">
                     Resume Optimizations Applied
-                    <CaideBadge theme="mint" size="sm">
+                    <GpBadge theme="mint" size="sm">
                       Verified
-                    </CaideBadge>
+                    </GpBadge>
                   </h3>
                   <p className="text-xs text-[#0D0431]/80 font-sans font-medium mt-0.5">
                     {lastApplyResult.summary || "ATS evaluation updated for revised content."}
@@ -669,20 +669,20 @@ export default function ResumeActionCenter({
                     <div className="space-y-1.5 flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         {/* Category Badge */}
-                        <CaideBadge theme={categoryTheme} size="sm">
+                        <GpBadge theme={categoryTheme} size="sm">
                           {action.category || "General"}
-                        </CaideBadge>
+                        </GpBadge>
 
                         {/* Impact Badge */}
-                        <CaideBadge theme={impactTheme} size="sm">
+                        <GpBadge theme={impactTheme} size="sm">
                           {action.impact} Impact
-                        </CaideBadge>
+                        </GpBadge>
 
                         {/* Severity Badge if Critical */}
                         {action.severity === "CRITICAL" && (
-                          <CaideBadge theme="coral" size="sm">
+                          <GpBadge theme="coral" size="sm">
                             Critical Fix
-                          </CaideBadge>
+                          </GpBadge>
                         )}
 
                         {/* Status Badge */}
@@ -899,13 +899,13 @@ export default function ResumeActionCenter({
                 >
                   Clear
                 </button>
-                <CaideButton
+                <GpButton
                   onClick={handleFixSelected}
                   variant="stacked-yellow"
                   size="sm"
                 >
                   Apply Selected Fixes
-                </CaideButton>
+                </GpButton>
               </div>
             </div>
           </motion.div>
@@ -951,9 +951,9 @@ export default function ResumeActionCenter({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <CaideBadge theme="light-purple" size="sm">
+                        <GpBadge theme="light-purple" size="sm">
                           {item.category}
-                        </CaideBadge>
+                        </GpBadge>
                         <h4 className="text-xs font-heading font-bold text-[#0D0431]">{item.title}</h4>
                       </div>
                       <span className="text-[10px] font-mono font-bold text-[#896EE2]">
@@ -1016,7 +1016,7 @@ export default function ResumeActionCenter({
                     Cancel
                   </button>
 
-                  <CaideButton
+                  <GpButton
                     onClick={handleConfirmApply}
                     disabled={isApplying}
                     variant="stacked-yellow"
@@ -1031,7 +1031,7 @@ export default function ResumeActionCenter({
                     ) : (
                       "Apply Changes & Recalculate ATS"
                     )}
-                  </CaideButton>
+                  </GpButton>
                 </div>
               </div>
 

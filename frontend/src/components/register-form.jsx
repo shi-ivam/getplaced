@@ -12,7 +12,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 
 export function RegisterForm({ className = "", ...rest }) {
   const navigate = useNavigate();
@@ -77,10 +77,10 @@ export function RegisterForm({ className = "", ...rest }) {
         {/* Header */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <CaideBadge theme="mint" size="sm">
+            <GpBadge theme="mint" size="sm">
               <UserPlus className="w-3.5 h-3.5 mr-1" />
               Free Registration
-            </CaideBadge>
+            </GpBadge>
             <Link to="/" className="text-xs text-[#6F6A80] hover:text-[#17103D] font-medium">
               Back to Home &rarr;
             </Link>

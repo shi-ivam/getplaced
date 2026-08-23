@@ -34,7 +34,7 @@ import {
   Database,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 
 export default function VtopDetails() {
   const containerRef = useRef(null);
@@ -315,12 +315,12 @@ export default function VtopDetails() {
               <span className="font-semibold uppercase tracking-wider text-[#6F6A80]">
                 Cumulative CGPA
               </span>
-              <CaideBadge
+              <GpBadge
                 theme={Number(vtopData.currentCgpa) >= 8.5 ? "mint" : Number(vtopData.currentCgpa) >= 7.5 ? "yellow" : "coral"}
                 size="sm"
               >
                 {Number(vtopData.currentCgpa) >= 8.5 ? "Tier-1 Ready" : "Super Dream"}
-              </CaideBadge>
+              </GpBadge>
             </div>
             <div className="text-2xl sm:text-3xl font-black text-[#17103D]">
               {vtopData.currentCgpa ? Number(vtopData.currentCgpa).toFixed(2) : "N/A"}
@@ -336,12 +336,12 @@ export default function VtopDetails() {
               <span className="font-semibold uppercase tracking-wider text-[#6F6A80]">
                 Overall Attendance
               </span>
-              <CaideBadge
+              <GpBadge
                 theme={(vtopData.overallAttendancePercentage || 0) >= 75 ? "mint" : "coral"}
                 size="sm"
               >
                 {(vtopData.overallAttendancePercentage || 0) >= 75 ? "Safe" : "Warning"}
-              </CaideBadge>
+              </GpBadge>
             </div>
             <div className="text-2xl sm:text-3xl font-black text-[#17103D]">
               {vtopData.overallAttendancePercentage != null
@@ -359,12 +359,12 @@ export default function VtopDetails() {
               <span className="font-semibold uppercase tracking-wider text-[#6F6A80]">
                 Standing Arrears
               </span>
-              <CaideBadge
+              <GpBadge
                 theme={(vtopData.activeBacklogs || 0) === 0 ? "mint" : "coral"}
                 size="sm"
               >
                 {(vtopData.activeBacklogs || 0) === 0 ? "Clean Record" : "Backlog Alert"}
-              </CaideBadge>
+              </GpBadge>
             </div>
             <div className="text-2xl sm:text-3xl font-black text-[#17103D]">
               {vtopData.activeBacklogs ?? 0}

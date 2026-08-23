@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Lock, ShieldCheck, Key, EyeOff, Server, Check } from "lucide-react";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideCard from "@/components/caide/CaideCard";
+import GpBadge from "@/components/gp/GpBadge";
+import GpCard from "@/components/gp/GpCard";
 
 const PrivacyProtection = () => {
   const [sessionSecurity, setSessionSecurity] = useState({
@@ -55,7 +55,7 @@ const PrivacyProtection = () => {
     <section id="security" className="py-24 md:py-32 bg-[#D4FDF7] u-background-grid-green text-[#0D0431] relative overflow-hidden border-b-2 border-[#0D0431]">
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         
-        <CaideCard
+        <GpCard
           theme="white"
           shadow="lg"
           className="p-8 md:p-12 overflow-hidden"
@@ -64,9 +64,9 @@ const PrivacyProtection = () => {
             
             {/* Left Specs (7 Cols) */}
             <div className="lg:col-span-7 space-y-6 text-left">
-              <CaideBadge theme="light-purple">
+              <GpBadge theme="light-purple">
                 Enterprise Data Privacy
-              </CaideBadge>
+              </GpBadge>
               
               <h2 className="text-3xl md:text-5xl font-heading font-black tracking-tight text-[#0D0431]">
                 End-to-End Encryption & Zero-Training Guarantees
@@ -132,7 +132,7 @@ const PrivacyProtection = () => {
             </div>
 
           </div>
-        </CaideCard>
+        </GpCard>
 
       </div>
     </section>

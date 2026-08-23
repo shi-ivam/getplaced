@@ -26,9 +26,9 @@ import {
   Target,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
-import CaideButton from "@/components/caide/CaideButton";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideCard from "@/components/caide/CaideCard";
+import GpButton from "@/components/gp/GpButton";
+import GpBadge from "@/components/gp/GpBadge";
+import GpCard from "@/components/gp/GpCard";
 
 const ICON_MAP = {
   Shield,
@@ -142,10 +142,10 @@ export default function Milestones() {
         {/* ── Editorial Header ── */}
         <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b-2 border-[#0D0431]">
           <div className="space-y-3 max-w-3xl">
-            <CaideBadge theme="yellow">
+            <GpBadge theme="yellow">
               <Award className="w-3.5 h-3.5 mr-1" />
               Verified Competency Badges
-            </CaideBadge>
+            </GpBadge>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black tracking-tight text-[#0D0431] leading-tight">
               Readiness Milestones & Skill Accreditations
             </h1>
@@ -188,7 +188,7 @@ export default function Milestones() {
         </nav>
 
         {/* ── Candidate Tier Progression Track ── */}
-        <CaideCard
+        <GpCard
           theme="white"
           shadow="default"
           className="gsap-fade-item p-6 md:p-8 space-y-6"
@@ -250,7 +250,7 @@ export default function Milestones() {
               );
             })}
           </div>
-        </CaideCard>
+        </GpCard>
 
         {/* ── Filter Navigation Bar ── */}
         <div className="gsap-fade-item flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
@@ -287,7 +287,7 @@ export default function Milestones() {
             const isClaimed = item.isClaimed || recentlyClaimed[item.id];
 
             return (
-              <CaideCard
+              <GpCard
                 key={item.id}
                 theme={item.isUnlocked ? "white" : "light-yellow"}
                 shadow="default"
@@ -302,9 +302,9 @@ export default function Milestones() {
                       <IconComp className="w-6 h-6" />
                     </div>
 
-                    <CaideBadge theme={tierTheme} size="sm">
+                    <GpBadge theme={tierTheme} size="sm">
                       {item.tier}
-                    </CaideBadge>
+                    </GpBadge>
                   </div>
 
                   <h3 className="text-base font-heading font-black text-[#0D0431] mb-1.5 flex items-center gap-2 tracking-tight">
@@ -334,7 +334,7 @@ export default function Milestones() {
                           <Check className="w-3.5 h-3.5" /> Reward Claimed
                         </span>
                       ) : (
-                        <CaideButton
+                        <GpButton
                           variant="stacked-yellow"
                           size="sm"
                           icon={false}
@@ -345,7 +345,7 @@ export default function Milestones() {
                             <Gift className="w-3.5 h-3.5" />
                             {claimingId === item.id ? "Claiming..." : "Claim Reward"}
                           </span>
-                        </CaideButton>
+                        </GpButton>
                       )}
                     </div>
                   ) : (
@@ -363,7 +363,7 @@ export default function Milestones() {
                     </div>
                   )}
                 </div>
-              </CaideCard>
+              </GpCard>
             );
           })}
         </section>

@@ -14,7 +14,7 @@ import {
   Zap,
   Layers,
 } from "lucide-react";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 
 export default function Hero() {
   const navigate = useNavigate();
@@ -108,9 +108,9 @@ export default function Hero() {
                     Candidate Dashboard • Microsoft SDE Track
                   </span>
                 </div>
-                <CaideBadge theme="mint" size="sm">
+                <GpBadge theme="mint" size="sm">
                   84% Target Readiness
-                </CaideBadge>
+                </GpBadge>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">

@@ -23,8 +23,8 @@ import {
   Layers,
   GraduationCap,
 } from "lucide-react";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideButton, { CaideArrow } from "@/components/caide/CaideButton";
+import GpBadge from "@/components/gp/GpBadge";
+import GpButton, { GpArrow } from "@/components/gp/GpButton";
 
 export default function JobDetailModal({
   job,
@@ -135,19 +135,19 @@ export default function JobDetailModal({
                   {employerName}
                 </span>
                 {isDemo ? (
-                  <CaideBadge theme="light-purple" size="sm">
+                  <GpBadge theme="light-purple" size="sm">
                     Demo Listing
-                  </CaideBadge>
+                  </GpBadge>
                 ) : (
-                  <CaideBadge theme="mint" size="sm">
+                  <GpBadge theme="mint" size="sm">
                     <ShieldCheck className="w-3 h-3 mr-0.5" />
                     Verified Official
-                  </CaideBadge>
+                  </GpBadge>
                 )}
                 {job.fitStatus && (
-                  <CaideBadge theme="yellow" size="sm">
+                  <GpBadge theme="yellow" size="sm">
                     {job.fitStatus}
-                  </CaideBadge>
+                  </GpBadge>
                 )}
               </div>
 

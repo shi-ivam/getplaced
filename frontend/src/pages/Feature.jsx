@@ -3,9 +3,9 @@ import { motion } from "framer-motion";
 import { Cpu, FileSearch, Code2, Sparkles, Target, BarChart3, Bot, Zap, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
 import axios from "axios";
 import { NODE_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideButton from "@/components/caide/CaideButton";
+import GpBadge from "@/components/gp/GpBadge";
+import GpCard from "@/components/gp/GpCard";
+import GpButton from "@/components/gp/GpButton";
 
 const FeaturesGrid = () => {
   const [telemetryData, setTelemetryData] = useState({
@@ -79,9 +79,9 @@ const FeaturesGrid = () => {
         
         {/* Section Header */}
         <div className="flex flex-col items-center text-center mb-16 md:mb-20">
-          <CaideBadge theme="light-purple">
+          <GpBadge theme="light-purple">
             From Chaos to Offers
-          </CaideBadge>
+          </GpBadge>
           <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading font-black tracking-tight max-w-4xl text-[#0D0431] mt-4">
             A Complete Career Intelligence Stack
           </h2>
@@ -90,10 +90,10 @@ const FeaturesGrid = () => {
           </p>
         </div>
 
-        {/* Caide-Style Comparison Section: Without vs With */}
+        {/* GetPlaced-Style Comparison Section: Without vs With */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
           {/* Without Card */}
-          <CaideCard
+          <GpCard
             theme="white"
             shadow="lg"
             className="p-8 space-y-6"
@@ -126,10 +126,10 @@ const FeaturesGrid = () => {
                 <span>Hours lost wandering aimlessly across unorganized LeetCode problem lists</span>
               </li>
             </ul>
-          </CaideCard>
+          </GpCard>
 
           {/* With Card */}
-          <CaideCard
+          <GpCard
             theme="light-green"
             shadow="lg"
             className="p-8 space-y-6"
@@ -162,14 +162,14 @@ const FeaturesGrid = () => {
                 <span>Structured 28+ topic curated sheets with verified solution architectures</span>
               </li>
             </ul>
-          </CaideCard>
+          </GpCard>
         </div>
 
         {/* Bento Grid Features */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           
           {/* Bento Card 1: Technical Interview Simulation (Span 2) */}
-          <CaideCard
+          <GpCard
             theme="light-purple"
             shadow="lg"
             className="col-span-1 md:col-span-2 p-8 flex flex-col justify-between"
@@ -195,10 +195,10 @@ const FeaturesGrid = () => {
                 <div className="h-full bg-[#896EE2] w-[94%] rounded-full" />
               </div>
             </div>
-          </CaideCard>
+          </GpCard>
 
           {/* Bento Card 2: ATS Resume Score (Span 2) */}
-          <CaideCard
+          <GpCard
             theme="pale-lime"
             shadow="lg"
             className="col-span-1 md:col-span-2 p-8 flex flex-col justify-between"
@@ -219,10 +219,10 @@ const FeaturesGrid = () => {
               <div className="font-heading font-bold text-xs text-[#0D0431] uppercase">Verified ATS Score</div>
               <div className="text-3xl font-heading font-black text-[#0D0431]">{telemetryData.atsScore}%</div>
             </div>
-          </CaideCard>
+          </GpCard>
 
           {/* Bento Card 3: 2800+ Question Arena */}
-          <CaideCard
+          <GpCard
             theme="light-blue"
             shadow="default"
             className="col-span-1 md:col-span-1 p-6 flex flex-col justify-between"
@@ -242,10 +242,10 @@ const FeaturesGrid = () => {
               <span>Explore Arena</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
-          </CaideCard>
+          </GpCard>
 
           {/* Bento Card 4: Company Dossiers */}
-          <CaideCard
+          <GpCard
             theme="white"
             shadow="default"
             className="col-span-1 md:col-span-1 p-6 flex flex-col justify-between"
@@ -265,10 +265,10 @@ const FeaturesGrid = () => {
               <span>View Intel</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
-          </CaideCard>
+          </GpCard>
 
           {/* Bento Card 5: Behavioral STAR Engine */}
-          <CaideCard
+          <GpCard
             theme="light-green"
             shadow="default"
             className="col-span-1 md:col-span-1 p-6 flex flex-col justify-between"
@@ -288,10 +288,10 @@ const FeaturesGrid = () => {
               <span>Practice STAR</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
-          </CaideCard>
+          </GpCard>
 
           {/* Bento Card 6: Readiness Score */}
-          <CaideCard
+          <GpCard
             theme="white"
             shadow="default"
             className="col-span-1 md:col-span-1 p-6 flex flex-col justify-between"
@@ -311,7 +311,7 @@ const FeaturesGrid = () => {
               <span>Score Breakdown</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
-          </CaideCard>
+          </GpCard>
 
         </div>
 

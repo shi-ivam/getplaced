@@ -11,9 +11,9 @@ import {
   ChevronRight,
   X
 } from "lucide-react";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideButton from "@/components/caide/CaideButton";
+import GpBadge from "@/components/gp/GpBadge";
+import GpCard from "@/components/gp/GpCard";
+import GpButton from "@/components/gp/GpButton";
 
 export default function ResumeVersionHistory({
   versions = [],
@@ -39,7 +39,7 @@ export default function ResumeVersionHistory({
     <div className="space-y-6">
       
       {/* Overview Card */}
-      <CaideCard theme="white" shadow="lg" rounded="3xl" className="p-6 sm:p-7 space-y-6">
+      <GpCard theme="white" shadow="lg" rounded="3xl" className="p-6 sm:p-7 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#0D0431] pb-5">
           <div className="space-y-1">
             <h2 className="text-sm font-heading font-bold uppercase tracking-wider text-[#0D0431] flex items-center gap-2">
@@ -62,13 +62,13 @@ export default function ResumeVersionHistory({
             )}
 
             {versions.length >= 2 && (
-              <CaideButton
+              <GpButton
                 onClick={() => handleOpenDiff(versions[1], versions[0])}
                 variant="stacked-yellow"
                 size="sm"
               >
                 Compare Latest vs Prior
-              </CaideButton>
+              </GpButton>
             )}
           </div>
         </div>
@@ -106,9 +106,9 @@ export default function ResumeVersionHistory({
                           {ver.name}
                         </h4>
                         {isLatest && (
-                          <CaideBadge theme="mint" size="sm">
+                          <GpBadge theme="mint" size="sm">
                             Active Version
-                          </CaideBadge>
+                          </GpBadge>
                         )}
                         <span className={`px-2.5 py-0.5 text-[9px] font-heading font-bold uppercase rounded-full border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] ${
                           ver.atsScore >= 80
@@ -164,7 +164,7 @@ export default function ResumeVersionHistory({
             })
           )}
         </div>
-      </CaideCard>
+      </GpCard>
 
       {/* Version Diffing Modal */}
       {compareModalOpen && versionA && versionB && (

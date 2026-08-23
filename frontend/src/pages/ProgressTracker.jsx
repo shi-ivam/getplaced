@@ -37,9 +37,9 @@ import {
 } from "recharts";
 import { NODE_API_URL } from "@/config/api";
 import { getProgressTrackerMentorCopy } from "@/utils/dynamicCopy";
-import CaideButton from "@/components/caide/CaideButton";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideCard from "@/components/caide/CaideCard";
+import GpButton from "@/components/gp/GpButton";
+import GpBadge from "@/components/gp/GpBadge";
+import GpCard from "@/components/gp/GpCard";
 
 const DIMENSIONS = [
   { key: "overallScore", label: "Overall Readiness", color: "#896EE2" },
@@ -144,10 +144,10 @@ export default function ProgressTracker() {
         {/* ── Editorial Header ── */}
         <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b-2 border-[#0D0431]">
           <div className="space-y-3 max-w-3xl">
-            <CaideBadge theme="light-purple">
+            <GpBadge theme="light-purple">
               <Activity className="w-3.5 h-3.5 mr-1" />
               Velocity & Trajectory Analytics
-            </CaideBadge>
+            </GpBadge>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black tracking-tight text-[#0D0431] leading-tight">
               {trackerMentor.heading}
             </h1>
@@ -157,7 +157,7 @@ export default function ProgressTracker() {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <CaideButton
+            <GpButton
               variant="stacked-yellow"
               size="md"
               icon={false}
@@ -166,7 +166,7 @@ export default function ProgressTracker() {
               <span className="flex items-center gap-1.5 font-bold text-[#0D0431]">
                 <Plus className="w-4 h-4" /> Log Practice Sprint
               </span>
-            </CaideButton>
+            </GpButton>
           </div>
         </header>
 
@@ -198,7 +198,7 @@ export default function ProgressTracker() {
         <section className="gsap-fade-item grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
           {/* Weekly Velocity Bento Card */}
-          <CaideCard
+          <GpCard
             theme="pale-lime"
             shadow="default"
             hoverEffect={true}
@@ -225,10 +225,10 @@ export default function ProgressTracker() {
                   : "Target projection active"}
               </span>
             </div>
-          </CaideCard>
+          </GpCard>
 
           {/* Daily Streak Bento Card */}
-          <CaideCard
+          <GpCard
             theme="light-yellow"
             shadow="default"
             hoverEffect={true}
@@ -250,10 +250,10 @@ export default function ProgressTracker() {
               <CheckCircle2 className="w-4 h-4 text-[#0D0431]" />
               <span>Consistency multiplier active</span>
             </div>
-          </CaideCard>
+          </GpCard>
 
           {/* Solved Problems Bento Card */}
-          <CaideCard
+          <GpCard
             theme="light-purple"
             shadow="default"
             hoverEffect={true}
@@ -275,10 +275,10 @@ export default function ProgressTracker() {
               <Target className="w-4 h-4 text-[#0D0431]" />
               <span>Balanced across Arrays, Trees, DP</span>
             </div>
-          </CaideCard>
+          </GpCard>
 
           {/* Dedicated Study Time Bento Card */}
-          <CaideCard
+          <GpCard
             theme="light-blue"
             shadow="default"
             hoverEffect={true}
@@ -300,11 +300,11 @@ export default function ProgressTracker() {
               <Award className="w-4 h-4 text-[#0D0431]" />
               <span>{progressData?.totalTasksCompleted || 0} tasks mastered</span>
             </div>
-          </CaideCard>
+          </GpCard>
         </section>
 
         {/* ── Historical Multi-Dimensional Trend Graphs ── */}
-        <CaideCard
+        <GpCard
           theme="white"
           shadow="default"
           className="gsap-fade-item p-6 md:p-8 space-y-6"
@@ -412,10 +412,10 @@ export default function ProgressTracker() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </CaideCard>
+        </GpCard>
 
         {/* ── Activity Telemetry Feed ── */}
-        <CaideCard
+        <GpCard
           theme="white"
           shadow="default"
           className="gsap-fade-item p-6 md:p-8 space-y-4"
@@ -462,7 +462,7 @@ export default function ProgressTracker() {
               </div>
             ))}
           </div>
-        </CaideCard>
+        </GpCard>
 
         {/* ── Log Activity Modal ── */}
         {showLogModal && (
@@ -550,7 +550,7 @@ export default function ProgressTracker() {
                   >
                     Cancel
                   </button>
-                  <CaideButton
+                  <GpButton
                     type="submit"
                     variant="stacked-yellow"
                     size="md"
@@ -560,7 +560,7 @@ export default function ProgressTracker() {
                     <span className="font-bold text-[#0D0431]">
                       {loggingInProgress ? "Logging..." : "Record Activity"}
                     </span>
-                  </CaideButton>
+                  </GpButton>
                 </div>
               </form>
             </div>

@@ -28,7 +28,7 @@ import { sheetsService } from "@/services/sheetsService";
 import SheetViewer from "./SheetViewer";
 import SheetArticleModal from "./SheetArticleModal";
 import SheetVideoModal from "./SheetVideoModal";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 
 const CATEGORY_TABS = [
   { id: "all", label: "All Curricula (28)", icon: Layers },

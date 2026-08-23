@@ -33,9 +33,9 @@ import {
   X,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideButton, { CaideArrow } from "@/components/caide/CaideButton";
+import GpBadge from "@/components/gp/GpBadge";
+import GpCard from "@/components/gp/GpCard";
+import GpButton, { GpArrow } from "@/components/gp/GpButton";
 import GitHubConnectCard from "@/components/github/GitHubConnectCard";
 import { getDevMentorCopy } from "@/utils/dynamicCopy";
 
@@ -279,13 +279,13 @@ export default function Development() {
               </button>
             )}
 
-            <CaideButton
+            <GpButton
               variant="stacked-yellow"
               size="sm"
               to="/app/roadmap"
             >
               <span>View Tech Roadmap</span>
-            </CaideButton>
+            </GpButton>
           </div>
         </header>
 
@@ -327,13 +327,13 @@ export default function Development() {
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <CaideBadge theme="mint">
+                    <GpBadge theme="mint">
                       <Sparkles className="w-3 h-3 text-[#0D0431]" />
                       Project Readiness
-                    </CaideBadge>
-                    <CaideBadge theme="yellow">
+                    </GpBadge>
+                    <GpBadge theme="yellow">
                       15% Weight
-                    </CaideBadge>
+                    </GpBadge>
                   </div>
 
                   <div className="flex items-baseline gap-3">
@@ -645,9 +645,9 @@ export default function Development() {
 
                 <div className="flex items-center gap-2 text-xs font-mono font-bold">
                   <span className="text-[#0D0431]/70">Benchmark Bar:</span>
-                  <CaideBadge theme="yellow">
+                  <GpBadge theme="yellow">
                     {userProfile?.targetCompany || "Tier-1 Tech"}
-                  </CaideBadge>
+                  </GpBadge>
                 </div>
               </div>
 
@@ -666,12 +666,12 @@ export default function Development() {
                         <div className="space-y-2">
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-heading font-black text-xs text-[#0D0431]">{skill.name}</span>
-                            <CaideBadge
+                            <GpBadge
                               theme={skill.importance === "Required" ? "light-purple" : "mint"}
                               size="sm"
                             >
                               {skill.importance}
-                            </CaideBadge>
+                            </GpBadge>
                           </div>
 
                           <div className="space-y-1 font-mono font-semibold">
@@ -747,9 +747,9 @@ export default function Development() {
                 </div>
 
                 <div className="flex items-center gap-2 text-xs font-mono">
-                  <CaideBadge theme="mint">
+                  <GpBadge theme="mint">
                     Verified Evidence
-                  </CaideBadge>
+                  </GpBadge>
                 </div>
               </div>
 
@@ -877,9 +877,9 @@ export default function Development() {
                 <h4 className="text-xs uppercase font-heading font-bold text-[#0D0431] tracking-wider">
                   Detected Repository Deployments
                 </h4>
-                <CaideBadge theme="yellow">
+                <GpBadge theme="yellow">
                   {githubProfile?.repositories?.filter((r) => r.hasLiveDemo).length || 0} Demos Detected
-                </CaideBadge>
+                </GpBadge>
               </div>
 
               {githubProfile?.repositories?.filter((r) => r.hasLiveDemo).length ? (
@@ -894,9 +894,9 @@ export default function Development() {
                         <div>
                           <div className="flex items-center justify-between">
                             <span className="font-heading font-black text-xs text-[#0D0431]">{repo.name}</span>
-                            <CaideBadge theme="mint" size="sm">
+                            <GpBadge theme="mint" size="sm">
                               Live
-                            </CaideBadge>
+                            </GpBadge>
                           </div>
                           <p className="text-xs text-[#0D0431]/80 mt-1 line-clamp-2 font-medium">
                             {repo.description || "Production deployment."}
@@ -962,9 +962,9 @@ export default function Development() {
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <CaideBadge theme="light-purple" size="sm">
+                      <GpBadge theme="light-purple" size="sm">
                         {track.category}
-                      </CaideBadge>
+                      </GpBadge>
                       <span className="text-xs font-mono font-bold text-[#0D0431]/70">{track.duration}</span>
                     </div>
 
@@ -1029,9 +1029,9 @@ export default function Development() {
                     {selectedRepoModal.name}
                   </h3>
                   {selectedRepoModal.isFork && (
-                    <CaideBadge theme="yellow" size="sm">
+                    <GpBadge theme="yellow" size="sm">
                       Fork
-                    </CaideBadge>
+                    </GpBadge>
                   )}
                 </div>
                 <p className="text-xs text-[#0D0431]/80 font-medium">

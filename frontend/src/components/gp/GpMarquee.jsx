@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function CaideMarquee({
+export default function GpMarquee({
   items = [
     "DSA & System Design Tracks",
     "AI Placement Roadmap",
@@ -18,7 +18,7 @@ export default function CaideMarquee({
     <div
       className={`relative w-full overflow-hidden bg-[#FFD84D] text-[#17103D] py-3.5 border-y border-[#FFE995] select-none group shadow-sm ${className}`}
     >
-      <div className="flex w-max animate-caide-marquee group-hover:[animation-play-state:paused] motion-reduce:animate-none items-center gap-8 font-heading text-xs sm:text-sm font-bold tracking-wider uppercase">
+      <div className="flex w-max animate-gp-marquee group-hover:[animation-play-state:paused] motion-reduce:animate-none items-center gap-8 font-heading text-xs sm:text-sm font-bold tracking-wider uppercase">
         {repeated.map((text, idx) => (
           <div key={idx} className="flex items-center gap-8 shrink-0">
             <span>{text}</span>

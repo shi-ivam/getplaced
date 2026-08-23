@@ -11,8 +11,8 @@ import {
   ShieldAlert,
   GraduationCap,
 } from "lucide-react";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpCard from "@/components/gp/GpCard";
+import GpBadge from "@/components/gp/GpBadge";
 
 export default function TargetCutoffCalculator({
   currentCgpa = 8.0,
@@ -90,7 +90,7 @@ export default function TargetCutoffCalculator({
   }, [currCgpa, completed, total, target]);
 
   return (
-    <CaideCard
+    <GpCard
       theme="white"
       shadow="default"
       className="p-6 md:p-8 space-y-6"
@@ -103,9 +103,9 @@ export default function TargetCutoffCalculator({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <CaideBadge theme="yellow" size="sm">
+              <GpBadge theme="yellow" size="sm">
                 Target CGPA Engine
-              </CaideBadge>
+              </GpBadge>
             </div>
             <h3 className="text-xl sm:text-2xl font-heading font-black text-[#0D0431] tracking-tight mt-0.5">
               Placement Target CGPA Cutoff Calculator
@@ -212,7 +212,7 @@ export default function TargetCutoffCalculator({
                   {analysis.achievable ? (
                     <>
                       <span>{analysis.requiredSgpaPerSem} SGPA</span>
-                      <CaideBadge
+                      <GpBadge
                         theme={
                           analysis.difficultyLevel.startsWith("Comfortable")
                             ? "lime"
@@ -222,7 +222,7 @@ export default function TargetCutoffCalculator({
                         }
                       >
                         {analysis.difficultyLevel}
-                      </CaideBadge>
+                      </GpBadge>
                     </>
                   ) : (
                     <span className="text-[#0D0431] text-2xl sm:text-3xl">
@@ -248,6 +248,6 @@ export default function TargetCutoffCalculator({
           </p>
         </div>
       )}
-    </CaideCard>
+    </GpCard>
   );
 }

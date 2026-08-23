@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-export function CaideArrow({ className = "w-4 h-4" }) {
+export function GpArrow({ className = "w-4 h-4" }) {
   return (
     <svg
       viewBox="0 0 25 24"
@@ -20,7 +20,7 @@ export function CaideArrow({ className = "w-4 h-4" }) {
 /**
  * Modern Clean Button Component
  */
-export default function CaideButton({
+export default function GpButton({
   children,
   to,
   href,
@@ -61,7 +61,7 @@ export default function CaideButton({
     return (
       <Link to={to} className={baseClasses}>
         <span>{children}</span>
-        {icon && <CaideArrow className="w-3.5 h-3.5 shrink-0 opacity-80" />}
+        {icon && <GpArrow className="w-3.5 h-3.5 shrink-0 opacity-80" />}
       </Link>
     );
   }
@@ -70,7 +70,7 @@ export default function CaideButton({
     return (
       <a href={href} className={baseClasses}>
         <span>{children}</span>
-        {icon && <CaideArrow className="w-3.5 h-3.5 shrink-0 opacity-80" />}
+        {icon && <GpArrow className="w-3.5 h-3.5 shrink-0 opacity-80" />}
       </a>
     );
   }
@@ -83,7 +83,7 @@ export default function CaideButton({
       className={baseClasses}
     >
       <span>{children}</span>
-      {icon && <CaideArrow className="w-3.5 h-3.5 shrink-0 opacity-80" />}
+      {icon && <GpArrow className="w-3.5 h-3.5 shrink-0 opacity-80" />}
     </button>
   );
 }

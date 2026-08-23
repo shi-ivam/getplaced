@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { sheetsService } from "@/services/sheetsService";
 
-// Helper component to render formatted tutorial markdown nicely in Caide design
+// Helper component to render formatted tutorial markdown nicely in GetPlaced design
 function MarkdownRenderer({ content }) {
   if (!content) return null;
 
@@ -217,7 +217,7 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
           isMaximized ? "w-full h-full max-w-none rounded-none" : "w-full max-w-5xl max-h-[92vh]"
         }`}
       >
-        {/* Modal Header (Caide Bento Style with #FEF9CF titlebar) */}
+        {/* Modal Header (GetPlaced Bento Style with #FEF9CF titlebar) */}
         <div className="flex items-center justify-between px-6 py-4 bg-[#FEF9CF] border-b-2 border-[#0D0431] shrink-0">
           <div className="flex items-center gap-3.5 min-w-0 pr-4">
             <div className="p-2 rounded-xl bg-[#E4CDFB] text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] shrink-0">

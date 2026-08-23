@@ -31,28 +31,28 @@
   --color-semantic-purple: #6E44FF;
   --color-semantic-purple-bg: #EFEAFF;
 
-  /* Legacy Caide Tokens (Mapped to modern palette) */
-  --color-caide-dark: #17103D;
-  --color-caide-black: #17103D;
-  --color-caide-white: #FFFFFF;
-  --color-caide-light-grey: #F8F8F5;
-  --color-caide-purple: #6E44FF;
-  --color-caide-brand: #17103D;
-  --color-caide-light-purple: #EFEAFF;
-  --color-caide-dark-lavender: #8B85A8;
-  --color-caide-blue: #1D58B5;
-  --color-caide-light-blue: #E3EEFF;
-  --color-caide-faded-blue: #F0F5FF;
-  --color-caide-green: #0D7A68;
-  --color-caide-light-green: #D8FAF4;
-  --color-caide-dark-green: #0A6354;
-  --color-caide-lime: #DDF7D0;
-  --color-caide-pale-lime: #EEFAEA;
-  --color-caide-yellow: #FFD84D;
-  --color-caide-light-yellow: #FEF9CF;
-  --color-caide-dark-yellow: #FEDF6A;
-  --color-caide-orange: #FFE8E5;
-  --color-caide-dark-orange: #C7382B;
+  /* Theme Palette Tokens (Mapped to modern palette) */
+  --color-gp-dark: #17103D;
+  --color-gp-black: #17103D;
+  --color-gp-white: #FFFFFF;
+  --color-gp-light-grey: #F8F8F5;
+  --color-gp-purple: #6E44FF;
+  --color-gp-brand: #17103D;
+  --color-gp-light-purple: #EFEAFF;
+  --color-gp-dark-lavender: #8B85A8;
+  --color-gp-blue: #1D58B5;
+  --color-gp-light-blue: #E3EEFF;
+  --color-gp-faded-blue: #F0F5FF;
+  --color-gp-green: #0D7A68;
+  --color-gp-light-green: #D8FAF4;
+  --color-gp-dark-green: #0A6354;
+  --color-gp-lime: #DDF7D0;
+  --color-gp-pale-lime: #EEFAEA;
+  --color-gp-yellow: #FFD84D;
+  --color-gp-light-yellow: #FEF9CF;
+  --color-gp-dark-yellow: #FEDF6A;
+  --color-gp-orange: #FFE8E5;
+  --color-gp-dark-orange: #C7382B;
 }
 
 :root {

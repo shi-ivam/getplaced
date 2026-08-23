@@ -27,10 +27,10 @@ import {
 } from "lucide-react";
 import { PY_API_URL } from "@/config/api";
 import { getInterviewMentorCopy } from "@/utils/dynamicCopy";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideButton from "@/components/caide/CaideButton";
-import CaideModal from "@/components/caide/CaideModal";
+import GpBadge from "@/components/gp/GpBadge";
+import GpCard from "@/components/gp/GpCard";
+import GpButton from "@/components/gp/GpButton";
+import GpModal from "@/components/gp/GpModal";
 
 const COMPANY_FILTERS = [
   "All Companies",
@@ -195,9 +195,9 @@ export default function HRPrep() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8">
         {/* Header Hero Section */}
         <div className="text-center space-y-4">
-          <CaideBadge theme="light-purple" dot={true}>
+          <GpBadge theme="light-purple" dot={true}>
             Behavioral Strategy & Leadership Principles
-          </CaideBadge>
+          </GpBadge>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black text-[#0D0431] tracking-tight max-w-5xl mx-auto leading-tight">
             Behavioral & Leadership Preparation
           </h1>
@@ -351,12 +351,12 @@ export default function HRPrep() {
             >
               <div className="space-y-4">
                 <div className="flex items-center justify-between flex-wrap gap-2">
-                  <CaideBadge theme="light-purple" size="sm">
+                  <GpBadge theme="light-purple" size="sm">
                     {q.category || "Behavioral Track"}
-                  </CaideBadge>
-                  <CaideBadge theme="yellow" size="sm">
+                  </GpBadge>
+                  <GpBadge theme="yellow" size="sm">
                     Level: {q.difficulty || "Medium"}
-                  </CaideBadge>
+                  </GpBadge>
                 </div>
 
                 <h3 className="text-base sm:text-lg font-heading font-bold text-[#0D0431] leading-snug">
@@ -409,7 +409,7 @@ export default function HRPrep() {
                   <div />
                 )}
 
-                <CaideButton
+                <GpButton
                   onClick={() => {
                     setActiveQuestion(q);
                     setPracticeAnswer("");
@@ -419,7 +419,7 @@ export default function HRPrep() {
                   size="sm"
                 >
                   Practice Response
-                </CaideButton>
+                </GpButton>
               </div>
             </div>
           ))}
@@ -427,7 +427,7 @@ export default function HRPrep() {
 
         {/* PRACTICE & AI EVALUATION MODAL */}
         {activeQuestion && (
-          <CaideModal
+          <GpModal
             isOpen={!!activeQuestion}
             onClose={() => setActiveQuestion(null)}
             title="Practice Behavioral Response"
@@ -482,7 +482,7 @@ export default function HRPrep() {
                   className="w-full p-4 bg-white text-[#0D0431] placeholder-[#0D0431]/40 border-2 border-[#0D0431] rounded-xl text-sm font-sans font-medium shadow-[3px_3px_0_0_#0D0431] focus:bg-[#FEF9CF] focus:shadow-[4px_4px_0_0_#0D0431] focus:outline-none transition-all resize-none leading-relaxed"
                 />
 
-                <CaideButton
+                <GpButton
                   onClick={handleEvaluatePractice}
                   disabled={evaluating || !practiceAnswer.trim()}
                   variant="stacked"
@@ -490,7 +490,7 @@ export default function HRPrep() {
                   fullWidth
                 >
                   {evaluating ? "Evaluating Answer..." : "Evaluate Response with AI"}
-                </CaideButton>
+                </GpButton>
               </div>
 
               {/* Evaluation Results */}
@@ -636,7 +636,7 @@ export default function HRPrep() {
                 </div>
               )}
             </div>
-          </CaideModal>
+          </GpModal>
         )}
       </div>
     </main>

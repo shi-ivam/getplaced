@@ -27,9 +27,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatLevelComparison } from "@/utils/dynamicCopy";
-import CaideButton from "@/components/caide/CaideButton";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideCard from "@/components/caide/CaideCard";
+import GpButton from "@/components/gp/GpButton";
+import GpBadge from "@/components/gp/GpBadge";
+import GpCard from "@/components/gp/GpCard";
 
 const CATEGORY_ICONS = {
   dsa: Code2,
@@ -149,7 +149,7 @@ export default function LevelComparisonTable({
 
   if (loading) {
     return (
-      <CaideCard theme="white" shadow="default" className="p-6 space-y-6">
+      <GpCard theme="white" shadow="default" className="p-6 space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="space-y-2">
             <div className="h-6 w-48 bg-[#FEF9CF] border-2 border-[#0D0431] animate-pulse rounded-xl" />
@@ -165,14 +165,14 @@ export default function LevelComparisonTable({
             </div>
           ))}
         </div>
-      </CaideCard>
+      </GpCard>
     );
   }
 
   return (
     <section className="space-y-6 text-[#0D0431] font-sans">
       {/* ── Top Header & Context Card ── */}
-      <CaideCard
+      <GpCard
         theme="white"
         shadow="default"
         className="p-5 md:p-6 space-y-6"
@@ -180,10 +180,10 @@ export default function LevelComparisonTable({
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <CaideBadge theme="light-purple" size="sm">
+              <GpBadge theme="light-purple" size="sm">
                 <Target className="w-3.5 h-3.5 mr-1" />
                 Gap Analysis Engine • 0–10 Scale
-              </CaideBadge>
+              </GpBadge>
             </div>
             <h2 className="text-xl md:text-2xl font-heading font-black text-[#0D0431] tracking-tight">
               Current Level vs Required Target Level
@@ -328,7 +328,7 @@ export default function LevelComparisonTable({
             );
           })}
         </div>
-      </CaideCard>
+      </GpCard>
 
       {/* ── Main Table & List Section ── */}
       <div className="rounded-2xl border-2 border-[#0D0431] bg-white shadow-[4px_4px_0_0_#0D0431] overflow-hidden">
@@ -463,9 +463,9 @@ export default function LevelComparisonTable({
 
                       {/* Status Badge */}
                       <td className="py-3.5 px-3 text-center">
-                        <CaideBadge theme={badgeTheme} size="sm">
+                        <GpBadge theme={badgeTheme} size="sm">
                           {comparison.humanPhrase}
-                        </CaideBadge>
+                        </GpBadge>
                       </td>
 
                       {/* Action Drill Down Button */}
@@ -523,9 +523,9 @@ export default function LevelComparisonTable({
                       </div>
                     </div>
 
-                    <CaideBadge theme={badgeTheme} size="sm">
+                    <GpBadge theme={badgeTheme} size="sm">
                       {comparison.humanPhrase}
-                    </CaideBadge>
+                    </GpBadge>
                   </div>
 
                   {/* Level Numbers & Progress Bar */}
@@ -605,9 +605,9 @@ export default function LevelComparisonTable({
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <CaideBadge theme="light-purple" size="sm">
+                      <GpBadge theme="light-purple" size="sm">
                         {selectedItem.category}
-                      </CaideBadge>
+                      </GpBadge>
                       <span className="text-[11px] text-[#0D0431]/70 font-mono font-bold">
                         {selectedItem.importance}
                       </span>
@@ -689,9 +689,9 @@ export default function LevelComparisonTable({
                 </div>
 
                 <div className="text-center pt-1">
-                  <CaideBadge theme={modalBadgeTheme}>
+                  <GpBadge theme={modalBadgeTheme}>
                     {modalComparison.statusLabel} — {modalComparison.humanPhrase}
-                  </CaideBadge>
+                  </GpBadge>
                 </div>
               </div>
 
@@ -751,7 +751,7 @@ export default function LevelComparisonTable({
                   Close
                 </button>
 
-                <CaideButton
+                <GpButton
                   variant="stacked-yellow"
                   size="sm"
                   to={selectedItem.actionLink || "/app/profile"}
@@ -760,7 +760,7 @@ export default function LevelComparisonTable({
                   <span className="font-bold text-[#0D0431]">
                     {selectedItem.actionLabel || "Take Action"}
                   </span>
-                </CaideButton>
+                </GpButton>
               </div>
             </div>
           </div>

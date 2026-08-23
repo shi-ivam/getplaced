@@ -22,7 +22,7 @@ import {
   Check,
 } from "lucide-react";
 import SearchableCombobox from "@/components/ui/SearchableCombobox";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 import { NODE_API_URL } from "@/config/api";
 
 const DEGREE_OPTIONS = [
@@ -434,9 +434,9 @@ export default function Profile() {
                 {formData.name || "Candidate Name"}
               </h2>
               {formData.targetCompany && (
-                <CaideBadge theme="yellow" size="sm">
+                <GpBadge theme="yellow" size="sm">
                   {formData.targetCompany} Target
-                </CaideBadge>
+                </GpBadge>
               )}
             </div>
             <p className="text-xs text-[#6F6A80] flex items-center gap-2 flex-wrap font-medium">
@@ -732,9 +732,9 @@ export default function Profile() {
                 </div>
               </div>
 
-              <CaideBadge theme="mint" size="sm">
+              <GpBadge theme="mint" size="sm">
                 Connected
-              </CaideBadge>
+              </GpBadge>
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center text-xs py-1">
@@ -776,9 +776,9 @@ export default function Profile() {
                 </div>
               </div>
 
-              <CaideBadge theme="mint" size="sm">
+              <GpBadge theme="mint" size="sm">
                 Connected
-              </CaideBadge>
+              </GpBadge>
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center text-xs py-1">

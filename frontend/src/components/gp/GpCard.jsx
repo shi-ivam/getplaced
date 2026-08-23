@@ -4,7 +4,7 @@ import React from "react";
  * Modern Clean Card Component
  * Uses soft ambient shadows, subtle 1px border (#E2DEEC), and clean white/soft-neutral surfaces.
  */
-export default function CaideCard({
+export default function GpCard({
   children,
   className = "",
   theme = "white", // "white" | "light-yellow" | "light-purple" | "light-green" | "light-blue" | "pale-lime" | "dark"

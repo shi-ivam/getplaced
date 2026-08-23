@@ -25,7 +25,7 @@ import {
   Compass,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 
 export default function PlacementArena() {
   const containerRef = useRef(null);
@@ -505,9 +505,9 @@ export default function PlacementArena() {
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <CaideBadge theme="mint" size="sm">
+                  <GpBadge theme="mint" size="sm">
                     +{chal.xp} XP
-                  </CaideBadge>
+                  </GpBadge>
                   <span className="text-[11px] font-mono text-[#6F6A80] flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {chal.deadline}

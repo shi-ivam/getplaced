@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
 import { Skeleton } from "@/components/ui/skeleton";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 
 export default function DsaRequirementComparison({
   initialData = null,

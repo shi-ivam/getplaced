@@ -15,7 +15,7 @@ import {
   Building2,
   Briefcase,
 } from "lucide-react";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 
 export default function TopicSummaryHeader({ dsaData, targetCompany = "", targetJobRole = "" }) {
   const summary = dsaData?.summary || {};

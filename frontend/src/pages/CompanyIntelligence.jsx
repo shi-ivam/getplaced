@@ -25,10 +25,10 @@ import {
   Compass,
 } from "lucide-react";
 import { PY_API_URL } from "@/config/api";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideButton from "@/components/caide/CaideButton";
-import CaideToggle from "@/components/caide/CaideToggle";
+import GpCard from "@/components/gp/GpCard";
+import GpBadge from "@/components/gp/GpBadge";
+import GpButton from "@/components/gp/GpButton";
+import GpToggle from "@/components/gp/GpToggle";
 
 function FrequencyBadge({ value }) {
   const map = {
@@ -139,7 +139,7 @@ export default function CompanyIntelligence() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <CaideButton
+            <GpButton
               variant="secondary"
               size="sm"
               icon={false}
@@ -148,8 +148,8 @@ export default function CompanyIntelligence() {
               <span className="flex items-center gap-1.5 font-bold">
                 <Brain className="w-4 h-4" /> Mock Interview
               </span>
-            </CaideButton>
-            <CaideButton
+            </GpButton>
+            <GpButton
               variant="stacked-yellow"
               size="sm"
               icon={false}
@@ -158,7 +158,7 @@ export default function CompanyIntelligence() {
               <span className="flex items-center gap-1.5 font-bold text-[#0D0431]">
                 <Code2 className="w-4 h-4" /> Coding Arena
               </span>
-            </CaideButton>
+            </GpButton>
           </div>
         </header>
 
@@ -189,9 +189,9 @@ export default function CompanyIntelligence() {
         {/* ── Hero Search Section ── */}
         <section className="space-y-6">
           <div className="max-w-3xl space-y-3">
-            <CaideBadge theme="light-purple">
+            <GpBadge theme="light-purple">
               Verified Hiring Intelligence
-            </CaideBadge>
+            </GpBadge>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-black text-[#0D0431] tracking-tight leading-[1.1]">
               Technical Hiring Intelligence & Evaluation Standards
             </h1>
@@ -201,7 +201,7 @@ export default function CompanyIntelligence() {
           </div>
 
           {/* Search Card */}
-          <CaideCard
+          <GpCard
             theme="white"
             shadow="lg"
             className="p-4 sm:p-5"
@@ -217,7 +217,7 @@ export default function CompanyIntelligence() {
                   className="w-full bg-white text-[#0D0431] placeholder-[#0D0431]/40 border-2 border-[#0D0431] rounded-xl pl-10 pr-4 py-2.5 text-sm font-sans font-medium shadow-[3px_3px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] focus:shadow-[4px_4px_0_0_#0D0431] transition-all"
                 />
               </div>
-              <CaideButton
+              <GpButton
                 type="submit"
                 variant="stacked-yellow"
                 size="md"
@@ -228,7 +228,7 @@ export default function CompanyIntelligence() {
                 <span className="flex items-center justify-center gap-2 font-bold text-[#0D0431]">
                   {loading ? "Loading..." : "View Dossier"} <ArrowRight className="w-4 h-4" />
                 </span>
-              </CaideButton>
+              </GpButton>
             </form>
 
             {featuredCompanies.length > 0 && (
@@ -258,7 +258,7 @@ export default function CompanyIntelligence() {
                 })}
               </div>
             )}
-          </CaideCard>
+          </GpCard>
         </section>
 
         {/* ── Dossier Content ── */}
@@ -266,7 +266,7 @@ export default function CompanyIntelligence() {
           <section ref={contentRef} className="space-y-6">
 
             {/* Company Banner Bento Card with Pastel Accents */}
-            <CaideCard
+            <GpCard
               theme="white"
               shadow="lg"
               className="bento-item p-6 sm:p-8 space-y-6 overflow-hidden"
@@ -282,9 +282,9 @@ export default function CompanyIntelligence() {
                       <h2 className="text-2xl sm:text-3xl font-heading font-black text-[#0D0431]">
                         {companyIntel.name}
                       </h2>
-                      <CaideBadge theme="light-purple">
+                      <GpBadge theme="light-purple">
                         {companyIntel.tier || "Tier-1 Tech"}
-                      </CaideBadge>
+                      </GpBadge>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs font-mono font-semibold text-[#0D0431]/70">
                       <span>{companyIntel.industry}</span>
@@ -297,7 +297,7 @@ export default function CompanyIntelligence() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 shrink-0">
-                  <CaideButton
+                  <GpButton
                     variant="stacked-yellow"
                     size="sm"
                     icon={false}
@@ -306,8 +306,8 @@ export default function CompanyIntelligence() {
                     <span className="flex items-center gap-1.5 font-bold text-[#0D0431]">
                       <Brain className="w-4 h-4" /> Start Mock Session
                     </span>
-                  </CaideButton>
-                  <CaideButton
+                  </GpButton>
+                  <GpButton
                     variant="secondary"
                     size="sm"
                     icon={false}
@@ -316,7 +316,7 @@ export default function CompanyIntelligence() {
                     <span className="flex items-center gap-1.5 font-bold">
                       <Award className="w-4 h-4" /> HR Prep
                     </span>
-                  </CaideButton>
+                  </GpButton>
                 </div>
               </div>
 
@@ -435,14 +435,14 @@ export default function CompanyIntelligence() {
                   );
                 })}
               </div>
-            </CaideCard>
+            </GpCard>
 
             {/* ── Bento Grid Detail Sections ── */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
               {/* 1. INTERVIEW ROUNDS */}
               {(activeTab === "all" || activeTab === "rounds") && companyIntel.interview_rounds && (
-                <CaideCard
+                <GpCard
                   theme="white"
                   shadow="lg"
                   className="bento-item md:col-span-12 lg:col-span-8 p-6 sm:p-8 space-y-6"
@@ -461,9 +461,9 @@ export default function CompanyIntelligence() {
                         </p>
                       </div>
                     </div>
-                    <CaideBadge theme="blue">
+                    <GpBadge theme="blue">
                       {companyIntel.interview_rounds.length} Stages
-                    </CaideBadge>
+                    </GpBadge>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -524,12 +524,12 @@ export default function CompanyIntelligence() {
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                </CaideCard>
+                </GpCard>
               )}
 
               {/* 2. BEHAVIORAL EVALUATION */}
               {(activeTab === "all" || activeTab === "culture") && companyIntel.behavioral_questions && (
-                <CaideCard
+                <GpCard
                   theme="white"
                   shadow="lg"
                   className="bento-item md:col-span-12 lg:col-span-4 p-6 sm:p-8 flex flex-col space-y-6"
@@ -570,7 +570,7 @@ export default function CompanyIntelligence() {
                   </div>
 
                   <div className="pt-4 border-t-2 border-[#0D0431]">
-                    <CaideButton
+                    <GpButton
                       variant="stacked-yellow"
                       fullWidth
                       icon={false}
@@ -579,14 +579,14 @@ export default function CompanyIntelligence() {
                       <span className="font-bold text-[#0D0431]">
                         Practice Behavioral Questions
                       </span>
-                    </CaideButton>
+                    </GpButton>
                   </div>
-                </CaideCard>
+                </GpCard>
               )}
 
               {/* 3. DSA PATTERN MATRIX */}
               {(activeTab === "all" || activeTab === "patterns") && companyIntel.dsa_patterns && (
-                <CaideCard
+                <GpCard
                   theme="white"
                   shadow="lg"
                   className="bento-item md:col-span-12 lg:col-span-7 p-6 sm:p-8 space-y-6"
@@ -605,9 +605,9 @@ export default function CompanyIntelligence() {
                         </p>
                       </div>
                     </div>
-                    <CaideBadge theme="yellow">
+                    <GpBadge theme="yellow">
                       LeetCode Mapped
-                    </CaideBadge>
+                    </GpBadge>
                   </div>
 
                   <div className="space-y-3.5">
@@ -639,12 +639,12 @@ export default function CompanyIntelligence() {
                       </div>
                     ))}
                   </div>
-                </CaideCard>
+                </GpCard>
               )}
 
               {/* 4. PRODUCTION TECH STACK */}
               {(activeTab === "all" || activeTab === "stack") && companyIntel.tech_stack && (
-                <CaideCard
+                <GpCard
                   theme="white"
                   shadow="lg"
                   className="bento-item md:col-span-12 lg:col-span-5 p-6 sm:p-8 space-y-6"
@@ -686,12 +686,12 @@ export default function CompanyIntelligence() {
                       </div>
                     ))}
                   </div>
-                </CaideCard>
+                </GpCard>
               )}
 
               {/* 5. CORE VALUES & PREPARATION ROADMAP */}
               {(activeTab === "all" || activeTab === "culture") && (
-                <CaideCard
+                <GpCard
                   theme="white"
                   shadow="lg"
                   className="bento-item md:col-span-12 p-6 sm:p-8 space-y-6"
@@ -710,7 +710,7 @@ export default function CompanyIntelligence() {
                         </p>
                       </div>
                     </div>
-                    <CaideButton
+                    <GpButton
                       variant="stacked-yellow"
                       size="sm"
                       icon={false}
@@ -719,7 +719,7 @@ export default function CompanyIntelligence() {
                       <span className="flex items-center gap-1.5 font-bold text-[#0D0431]">
                         View Roadmap <ArrowRight className="w-3.5 h-3.5" />
                       </span>
-                    </CaideButton>
+                    </GpButton>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -786,7 +786,7 @@ export default function CompanyIntelligence() {
                       </div>
                     </div>
                   )}
-                </CaideCard>
+                </GpCard>
               )}
 
             </div>

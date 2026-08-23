@@ -27,9 +27,9 @@ import {
   Filter,
 } from "lucide-react";
 import { leetcodeService } from "@/services/leetcodeService";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideButton, { CaideArrow } from "@/components/caide/CaideButton";
-import CaideCard from "@/components/caide/CaideCard";
+import GpBadge from "@/components/gp/GpBadge";
+import GpButton, { GpArrow } from "@/components/gp/GpButton";
+import GpCard from "@/components/gp/GpCard";
 
 export default function LeetCodeSubmissionAnalysis({
   initialData = null,
@@ -236,10 +236,10 @@ export default function LeetCodeSubmissionAnalysis({
                 <h3 className="font-heading font-black text-lg sm:text-xl text-[#0D0431]">
                   LeetCode Submission & Consistency Analysis
                 </h3>
-                <CaideBadge theme="yellow">
+                <GpBadge theme="yellow">
                   <Sparkles className="w-3 h-3 mr-1" />
                   {consistency?.archetype || "Active Coder"}
-                </CaideBadge>
+                </GpBadge>
               </div>
               <div className="flex flex-wrap items-center gap-3 text-xs text-[#0D0431]/80 mt-1 font-mono font-bold">
                 <a
@@ -552,9 +552,9 @@ export default function LeetCodeSubmissionAnalysis({
           </div>
           <div className="flex items-center gap-2 font-mono text-xs font-bold">
             <span className="text-[#0D0431]/70">Archetype:</span>
-            <CaideBadge theme="light-purple">
+            <GpBadge theme="light-purple">
               {consistency?.archetype}
-            </CaideBadge>
+            </GpBadge>
           </div>
         </div>
 

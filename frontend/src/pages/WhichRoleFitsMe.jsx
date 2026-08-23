@@ -49,9 +49,9 @@ import {
   evaluateRoleFit,
   adoptTargetRole,
 } from "@/services/roleFitService";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideButton from "@/components/caide/CaideButton";
+import GpCard from "@/components/gp/GpCard";
+import GpBadge from "@/components/gp/GpBadge";
+import GpButton from "@/components/gp/GpButton";
 
 export default function WhichRoleFitsMe() {
   const navigate = useNavigate();
@@ -273,9 +273,9 @@ export default function WhichRoleFitsMe() {
                 <h1 className="text-xl sm:text-2xl font-heading font-black text-[#17103D] tracking-tight flex items-center gap-2">
                   Which Role Fits Me?
                 </h1>
-                <CaideBadge theme="light-purple" size="sm">
+                <GpBadge theme="light-purple" size="sm">
                   Multi-Evidence AI
-                </CaideBadge>
+                </GpBadge>
               </div>
               <p className="text-xs text-[#6F6A80] font-medium font-sans">
                 Transparent role discovery aligning your GitHub repos, LeetCode patterns, verified skills & resume keywords.
@@ -325,7 +325,7 @@ export default function WhichRoleFitsMe() {
         {/* 2. LOW-DATA WARNING / COMPLETION CALLOUT */}
         {/* ========================================================================= */}
         {evaluation.hasLowData && (
-          <CaideCard
+          <GpCard
             theme="light-yellow"
             shadow="default"
             className="gsap-fade-in p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -344,23 +344,23 @@ export default function WhichRoleFitsMe() {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <CaideButton
+              <GpButton
                 to="/app/profile"
                 variant="stacked-yellow"
                 size="sm"
                 icon={true}
               >
                 Complete Profile
-              </CaideButton>
+              </GpButton>
             </div>
-          </CaideCard>
+          </GpCard>
         )}
 
         {/* ========================================================================= */}
         {/* 3. HERO: TOP MATCH SPOTLIGHT CARD */}
         {/* ========================================================================= */}
         {topRole && (
-          <CaideCard
+          <GpCard
             theme="light-purple"
             shadow="lg"
             className="gsap-fade-in p-6 sm:p-8 rounded-3xl relative overflow-hidden"
@@ -369,23 +369,23 @@ export default function WhichRoleFitsMe() {
               {/* Left Details */}
               <div className="space-y-4 max-w-2xl">
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <CaideBadge theme="yellow" size="md">
+                  <GpBadge theme="yellow" size="md">
                     <span className="flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5" />
                       TOP CAREER FIT
                     </span>
-                  </CaideBadge>
+                  </GpBadge>
 
                   <span className="px-3 py-0.5 rounded-full bg-white text-[#0D0431] font-mono text-xs font-bold border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                     {topRole.category}
                   </span>
 
                   {topRole.isCurrentTarget && (
-                    <CaideBadge theme="mint" size="md">
+                    <GpBadge theme="mint" size="md">
                       <span className="flex items-center gap-1">
                         <Check className="w-3.5 h-3.5" /> Current Platform Target
                       </span>
-                    </CaideBadge>
+                    </GpBadge>
                   )}
                 </div>
 
@@ -460,7 +460,7 @@ export default function WhichRoleFitsMe() {
                 </div>
 
                 <div className="flex flex-col w-full gap-2.5 pt-1">
-                  <CaideButton
+                  <GpButton
                     onClick={() => setInspectedRole(topRole)}
                     variant="stacked-yellow"
                     size="sm"
@@ -468,10 +468,10 @@ export default function WhichRoleFitsMe() {
                     icon={true}
                   >
                     Inspect Deep Evidence
-                  </CaideButton>
+                  </GpButton>
 
                   {!topRole.isCurrentTarget ? (
-                    <CaideButton
+                    <GpButton
                       onClick={() => setConfirmAdoptRole(topRole)}
                       variant="secondary"
                       size="sm"
@@ -482,7 +482,7 @@ export default function WhichRoleFitsMe() {
                         <Target className="w-3.5 h-3.5 text-[#0D0431]" />
                         <span>Make This My Target</span>
                       </span>
-                    </CaideButton>
+                    </GpButton>
                   ) : (
                     <div className="text-[11px] font-mono font-bold text-[#0D0431] bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] rounded-xl flex items-center justify-center gap-1 py-1.5">
                       <Check className="w-3.5 h-3.5" /> Active Platform Target
@@ -491,13 +491,13 @@ export default function WhichRoleFitsMe() {
                 </div>
               </div>
             </div>
-          </CaideCard>
+          </GpCard>
         )}
 
         {/* ========================================================================= */}
         {/* 4. CONTROLS, SEARCH, AND MODE SELECTORS */}
         {/* ========================================================================= */}
-        <CaideCard
+        <GpCard
           theme="white"
           shadow="default"
           className="gsap-fade-in flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl"
@@ -543,7 +543,7 @@ export default function WhichRoleFitsMe() {
               )}
             </div>
 
-            <CaideButton
+            <GpButton
               onClick={() => {
                 if (compareList.length < 2 && !isCompareMode) {
                   // Pre-select top 2 roles if none selected
@@ -567,9 +567,9 @@ export default function WhichRoleFitsMe() {
                   </span>
                 )}
               </span>
-            </CaideButton>
+            </GpButton>
           </div>
-        </CaideCard>
+        </GpCard>
 
         {/* ========================================================================= */}
         {/* 5. INTERACTIVE ROLE COMPARISON MODE (SIDE-BY-SIDE MATRIX) */}
@@ -592,15 +592,15 @@ export default function WhichRoleFitsMe() {
             </div>
 
             {comparedRoles.length === 0 ? (
-              <CaideCard
+              <GpCard
                 theme="white"
                 shadow="default"
                 className="p-8 rounded-2xl text-center text-[#0D0431]/70 font-bold text-xs"
               >
                 No roles selected for comparison. Pick 2-3 roles from the grid below.
-              </CaideCard>
+              </GpCard>
             ) : (
-              <CaideCard
+              <GpCard
                 theme="white"
                 shadow="lg"
                 className="overflow-x-auto rounded-3xl p-0"
@@ -777,7 +777,7 @@ export default function WhichRoleFitsMe() {
                           key={role.id}
                           className="p-4 border-l-2 border-[#0D0431] space-y-2"
                         >
-                          <CaideButton
+                          <GpButton
                             onClick={() => setInspectedRole(role)}
                             variant="secondary"
                             size="sm"
@@ -785,9 +785,9 @@ export default function WhichRoleFitsMe() {
                             icon={false}
                           >
                             Inspect Full Evidence
-                          </CaideButton>
+                          </GpButton>
                           {!role.isCurrentTarget ? (
-                            <CaideButton
+                            <GpButton
                               onClick={() => setConfirmAdoptRole(role)}
                               variant="stacked-yellow"
                               size="sm"
@@ -798,7 +798,7 @@ export default function WhichRoleFitsMe() {
                                 <Target className="w-3.5 h-3.5" />
                                 <span>Make This Target</span>
                               </span>
-                            </CaideButton>
+                            </GpButton>
                           ) : (
                             <div className="text-[11px] font-mono font-bold text-[#0D0431] bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] rounded-xl text-center flex items-center justify-center gap-1 py-1.5">
                               <Check className="w-3.5 h-3.5" />
@@ -810,7 +810,7 @@ export default function WhichRoleFitsMe() {
                     </tr>
                   </tbody>
                 </table>
-              </CaideCard>
+              </GpCard>
             )}
           </section>
         ) : null}
@@ -826,9 +826,9 @@ export default function WhichRoleFitsMe() {
                 Ranked Best Role Matches ({filteredRoles.length})
               </h3>
             </div>
-            <CaideBadge theme="light-purple" size="sm">
+            <GpBadge theme="light-purple" size="sm">
               Sorted by Multi-Evidence %
-            </CaideBadge>
+            </GpBadge>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -846,7 +846,7 @@ export default function WhichRoleFitsMe() {
                 : "white";
 
               return (
-                <CaideCard
+                <GpCard
                   key={role.id}
                   theme={cardTheme}
                   shadow="default"
@@ -861,17 +861,17 @@ export default function WhichRoleFitsMe() {
                           #{index + 1}
                         </span>
                         {isTop ? (
-                          <CaideBadge theme="yellow" size="sm">
+                          <GpBadge theme="yellow" size="sm">
                             Top Match
-                          </CaideBadge>
+                          </GpBadge>
                         ) : index === 1 ? (
-                          <CaideBadge theme="light-purple" size="sm">
+                          <GpBadge theme="light-purple" size="sm">
                             Rank 2
-                          </CaideBadge>
+                          </GpBadge>
                         ) : index === 2 ? (
-                          <CaideBadge theme="mint" size="sm">
+                          <GpBadge theme="mint" size="sm">
                             Rank 3
-                          </CaideBadge>
+                          </GpBadge>
                         ) : null}
 
                         <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-white text-[#0D0431] border-2 border-[#0D0431]">
@@ -984,7 +984,7 @@ export default function WhichRoleFitsMe() {
 
                   {/* Card Actions Footer */}
                   <div className="pt-4 mt-3 border-t-2 border-[#0D0431] flex items-center gap-2">
-                    <CaideButton
+                    <GpButton
                       onClick={() => setInspectedRole(role)}
                       variant="secondary"
                       size="sm"
@@ -992,10 +992,10 @@ export default function WhichRoleFitsMe() {
                       icon={true}
                     >
                       Inspect Details
-                    </CaideButton>
+                    </GpButton>
 
                     {!role.isCurrentTarget ? (
-                      <CaideButton
+                      <GpButton
                         onClick={() => setConfirmAdoptRole(role)}
                         variant="stacked-yellow"
                         size="sm"
@@ -1005,14 +1005,14 @@ export default function WhichRoleFitsMe() {
                           <Target className="w-3.5 h-3.5" />
                           <span className="hidden sm:inline">Target</span>
                         </span>
-                      </CaideButton>
+                      </GpButton>
                     ) : (
                       <div className="px-3 py-1.5 rounded-xl bg-[#D4FDF7] text-[#0D0431] text-[11px] font-mono font-bold border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1 shrink-0">
                         <Check className="w-3 h-3" /> Target
                       </div>
                     )}
                   </div>
-                </CaideCard>
+                </GpCard>
               );
             })}
           </div>
@@ -1029,16 +1029,16 @@ export default function WhichRoleFitsMe() {
             <div className="p-6 border-b-2 border-[#0D0431] bg-[#FEDF6A] flex items-start justify-between gap-4">
               <div className="space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <CaideBadge theme="dark" size="sm">
+                  <GpBadge theme="dark" size="sm">
                     {inspectedRole.matchScore}% Match
-                  </CaideBadge>
+                  </GpBadge>
                   <span className="px-3 py-0.5 rounded-full bg-white text-[#0D0431] font-mono text-xs font-bold border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]">
                     {inspectedRole.category}
                   </span>
                   {inspectedRole.isCurrentTarget && (
-                    <CaideBadge theme="mint" size="sm">
+                    <GpBadge theme="mint" size="sm">
                       Current Target
-                    </CaideBadge>
+                    </GpBadge>
                   )}
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-heading font-black text-[#0D0431]">
@@ -1367,16 +1367,16 @@ export default function WhichRoleFitsMe() {
               </div>
 
               <div className="flex items-center gap-3 w-full sm:w-auto">
-                <CaideButton
+                <GpButton
                   onClick={() => setInspectedRole(null)}
                   variant="secondary"
                   size="sm"
                 >
                   Close
-                </CaideButton>
+                </GpButton>
 
                 {!inspectedRole.isCurrentTarget ? (
-                  <CaideButton
+                  <GpButton
                     onClick={() => {
                       setConfirmAdoptRole(inspectedRole);
                     }}
@@ -1388,7 +1388,7 @@ export default function WhichRoleFitsMe() {
                       <Target className="w-4 h-4" />
                       <span>Make This My Target Career Role</span>
                     </span>
-                  </CaideButton>
+                  </GpButton>
                 ) : (
                   <div className="px-4 py-2 rounded-xl bg-[#D4FDF7] text-[#0D0431] text-xs font-mono font-bold border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1.5">
                     <Check className="w-3.5 h-3.5" /> Current Target Role
@@ -1439,7 +1439,7 @@ export default function WhichRoleFitsMe() {
             )}
 
             <div className="flex items-center gap-3 pt-2">
-              <CaideButton
+              <GpButton
                 disabled={isAdopting}
                 onClick={() => setConfirmAdoptRole(null)}
                 variant="secondary"
@@ -1447,8 +1447,8 @@ export default function WhichRoleFitsMe() {
                 fullWidth
               >
                 Cancel
-              </CaideButton>
-              <CaideButton
+              </GpButton>
+              <GpButton
                 disabled={isAdopting}
                 onClick={handleExecuteAdoption}
                 variant="stacked-yellow"
@@ -1467,7 +1467,7 @@ export default function WhichRoleFitsMe() {
                     <span>Confirm & Set Target</span>
                   </span>
                 )}
-              </CaideButton>
+              </GpButton>
             </div>
           </div>
         </div>

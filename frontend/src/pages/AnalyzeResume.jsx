@@ -23,7 +23,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { PY_API_URL, NODE_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 import ResumeActionCenter from "@/components/resume/ResumeActionCenter";
 import ResumeReportOverview from "@/components/resume/ResumeReportOverview";
 import ResumeVersionHistory from "@/components/resume/ResumeVersionHistory";

@@ -4,9 +4,9 @@ import "react-calendar/dist/Calendar.css";
 import { motion } from "framer-motion";
 import { Calendar as CalendarIcon, Clock, CheckCircle2, Sparkles, BookOpen, Download, ExternalLink, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideButton from "@/components/caide/CaideButton";
+import GpBadge from "@/components/gp/GpBadge";
+import GpCard from "@/components/gp/GpCard";
+import GpButton from "@/components/gp/GpButton";
 import "./customCalendar.css";
 
 const upcomingModules = [
@@ -53,9 +53,9 @@ END:VCALENDAR`;
         
         {/* Section Header */}
         <div className="flex flex-col items-center text-center mb-16">
-          <CaideBadge theme="light-purple">
+          <GpBadge theme="light-purple">
             Effortless Milestones
-          </CaideBadge>
+          </GpBadge>
           <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading font-black tracking-tight max-w-4xl text-[#0D0431] mt-4">
             Structured Preparation Calendar
           </h2>
@@ -69,7 +69,7 @@ END:VCALENDAR`;
           
           {/* Calendar Bento Card (6 Cols) */}
           <div className="lg:col-span-6">
-            <CaideCard
+            <GpCard
               theme="white"
               shadow="lg"
               className="p-6 md:p-8 flex flex-col items-center justify-between h-full"
@@ -107,7 +107,7 @@ END:VCALENDAR`;
                   <ExternalLink className="w-3.5 h-3.5 ml-1" />
                 </button>
               </div>
-            </CaideCard>
+            </GpCard>
           </div>
 
           {/* Daily Milestone Cards (6 Cols) */}
@@ -121,7 +121,7 @@ END:VCALENDAR`;
 
             <div className="space-y-3">
               {upcomingModules.map((item, idx) => (
-                <CaideCard
+                <GpCard
                   key={idx}
                   theme="white"
                   shadow="sm"
@@ -143,11 +143,11 @@ END:VCALENDAR`;
                     <CheckCircle2 className="w-3.5 h-3.5 text-[#0D0431]" />
                     <span>{item.status}</span>
                   </div>
-                </CaideCard>
+                </GpCard>
               ))}
             </div>
 
-            <CaideCard
+            <GpCard
               theme="light-yellow"
               shadow="default"
               className="p-6 mt-4"
@@ -175,7 +175,7 @@ END:VCALENDAR`;
                   {syncNotice}
                 </div>
               )}
-            </CaideCard>
+            </GpCard>
           </div>
 
         </div>

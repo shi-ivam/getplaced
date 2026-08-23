@@ -4,8 +4,8 @@ import Navbar from "../components/Navbar";
 import Hero from "./Hero";
 import FeaturesGrid from "./Feature";
 import Footer from "./Footer";
-import CaideMarquee from "../components/caide/CaideMarquee";
-import CaideBadge from "../components/caide/CaideBadge";
+import GpMarquee from "../components/gp/GpMarquee";
+import GpBadge from "../components/gp/GpBadge";
 import {
   ChevronDown,
   ArrowRight,
@@ -61,9 +61,9 @@ function WorkflowSection() {
     <section className="py-20 md:py-28 bg-[#F8F8F5] text-[#17103D] border-t border-[#E2DEEC]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <CaideBadge theme="light-purple" size="sm">
+          <GpBadge theme="light-purple" size="sm">
             Proven Strategy
-          </CaideBadge>
+          </GpBadge>
           <h2 className="text-2xl sm:text-4xl font-heading font-black text-[#17103D] tracking-tight">
             How GetPlaced Works
           </h2>
@@ -135,9 +135,9 @@ function FaqSection() {
     <section id="faqs" className="py-20 md:py-28 bg-white text-[#17103D] border-t border-[#E2DEEC]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         <div className="text-center space-y-2">
-          <CaideBadge theme="yellow" size="sm">
+          <GpBadge theme="yellow" size="sm">
             Frequently Asked Questions
-          </CaideBadge>
+          </GpBadge>
           <h2 className="text-2xl sm:text-4xl font-heading font-black text-[#17103D] tracking-tight">
             Everything You Need to Know
           </h2>
@@ -221,7 +221,7 @@ export default function LandingPage() {
     <div className="overflow-x-hidden w-full max-w-full bg-[#F8F8F5] text-[#17103D] min-h-screen font-sans">
       <Navbar />
       <Hero />
-      <CaideMarquee />
+      <GpMarquee />
       <FeaturesGrid />
       <WorkflowSection />
       <FaqSection />

@@ -27,7 +27,7 @@ import {
   Award,
 } from "lucide-react";
 import { NODE_API_URL, PY_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 import LevelComparisonTable from "@/components/ui/LevelComparisonTable";
 import DsaTopicAnalysis from "@/components/dsa/DsaTopicAnalysis";
 import WhatToDoNext from "@/components/dashboard/WhatToDoNext";
@@ -110,13 +110,13 @@ export default function Dashboard() {
       <div className="bg-white border border-[#E2DEEC] rounded-2xl p-6 sm:p-7 shadow-[0_2px_8px_rgba(23,16,61,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-3 max-w-2xl">
           <div className="flex items-center gap-2 flex-wrap">
-            <CaideBadge theme="mint" size="sm">
+            <GpBadge theme="mint" size="sm">
               <ShieldCheck className="w-3.5 h-3.5 mr-1" />
               Verified Readiness Matrix
-            </CaideBadge>
-            <CaideBadge theme="yellow" size="sm">
+            </GpBadge>
+            <GpBadge theme="yellow" size="sm">
               {targetCompany} Candidate
-            </CaideBadge>
+            </GpBadge>
           </div>
 
           <div>
@@ -175,9 +175,9 @@ export default function Dashboard() {
               </div>
               <span className="text-xs font-bold text-[#17103D]">Coding & DSA</span>
             </div>
-            <CaideBadge theme={codingScore >= codingTarget ? "mint" : "yellow"} size="sm">
+            <GpBadge theme={codingScore >= codingTarget ? "mint" : "yellow"} size="sm">
               {codingScore >= codingTarget ? "Ready" : "Gap"}
-            </CaideBadge>
+            </GpBadge>
           </div>
 
           <div className="space-y-1">
@@ -211,9 +211,9 @@ export default function Dashboard() {
               </div>
               <span className="text-xs font-bold text-[#17103D]">Projects & GitHub</span>
             </div>
-            <CaideBadge theme={devScore >= devTarget ? "mint" : "yellow"} size="sm">
+            <GpBadge theme={devScore >= devTarget ? "mint" : "yellow"} size="sm">
               {devScore >= devTarget ? "Ready" : "Gap"}
-            </CaideBadge>
+            </GpBadge>
           </div>
 
           <div className="space-y-1">
@@ -247,9 +247,9 @@ export default function Dashboard() {
               </div>
               <span className="text-xs font-bold text-[#17103D]">Resume ATS</span>
             </div>
-            <CaideBadge theme={resumeScore >= resumeTarget ? "mint" : "yellow"} size="sm">
+            <GpBadge theme={resumeScore >= resumeTarget ? "mint" : "yellow"} size="sm">
               {resumeScore >= resumeTarget ? "Ready" : "Gap"}
-            </CaideBadge>
+            </GpBadge>
           </div>
 
           <div className="space-y-1">
@@ -283,9 +283,9 @@ export default function Dashboard() {
               </div>
               <span className="text-xs font-bold text-[#17103D]">Academics</span>
             </div>
-            <CaideBadge theme="mint" size="sm">
+            <GpBadge theme="mint" size="sm">
               Cutoff Clear
-            </CaideBadge>
+            </GpBadge>
           </div>
 
           <div className="space-y-1">

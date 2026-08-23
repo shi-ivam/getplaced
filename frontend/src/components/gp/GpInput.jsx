@@ -3,7 +3,7 @@ import React from "react";
 /**
  * Modern Clean Form Input Component
  */
-export default function CaideInput({
+export default function GpInput({
   label,
   type = "text",
   placeholder,

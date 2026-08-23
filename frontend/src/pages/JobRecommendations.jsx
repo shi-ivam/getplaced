@@ -29,7 +29,7 @@ import {
   Compass,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 import JobCard from "@/components/jobs/JobCard";
 import JobDetailModal from "@/components/jobs/JobDetailModal";
 import JobFiltersBar from "@/components/jobs/JobFiltersBar";

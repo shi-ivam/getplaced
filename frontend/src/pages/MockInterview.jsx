@@ -33,7 +33,7 @@ import {
   Flame,
 } from "lucide-react";
 import { PY_API_URL } from "@/config/api";
-import CaideBadge from "@/components/caide/CaideBadge";
+import GpBadge from "@/components/gp/GpBadge";
 
 const TARGET_COMPANIES = [
   "Google",

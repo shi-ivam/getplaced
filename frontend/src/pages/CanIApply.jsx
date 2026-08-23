@@ -45,14 +45,14 @@ import {
   POPULAR_ROLES,
   evaluateApplicationReadiness,
 } from "@/services/canIApplyService";
-import CaideCard from "@/components/caide/CaideCard";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideButton from "@/components/caide/CaideButton";
+import GpCard from "@/components/gp/GpCard";
+import GpBadge from "@/components/gp/GpBadge";
+import GpButton from "@/components/gp/GpButton";
 
 /**
- * Caide-themed Searchable Combobox with retro 2px border and hard drop shadow
+ * Theme-styled Searchable Combobox with retro 2px border and hard drop shadow
  */
-function CaideCombobox({
+function GpCombobox({
   id,
   name,
   value = "",
@@ -566,9 +566,9 @@ export default function CanIApply() {
                 <h1 className="text-xl sm:text-2xl font-heading font-black text-[#17103D] tracking-tight">
                   Can I Apply?
                 </h1>
-                <CaideBadge theme="mint" size="sm">
+                <GpBadge theme="mint" size="sm">
                   Placement Eligibility Engine
-                </CaideBadge>
+                </GpBadge>
               </div>
               <p className="text-xs text-[#6F6A80] font-medium">
                 Simulate your actual shortlisting probability against 35+ verified company recruitment rules.
@@ -607,9 +607,9 @@ export default function CanIApply() {
       {/* ========================================================================= */}
         <section className="space-y-6">
           <div className="max-w-4xl space-y-2">
-            <CaideBadge theme="mint" size="md">
+            <GpBadge theme="mint" size="md">
               Eligibility & Hiring Bar Engine
-            </CaideBadge>
+            </GpBadge>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black text-[#0D0431] tracking-tight leading-[1.1]">
               Know before you apply: cutoffs, skills, and interview readiness.
             </h1>
@@ -619,7 +619,7 @@ export default function CanIApply() {
           </div>
 
           {/* Target Selector Command Suite */}
-          <CaideCard
+          <GpCard
             theme="white"
             shadow="lg"
             className="p-5 sm:p-6 rounded-3xl space-y-4"
@@ -639,7 +639,7 @@ export default function CanIApply() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Target Company Selector */}
               <div>
-                <CaideCombobox
+                <GpCombobox
                   id="target-company-select"
                   name="targetCompany"
                   label="Target Company"
@@ -664,7 +664,7 @@ export default function CanIApply() {
 
               {/* Target Role Selector */}
               <div>
-                <CaideCombobox
+                <GpCombobox
                   id="target-role-select"
                   name="targetRole"
                   label="Target Job Role"
@@ -683,14 +683,14 @@ export default function CanIApply() {
                 />
               </div>
             </div>
-          </CaideCard>
+          </GpCard>
         </section>
 
         {/* ========================================================================= */}
         {/* EXECUTIVE DECISION HERO BANNER (READY / ALMOST READY / BLOCKER) */}
         {/* ========================================================================= */}
         <section ref={resultsRef} className="space-y-6">
-          <CaideCard
+          <GpCard
             theme={
               decision.state === "READY"
                 ? "light-green"
@@ -708,7 +708,7 @@ export default function CanIApply() {
             <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               <div className="space-y-3 max-w-2xl">
                 <div className="flex flex-wrap items-center gap-3">
-                  <CaideBadge
+                  <GpBadge
                     theme={
                       decision.state === "READY"
                         ? "mint"
@@ -731,7 +731,7 @@ export default function CanIApply() {
                       )}
                       <span>{decision.title}</span>
                     </span>
-                  </CaideBadge>
+                  </GpBadge>
 
                   <span className="text-xs font-mono font-bold text-[#0D0431]/80 bg-white px-3 py-1 rounded-full border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431]">
                     Calibrated for <strong className="text-[#0D0431] font-heading font-black">{benchmark.name}</strong> • {selectedRole}
@@ -755,7 +755,7 @@ export default function CanIApply() {
 
               {/* Composite Readiness Gauge Card */}
               <div className="flex flex-col items-start lg:items-end gap-3 shrink-0 w-full sm:w-auto">
-                <CaideCard
+                <GpCard
                   theme="white"
                   shadow="default"
                   className="p-5 rounded-2xl w-full sm:w-64 space-y-2 text-left"
@@ -796,11 +796,11 @@ export default function CanIApply() {
                         : `-${benchmark.targetDsaScore - decision.compositeScore} pts`}
                     </span>
                   </div>
-                </CaideCard>
+                </GpCard>
 
                 {/* Quick Real Jobs Shortcut Trigger */}
                 {matchingMarketplaceJobs.length > 0 && (
-                  <CaideButton
+                  <GpButton
                     onClick={() => setShowOpeningsDrawer(true)}
                     variant="secondary"
                     size="sm"
@@ -808,18 +808,18 @@ export default function CanIApply() {
                     icon={true}
                   >
                     View {matchingMarketplaceJobs.length} Live Openings
-                  </CaideButton>
+                  </GpButton>
                 )}
               </div>
             </div>
-          </CaideCard>
+          </GpCard>
 
           {/* ========================================================================= */}
           {/* 4 DISTINCT, UNMIXED EVALUATION DIMENSIONS (PROGRESSIVE CARDS) */}
           {/* ========================================================================= */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* DIMENSION 1: ELIGIBILITY CHECK */}
-            <CaideCard
+            <GpCard
               theme="light-yellow"
               shadow="default"
               hoverEffect
@@ -840,7 +840,7 @@ export default function CanIApply() {
                   <div className="p-2.5 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-[#0D0431] group-hover:scale-105 transition-transform">
                     <GraduationCap className="w-5 h-5" />
                   </div>
-                  <CaideBadge
+                  <GpBadge
                     theme={
                       dimensions.eligibility.isPassed
                         ? "mint"
@@ -851,7 +851,7 @@ export default function CanIApply() {
                     size="sm"
                   >
                     {dimensions.eligibility.status}
-                  </CaideBadge>
+                  </GpBadge>
                 </div>
 
                 <div>
@@ -910,10 +910,10 @@ export default function CanIApply() {
                   }`}
                 />
               </div>
-            </CaideCard>
+            </GpCard>
 
             {/* DIMENSION 2: TECHNICAL READINESS % */}
-            <CaideCard
+            <GpCard
               theme="light-purple"
               shadow="default"
               hoverEffect
@@ -934,7 +934,7 @@ export default function CanIApply() {
                   <div className="p-2.5 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-[#0D0431] group-hover:scale-105 transition-transform">
                     <Code2 className="w-5 h-5" />
                   </div>
-                  <CaideBadge
+                  <GpBadge
                     theme={
                       dimensions.technical.isPassed
                         ? "mint"
@@ -943,7 +943,7 @@ export default function CanIApply() {
                     size="sm"
                   >
                     {dimensions.technical.score}% Readiness
-                  </CaideBadge>
+                  </GpBadge>
                 </div>
 
                 <div>
@@ -985,10 +985,10 @@ export default function CanIApply() {
                   }`}
                 />
               </div>
-            </CaideCard>
+            </GpCard>
 
             {/* DIMENSION 3: PROFILE READINESS % */}
-            <CaideCard
+            <GpCard
               theme="light-blue"
               shadow="default"
               hoverEffect
@@ -1009,7 +1009,7 @@ export default function CanIApply() {
                   <div className="p-2.5 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-[#0D0431] group-hover:scale-105 transition-transform">
                     <FileText className="w-5 h-5" />
                   </div>
-                  <CaideBadge
+                  <GpBadge
                     theme={
                       dimensions.profile.isPassed
                         ? "mint"
@@ -1018,7 +1018,7 @@ export default function CanIApply() {
                     size="sm"
                   >
                     {dimensions.profile.score}% Readiness
-                  </CaideBadge>
+                  </GpBadge>
                 </div>
 
                 <div>
@@ -1060,10 +1060,10 @@ export default function CanIApply() {
                   }`}
                 />
               </div>
-            </CaideCard>
+            </GpCard>
 
             {/* DIMENSION 4: INTERVIEW READINESS % */}
-            <CaideCard
+            <GpCard
               theme="pale-lime"
               shadow="default"
               hoverEffect
@@ -1084,7 +1084,7 @@ export default function CanIApply() {
                   <div className="p-2.5 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-[#0D0431] group-hover:scale-105 transition-transform">
                     <BrainCog className="w-5 h-5" />
                   </div>
-                  <CaideBadge
+                  <GpBadge
                     theme={
                       dimensions.interview.isPassed
                         ? "mint"
@@ -1093,7 +1093,7 @@ export default function CanIApply() {
                     size="sm"
                   >
                     {dimensions.interview.score}% Readiness
-                  </CaideBadge>
+                  </GpBadge>
                 </div>
 
                 <div>
@@ -1135,13 +1135,13 @@ export default function CanIApply() {
                   }`}
                 />
               </div>
-            </CaideCard>
+            </GpCard>
           </div>
 
           {/* ========================================================================= */}
           {/* PROGRESSIVE DISCLOSURE: EXPANDABLE REQUIREMENT CHECKLISTS */}
           {/* ========================================================================= */}
-          <CaideCard
+          <GpCard
             theme="white"
             shadow="lg"
             className="eval-card p-6 sm:p-8 rounded-3xl space-y-6"
@@ -1208,12 +1208,12 @@ export default function CanIApply() {
                     <GraduationCap className="w-4 h-4" />
                     <span>Dimension 1: Academic & Recruitment Eligibility Criteria</span>
                   </span>
-                  <CaideBadge
+                  <GpBadge
                     theme={dimensions.eligibility.isPassed ? "mint" : "coral"}
                     size="sm"
                   >
                     {dimensions.eligibility.status}
-                  </CaideBadge>
+                  </GpBadge>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
@@ -1325,14 +1325,14 @@ export default function CanIApply() {
                           </div>
                         </div>
 
-                        <CaideButton
+                        <GpButton
                           to={item.fixLink}
                           variant="secondary"
                           size="sm"
                           icon={true}
                         >
                           {item.fixLabel}
-                        </CaideButton>
+                        </GpButton>
                       </div>
                     </div>
                   ))}
@@ -1397,14 +1397,14 @@ export default function CanIApply() {
                           </div>
                         </div>
 
-                        <CaideButton
+                        <GpButton
                           to={item.fixLink}
                           variant="secondary"
                           size="sm"
                           icon={true}
                         >
                           {item.fixLabel}
-                        </CaideButton>
+                        </GpButton>
                       </div>
                     </div>
                   ))}
@@ -1469,21 +1469,21 @@ export default function CanIApply() {
                           </div>
                         </div>
 
-                        <CaideButton
+                        <GpButton
                           to={item.fixLink}
                           variant="secondary"
                           size="sm"
                           icon={true}
                         >
                           {item.fixLabel}
-                        </CaideButton>
+                        </GpButton>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-          </CaideCard>
+          </GpCard>
 
           {/* ========================================================================= */}
           {/* TOP 3 CRITICAL RISKS / GAPS & "FIX FIRST" ACTION TRIGGERS */}
@@ -1496,14 +1496,14 @@ export default function CanIApply() {
                   Top Priority Risks to Fix Before Applying
                 </h3>
               </div>
-              <CaideBadge theme="coral" size="sm">
+              <GpBadge theme="coral" size="sm">
                 Direct closure actions targeting {benchmark.name}
-              </CaideBadge>
+              </GpBadge>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {topCriticalRisks.map((gap, gIdx) => (
-                <CaideCard
+                <GpCard
                   key={gap.id || gIdx}
                   theme="white"
                   shadow="default"
@@ -1515,7 +1515,7 @@ export default function CanIApply() {
                       <span className="text-[10px] font-mono uppercase text-[#0D0431]/70 font-bold">
                         {gap.pillar}
                       </span>
-                      <CaideBadge
+                      <GpBadge
                         theme={
                           gap.color === "rose"
                             ? "coral"
@@ -1526,7 +1526,7 @@ export default function CanIApply() {
                         size="sm"
                       >
                         {gap.impact}
-                      </CaideBadge>
+                      </GpBadge>
                     </div>
 
                     <h4 className="text-sm font-heading font-bold text-[#0D0431] tracking-tight">
@@ -1538,7 +1538,7 @@ export default function CanIApply() {
                     </p>
                   </div>
 
-                  <CaideButton
+                  <GpButton
                     to={gap.actionUrl}
                     variant="stacked-yellow"
                     size="sm"
@@ -1546,8 +1546,8 @@ export default function CanIApply() {
                     icon={true}
                   >
                     {gap.actionLabel}
-                  </CaideButton>
-                </CaideCard>
+                  </GpButton>
+                </GpCard>
               ))}
             </div>
           </div>
@@ -1556,7 +1556,7 @@ export default function CanIApply() {
           {/* POSITIVE REINFORCEMENT: "WHAT IS ALREADY COVERED?" */}
           {/* ========================================================================= */}
           {coveredStrengths.length > 0 && (
-            <CaideCard
+            <GpCard
               theme="light-green"
               shadow="default"
               className="eval-card p-6 sm:p-8 rounded-3xl space-y-4"
@@ -1586,13 +1586,13 @@ export default function CanIApply() {
                   </div>
                 ))}
               </div>
-            </CaideCard>
+            </GpCard>
           )}
 
           {/* ========================================================================= */}
           {/* REAL JOB LINK INTEGRATION & OFFICIAL CAREERS ACTION */}
           {/* ========================================================================= */}
-          <CaideCard
+          <GpCard
             theme="light-purple"
             shadow="lg"
             className="eval-card p-6 sm:p-8 rounded-3xl space-y-6"
@@ -1612,7 +1612,7 @@ export default function CanIApply() {
 
               <div className="flex flex-wrap items-center gap-3">
                 {matchingMarketplaceJobs.length > 0 && (
-                  <CaideButton
+                  <GpButton
                     onClick={() => setShowOpeningsDrawer(true)}
                     variant="secondary"
                     size="sm"
@@ -1624,17 +1624,17 @@ export default function CanIApply() {
                         View {matchingMarketplaceJobs.length} In Marketplace
                       </span>
                     </span>
-                  </CaideButton>
+                  </GpButton>
                 )}
 
-                <CaideButton
+                <GpButton
                   href={benchmark.careersUrl}
                   variant="stacked-yellow"
                   size="sm"
                   icon={true}
                 >
                   Apply on Official Careers
-                </CaideButton>
+                </GpButton>
               </div>
             </div>
 
@@ -1682,7 +1682,7 @@ export default function CanIApply() {
                 </div>
               </div>
             )}
-          </CaideCard>
+          </GpCard>
         </section>
 
       {/* ========================================================================= */}
@@ -1699,9 +1699,9 @@ export default function CanIApply() {
           >
             <div className="flex items-start justify-between pb-3 border-b-2 border-[#0D0431] bg-[#FEDF6A] -mx-6 -mt-6 p-6">
               <div className="space-y-1">
-                <CaideBadge theme="dark" size="sm">
+                <GpBadge theme="dark" size="sm">
                   GetPlaced Jobs Radar
-                </CaideBadge>
+                </GpBadge>
                 <h3 className="text-xl font-heading font-black text-[#0D0431]">
                   Available Positions at {benchmark.name}
                 </h3>
@@ -1744,14 +1744,14 @@ export default function CanIApply() {
                     <span className="text-[11px] font-bold text-[#0D0431]/80">
                       Cutoff: {job.cgpaCutoff || benchmark.minCgpa} CGPA
                     </span>
-                    <CaideButton
+                    <GpButton
                       href={job.applicationUrl || benchmark.careersUrl}
                       variant="stacked-yellow"
                       size="sm"
                       icon={true}
                     >
                       Apply on Official Portal
-                    </CaideButton>
+                    </GpButton>
                   </div>
                 </div>
               ))}

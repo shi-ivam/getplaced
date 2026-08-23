@@ -34,9 +34,9 @@ import {
 } from "lucide-react";
 import { leetcodeService } from "@/services/leetcodeService";
 import LeetCodeSubmissionAnalysis from "./LeetCodeSubmissionAnalysis";
-import CaideBadge from "@/components/caide/CaideBadge";
-import CaideButton, { CaideArrow } from "@/components/caide/CaideButton";
-import CaideCard from "@/components/caide/CaideCard";
+import GpBadge from "@/components/gp/GpBadge";
+import GpButton, { GpArrow } from "@/components/gp/GpButton";
+import GpCard from "@/components/gp/GpCard";
 
 export default function LeetCodeConnectCard({ onProfileUpdate }) {
   const [profile, setProfile] = useState(null);
@@ -325,9 +325,9 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
             <div className="flex items-center gap-2">
               <h3 className="font-heading font-black text-xl text-[#0D0431]">LeetCode Analytics</h3>
               {connected && (
-                <CaideBadge theme="mint">
+                <GpBadge theme="mint">
                   Connected
-                </CaideBadge>
+                </GpBadge>
               )}
             </div>
             {!connected && (
@@ -787,12 +787,12 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                       </h4>
                     </div>
                     {contestBadge ? (
-                      <CaideBadge theme="yellow">
+                      <GpBadge theme="yellow">
                         <Crown className="w-3 h-3 mr-1" />
                         {contestBadge}
-                      </CaideBadge>
+                      </GpBadge>
                     ) : contestRating !== null ? (
-                      <CaideBadge theme="mint">Active Competitor</CaideBadge>
+                      <GpBadge theme="mint">Active Competitor</GpBadge>
                     ) : null}
                   </div>
 
@@ -1049,14 +1049,14 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                 />
               </div>
 
-              <CaideButton
+              <GpButton
                 type="submit"
                 disabled={connecting || !inputUsername.trim()}
                 variant="stacked-yellow"
                 size="md"
               >
                 {connecting ? "Connecting..." : "Connect LeetCode"}
-              </CaideButton>
+              </GpButton>
             </div>
 
             {connecting && (
