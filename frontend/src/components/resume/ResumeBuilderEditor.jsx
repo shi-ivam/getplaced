@@ -9,7 +9,7 @@ import {
   Check,
   ChevronRight,
   RefreshCw,
-  X
+  X,
 } from "lucide-react";
 import axios from "axios";
 import { PY_API_URL } from "@/config/api";
@@ -17,16 +17,94 @@ import GpBadge from "@/components/gp/GpBadge";
 import GpCard from "@/components/gp/GpCard";
 import GpButton from "@/components/gp/GpButton";
 
+export const DEFAULT_BUILDER_DATA = {
+  personalInfo: {
+    fullName: "Alex Rivera",
+    email: "alex.rivera@example.com",
+    phone: "+1 555-0199",
+    location: "San Francisco, CA",
+    linkedin: "linkedin.com/in/alexrivera",
+    github: "github.com/alexrivera",
+  },
+  summary:
+    "Results-driven Software Engineer with 2+ years designing resilient web platforms and microservices. Adept at cloud infrastructure, automated CI/CD pipelines, and high-throughput data architectures.",
+  experience: [
+    {
+      id: "exp-1",
+      role: "Software Engineer",
+      company: "Tech Enterprise",
+      location: "Remote",
+      startDate: "2023",
+      endDate: "Present",
+      bullets: [
+        "Engineered 8 RESTful microservices with Node.js & Redis, reducing P99 latency by 42% at 10k RPM peak.",
+        "Spearheaded modular frontend architecture using React 19 and Tailwind CSS, increasing user onboarding conversion by 28%.",
+      ],
+    },
+  ],
+  projects: [
+    {
+      id: "proj-1",
+      name: "Distributed Task Scheduler",
+      techStack: "Go, Redis, Docker",
+      bullets: [
+        "Architected high-concurrency microservice handling 15k+ daily requests with automated Redis caching.",
+      ],
+    },
+  ],
+  skills: {
+    languages: ["TypeScript", "JavaScript", "Python", "SQL"],
+    frameworks: ["React", "Node.js", "Express", "FastAPI"],
+    toolsDatabases: ["PostgreSQL", "Redis", "Docker", "Git"],
+  },
+};
+
+export const getSafeBuilderData = (data) => {
+  if (!data) return DEFAULT_BUILDER_DATA;
+  return {
+    personalInfo: {
+      fullName: data.personalInfo?.fullName ?? DEFAULT_BUILDER_DATA.personalInfo.fullName,
+      email: data.personalInfo?.email ?? DEFAULT_BUILDER_DATA.personalInfo.email,
+      phone: data.personalInfo?.phone ?? DEFAULT_BUILDER_DATA.personalInfo.phone,
+      location: data.personalInfo?.location ?? DEFAULT_BUILDER_DATA.personalInfo.location,
+      linkedin: data.personalInfo?.linkedin ?? DEFAULT_BUILDER_DATA.personalInfo.linkedin,
+      github: data.personalInfo?.github ?? DEFAULT_BUILDER_DATA.personalInfo.github,
+    },
+    summary: data.summary ?? DEFAULT_BUILDER_DATA.summary,
+    experience: Array.isArray(data.experience) ? data.experience : DEFAULT_BUILDER_DATA.experience,
+    projects: Array.isArray(data.projects) ? data.projects : DEFAULT_BUILDER_DATA.projects,
+    skills: {
+      languages: Array.isArray(data.skills?.languages)
+        ? data.skills.languages
+        : DEFAULT_BUILDER_DATA.skills.languages,
+      frameworks: Array.isArray(data.skills?.frameworks)
+        ? data.skills.frameworks
+        : DEFAULT_BUILDER_DATA.skills.frameworks,
+      toolsDatabases: Array.isArray(data.skills?.toolsDatabases)
+        ? data.skills.toolsDatabases
+        : DEFAULT_BUILDER_DATA.skills.toolsDatabases,
+    },
+  };
+};
+
 export default function ResumeBuilderEditor({
   builderData,
   setBuilderData,
   onEvaluateATS,
   targetRole = "Software Engineer",
-  jobDescription = ""
+  jobDescription = "",
 }) {
   const [improvingBulletKey, setImprovingBulletKey] = useState(null);
   const [bulletImprovementModal, setBulletImprovementModal] = useState(null);
   const [isImprovingSection, setIsImprovingSection] = useState(false);
+
+  const activeData = getSafeBuilderData(builderData);
+
+  const updateData = (nextData) => {
+    if (typeof setBuilderData === "function") {
+      setBuilderData(nextData);
+    }
+  };
 
   const handleAIImproveBullet = async (bulletText, expIndex, bulletIndex) => {
     const key = `${expIndex}-${bulletIndex}`;
@@ -35,13 +113,13 @@ export default function ResumeBuilderEditor({
       const res = await axios.post(`${PY_API_URL}/api/resume/improve-bullet`, {
         bullet: bulletText,
         target_role: targetRole,
-        keywords: ["Architecture", "Scalability", "Optimization", "Latency"]
+        keywords: ["Architecture", "Scalability", "Optimization", "Latency"],
       });
       setBulletImprovementModal({
         expIndex,
         bulletIndex,
         original: bulletText,
-        data: res.data
+        data: res.data,
       });
     } catch (e) {
       console.warn("AI bullet improver failed, using local XYZ formula generator:", e);
@@ -51,12 +129,18 @@ export default function ResumeBuilderEditor({
         bulletIndex,
         original: bulletText,
         data: {
-          improved_xyz: `Engineered scalable architecture for ${bulletText.replace(/^worked on /i, "")}, improving throughput by 35% and reducing response latency by 42%.`,
+          improved_xyz: `Engineered scalable architecture for ${bulletText.replace(
+            /^worked on /i,
+            ""
+          )}, improving throughput by 35% and reducing response latency by 42%.`,
           alternative_versions: [
-            `Spearheaded development of ${bulletText.replace(/^worked on /i, "")}, boosting system efficiency by 28% and ensuring 99.9% uptime.`,
-            `Architected high-concurrency microservice handling 15k+ daily requests with automated Redis caching.`
-          ]
-        }
+            `Spearheaded development of ${bulletText.replace(
+              /^worked on /i,
+              ""
+            )}, boosting system efficiency by 28% and ensuring 99.9% uptime.`,
+            `Architected high-concurrency microservice handling 15k+ daily requests with automated Redis caching.`,
+          ],
+        },
       });
     } finally {
       setImprovingBulletKey(null);
@@ -66,9 +150,15 @@ export default function ResumeBuilderEditor({
   const applyImprovedBullet = (newBullet) => {
     if (!bulletImprovementModal) return;
     const { expIndex, bulletIndex } = bulletImprovementModal;
-    const updated = { ...builderData };
-    updated.experience[expIndex].bullets[bulletIndex] = newBullet;
-    setBuilderData(updated);
+    const updatedExp = (activeData.experience || []).map((exp, idx) => {
+      if (idx === expIndex) {
+        const nextBullets = [...(exp.bullets || [])];
+        nextBullets[bulletIndex] = newBullet;
+        return { ...exp, bullets: nextBullets };
+      }
+      return exp;
+    });
+    updateData({ ...activeData, experience: updatedExp });
     setBulletImprovementModal(null);
   };
 
@@ -77,18 +167,18 @@ export default function ResumeBuilderEditor({
     try {
       const res = await axios.post(`${PY_API_URL}/api/resume/optimize-section`, {
         section_type: "Professional Summary",
-        content: builderData.summary,
+        content: activeData.summary,
         target_role: targetRole,
-        job_description: jobDescription
+        job_description: jobDescription,
       });
       if (res.data?.optimized_content) {
-        setBuilderData({ ...builderData, summary: res.data.optimized_content });
+        updateData({ ...activeData, summary: res.data.optimized_content });
       }
     } catch (e) {
       console.warn("AI summary polish fallback:", e);
-      setBuilderData({
-        ...builderData,
-        summary: `Results-driven ${targetRole} with proven expertise designing distributed systems, low-latency microservices, and modern web applications. Adept at cloud infrastructure, automated CI/CD pipelines, and high-throughput data architectures.`
+      updateData({
+        ...activeData,
+        summary: `Results-driven ${targetRole} with proven expertise designing distributed systems, low-latency microservices, and modern web applications. Adept at cloud infrastructure, automated CI/CD pipelines, and high-throughput data architectures.`,
       });
     } finally {
       setIsImprovingSection(false);
@@ -96,36 +186,44 @@ export default function ResumeBuilderEditor({
   };
 
   const handleExportBuilderJSON = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(builderData, null, 2));
+    const dataStr =
+      "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(activeData, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `Resume_${builderData.personalInfo.fullName.replace(/\s+/g, "_")}.json`);
+    const safeName = (activeData.personalInfo?.fullName || "Resume").replace(/\s+/g, "_");
+    downloadAnchor.setAttribute("download", `Resume_${safeName}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
   };
 
   const handleSendToATS = () => {
-    let compiled = `${builderData.personalInfo.fullName}\n${builderData.personalInfo.email} | ${builderData.personalInfo.phone} | ${builderData.personalInfo.location}\nLinkedIn: ${builderData.personalInfo.linkedin} | GitHub: ${builderData.personalInfo.github}\n\nSUMMARY:\n${builderData.summary}\n\nEXPERIENCE:\n`;
-    builderData.experience.forEach((exp) => {
-      compiled += `${exp.role} at ${exp.company} (${exp.startDate} - ${exp.endDate})\n`;
-      exp.bullets.forEach((b) => (compiled += `• ${b}\n`));
+    const pInfo = activeData.personalInfo || {};
+    let compiled = `${pInfo.fullName || ""}\n${pInfo.email || ""} | ${pInfo.phone || ""} | ${
+      pInfo.location || ""
+    }\nLinkedIn: ${pInfo.linkedin || ""} | GitHub: ${pInfo.github || ""}\n\nSUMMARY:\n${
+      activeData.summary || ""
+    }\n\nEXPERIENCE:\n`;
+    (activeData.experience || []).forEach((exp) => {
+      compiled += `${exp.role || ""} at ${exp.company || ""} (${exp.startDate || ""} - ${
+        exp.endDate || ""
+      })\n`;
+      (exp.bullets || []).forEach((b) => (compiled += `• ${b}\n`));
     });
     compiled += "\nPROJECTS:\n";
-    builderData.projects.forEach((proj) => {
-      compiled += `${proj.name} [${proj.techStack}]\n`;
-      proj.bullets.forEach((b) => (compiled += `• ${b}\n`));
+    (activeData.projects || []).forEach((proj) => {
+      compiled += `${proj.name || ""} [${proj.techStack || ""}]\n`;
+      (proj.bullets || []).forEach((b) => (compiled += `• ${b}\n`));
     });
     compiled += "\nSKILLS:\n";
-    compiled += `Languages: ${builderData.skills?.languages?.join(", ") || ""}\n`;
-    compiled += `Frameworks: ${builderData.skills?.frameworks?.join(", ") || ""}\n`;
-    compiled += `Tools & Databases: ${builderData.skills?.toolsDatabases?.join(", ") || ""}\n`;
-    onEvaluateATS(compiled);
+    compiled += `Languages: ${activeData.skills?.languages?.join(", ") || ""}\n`;
+    compiled += `Frameworks: ${activeData.skills?.frameworks?.join(", ") || ""}\n`;
+    compiled += `Tools & Databases: ${activeData.skills?.toolsDatabases?.join(", ") || ""}\n`;
+    onEvaluateATS?.(compiled);
   };
 
   return (
     <div className="space-y-6">
-      
       {/* Header Deck */}
       <GpCard theme="white" shadow="lg" rounded="3xl" className="p-6 sm:p-7 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#0D0431] pb-5">
@@ -148,11 +246,7 @@ export default function ResumeBuilderEditor({
               <Download className="w-3.5 h-3.5" />
               <span>Export JSON</span>
             </button>
-            <GpButton
-              onClick={handleSendToATS}
-              variant="stacked-yellow"
-              size="sm"
-            >
+            <GpButton onClick={handleSendToATS} variant="stacked-yellow" size="sm">
               Evaluate ATS Score
             </GpButton>
           </div>
@@ -166,11 +260,11 @@ export default function ResumeBuilderEditor({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
               type="text"
-              value={builderData.personalInfo.fullName}
+              value={activeData.personalInfo.fullName}
               onChange={(e) =>
-                setBuilderData({
-                  ...builderData,
-                  personalInfo: { ...builderData.personalInfo, fullName: e.target.value }
+                updateData({
+                  ...activeData,
+                  personalInfo: { ...activeData.personalInfo, fullName: e.target.value },
                 })
               }
               placeholder="Full Name"
@@ -178,11 +272,11 @@ export default function ResumeBuilderEditor({
             />
             <input
               type="email"
-              value={builderData.personalInfo.email}
+              value={activeData.personalInfo.email}
               onChange={(e) =>
-                setBuilderData({
-                  ...builderData,
-                  personalInfo: { ...builderData.personalInfo, email: e.target.value }
+                updateData({
+                  ...activeData,
+                  personalInfo: { ...activeData.personalInfo, email: e.target.value },
                 })
               }
               placeholder="Email Address"
@@ -190,11 +284,11 @@ export default function ResumeBuilderEditor({
             />
             <input
               type="text"
-              value={builderData.personalInfo.linkedin}
+              value={activeData.personalInfo.linkedin}
               onChange={(e) =>
-                setBuilderData({
-                  ...builderData,
-                  personalInfo: { ...builderData.personalInfo, linkedin: e.target.value }
+                updateData({
+                  ...activeData,
+                  personalInfo: { ...activeData.personalInfo, linkedin: e.target.value },
                 })
               }
               placeholder="LinkedIn Profile URL"
@@ -221,8 +315,8 @@ export default function ResumeBuilderEditor({
           </div>
           <textarea
             rows={3}
-            value={builderData.summary}
-            onChange={(e) => setBuilderData({ ...builderData, summary: e.target.value })}
+            value={activeData.summary}
+            onChange={(e) => updateData({ ...activeData, summary: e.target.value })}
             className="w-full px-4 py-3 bg-white border-2 border-[#0D0431] rounded-2xl text-xs text-[#0D0431] font-sans font-medium focus:bg-[#FEF9CF] focus:outline-none resize-none leading-relaxed shadow-[2px_2px_0_0_#0D0431]"
           />
         </div>
@@ -243,9 +337,12 @@ export default function ResumeBuilderEditor({
                   location: "Remote",
                   startDate: "2024",
                   endDate: "Present",
-                  bullets: ["Engineered scalable backend service improving response time by 25%."]
+                  bullets: ["Engineered scalable backend service improving response time by 25%."],
                 };
-                setBuilderData({ ...builderData, experience: [...builderData.experience, newExp] });
+                updateData({
+                  ...activeData,
+                  experience: [...(activeData.experience || []), newExp],
+                });
               }}
               className="flex items-center gap-1.5 text-xs text-[#0D0431] font-heading font-bold bg-white hover:bg-[#FEDF6A] px-3.5 py-1.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
             >
@@ -255,7 +352,7 @@ export default function ResumeBuilderEditor({
           </div>
 
           <div className="space-y-4">
-            {builderData.experience.map((exp, expIdx) => (
+            {(activeData.experience || []).map((exp, expIdx) => (
               <div
                 key={exp.id || expIdx}
                 className="bg-[#FEF9CF] border-2 border-[#0D0431] p-5 rounded-2xl space-y-4 shadow-[3px_3px_0_0_#0D0431]"
@@ -265,9 +362,10 @@ export default function ResumeBuilderEditor({
                     type="text"
                     value={exp.role}
                     onChange={(e) => {
-                      const updated = { ...builderData };
-                      updated.experience[expIdx].role = e.target.value;
-                      setBuilderData(updated);
+                      const updatedExp = (activeData.experience || []).map((item, idx) =>
+                        idx === expIdx ? { ...item, role: e.target.value } : item
+                      );
+                      updateData({ ...activeData, experience: updatedExp });
                     }}
                     placeholder="Role / Title"
                     className="px-3.5 py-2 bg-white border-2 border-[#0D0431] rounded-xl text-xs font-heading font-bold text-[#0D0431] focus:bg-[#FEF9CF] focus:outline-none shadow-[2px_2px_0_0_#0D0431]"
@@ -276,9 +374,10 @@ export default function ResumeBuilderEditor({
                     type="text"
                     value={exp.company}
                     onChange={(e) => {
-                      const updated = { ...builderData };
-                      updated.experience[expIdx].company = e.target.value;
-                      setBuilderData(updated);
+                      const updatedExp = (activeData.experience || []).map((item, idx) =>
+                        idx === expIdx ? { ...item, company: e.target.value } : item
+                      );
+                      updateData({ ...activeData, experience: updatedExp });
                     }}
                     placeholder="Company / Organization"
                     className="px-3.5 py-2 bg-white border-2 border-[#0D0431] rounded-xl text-xs font-heading font-bold text-[#0D0431] focus:bg-[#FEF9CF] focus:outline-none shadow-[2px_2px_0_0_#0D0431]"
@@ -290,15 +389,21 @@ export default function ResumeBuilderEditor({
                   <span className="text-[10px] font-heading font-bold text-[#0D0431]/70 uppercase tracking-wider block">
                     Impact Bullet Points (XYZ Framework):
                   </span>
-                  {exp.bullets.map((bullet, bIdx) => (
+                  {(exp.bullets || []).map((bullet, bIdx) => (
                     <div key={bIdx} className="flex items-center gap-2.5">
                       <input
                         type="text"
                         value={bullet}
                         onChange={(e) => {
-                          const updated = { ...builderData };
-                          updated.experience[expIdx].bullets[bIdx] = e.target.value;
-                          setBuilderData(updated);
+                          const updatedExp = (activeData.experience || []).map((item, idx) => {
+                            if (idx === expIdx) {
+                              const nextBullets = [...(item.bullets || [])];
+                              nextBullets[bIdx] = e.target.value;
+                              return { ...item, bullets: nextBullets };
+                            }
+                            return item;
+                          });
+                          updateData({ ...activeData, experience: updatedExp });
                         }}
                         className="flex-1 px-3.5 py-2 bg-white border-2 border-[#0D0431] rounded-xl text-xs text-[#0D0431] font-sans font-medium focus:bg-[#FEF9CF] focus:outline-none shadow-[2px_2px_0_0_#0D0431]"
                       />
@@ -318,7 +423,6 @@ export default function ResumeBuilderEditor({
             ))}
           </div>
         </div>
-
       </GpCard>
 
       {/* Bullet Improvement Modal */}
@@ -371,7 +475,7 @@ export default function ResumeBuilderEditor({
                 <button
                   type="button"
                   onClick={() => setBulletImprovementModal(null)}
-                  className="px-4 py-2 bg-white hover:bg-[#FEF9CF] border-2 border-[#0D0431] text-[#0D0431] rounded-xl text-xs font-heading font-bold shadow-[2px_2px_0_0_#0D0431] transition"
+                  className="px-4 py-2 bg-white hover:bg-[#FEF9CF] border-2 border-[#0D0431] text-[#0D0431] rounded-xl text-xs font-heading font-bold shadow-[2px_2px_0_0_#0D0431] transition cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -380,7 +484,6 @@ export default function ResumeBuilderEditor({
           </div>
         </div>
       )}
-
     </div>
   );
 }

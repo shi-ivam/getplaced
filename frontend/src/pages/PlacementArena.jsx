@@ -442,7 +442,9 @@ export default function PlacementArena() {
                 { user: "You", text: "Let's complete the dynamic programming sheet by Friday." },
               ]).map((msg, idx) => (
                 <div key={idx} className="p-2 rounded-xl bg-[#F8F8F5] space-y-0.5">
-                  <span className="font-bold text-[#17103D]">{msg.user || msg.sender}: </span>
+                  <span className="font-bold text-[#17103D]">
+                    {msg.senderName || msg.user || msg.sender || "Squad Member"}:{" "}
+                  </span>
                   <span className="text-[#6F6A80]">{msg.text}</span>
                 </div>
               ))}

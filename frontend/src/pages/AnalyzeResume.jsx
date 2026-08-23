@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import {
   FileText,
   UploadCloud,
@@ -27,7 +25,7 @@ import GpBadge from "@/components/gp/GpBadge";
 import ResumeActionCenter from "@/components/resume/ResumeActionCenter";
 import ResumeReportOverview from "@/components/resume/ResumeReportOverview";
 import ResumeVersionHistory from "@/components/resume/ResumeVersionHistory";
-import ResumeBuilderEditor from "@/components/resume/ResumeBuilderEditor";
+import ResumeBuilderEditor, { DEFAULT_BUILDER_DATA } from "@/components/resume/ResumeBuilderEditor";
 
 const STORAGE_KEY = "getplaced_resume_versions";
 
@@ -95,6 +93,7 @@ export default function AnalyzeResume() {
   const [evaluation, setEvaluation] = useState(null);
   const [previousEvaluation, setPreviousEvaluation] = useState(null);
   const [actions, setActions] = useState([]);
+  const [builderData, setBuilderData] = useState(DEFAULT_BUILDER_DATA);
 
   // Version History State
   const [versions, setVersions] = useState([]);
@@ -102,11 +101,13 @@ export default function AnalyzeResume() {
 
   useEffect(() => {
     const initResumeIntelligence = async () => {
-      let initialVersions = [];
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
-          initialVersions = JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            setVersions(parsed);
+          }
         }
       } catch (e) {
         console.warn("Could not read resume history:", e);
@@ -248,32 +249,62 @@ export default function AnalyzeResume() {
     }
   };
 
-  const handleApplySingleAction = (actionId) => {
-    setActions((prev) =>
-      prev.map((act) => (act.id === actionId ? { ...act, status: "applied" } : act))
-    );
-    if (evaluation) {
-      const act = actions.find((a) => a.id === actionId);
-      const gain = act?.pointsGain || 4;
-      setEvaluation((prev) => ({
-        ...prev,
-        ats_score: Math.min(100, (prev?.ats_score || 74) + gain),
-      }));
+  const handleEvaluationUpdated = (newEval, updatedResumeText) => {
+    setPreviousEvaluation(evaluation);
+    if (newEval) {
+      setEvaluation(newEval);
+      if (newEval.structured_actions) {
+        setActions(newEval.structured_actions);
+      }
+    }
+    if (updatedResumeText) {
+      setRawText(updatedResumeText);
     }
   };
 
-  const handleApplyAllActions = () => {
-    const totalGain = actions
-      .filter((a) => a.status === "pending")
-      .reduce((acc, a) => acc + (a.pointsGain || 4), 0);
+  const handleEvaluateATSFromBuilder = async (compiledText) => {
+    if (!compiledText?.trim()) return;
+    setRawText(compiledText);
+    setInputMode("text");
+    setLoading(true);
+    setError("");
 
-    setActions((prev) => prev.map((act) => ({ ...act, status: "applied" })));
+    try {
+      const res = await axios.post(`${PY_API_URL}/api/resume/analyze-text`, {
+        resume_text: compiledText,
+        job_description: jobDescription,
+        target_role: targetRole,
+      });
+      const evalData = res.data.evaluation;
+      setPreviousEvaluation(evaluation);
+      setEvaluation(evalData);
+      const actionItems = evalData.structured_actions || DEMO_STRUCTURED_ACTIONS;
+      setActions(actionItems);
+      setActiveTab("overview");
 
-    if (evaluation) {
-      setEvaluation((prev) => ({
-        ...prev,
-        ats_score: Math.min(100, (prev?.ats_score || 74) + totalGain),
-      }));
+      try {
+        await axios.post(
+          `${NODE_API_URL}/api/coach/save-resume-analysis`,
+          {
+            resumeScore: evalData.ats_score,
+            resumeText: compiledText,
+            resumeAnalysis: evalData,
+            filename: "builder_resume.txt",
+          },
+          { withCredentials: true }
+        );
+      } catch (saveErr) {
+        console.warn("Could not persist builder analysis to profile:", saveErr);
+      }
+    } catch (err) {
+      console.error("Builder ATS evaluation error:", err);
+      setError(
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Could not evaluate resume ATS. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -285,6 +316,11 @@ export default function AnalyzeResume() {
           <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#17103D] tracking-tight flex items-center gap-2.5">
             <FileText className="w-6 h-6 text-[#6E44FF]" />
             <span>AI Resume ATS Optimizer</span>
+            {isProfileLinked && (
+              <GpBadge theme="mint" size="sm">
+                Profile Linked
+              </GpBadge>
+            )}
           </h1>
           <p className="text-xs sm:text-sm text-[#6F6A80] mt-1">
             Audit your resume against applicant tracking systems, identify missing keywords, and apply 1-click XYZ impact rewrites.
@@ -481,10 +517,21 @@ export default function AnalyzeResume() {
           {activeTab === "actions" && (
             <ResumeActionCenter
               actions={actions}
-              onApplyAction={handleApplySingleAction}
-              onApplyAll={handleApplyAllActions}
-              currentScore={evaluation.ats_score || 74}
-              targetScore={92}
+              onUpdateActions={setActions}
+              rawResumeText={rawText}
+              targetRole={targetRole}
+              jobDescription={jobDescription}
+              currentEvaluation={evaluation}
+              onEvaluationUpdated={handleEvaluationUpdated}
+              onRevertEvaluation={() => {
+                if (previousEvaluation) {
+                  setEvaluation(previousEvaluation);
+                  if (previousEvaluation?.structured_actions) {
+                    setActions(previousEvaluation.structured_actions);
+                  }
+                }
+              }}
+              previousEvaluation={previousEvaluation}
             />
           )}
 
@@ -501,9 +548,11 @@ export default function AnalyzeResume() {
           {/* Tab 3: Interactive Editor */}
           {activeTab === "builder" && (
             <ResumeBuilderEditor
-              rawResumeText={rawText}
+              builderData={builderData}
+              setBuilderData={setBuilderData}
+              onEvaluateATS={handleEvaluateATSFromBuilder}
               targetRole={targetRole}
-              onUpdateResumeText={(newTxt) => setRawText(newTxt)}
+              jobDescription={jobDescription}
             />
           )}
 
@@ -511,9 +560,28 @@ export default function AnalyzeResume() {
           {activeTab === "history" && (
             <ResumeVersionHistory
               versions={versions}
+              currentEvaluation={evaluation}
+              onSelectVersion={(ver) => {
+                const targetEval = ver?.fullEvaluation || ver;
+                if (targetEval) {
+                  setEvaluation(targetEval);
+                  if (targetEval.structured_actions) setActions(targetEval.structured_actions);
+                  setActiveTab("overview");
+                }
+              }}
+              onRevertVersion={(ver) => {
+                const targetEval = ver?.fullEvaluation || ver;
+                if (targetEval) {
+                  setEvaluation(targetEval);
+                  if (targetEval.structured_actions) setActions(targetEval.structured_actions);
+                  setActiveTab("overview");
+                }
+              }}
               onRestoreVersion={(ver) => {
-                if (ver.fullEvaluation) {
-                  setEvaluation(ver.fullEvaluation);
+                const targetEval = ver?.fullEvaluation || ver;
+                if (targetEval) {
+                  setEvaluation(targetEval);
+                  if (targetEval.structured_actions) setActions(targetEval.structured_actions);
                   setActiveTab("overview");
                 }
               }}
