@@ -231,14 +231,14 @@ export default function LeetCodeSubmissionAnalysis({
 
   // Archetype Badge Color Mapping
   const archetypeColorMap = {
-    emerald: "bg-emerald-950/70 text-emerald-300 border-emerald-700/60",
-    sky: "bg-sky-950/70 text-sky-300 border-sky-700/60",
-    amber: "bg-amber-950/70 text-amber-300 border-amber-700/60",
-    orange: "bg-orange-950/70 text-orange-300 border-orange-700/60",
+    emerald: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
+    purple: "bg-purple-500/10 text-purple-300 border-purple-500/20",
+    amber: "bg-amber-500/10 text-amber-300 border-amber-500/20",
+    rose: "bg-rose-500/10 text-rose-300 border-rose-500/20",
     zinc: "bg-zinc-800 text-zinc-300 border-zinc-700",
   };
   const archetypeBadgeStyle =
-    archetypeColorMap[consistency?.archetypeColor] || archetypeColorMap.sky;
+    archetypeColorMap[consistency?.archetypeColor] || archetypeColorMap.zinc;
 
   // Filtered recent submissions
   const filteredRecentList = (recentSubmissionsAnalysis?.recentList || []).filter((sub) => {
@@ -687,11 +687,11 @@ export default function LeetCodeSubmissionAnalysis({
                   title={`${day.formatted}: ${day.count} submission${day.count === 1 ? "" : "s"}`}
                   className={`h-7 rounded transition-all duration-200 flex items-center justify-center text-[9px] font-mono cursor-pointer ${
                     day.count >= 5
-                      ? "bg-emerald-500 text-black font-bold shadow-sm"
+                      ? "bg-emerald-400 text-black font-bold"
                       : day.count >= 2
-                      ? "bg-emerald-600/80 text-white"
+                      ? "bg-emerald-600 text-white"
                       : day.count === 1
-                      ? "bg-emerald-800/80 text-emerald-100"
+                      ? "bg-emerald-800 text-emerald-100"
                       : "bg-zinc-800/60 hover:bg-zinc-700 text-zinc-600"
                   }`}
                 >
@@ -795,28 +795,28 @@ export default function LeetCodeSubmissionAnalysis({
               type="button"
               onClick={() => setStatusFilter("all")}
               className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
-                statusFilter === "all" ? "bg-zinc-700 text-white font-medium" : "text-zinc-400 hover:text-zinc-200"
+                statusFilter === "all" ? "bg-zinc-100 text-zinc-950 font-bold" : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
-              All ({recentSubmissionsAnalysis?.recentList?.length || 0})
+              All
             </button>
             <button
               type="button"
               onClick={() => setStatusFilter("accepted")}
               className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
-                statusFilter === "accepted" ? "bg-zinc-700 text-white font-medium" : "text-zinc-400 hover:text-zinc-200"
+                statusFilter === "accepted" ? "bg-zinc-100 text-zinc-950 font-bold" : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
-              Accepted ({recentSubmissionsAnalysis?.acceptedCount || 0})
+              Accepted
             </button>
             <button
               type="button"
               onClick={() => setStatusFilter("failed")}
               className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
-                statusFilter === "failed" ? "bg-zinc-700 text-white font-medium" : "text-zinc-400 hover:text-zinc-200"
+                statusFilter === "failed" ? "bg-zinc-100 text-zinc-950 font-bold" : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
-              Failed ({recentSubmissionsAnalysis?.rejectedCount || 0})
+              Failed
             </button>
           </div>
 
@@ -940,7 +940,7 @@ export default function LeetCodeSubmissionAnalysis({
                 key={lang.languageName || idx}
                 className={`p-3.5 rounded-xl border transition-all ${
                   lang.isPrimary
-                    ? "bg-[#0f1017] border-zinc-700 shadow-sm"
+                    ? "bg-[#0f1017] border-zinc-700"
                     : "bg-[#0f1017] border-zinc-800/70"
                 }`}
               >

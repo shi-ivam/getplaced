@@ -10,13 +10,11 @@ import {
   Settings,
   LogOut,
   Building,
-  Mic,
   BookOpen,
   GraduationCap,
   TrendingUp,
   Award,
   Target,
-  PlayCircle,
   Swords,
   Sparkles,
   Database,
@@ -76,7 +74,6 @@ const navigationGroups = [
         title: "Study Sheets",
         url: "/app/sheets",
         icon: Layers,
-        badge: "28 Lists",
       },
       {
         title: "DSA Analytics",
@@ -149,7 +146,6 @@ const navigationGroups = [
         title: "VTOP Sync",
         url: "/app/vtop",
         icon: Database,
-        badge: "Sync",
       },
       {
         title: "Eligibility",
@@ -177,7 +173,6 @@ const navigationGroups = [
         title: "Role Fit Assessment",
         url: "/app/role-fit",
         icon: Compass,
-        badge: "Fit",
       },
       {
         title: "Job Listings",
@@ -188,7 +183,6 @@ const navigationGroups = [
         title: "Application Eligibility",
         url: "/app/can-i-apply",
         icon: ShieldCheck,
-        badge: "Check",
       },
       {
         title: "Company Dossiers",

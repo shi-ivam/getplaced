@@ -132,17 +132,6 @@ export default function JobDetailModal({
                 <span className="text-xs font-mono font-bold text-[#A8A59C] tracking-wider uppercase">
                   {employerName}
                 </span>
-                {isDemo ? (
-                  <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md bg-[#11110F] text-[#A8A59C] border border-[#3A3831] flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3 text-[#A8A59C]" />
-                    Demo Listing
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md bg-[#C7F36B]/10 text-[#C7F36B] border border-[#C7F36B]/30 flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3 text-[#C7F36B]" />
-                    Verified Official
-                  </span>
-                )}
                 {job.fitStatus && (
                   <span
                     className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border ${
@@ -172,7 +161,7 @@ export default function JobDetailModal({
                   {job.employmentType || "Full-time"}
                 </span>
                 <span className="text-[#3A3831]">•</span>
-                <span className="text-[#C7F36B] font-mono font-semibold">
+                <span className="text-emerald-400 font-mono font-semibold">
                   {job.salary || "Competitive Market Standard"}
                 </span>
               </div>
@@ -186,7 +175,7 @@ export default function JobDetailModal({
               title="Share job link"
               className="p-2.5 rounded-xl bg-[#11110F] hover:bg-[#1A1916] text-[#A8A59C] hover:text-[#FAF8F2] border border-[#3A3831] transition-colors"
             >
-              {copied ? <Check className="w-4 h-4 text-[#C7F36B]" /> : <Share2 className="w-4 h-4" />}
+              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
             </button>
 
             <button
@@ -195,7 +184,7 @@ export default function JobDetailModal({
               title={job.isSaved ? "Saved to your list" : "Save job"}
               className={`p-2.5 rounded-xl border transition-all ${
                 job.isSaved
-                  ? "bg-[#C7F36B] text-[#11110F] border-[#C7F36B] shadow-md shadow-[#C7F36B]/20 font-bold"
+                  ? "bg-purple-500 text-white border-purple-500 font-bold"
                   : "bg-[#11110F] hover:bg-[#1A1916] text-[#A8A59C] hover:text-[#FAF8F2] border-[#3A3831]"
               }`}
             >
@@ -226,7 +215,7 @@ export default function JobDetailModal({
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-3 text-xs font-semibold tracking-wide border-b-2 transition-all shrink-0 ${
                 activeTab === tab.id
-                  ? "text-[#C7F36B] border-[#C7F36B] font-bold bg-[#C7F36B]/5"
+                  ? "text-purple-300 border-purple-400 font-bold bg-purple-500/10"
                   : "text-[#A8A59C] border-transparent hover:text-[#FAF8F2]"
               }`}
             >
@@ -243,8 +232,8 @@ export default function JobDetailModal({
               <div className="p-4 rounded-2xl bg-gradient-to-r from-[#24231F] via-[#1A1916] to-[#24231F] border border-[#3A3831] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#C7F36B]" />
-                    <span className="text-xs font-mono uppercase font-bold text-[#C7F36B]">
+                    <Sparkles className="w-4 h-4 text-purple-400" />
+                    <span className="text-xs font-mono uppercase font-bold text-purple-300">
                       GetPlaced Match Score: {matchScore != null ? `${matchScore}%` : "Unassessed"}
                     </span>
                   </div>
@@ -258,16 +247,16 @@ export default function JobDetailModal({
                   <button
                     type="button"
                     onClick={handleCanIApply}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#11110F] hover:bg-[#1A1916] border border-[#3A3831] hover:border-[#C7F36B]/40 text-[#FAF8F2] text-xs font-semibold transition-all flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 rounded-xl bg-[#11110F] hover:bg-[#1A1916] border border-[#3A3831] hover:border-purple-500/40 text-[#FAF8F2] text-xs font-semibold transition-all flex items-center gap-1.5"
                   >
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#C7F36B]" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
                     <span>Can I Apply?</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setActiveTab("match")}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#C7F36B] hover:bg-[#bbf055] text-[#11110F] text-xs font-bold transition-all flex items-center gap-1 shrink-0 shadow-md shadow-[#C7F36B]/20"
+                    className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-bold transition-all flex items-center gap-1 shrink-0 shadow-md"
                   >
                     <span>View Breakdown</span>
                     <ChevronRight className="w-3.5 h-3.5" />
@@ -333,7 +322,7 @@ export default function JobDetailModal({
                   <ul className="space-y-2">
                     {job.responsibilities.map((resp, rIdx) => (
                       <li key={rIdx} className="text-xs text-[#FAF8F2] flex items-start gap-2.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#C7F36B] mt-1.5 shrink-0" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5 shrink-0" />
                         <span className="leading-relaxed">{resp}</span>
                       </li>
                     ))}
@@ -350,7 +339,7 @@ export default function JobDetailModal({
                   <ul className="space-y-2">
                     {job.requirements.map((req, reqIdx) => (
                       <li key={reqIdx} className="text-xs text-[#FAF8F2] flex items-start gap-2.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#C7F36B] mt-0.5 shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
                         <span className="leading-relaxed">{req}</span>
                       </li>
                     ))}
@@ -371,12 +360,12 @@ export default function JobDetailModal({
                         key={sIdx}
                         className={`text-xs font-mono px-3 py-1 rounded-xl border flex items-center gap-1.5 ${
                           isMatched
-                            ? "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
+                            ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                             : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                         }`}
                       >
                         {isMatched ? (
-                          <CheckCircle2 className="w-3 h-3 text-[#C7F36B]" />
+                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                         ) : (
                           <AlertTriangle className="w-3 h-3 text-amber-400" />
                         )}
@@ -417,13 +406,13 @@ export default function JobDetailModal({
                     <span className="text-xs font-mono uppercase text-[#A8A59C] font-bold">
                       Job Match Score
                     </span>
-                    <span className="text-2xl font-black font-mono text-[#C7F36B]">
+                    <span className="text-2xl font-black font-mono text-emerald-400">
                       {matchScore != null ? `${matchScore}%` : "Unassessed"}
                     </span>
                   </div>
                   <div className="w-full h-2 bg-[#11110F] rounded-full overflow-hidden border border-[#3A3831]">
                     <div
-                      className="h-full bg-[#C7F36B] rounded-full transition-all duration-500"
+                      className="h-full bg-emerald-400 rounded-full transition-all duration-500"
                       style={{ width: `${matchScore != null ? matchScore : 0}%` }}
                     />
                   </div>
@@ -437,13 +426,13 @@ export default function JobDetailModal({
                     <span className="text-xs font-mono uppercase text-[#A8A59C] font-bold">
                       Your Interview Readiness
                     </span>
-                    <span className="text-2xl font-black font-mono text-sky-400">
+                    <span className="text-2xl font-black font-mono text-purple-300">
                       {readinessScore != null ? `${readinessScore}%` : "Unassessed"}
                     </span>
                   </div>
                   <div className="w-full h-2 bg-[#11110F] rounded-full overflow-hidden border border-[#3A3831]">
                     <div
-                      className="h-full bg-sky-400 rounded-full transition-all duration-500"
+                      className="h-full bg-purple-400 rounded-full transition-all duration-500"
                       style={{ width: `${readinessScore != null ? readinessScore : 0}%` }}
                     />
                   </div>
@@ -470,13 +459,13 @@ export default function JobDetailModal({
                       <div key={idx} className="space-y-1">
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-[#FAF8F2]">{item.label}</span>
-                          <span className="font-mono font-bold text-[#C7F36B]">
+                          <span className="font-mono font-bold text-purple-300">
                             {item.score != null ? `${item.score}%` : "Unassessed"}
                           </span>
                         </div>
                         <div className="w-full h-1.5 bg-[#11110F] rounded-full overflow-hidden border border-[#3A3831]/60">
                           <div
-                            className="h-full bg-[#C7F36B] rounded-full"
+                            className="h-full bg-purple-400 rounded-full"
                             style={{ width: `${item.score != null ? item.score : 0}%` }}
                           />
                         </div>
@@ -489,7 +478,7 @@ export default function JobDetailModal({
               {/* Matching Skills vs Gaps Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-4 rounded-2xl bg-[#24231F] border border-[#3A3831] space-y-3">
-                  <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#C7F36B] uppercase">
+                  <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400 uppercase">
                     <CheckCircle2 className="w-4 h-4" />
                     <span>Matching Skills ({job.matchedSkills?.length || 0})</span>
                   </div>
@@ -497,9 +486,9 @@ export default function JobDetailModal({
                     {(job.matchedSkills || []).map((s, idx) => (
                       <span
                         key={idx}
-                        className="text-xs font-mono px-2.5 py-1 rounded-lg bg-[#C7F36B]/10 text-[#C7F36B] border border-[#C7F36B]/30 flex items-center gap-1"
+                        className="text-xs font-mono px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 flex items-center gap-1"
                       >
-                        <Check className="w-3 h-3 text-[#C7F36B]" />
+                        <Check className="w-3 h-3 text-emerald-400" />
                         <span>{s}</span>
                       </span>
                     ))}
@@ -531,14 +520,14 @@ export default function JobDetailModal({
               {/* "Why This Job?" Section */}
               {job.whyThisJob && job.whyThisJob.length > 0 && (
                 <div className="p-5 rounded-2xl bg-[#24231F] border border-[#3A3831] space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#C7F36B] uppercase">
+                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-purple-300 uppercase">
                     <Sparkles className="w-4 h-4" />
                     <span>Why GetPlaced Recommends This Position?</span>
                   </div>
                   <ul className="space-y-2">
                     {job.whyThisJob.map((reason, rIdx) => (
                       <li key={rIdx} className="text-xs text-[#FAF8F2] flex items-start gap-2.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#C7F36B] mt-0.5 shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
                         <span className="leading-relaxed">{reason}</span>
                       </li>
                     ))}
@@ -562,7 +551,7 @@ export default function JobDetailModal({
                 <button
                   type="button"
                   onClick={handlePrepareJob}
-                  className="px-4 py-2 rounded-xl bg-[#C7F36B] hover:bg-[#bbf055] text-[#11110F] text-xs font-bold shadow-md shadow-[#C7F36B]/20 transition-all shrink-0"
+                  className="px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-bold shadow-md transition-all shrink-0"
                 >
                   Open Full Roadmap
                 </button>
@@ -575,7 +564,7 @@ export default function JobDetailModal({
                     className="p-4 rounded-2xl bg-[#24231F] border border-[#3A3831] space-y-2"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono font-bold text-[#C7F36B]">
+                      <span className="text-xs font-mono font-bold text-purple-300">
                         {week.phase}
                       </span>
                       <span className="text-xs font-semibold text-[#FAF8F2]">
@@ -584,7 +573,7 @@ export default function JobDetailModal({
                     </div>
                     <ul className="space-y-1.5 pt-1">
                       {week.tasks.map((task, tIdx) => (
-                        <li key={tIdx} className="text-xs text-[#A8A59C] flex items-start gap-2">
+                         <li key={task} className="text-xs text-[#A8A59C] flex items-start gap-2">
                           <span className="w-1.5 h-1.5 rounded-full bg-[#8C8980] mt-1.5 shrink-0" />
                           <span>{task}</span>
                         </li>
@@ -599,10 +588,10 @@ export default function JobDetailModal({
                 <button
                   type="button"
                   onClick={handleTailorResume}
-                  className="p-3.5 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] hover:border-[#C7F36B]/40 text-left transition-all group flex items-center justify-between"
+                  className="p-3.5 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] hover:border-purple-500/40 text-left transition-all group flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
-                    <FileText className="w-4 h-4 text-[#C7F36B]" />
+                    <FileText className="w-4 h-4 text-purple-400" />
                     <div>
                       <div className="text-xs font-bold text-[#FAF8F2]">Tailor Resume ATS</div>
                       <div className="text-[10px] text-[#A8A59C]">Align with job keywords</div>
@@ -614,10 +603,10 @@ export default function JobDetailModal({
                 <button
                   type="button"
                   onClick={handlePracticeDsa}
-                  className="p-3.5 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] hover:border-[#C7F36B]/40 text-left transition-all group flex items-center justify-between"
+                  className="p-3.5 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] hover:border-purple-500/40 text-left transition-all group flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
-                    <Code2 className="w-4 h-4 text-[#C7F36B]" />
+                    <Code2 className="w-4 h-4 text-purple-400" />
                     <div>
                       <div className="text-xs font-bold text-[#FAF8F2]">Practice Relevant DSA</div>
                       <div className="text-[10px] text-[#A8A59C]">Algorithms & Coding Arena</div>
@@ -642,7 +631,7 @@ export default function JobDetailModal({
                     onClick={handleCompanyIntel}
                     className="px-3.5 py-1.5 rounded-xl bg-[#11110F] hover:bg-[#1A1916] text-[#FAF8F2] border border-[#3A3831] text-xs font-semibold transition-all flex items-center gap-1.5"
                   >
-                    <Building2 className="w-3.5 h-3.5 text-[#C7F36B]" />
+                    <Building2 className="w-3.5 h-3.5 text-purple-400" />
                     <span>Company Intelligence Dossier</span>
                   </button>
                 </div>
@@ -666,7 +655,7 @@ export default function JobDetailModal({
                   </div>
                   <div className="p-3 rounded-xl bg-[#11110F] border border-[#3A3831]">
                     <div className="text-[10px] font-mono text-[#8C8980] uppercase">Open Roles Tracked</div>
-                    <div className="text-xs font-bold text-[#C7F36B] mt-0.5">
+                    <div className="text-xs font-bold text-purple-300 mt-0.5">
                       {job.companyDetails?.openPositionsCount || 10} Positions
                     </div>
                   </div>
@@ -676,7 +665,7 @@ export default function JobDetailModal({
               {/* Source Transparency Note */}
               <div className="p-4 rounded-2xl bg-[#24231F]/50 border border-[#3A3831] text-xs text-[#A8A59C] space-y-1">
                 <div className="font-semibold text-[#FAF8F2] flex items-center gap-1.5 font-mono text-[11px]">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#C7F36B]" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
                   Listing Source & Verification Transparency
                 </div>
                 <p className="text-[11px] leading-relaxed">
@@ -697,7 +686,7 @@ export default function JobDetailModal({
               onClick={() => onToggleSave(job)}
               className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-2 ${
                 job.isSaved
-                  ? "bg-[#C7F36B] text-[#11110F] border-[#C7F36B] shadow-md shadow-[#C7F36B]/20 font-bold"
+                  ? "bg-purple-500 text-white border-purple-500 font-bold"
                   : "bg-[#11110F] hover:bg-[#1A1916] text-[#FAF8F2] border-[#3A3831]"
               }`}
             >
@@ -710,16 +699,16 @@ export default function JobDetailModal({
               onClick={handleTailorResume}
               className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-[#11110F] hover:bg-[#1A1916] text-[#FAF8F2] border border-[#3A3831] text-xs font-semibold transition-all flex items-center justify-center gap-2"
             >
-              <FileText className="w-4 h-4 text-[#C7F36B]" />
+              <FileText className="w-4 h-4 text-purple-400" />
               <span>Tailor Resume</span>
             </button>
 
             <button
               type="button"
               onClick={handleCanIApply}
-              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-[#11110F] hover:bg-[#1A1916] text-[#FAF8F2] border border-[#3A3831] hover:border-[#C7F36B]/40 text-xs font-semibold transition-all flex items-center justify-center gap-2"
+              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-[#11110F] hover:bg-[#1A1916] text-[#FAF8F2] border border-[#3A3831] hover:border-purple-500/40 text-xs font-semibold transition-all flex items-center justify-center gap-2"
             >
-              <ShieldCheck className="w-4 h-4 text-[#C7F36B]" />
+              <ShieldCheck className="w-4 h-4 text-purple-400" />
               <span>Can I Apply?</span>
             </button>
           </div>
@@ -729,7 +718,7 @@ export default function JobDetailModal({
               href={job.applicationUrl || "#"}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#C7F36B] hover:bg-[#bbf055] text-[#11110F] text-xs font-bold uppercase tracking-wider shadow-lg shadow-[#C7F36B]/20 transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-bold uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-2"
             >
               <span>Apply on Original Site</span>
               <ExternalLink className="w-3.5 h-3.5" />

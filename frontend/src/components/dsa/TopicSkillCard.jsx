@@ -22,7 +22,7 @@ export default function TopicSkillCard({ topic, targetCompany = "", targetJobRol
   const getLevelColor = (level) => {
     if (level === null || level === undefined) return "text-zinc-500";
     if (level >= 8.5) return "text-emerald-400";
-    if (level >= 7.0) return "text-sky-400";
+    if (level >= 7.0) return "text-zinc-200";
     if (level >= 5.0) return "text-amber-400";
     return "text-rose-400";
   };
@@ -30,7 +30,7 @@ export default function TopicSkillCard({ topic, targetCompany = "", targetJobRol
   const getLevelBarBg = (level) => {
     if (level === null || level === undefined) return "bg-zinc-800";
     if (level >= 8.5) return "bg-emerald-400";
-    if (level >= 7.0) return "bg-sky-400";
+    if (level >= 7.0) return "bg-zinc-400";
     if (level >= 5.0) return "bg-amber-400";
     return "bg-rose-400";
   };
@@ -38,23 +38,15 @@ export default function TopicSkillCard({ topic, targetCompany = "", targetJobRol
   const getCategoryBadgeClass = (category) => {
     switch (category?.toLowerCase()) {
       case "core":
+      case "advanced":
         return "bg-purple-500/10 text-purple-400 border-purple-500/20";
-      case "searching":
-        return "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
-      case "linked structures":
-        return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-      case "trees":
-        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-      case "graphs":
-        return "bg-indigo-500/10 text-indigo-400 border-indigo-500/20";
-      case "algorithms":
-        return "bg-teal-500/10 text-teal-400 border-teal-500/20";
       case "dynamic programming":
         return "bg-amber-500/10 text-amber-400 border-amber-500/20";
-      case "advanced":
-        return "bg-rose-500/10 text-rose-400 border-rose-500/20";
+      case "trees":
+      case "graphs":
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       default:
-        return "bg-zinc-800 text-zinc-400 border-zinc-700";
+        return "bg-zinc-900 text-zinc-400 border-zinc-800";
     }
   };
 
@@ -70,7 +62,7 @@ export default function TopicSkillCard({ topic, targetCompany = "", targetJobRol
 
     if (topic.gap === null) {
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">
+        <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono">
           Assessed
         </span>
       );
@@ -123,8 +115,8 @@ export default function TopicSkillCard({ topic, targetCompany = "", targetJobRol
     }
     if (conf >= 40) {
       return (
-        <span className="text-[10px] text-sky-400 font-mono flex items-center gap-1">
-          <Sparkles className="w-3 h-3" />
+        <span className="text-[10px] text-zinc-300 font-mono flex items-center gap-1">
+          <Sparkles className="w-3 h-3 text-purple-400" />
           {conf}% Mod
         </span>
       );
@@ -151,7 +143,7 @@ export default function TopicSkillCard({ topic, targetCompany = "", targetJobRol
     <div
       className={`rounded-xl border transition-all duration-200 ${
         expanded
-          ? "bg-[#141418] border-zinc-700 shadow-lg"
+          ? "bg-[#141418] border-zinc-700"
           : "bg-[#111114] border-zinc-800/80 hover:border-zinc-700/80"
       }`}
     >

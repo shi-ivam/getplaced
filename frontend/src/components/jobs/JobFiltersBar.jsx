@@ -109,7 +109,7 @@ export default function JobFiltersBar({
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search by job title, company name, skills (e.g. Java, React, Go), or city..."
-              className="w-full pl-11 pr-10 py-3 bg-[#11110F] border border-[#3A3831] rounded-2xl text-xs sm:text-sm text-[#FAF8F2] placeholder-[#8C8980] focus:outline-none focus:border-[#C7F36B] transition-all font-sans"
+              className="w-full pl-11 pr-10 py-3 bg-[#11110F] border border-[#3A3831] rounded-2xl text-xs sm:text-sm text-[#FAF8F2] placeholder-[#8C8980] focus:outline-none focus:border-purple-400 transition-all font-sans"
             />
             {search && (
               <button
@@ -129,7 +129,7 @@ export default function JobFiltersBar({
               <select
                 value={sort}
                 onChange={(e) => onSortChange(e.target.value)}
-                className="w-full sm:w-auto appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-semibold py-3 pl-3.5 pr-8 rounded-2xl focus:outline-none focus:border-[#C7F36B] transition-all cursor-pointer font-sans"
+                className="w-full sm:w-auto appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-semibold py-3 pl-3.5 pr-8 rounded-2xl focus:outline-none focus:border-purple-400 transition-all cursor-pointer font-sans"
               >
                 {SORT_OPTIONS.map((s) => (
                   <option key={s.id} value={s.id} className="bg-[#11110F] text-[#FAF8F2]">
@@ -163,7 +163,7 @@ export default function JobFiltersBar({
             <select
               value={role}
               onChange={(e) => onRoleChange(e.target.value)}
-              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-[#C7F36B] transition-all cursor-pointer"
+              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-purple-400 transition-all cursor-pointer"
             >
               {ROLE_OPTIONS.map((r) => (
                 <option key={r.id} value={r.id} className="bg-[#11110F] text-[#FAF8F2]">
@@ -179,7 +179,7 @@ export default function JobFiltersBar({
             <select
               value={location}
               onChange={(e) => onLocationChange(e.target.value)}
-              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-[#C7F36B] transition-all cursor-pointer"
+              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-purple-400 transition-all cursor-pointer"
             >
               {LOCATION_OPTIONS.map((loc) => (
                 <option key={loc.id} value={loc.id} className="bg-[#11110F] text-[#FAF8F2]">
@@ -195,7 +195,7 @@ export default function JobFiltersBar({
             <select
               value={workMode}
               onChange={(e) => onWorkModeChange(e.target.value)}
-              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-[#C7F36B] transition-all cursor-pointer"
+              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-purple-400 transition-all cursor-pointer"
             >
               {WORK_MODE_OPTIONS.map((wm) => (
                 <option key={wm.id} value={wm.id} className="bg-[#11110F] text-[#FAF8F2]">
@@ -211,7 +211,7 @@ export default function JobFiltersBar({
             <select
               value={experience}
               onChange={(e) => onExperienceChange(e.target.value)}
-              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-[#C7F36B] transition-all cursor-pointer"
+              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-purple-400 transition-all cursor-pointer"
             >
               {EXPERIENCE_OPTIONS.map((exp) => (
                 <option key={exp.id} value={exp.id} className="bg-[#11110F] text-[#FAF8F2]">
@@ -227,7 +227,7 @@ export default function JobFiltersBar({
             <select
               value={minSalary}
               onChange={(e) => onMinSalaryChange(Number(e.target.value))}
-              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-[#C7F36B] transition-all cursor-pointer"
+              className="appearance-none bg-[#11110F] border border-[#3A3831] hover:border-[#4A473F] text-[#FAF8F2] text-xs font-medium py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-purple-400 transition-all cursor-pointer"
             >
               <option value={0} className="bg-[#11110F] text-[#FAF8F2]">Salary: Any</option>
               <option value={1000000} className="bg-[#11110F] text-[#FAF8F2]">Salary: ₹10L+ / yr</option>
@@ -253,7 +253,7 @@ export default function JobFiltersBar({
         {/* Quick Skill Tags Bar */}
         <div className="flex items-center gap-1.5 overflow-x-auto pt-2 no-scrollbar text-xs">
           <span className="text-[10px] font-mono uppercase text-[#8C8980] font-bold tracking-wider shrink-0 mr-1 flex items-center gap-1">
-            <Tag className="w-3 h-3 text-[#C7F36B]" />
+            <Tag className="w-3 h-3 text-purple-400" />
             Skills:
           </span>
           <button
@@ -261,7 +261,7 @@ export default function JobFiltersBar({
             onClick={() => onSelectSkill("ALL")}
             className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all shrink-0 border ${
               selectedSkill === "ALL"
-                ? "bg-[#C7F36B] text-[#11110F] border-[#C7F36B] font-bold"
+                ? "bg-white text-zinc-950 border-white font-bold"
                 : "bg-[#11110F] text-[#A8A59C] border-[#3A3831] hover:text-[#FAF8F2] hover:border-[#4A473F]"
             }`}
           >
@@ -276,7 +276,7 @@ export default function JobFiltersBar({
                 onClick={() => onSelectSkill(isSelected ? "ALL" : skill)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all shrink-0 border ${
                   isSelected
-                    ? "bg-[#C7F36B] text-[#11110F] border-[#C7F36B] font-bold shadow-sm"
+                    ? "bg-white text-zinc-950 border-white font-bold shadow-sm"
                     : "bg-[#11110F] text-[#A8A59C] border-[#3A3831] hover:text-[#FAF8F2] hover:border-[#4A473F]"
                 }`}
               >

@@ -44,7 +44,7 @@ export default function SheetVideoModal({ videoUrl, title, onClose }) {
       >
         <div className="flex items-center justify-between gap-4 pb-3 border-b border-zinc-800/80 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="p-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 shrink-0">
+            <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 shrink-0">
               <Play className="w-4 h-4 fill-current" />
             </div>
             <div className="min-w-0">

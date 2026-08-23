@@ -213,7 +213,7 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 md:p-6 select-text animate-in fade-in duration-200">
       <div
-        className={`bg-[#0c0c0e] border border-zinc-800/90 rounded-3xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ${
+        className={`bg-[#0c0c0e] border border-zinc-800/90 rounded-3xl flex flex-col overflow-hidden transition-all duration-300 ${
           isMaximized ? "w-full h-full max-w-none rounded-none" : "w-full max-w-5xl max-h-[92vh]"
         }`}
       >
@@ -296,7 +296,7 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
                     <button
                       type="button"
                       onClick={() => onOpenVideo(article.related_problems[0].youtube_url, article.title)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-red-600/15 hover:bg-red-600/25 text-red-300 border border-red-500/30 text-xs font-semibold transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 text-xs font-semibold transition-all cursor-pointer"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
                       <span>Video Solution</span>
@@ -383,7 +383,7 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
               {article.related_problems?.length > 1 && (
                 <div className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/60 space-y-2.5">
                   <h4 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">
-                    Related Problems ({article.related_problems.length})
+                    Related Problems
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {article.related_problems.map((rp, idx) => (

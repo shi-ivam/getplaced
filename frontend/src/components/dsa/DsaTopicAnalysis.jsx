@@ -150,7 +150,7 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
       {error && (
         <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-4 text-rose-300 text-xs flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
             <span>{error}</span>
           </div>
           <button
@@ -382,7 +382,7 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
                                 topic.currentLevel >= 8.0
                                   ? "text-emerald-400"
                                   : topic.currentLevel >= 6.5
-                                  ? "text-sky-400"
+                                  ? "text-zinc-200"
                                   : "text-amber-400"
                               }
                             >

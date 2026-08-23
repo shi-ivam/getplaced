@@ -216,20 +216,20 @@ export default function JobRecommendations() {
 
   return (
     <main
-      className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#11110F] text-[#FAF8F2] font-sans selection:bg-[#C7F36B] selection:text-[#11110F]"
+      className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#11110F] text-[#FAF8F2] font-sans selection:bg-purple-500/30 selection:text-purple-200"
       ref={containerRef}
     >
       {/* Ambient background wash */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-[#C7F36B]/5 via-[#24231F]/30 to-transparent blur-[150px]" />
-        <div className="absolute bottom-[-10%] right-[-5%] w-[650px] h-[450px] bg-[#C7F36B]/3 blur-[170px]" />
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-purple-500/5 via-[#24231F]/30 to-transparent blur-[150px]" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[650px] h-[450px] bg-purple-500/3 blur-[170px]" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Navigation Bar / Sub-Header */}
         <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[#3A3831]">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-[#24231F] border border-[#3A3831] flex items-center justify-center text-[#C7F36B] shadow-lg shadow-black/40">
+            <div className="w-11 h-11 rounded-2xl bg-[#24231F] border border-[#3A3831] flex items-center justify-center text-purple-400 shadow-lg shadow-black/40">
               <Briefcase className="w-5 h-5" />
             </div>
             <div>
@@ -248,7 +248,7 @@ export default function JobRecommendations() {
               onClick={() => navigate("/app/can-i-apply")}
               className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#24231F] hover:bg-[#2e2d27] text-[#FAF8F2] border border-[#3A3831] transition-all flex items-center gap-1.5"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-[#C7F36B]" />
+              <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
               <span>Can I Apply?</span>
             </button>
             <button
@@ -256,7 +256,7 @@ export default function JobRecommendations() {
               onClick={() => navigate("/app/company-intel")}
               className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#24231F] hover:bg-[#2e2d27] text-[#FAF8F2] border border-[#3A3831] transition-all flex items-center gap-1.5"
             >
-              <Building2 className="w-3.5 h-3.5 text-[#C7F36B]" />
+              <Building2 className="w-3.5 h-3.5 text-purple-400" />
               <span>Company Intel</span>
             </button>
             <button
@@ -264,13 +264,13 @@ export default function JobRecommendations() {
               onClick={() => navigate("/app/roadmap")}
               className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#24231F] hover:bg-[#2e2d27] text-[#FAF8F2] border border-[#3A3831] transition-all flex items-center gap-1.5"
             >
-              <Target className="w-3.5 h-3.5 text-[#C7F36B]" />
+              <Target className="w-3.5 h-3.5 text-purple-400" />
               <span>Placement Roadmap</span>
             </button>
             <button
               type="button"
               onClick={() => navigate("/app/interview")}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-[#C7F36B] hover:bg-[#bbf055] text-[#11110F] shadow-lg shadow-[#C7F36B]/20 transition-all flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-white hover:bg-zinc-200 text-zinc-950 shadow-lg transition-all flex items-center gap-1.5"
             >
               <Brain className="w-3.5 h-3.5" />
               <span>Mock Interview</span>
@@ -304,7 +304,7 @@ export default function JobRecommendations() {
               <div className="text-[10px] font-mono uppercase text-[#8C8980] font-semibold">
                 Your Target Role
               </div>
-              <div className="text-sm font-bold text-[#C7F36B] mt-1 truncate">
+              <div className="text-sm font-bold text-purple-300 mt-1 truncate">
                 {meta.targetRole || "Software Development Engineer"}
               </div>
             </div>
@@ -313,7 +313,7 @@ export default function JobRecommendations() {
               <div className="text-[10px] font-mono uppercase text-[#8C8980] font-semibold">
                 Interview Readiness
               </div>
-              <div className="text-xl font-bold text-[#C7F36B] mt-1">
+              <div className="text-xl font-bold text-emerald-400 mt-1">
                 {meta.userReadiness != null ? `${meta.userReadiness}% Benchmark` : "Unassessed"}
               </div>
             </div>
@@ -341,16 +341,16 @@ export default function JobRecommendations() {
                 onClick={() => setActiveCategory(tab.id)}
                 className={`px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all shrink-0 flex items-center gap-2 border ${
                   isActive
-                    ? "bg-[#C7F36B] text-[#11110F] border-[#C7F36B] shadow-md shadow-[#C7F36B]/20 font-bold"
+                    ? "bg-white text-zinc-950 border-white font-bold shadow-md"
                     : "bg-[#24231F] hover:bg-[#2e2d27] text-[#A8A59C] hover:text-[#FAF8F2] border-[#3A3831]"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-[#11110F]" : "text-[#8C8980]"}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-zinc-950" : "text-[#8C8980]"}`} />
                 <span>{tab.label}</span>
                 {tab.id === "saved" && meta.savedCount > 0 && (
                   <span
                     className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-                      isActive ? "bg-[#11110F] text-[#C7F36B] font-bold" : "bg-[#11110F] text-[#C7F36B]"
+                      isActive ? "bg-zinc-900 text-white font-bold" : "bg-[#11110F] text-purple-300"
                     }`}
                   >
                     {meta.savedCount}
@@ -390,7 +390,7 @@ export default function JobRecommendations() {
           <section className="space-y-4 pt-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-[#C7F36B]/10 border border-[#C7F36B]/30 text-[#C7F36B]">
+                <div className="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400">
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div>
@@ -423,7 +423,7 @@ export default function JobRecommendations() {
           <section className="space-y-4 pt-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-sky-500/10 border border-sky-500/30 text-sky-400">
+                <div className="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400">
                   <Building2 className="w-4 h-4" />
                 </div>
                 <div>
@@ -457,7 +457,7 @@ export default function JobRecommendations() {
             <div>
               <h2 className="text-lg font-bold text-[#FAF8F2] tracking-tight flex items-center gap-2">
                 <span>All Opportunities</span>
-                <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-md bg-[#24231F] border border-[#3A3831] text-[#C7F36B]">
+                <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-md bg-[#24231F] border border-[#3A3831] text-purple-300">
                   {jobs.length} found
                 </span>
               </h2>
@@ -475,7 +475,7 @@ export default function JobRecommendations() {
                 onClick={() => setViewMode("grid")}
                 className={`p-1.5 rounded-lg transition-all ${
                   viewMode === "grid"
-                    ? "bg-[#11110F] text-[#C7F36B] shadow-sm font-bold border border-[#3A3831]"
+                    ? "bg-[#11110F] text-purple-300 shadow-sm font-bold border border-[#3A3831]"
                     : "text-[#8C8980] hover:text-[#FAF8F2]"
                 }`}
                 title="Grid View"
@@ -488,7 +488,7 @@ export default function JobRecommendations() {
                 onClick={() => setViewMode("list")}
                 className={`p-1.5 rounded-lg transition-all ${
                   viewMode === "list"
-                    ? "bg-[#11110F] text-[#C7F36B] shadow-sm font-bold border border-[#3A3831]"
+                    ? "bg-[#11110F] text-purple-300 shadow-sm font-bold border border-[#3A3831]"
                     : "text-[#8C8980] hover:text-[#FAF8F2]"
                 }`}
                 title="List View"
@@ -539,7 +539,7 @@ export default function JobRecommendations() {
               <button
                 type="button"
                 onClick={fetchJobs}
-                className="px-5 py-2.5 rounded-xl bg-[#C7F36B] hover:bg-[#bbf055] text-[#11110F] text-xs font-bold transition-all shadow-md shadow-[#C7F36B]/20"
+                className="px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-bold transition-all shadow-md"
               >
                 Try Again
               </button>

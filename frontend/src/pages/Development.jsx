@@ -9,27 +9,18 @@ import {
   Globe,
   ExternalLink,
   RefreshCw,
-  Search,
-  Filter,
   CheckCircle2,
   AlertCircle,
   Code2,
   Layers,
   Cpu,
-  Server,
   ArrowRight,
   ShieldCheck,
   Sparkles,
-  Terminal,
-  Activity,
   BookOpen,
   Check,
   ChevronRight,
   Play,
-  Zap,
-  TrendingUp,
-  Sliders,
-  Award,
   X,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
@@ -235,16 +226,12 @@ export default function Development() {
   }, [projectScore, targetScore, githubProfile, userProfile]);
 
   return (
-    <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-zinc-100 p-4 md:p-8 lg:p-10 font-sans selection:bg-emerald-950 selection:text-emerald-200">
+    <main className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#09090b] text-zinc-100 p-4 md:p-8 lg:p-10 font-sans selection:bg-zinc-800 selection:text-white">
       <div ref={containerRef} className="max-w-6xl mx-auto space-y-8">
         
         {/* Workspace Top Header */}
-        <header className="gsap-reveal flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-zinc-800/80 pb-6">
+        <header className="gsap-reveal flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-zinc-800 pb-6">
           <div className="space-y-1.5 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/50 border border-emerald-800/50 text-emerald-400 text-xs font-mono">
-              <FolderGit2 className="w-3.5 h-3.5" />
-              <span>Engineering Portfolio & Deployments</span>
-            </div>
             <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight">
               {devMentor.heading}
             </h1>
@@ -260,33 +247,33 @@ export default function Development() {
                 type="button"
                 onClick={handleRefreshGithub}
                 disabled={syncingGithub}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium font-mono transition-all cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium font-mono transition-colors cursor-pointer"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${syncingGithub ? "animate-spin text-emerald-400" : ""}`} />
+                <RefreshCw className={`w-3.5 h-3.5 ${syncingGithub ? "animate-spin text-emerald-400" : "text-zinc-400"}`} />
                 <span>{syncingGithub ? "Syncing..." : `Sync @${githubProfile.username}`}</span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => setActiveTab("projects")}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-950/50 transition-all cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold transition-colors cursor-pointer"
               >
-                <FolderGit2 className="w-4 h-4" />
+                <FolderGit2 className="w-3.5 h-3.5" />
                 <span>Connect GitHub</span>
               </button>
             )}
 
             <Link
               to="/app/roadmap"
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold transition-all font-sans"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium transition-colors font-sans"
             >
-              <span>View Tech Roadmap</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>Tech Roadmap</span>
+              <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
             </Link>
           </div>
         </header>
 
-        {/* 6 Workspace Pillar Tabs */}
+        {/* Workspace Pillar Tabs */}
         <nav className="gsap-reveal flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs">
           {[
             { id: "overview", label: "Overview", icon: Layers },
@@ -294,7 +281,7 @@ export default function Development() {
             { id: "technologies", label: "Technology Profile", icon: Cpu },
             { id: "requirements", label: "Requirements & Evidence", icon: ShieldCheck },
             { id: "deployment", label: "Live Deployments", icon: Globe },
-            { id: "learning", label: "Engineering Learning", icon: BookOpen },
+            { id: "learning", label: "Engineering Tracks", icon: BookOpen },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -309,7 +296,7 @@ export default function Development() {
                     : "bg-[#121215] hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-zinc-950" : "text-emerald-400"}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-zinc-950" : "text-zinc-400"}`} />
                 <span>{tab.label}</span>
               </button>
             );
@@ -320,16 +307,13 @@ export default function Development() {
         {activeTab === "overview" && (
           <div className="space-y-6">
             {/* Quick Hero Banner */}
-            <section className="gsap-reveal rounded-2xl bg-gradient-to-br from-[#121215] via-[#141418] to-emerald-950/20 border border-zinc-800/90 p-6 md:p-8 space-y-6">
+            <section className="gsap-reveal rounded-2xl bg-[#121215] border border-zinc-800 p-6 md:p-8 space-y-6">
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                      <Sparkles className="w-3 h-3 text-emerald-400" />
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
                       Project Readiness
-                    </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">
-                      15% Weight
                     </span>
                   </div>
 
@@ -341,7 +325,7 @@ export default function Development() {
 
                     <div className="hidden sm:flex flex-col text-xs text-zinc-400 pl-4 border-l border-zinc-800 space-y-0.5 font-mono">
                       <div>
-                        Target Bar: <span className="text-zinc-200">{targetScore !== null ? `${targetScore} / 100` : "N/A"}</span>
+                        Target Benchmark: <span className="text-zinc-200">{targetScore !== null ? `${targetScore} / 100` : "N/A"}</span>
                       </div>
                       <div>
                         Status:{" "}
@@ -354,14 +338,14 @@ export default function Development() {
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2.5 bg-zinc-900/80 border border-zinc-800/80 rounded-xl p-3 max-w-xl text-xs text-zinc-300">
-                    <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-2.5 bg-zinc-900/70 border border-zinc-800 rounded-xl p-3.5 max-w-xl text-xs text-zinc-300">
+                    <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
                     <p className="leading-relaxed font-sans">{devMentor.mentorTip}</p>
                   </div>
                 </div>
 
                 {/* Score vs Target Box */}
-                <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-1 gap-3 bg-zinc-900/90 border border-zinc-800 p-4 rounded-xl shrink-0 text-xs font-mono">
+                <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-1 gap-3 bg-zinc-900/80 border border-zinc-800 p-4 rounded-xl shrink-0 text-xs font-mono">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6">
                     <span className="text-zinc-500 text-[11px]">Portfolio Score</span>
                     <span className="font-semibold text-emerald-400">{projectScore !== null ? `${projectScore}%` : "Unassessed"}</span>
@@ -372,7 +356,7 @@ export default function Development() {
                   </div>
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6 border-l lg:border-l-0 lg:border-t border-zinc-800 pl-3 lg:pl-0 lg:pt-2">
                     <span className="text-zinc-500 text-[11px]">Status</span>
-                    <span className="font-semibold text-emerald-300 font-sans">
+                    <span className="font-semibold text-zinc-200 font-sans">
                       {githubProfile ? "Verified Profile" : "Not Connected"}
                     </span>
                   </div>
@@ -380,7 +364,7 @@ export default function Development() {
               </div>
 
               {/* Progress Bar */}
-              <div className="space-y-1.5 pt-2 border-t border-zinc-800/80">
+              <div className="space-y-1.5 pt-2 border-t border-zinc-800">
                 <div className="flex justify-between text-[11px] font-mono text-zinc-500">
                   <span>Current: {projectScore !== null ? `${projectScore}%` : "Unassessed"}</span>
                   <span>Target Benchmark: {targetScore !== null ? `${targetScore}%` : "N/A"}</span>
@@ -388,7 +372,7 @@ export default function Development() {
                 <div className="relative w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
                   {targetScore !== null && (
                     <div
-                      className="absolute top-0 bottom-0 w-0.5 bg-zinc-300 z-10"
+                      className="absolute top-0 bottom-0 w-0.5 bg-zinc-400 z-10"
                       style={{ left: `${targetScore}%` }}
                       title={`Target Benchmark: ${targetScore}%`}
                     />
@@ -401,12 +385,12 @@ export default function Development() {
               </div>
             </section>
 
-            {/* 4 Bento Stat Cards */}
+            {/* Bento Stat Cards */}
             <section className="gsap-reveal grid grid-cols-2 md:grid-cols-4 gap-3.5">
-              <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors space-y-1">
+              <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors space-y-1">
                 <div className="flex items-center justify-between text-zinc-400">
                   <span className="text-[10px] font-mono uppercase tracking-wider">Public Repos</span>
-                  <FolderGit2 className="w-4 h-4 text-emerald-400" />
+                  <FolderGit2 className="w-4 h-4 text-zinc-400" />
                 </div>
                 <div className="text-2xl font-bold font-mono text-zinc-100">
                   {githubProfile?.publicReposCount || (githubProfile?.repositories ? githubProfile.repositories.length : 0)}
@@ -416,7 +400,7 @@ export default function Development() {
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors space-y-1">
+              <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors space-y-1">
                 <div className="flex items-center justify-between text-zinc-400">
                   <span className="text-[10px] font-mono uppercase tracking-wider">Total Stars</span>
                   <Star className="w-4 h-4 text-amber-400" />
@@ -424,30 +408,30 @@ export default function Development() {
                 <div className="text-2xl font-bold font-mono text-amber-400">
                   {githubProfile?.totalStars || 0}
                 </div>
-                <p className="text-[11px] text-zinc-500 font-mono">Across public repositories</p>
+                <p className="text-[11px] text-zinc-500 font-mono">Across repositories</p>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors space-y-1">
+              <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors space-y-1">
                 <div className="flex items-center justify-between text-zinc-400">
-                  <span className="text-[10px] font-mono uppercase tracking-wider">Downstream Forks</span>
-                  <GitFork className="w-4 h-4 text-sky-400" />
+                  <span className="text-[10px] font-mono uppercase tracking-wider">Forks</span>
+                  <GitFork className="w-4 h-4 text-zinc-400" />
                 </div>
-                <div className="text-2xl font-bold font-mono text-sky-400">
+                <div className="text-2xl font-bold font-mono text-zinc-200">
                   {githubProfile?.totalForks || 0}
                 </div>
-                <p className="text-[11px] text-zinc-500 font-mono">Downstream repositories</p>
+                <p className="text-[11px] text-zinc-500 font-mono">Downstream forks</p>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800/80 hover:border-zinc-700 transition-colors space-y-1">
+              <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors space-y-1">
                 <div className="flex items-center justify-between text-zinc-400">
-                  <span className="text-[10px] font-mono uppercase tracking-wider">Top Tech Stack</span>
+                  <span className="text-[10px] font-mono uppercase tracking-wider">Primary Language</span>
                   <Code2 className="w-4 h-4 text-purple-400" />
                 </div>
-                <div className="text-2xl font-bold font-mono text-purple-300 truncate">
+                <div className="text-2xl font-bold font-mono text-zinc-100 truncate">
                   {githubProfile?.languages?.[0]?.languageName || "TypeScript"}
                 </div>
                 <p className="text-[11px] text-zinc-500 font-mono">
-                  {githubProfile?.languages?.length || 5} active languages
+                  {githubProfile?.languages?.length || 0} active languages
                 </p>
               </div>
             </section>
@@ -457,7 +441,7 @@ export default function Development() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-amber-400" />
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-300 font-mono">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
                     Featured Repositories
                   </h3>
                 </div>
@@ -476,7 +460,7 @@ export default function Development() {
                   {githubProfile.topRepositories.slice(0, 3).map((repo, idx) => (
                     <div
                       key={repo.githubId || idx}
-                      className="bg-[#121215] border border-zinc-800/90 hover:border-zinc-700 rounded-xl p-4 space-y-3 flex flex-col justify-between transition-colors"
+                      className="bg-[#121215] border border-zinc-800 hover:border-zinc-700 rounded-xl p-4 space-y-3 flex flex-col justify-between transition-colors"
                     >
                       <div className="space-y-2">
                         <div className="flex items-center justify-between gap-2">
@@ -484,7 +468,7 @@ export default function Development() {
                             href={repo.htmlUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-medium text-xs text-zinc-200 hover:text-emerald-300 truncate font-mono"
+                            className="font-medium text-xs text-zinc-200 hover:text-emerald-400 truncate font-mono"
                           >
                             {repo.name}
                           </a>
@@ -498,7 +482,7 @@ export default function Development() {
                         </p>
                       </div>
 
-                      <div className="flex items-center justify-between text-[11px] font-mono pt-2 text-zinc-500 border-t border-zinc-800/60">
+                      <div className="flex items-center justify-between text-[11px] font-mono pt-2 text-zinc-500 border-t border-zinc-800">
                         <span>{repo.language || "TypeScript"}</span>
                         <div className="flex items-center gap-2">
                           <button
@@ -543,7 +527,7 @@ export default function Development() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("projects")}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold cursor-pointer"
+                    className="px-4 py-2 bg-zinc-100 hover:bg-white text-zinc-950 rounded-lg text-xs font-semibold cursor-pointer"
                   >
                     Connect GitHub
                   </button>
@@ -555,55 +539,55 @@ export default function Development() {
             <section className="gsap-reveal grid grid-cols-1 md:grid-cols-3 gap-4">
               <div
                 onClick={() => setActiveTab("technologies")}
-                className="bg-[#121215] border border-zinc-800/90 hover:border-emerald-500/40 rounded-xl p-5 space-y-3 cursor-pointer transition-colors group"
+                className="bg-[#121215] border border-zinc-800 hover:border-zinc-700 rounded-xl p-5 space-y-3 cursor-pointer transition-colors group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Cpu className="w-4 h-4 text-emerald-400" />
-                    <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-emerald-300">
+                    <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-white">
                       Technology Profile
                     </h4>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-emerald-400 transition-transform group-hover:translate-x-0.5" />
+                  <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300 transition-transform group-hover:translate-x-0.5" />
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Compare verified technical proficiency against {userProfile?.targetJobRole || "Software Engineer"} benchmark requirements.
+                  Compare technical proficiency against {userProfile?.targetJobRole || "Software Engineer"} benchmark requirements.
                 </p>
               </div>
 
               <div
                 onClick={() => setActiveTab("deployment")}
-                className="bg-[#121215] border border-zinc-800/90 hover:border-emerald-500/40 rounded-xl p-5 space-y-3 cursor-pointer transition-colors group"
+                className="bg-[#121215] border border-zinc-800 hover:border-zinc-700 rounded-xl p-5 space-y-3 cursor-pointer transition-colors group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-sky-400" />
-                    <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-sky-300">
+                    <Globe className="w-4 h-4 text-zinc-300" />
+                    <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-white">
                       Live Deployments
                     </h4>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-sky-400 transition-transform group-hover:translate-x-0.5" />
+                  <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300 transition-transform group-hover:translate-x-0.5" />
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Test deployed project endpoints, check HTTP response codes, and verify latency.
+                  Probe deployed project endpoints, check HTTP status, and verify latency.
                 </p>
               </div>
 
               <div
                 onClick={() => setActiveTab("learning")}
-                className="bg-[#121215] border border-zinc-800/90 hover:border-emerald-500/40 rounded-xl p-5 space-y-3 cursor-pointer transition-colors group"
+                className="bg-[#121215] border border-zinc-800 hover:border-zinc-700 rounded-xl p-5 space-y-3 cursor-pointer transition-colors group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-purple-400" />
-                    <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-purple-300">
-                      Engineering Learning
+                    <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-white">
+                      Engineering Tracks
                     </h4>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-purple-400 transition-transform group-hover:translate-x-0.5" />
+                  <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300 transition-transform group-hover:translate-x-0.5" />
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Curated learning tracks covering system design, containerization, caching, and CI/CD.
+                  Structured modules covering system design, containerization, caching, and CI/CD.
                 </p>
               </div>
             </section>
@@ -620,8 +604,8 @@ export default function Development() {
         {/* TAB 3: TECHNOLOGY PROFILE */}
         {activeTab === "technologies" && (
           <section className="gsap-reveal space-y-6">
-            <div className="bg-[#121215] border border-zinc-800/90 rounded-2xl p-6 md:p-8 space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
+            <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-6 md:p-8 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
                 <div>
                   <div className="flex items-center gap-2">
                     <Cpu className="w-5 h-5 text-emerald-400" />
@@ -635,7 +619,7 @@ export default function Development() {
                 </div>
 
                 <div className="flex items-center gap-2 text-xs font-mono">
-                  <span className="text-zinc-500">Benchmark Bar:</span>
+                  <span className="text-zinc-500">Benchmark:</span>
                   <span className="px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-200 font-semibold">
                     {userProfile?.targetCompany || "Tier-1 Tech"}
                   </span>
@@ -652,7 +636,7 @@ export default function Development() {
                     return (
                       <div
                         key={skill.id}
-                        className="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-4 space-y-3 flex flex-col justify-between"
+                        className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 space-y-3 flex flex-col justify-between"
                       >
                         <div className="space-y-2">
                           <div className="flex items-center justify-between gap-2">
@@ -660,8 +644,8 @@ export default function Development() {
                             <span
                               className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
                                 skill.importance === "Required"
-                                  ? "bg-purple-950/60 text-purple-300 border-purple-800/60"
-                                  : "bg-zinc-800 text-zinc-400 border-zinc-700"
+                                  ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                                  : "bg-zinc-900 text-zinc-400 border-zinc-800"
                               }`}
                             >
                               {skill.importance}
@@ -703,7 +687,7 @@ export default function Development() {
                         </div>
 
                         {skill.improvementSteps && skill.improvementSteps.length > 0 && (
-                          <div className="text-[11px] text-zinc-400 pt-2 border-t border-zinc-800/60 font-sans">
+                          <div className="text-[11px] text-zinc-400 pt-2 border-t border-zinc-800 font-sans">
                             <span className="text-emerald-400 font-mono text-[10px] uppercase font-bold block mb-0.5">
                               Recommended Action
                             </span>
@@ -726,25 +710,17 @@ export default function Development() {
         {/* TAB 4: REQUIREMENTS & EVIDENCE */}
         {activeTab === "requirements" && (
           <section className="gsap-reveal space-y-6">
-            <div className="bg-[#121215] border border-zinc-800/90 rounded-2xl p-6 md:p-8 space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                    <h3 className="text-base font-bold text-zinc-100">
-                      Requirements & Evidence
-                    </h3>
-                  </div>
-                  <p className="text-xs text-zinc-400 mt-1">
-                    Verified evidence from repositories, commit history, and coursework.
-                  </p>
+            <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-6 md:p-8 space-y-6">
+              <div className="pb-4 border-b border-zinc-800">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                  <h3 className="text-base font-bold text-zinc-100">
+                    Requirements & Evidence
+                  </h3>
                 </div>
-
-                <div className="flex items-center gap-2 text-xs font-mono">
-                  <span className="text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-3 py-1 rounded-md">
-                    Verified Evidence
-                  </span>
-                </div>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Verified evidence from repositories, commit history, and coursework.
+                </p>
               </div>
 
               {projectsCategory?.items && projectsCategory.items.length > 0 ? (
@@ -752,7 +728,7 @@ export default function Development() {
                   {projectsCategory.items.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-5 space-y-3"
+                      className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 space-y-3"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <h4 className="font-semibold text-sm text-zinc-100">{item.name}</h4>
@@ -814,10 +790,10 @@ export default function Development() {
         {activeTab === "deployment" && (
           <section className="gsap-reveal space-y-6">
             {/* Live URL Tester Tool */}
-            <div className="bg-[#121215] border border-zinc-800/90 rounded-2xl p-6 md:p-8 space-y-5">
+            <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-6 md:p-8 space-y-5">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-sky-400" />
+                  <Globe className="w-5 h-5 text-zinc-300" />
                   <h3 className="text-base font-bold text-zinc-100">Live Deployment Health Probe</h3>
                 </div>
                 <p className="text-xs text-zinc-400 max-w-xl">
@@ -831,13 +807,13 @@ export default function Development() {
                   value={testUrl}
                   onChange={(e) => setTestUrl(e.target.value)}
                   placeholder="https://your-project-demo.vercel.app"
-                  className="flex-1 px-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500 font-mono"
+                  className="flex-1 px-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500 font-mono"
                   required
                 />
                 <button
                   type="submit"
                   disabled={testingUrl || !testUrl.trim()}
-                  className="px-6 py-2.5 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-lg transition-all shrink-0 cursor-pointer font-mono"
+                  className="px-6 py-2.5 bg-zinc-100 hover:bg-white text-zinc-950 disabled:opacity-50 rounded-xl text-xs font-semibold shadow transition-all shrink-0 cursor-pointer font-mono"
                 >
                   {testingUrl ? "Probing..." : "Verify Endpoint"}
                 </button>
@@ -847,17 +823,17 @@ export default function Development() {
                 <div
                   className={`p-4 rounded-xl border text-xs font-mono space-y-2 ${
                     testResult.isLive
-                      ? "bg-emerald-950/40 border-emerald-800/60 text-emerald-300"
-                      : "bg-rose-950/40 border-rose-800/60 text-rose-300"
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
+                      : "bg-rose-500/10 border-rose-500/20 text-rose-300"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold flex items-center gap-1.5">
-                      {testResult.isLive ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                      {testResult.isLive ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-rose-400" />}
                       {testResult.isLive ? "HTTP 200 OK — Endpoint Accessible" : "Unreachable / Host Failure"}
                     </span>
                     {testResult.responseTimeMs && (
-                      <span>Latency: {testResult.responseTimeMs}ms</span>
+                      <span className="text-zinc-400">Latency: {testResult.responseTimeMs}ms</span>
                     )}
                   </div>
                   <p className="text-zinc-400 font-sans text-xs">{testResult.message}</p>
@@ -866,10 +842,10 @@ export default function Development() {
             </div>
 
             {/* Repositories with Live Demos List */}
-            <div className="bg-[#121215] border border-zinc-800/90 rounded-2xl p-6 md:p-8 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
+            <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-6 md:p-8 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
                 <h4 className="text-xs uppercase font-mono font-bold text-zinc-300 tracking-wider">
-                  Detected Repository Deployments
+                  Detected Deployments
                 </h4>
                 <span className="text-xs font-mono text-zinc-500">
                   {githubProfile?.repositories?.filter((r) => r.hasLiveDemo).length || 0} Demos Detected
@@ -883,7 +859,7 @@ export default function Development() {
                     .map((repo) => (
                       <div
                         key={repo.githubId}
-                        className="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-4 space-y-3 flex flex-col justify-between"
+                        className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 space-y-3 flex flex-col justify-between"
                       >
                         <div>
                           <div className="flex items-center justify-between">
@@ -897,14 +873,14 @@ export default function Development() {
                           </p>
                         </div>
 
-                        <div className="flex items-center justify-between pt-2 border-t border-zinc-800/60 text-xs font-mono">
+                        <div className="flex items-center justify-between pt-2 border-t border-zinc-800 text-xs font-mono">
                           <a
                             href={repo.liveDemoUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sky-400 hover:underline flex items-center gap-1"
+                            className="text-zinc-300 hover:text-emerald-400 hover:underline flex items-center gap-1"
                           >
-                            <Globe className="w-3 h-3" />
+                            <Globe className="w-3 h-3 text-zinc-400" />
                             <span>{repo.liveDemoUrl.replace(/^https?:\/\//, "")}</span>
                           </a>
                           <button
@@ -939,8 +915,8 @@ export default function Development() {
           <section className="gsap-reveal space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-300 font-mono">
-                  Engineering System Tracks
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono">
+                  Engineering Tracks
                 </h3>
                 <p className="text-xs text-zinc-400 mt-0.5">
                   Curated modules for distributed systems, containerization, and infrastructure.
@@ -952,11 +928,11 @@ export default function Development() {
               {DEV_LEARNING_TRACKS.map((track) => (
                 <div
                   key={track.id}
-                  className="bg-[#121215] border border-zinc-800/90 hover:border-zinc-700 rounded-xl p-5 space-y-4 flex flex-col justify-between transition-colors"
+                  className="bg-[#121215] border border-zinc-800 hover:border-zinc-700 rounded-xl p-5 space-y-4 flex flex-col justify-between transition-colors"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-zinc-900 text-emerald-400 border border-zinc-800 font-semibold">
+                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800 font-semibold">
                         {track.category}
                       </span>
                       <span className="text-[11px] font-mono text-zinc-500">{track.duration}</span>
@@ -977,7 +953,7 @@ export default function Development() {
                     </div>
                   </div>
 
-                  <div className="space-y-2 pt-3 border-t border-zinc-800/60">
+                  <div className="space-y-2 pt-3 border-t border-zinc-800">
                     <div className="flex justify-between text-[11px] font-mono text-zinc-500">
                       <span>Progress</span>
                       <span className="text-emerald-400 font-semibold">{track.progress}%</span>
@@ -990,7 +966,7 @@ export default function Development() {
                     </div>
                     <Link
                       to="/app/dsa"
-                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-medium transition-colors font-mono mt-1"
+                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium transition-colors font-mono mt-1"
                     >
                       <Play className="w-3 h-3 fill-current text-emerald-400" />
                       <span>Start Track</span>
@@ -1008,7 +984,7 @@ export default function Development() {
       {selectedRepoModal && (
         <div
           onClick={() => setSelectedRepoModal(null)}
-          className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -1053,12 +1029,12 @@ export default function Development() {
               </div>
               <div className="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800">
                 <span className="text-[10px] text-zinc-500 block">Forks</span>
-                <span className="font-bold text-sky-400">{selectedRepoModal.forks || 0}</span>
+                <span className="font-bold text-zinc-200">{selectedRepoModal.forks || 0}</span>
               </div>
             </div>
 
             {/* Architecture Verdict */}
-            <div className="p-3.5 bg-zinc-900/60 border border-zinc-800/80 rounded-xl space-y-1 text-xs">
+            <div className="p-3.5 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-1 text-xs">
               <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-semibold block">
                 Repository Assessment
               </span>
@@ -1078,9 +1054,9 @@ export default function Development() {
                   href={selectedRepoModal.liveDemoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold text-center flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold text-center flex items-center justify-center gap-1.5 transition-colors"
                 >
-                  <Globe className="w-3 h-3" />
+                  <Globe className="w-3.5 h-3.5" />
                   <span>Open Live Demo</span>
                 </a>
               )}
@@ -1088,7 +1064,7 @@ export default function Development() {
                 href={selectedRepoModal.htmlUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium text-center flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium text-center flex items-center justify-center gap-1.5 transition-colors"
               >
                 <FolderGit2 className="w-3.5 h-3.5" />
                 <span>View on GitHub</span>

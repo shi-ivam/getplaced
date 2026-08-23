@@ -311,7 +311,7 @@ export default function DsaRequirementComparison({
           <div className="relative w-full bg-zinc-900 rounded-full h-3 overflow-hidden border border-zinc-800">
             {/* Target marker */}
             <div
-              className="absolute top-0 bottom-0 w-0.5 bg-purple-400 z-10 shadow-sm"
+              className="absolute top-0 bottom-0 w-0.5 bg-purple-400 z-10"
               style={{ left: `${Math.min(100, Math.max(0, overall.requiredReadiness || 75))}%` }}
               title={`Target: ${overall.requiredReadiness}%`}
             />
@@ -355,7 +355,7 @@ export default function DsaRequirementComparison({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-purple-400" />
+            <Layers className="w-4 h-4 text-zinc-400" />
             <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-300">
               Problem Difficulty Benchmarks (Easy / Medium / Hard)
             </h3>
@@ -443,7 +443,7 @@ export default function DsaRequirementComparison({
                   </span>
                   <Link
                     to="/app/interview"
-                    className="text-xs text-purple-400 hover:text-purple-300 font-mono inline-flex items-center gap-1 hover:underline"
+                    className="text-xs text-zinc-300 hover:text-white font-mono inline-flex items-center gap-1 hover:underline"
                   >
                     <span>Practice</span>
                     <ArrowRight className="w-3 h-3" />
@@ -459,7 +459,7 @@ export default function DsaRequirementComparison({
       <div className="rounded-xl bg-[#121215] border border-zinc-800/90 p-5 md:p-6 space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-purple-400" />
+            <Trophy className="w-4 h-4 text-zinc-400" />
             <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-300">
               Actionable Improvement Roadmap for {effectiveCompany || "Target Role"}
             </h3>
@@ -485,7 +485,7 @@ export default function DsaRequirementComparison({
                         : milestone.badgeColor === "rose"
                         ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
                         : milestone.badgeColor === "sky"
-                        ? "bg-sky-500/10 text-sky-400 border border-sky-500/20"
+                        ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
                         : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                     }`}
                   >

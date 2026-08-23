@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Lock, ShieldCheck, Key, EyeOff, Server, RefreshCw, Cpu } from "lucide-react";
+import { Lock, ShieldCheck, Key, EyeOff, Server } from "lucide-react";
 
 const PrivacyProtection = () => {
   const [sessionSecurity, setSessionSecurity] = useState({
@@ -58,71 +58,67 @@ const PrivacyProtection = () => {
   }, []);
 
   return (
-    <section id="security" className="py-24 md:py-36 bg-[#1A312C] text-[#FFF4E1] relative overflow-hidden">
-      
-      {/* Subtle Background Mesh */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#428475]/20 via-[#1A312C] to-[#1A312C] pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+    <section id="security" className="py-20 md:py-32 bg-[#09090b] text-zinc-100 relative overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 relative z-10">
         
-        <div className="rounded-3xl bg-gradient-to-b from-[#1E3A34] to-[#12221e] p-8 md:p-14 border border-[#428475]/40 shadow-2xl relative overflow-hidden">
+        <div className="rounded-2xl bg-zinc-900/50 p-6 md:p-10 border border-zinc-800 relative overflow-hidden">
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
             {/* Text & Specs */}
-            <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#428475]/25 border border-[#89D7B7]/30 text-[#89D7B7] text-xs font-mono uppercase tracking-widest">
-                <Lock className="w-3.5 h-3.5 text-[#89D7B7]" /> Data Security
+            <div className="lg:col-span-7 space-y-5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs font-mono uppercase tracking-wider">
+                <Lock className="w-3.5 h-3.5 text-emerald-400" /> Data Security & Encryption
               </div>
               
-              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-[#FFF4E1] leading-tight">
-                Encryption & Data Privacy Standards
+              <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-white leading-tight">
+                Encryption & Privacy Architecture
               </h2>
 
-              <p className="text-[#FFF4E1]/80 text-base md:text-lg leading-relaxed">
+              <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
                 Interview audio, session telemetry, and resume files are encrypted in transit via {sessionSecurity.tlsVersion} ({sessionSecurity.cipherSuite}) and at rest with AES-256 GCM.
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-                <div className="p-4 rounded-xl bg-[#1A312C]/80 border border-[#428475]/35 flex items-start gap-3">
-                  <Key className="w-5 h-5 text-[#89D7B7] shrink-0 mt-0.5" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
+                <div className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800 flex items-start gap-2.5">
+                  <Key className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-bold text-[#FFF4E1] mb-0.5">Client Key Isolation</h4>
-                    <p className="text-xs text-[#FFF4E1]/70">Session key hashes generated client-side via SHA-256.</p>
+                    <h4 className="text-xs font-semibold text-white mb-0.5">Client Key Isolation</h4>
+                    <p className="text-[11px] text-zinc-400">Session key hashes generated client-side via SHA-256.</p>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#1A312C]/80 border border-[#428475]/35 flex items-start gap-3">
-                  <EyeOff className="w-5 h-5 text-[#89D7B7] shrink-0 mt-0.5" />
+                <div className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800 flex items-start gap-2.5">
+                  <EyeOff className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-bold text-[#FFF4E1] mb-0.5">No Third-Party Training</h4>
-                    <p className="text-xs text-[#FFF4E1]/70">Interview and resume data is never used for public model training.</p>
+                    <h4 className="text-xs font-semibold text-white mb-0.5">Zero Model Training</h4>
+                    <p className="text-[11px] text-zinc-400">User session transcripts and resume data are never used for public training.</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Encrypted Hash Graphic */}
-            <div className="lg:col-span-5 flex flex-col items-center justify-center p-6 rounded-2xl bg-[#12221e]/90 border border-[#428475]/40 relative">
-              <div className="w-16 h-16 rounded-full bg-[#89D7B7]/20 border border-[#89D7B7]/40 flex items-center justify-center text-[#89D7B7] mb-6 shadow-[0_0_30px_rgba(137,215,183,0.3)]">
-                <ShieldCheck className="w-8 h-8" />
+            <div className="lg:col-span-5 flex flex-col items-center justify-center p-5 rounded-xl bg-zinc-950 border border-zinc-800">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
+                <ShieldCheck className="w-6 h-6" />
               </div>
 
-              <div className="w-full space-y-2 font-mono text-xs">
+              <div className="w-full space-y-1.5 font-mono text-xs">
                 {sessionSecurity.hashes.map((hash, i) => (
-                  <div key={i} className="flex justify-between p-2.5 rounded-lg bg-[#1A312C]/90 border border-[#428475]/25 text-[#FFF4E1]/70">
-                    <span className="text-[#89D7B7]">SESSION_HASH_{i+1}</span>
+                  <div key={i} className="flex justify-between p-2 rounded-md bg-zinc-900/60 border border-zinc-800 text-zinc-400 text-[11px]">
+                    <span className="text-emerald-400">HASH_{i+1}</span>
                     <span>{hash}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-4 flex flex-col items-center gap-1 text-[11px] font-mono text-[#89D7B7]">
-                <div className="flex items-center gap-2">
-                  <Server className="w-3.5 h-3.5 text-[#89D7B7]" />
+              <div className="mt-3.5 flex flex-col items-center gap-0.5 text-[11px] font-mono text-zinc-400">
+                <div className="flex items-center gap-1.5 text-emerald-400 font-medium">
+                  <Server className="w-3.5 h-3.5 text-emerald-400" />
                   <span>STATUS: {sessionSecurity.enclaveStatus}</span>
                 </div>
-                <div className="text-[10px] text-[#FFF4E1]/60">
+                <div className="text-[10px] text-zinc-500">
                   CIPHER: {sessionSecurity.cipherSuite}
                 </div>
               </div>

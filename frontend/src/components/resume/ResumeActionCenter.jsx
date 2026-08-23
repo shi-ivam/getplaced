@@ -27,17 +27,17 @@ import axios from "axios";
 import { PY_API_URL } from "@/config/api";
 
 const CATEGORY_COLORS = {
-  Keywords: "text-cyan-300 bg-cyan-500/10 border-cyan-500/30",
+  Keywords: "text-purple-300 bg-purple-500/10 border-purple-500/30",
   "Measurable Impact": "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
-  Projects: "text-violet-300 bg-violet-500/10 border-violet-500/30",
-  Experience: "text-blue-300 bg-blue-500/10 border-blue-500/30",
-  Skills: "text-teal-300 bg-teal-500/10 border-teal-500/30",
+  Projects: "text-zinc-300 bg-zinc-500/10 border-zinc-500/30",
+  Experience: "text-zinc-300 bg-zinc-500/10 border-zinc-500/30",
+  Skills: "text-purple-300 bg-purple-500/10 border-purple-500/30",
   Formatting: "text-amber-300 bg-amber-500/10 border-amber-500/30",
-  Structure: "text-indigo-300 bg-indigo-500/10 border-indigo-500/30",
-  Links: "text-pink-300 bg-pink-500/10 border-pink-500/30",
+  Structure: "text-amber-300 bg-amber-500/10 border-amber-500/30",
+  Links: "text-zinc-400 bg-zinc-500/10 border-zinc-500/30",
   "Role Relevance": "text-purple-300 bg-purple-500/10 border-purple-500/30",
-  Achievements: "text-yellow-300 bg-yellow-500/10 border-yellow-500/30",
-  Education: "text-slate-300 bg-slate-500/10 border-slate-500/30"
+  Achievements: "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
+  Education: "text-zinc-300 bg-zinc-500/10 border-zinc-500/30"
 };
 
 const IMPACT_COLORS = {
@@ -384,9 +384,6 @@ export default function ResumeActionCenter({
               <h2 className="text-sm font-semibold uppercase tracking-wider text-white font-mono">
                 Resume Action Center
               </h2>
-              <span className="px-2 py-0.5 text-[10px] font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-md">
-                Recommendation Engine
-              </span>
             </div>
             <p className="text-xs text-neutral-400">
               Select specific recommendations, preview suggested enhancements, and calculate ATS impact.
@@ -448,7 +445,7 @@ export default function ResumeActionCenter({
               className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-neutral-200 border border-white/[0.08] rounded-xl text-xs font-medium transition"
             >
               <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
-              Select All ({filteredActions.filter((a) => a.status !== "RESOLVED").length})
+              Select All
             </button>
 
             <button
@@ -528,9 +525,6 @@ export default function ResumeActionCenter({
                 <div>
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
                     Resume Optimizations Applied
-                    <span className="px-2 py-0.5 text-[10px] font-mono uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded">
-                      Verified
-                    </span>
                   </h3>
                   <p className="text-xs text-neutral-300 mt-0.5">
                     {lastApplyResult.summary || "ATS evaluation updated for revised content."}
@@ -756,7 +750,7 @@ export default function ResumeActionCenter({
                       {/* Structured 4-Quadrant Analysis */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                         <div className="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl space-y-1">
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-400 block">
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-purple-400 block">
                             Modification
                           </span>
                           <p className="text-neutral-300 leading-relaxed">

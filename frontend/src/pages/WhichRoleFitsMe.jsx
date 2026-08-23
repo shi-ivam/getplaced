@@ -232,7 +232,7 @@ export default function WhichRoleFitsMe() {
   }, [evaluation.evaluatedRoles, compareList]);
 
   const categories = [
-    { id: "all", label: "All 9 Roles" },
+    { id: "all", label: "All Roles" },
     { id: "web", label: "Web & Full Stack" },
     { id: "systems", label: "Core & SDE" },
     { id: "cloud", label: "DevOps & Cloud" },
@@ -244,7 +244,7 @@ export default function WhichRoleFitsMe() {
   return (
     <div
       ref={containerRef}
-      className="min-h-screen bg-[#11110F] text-[#F5F5F0] font-sans pb-24 selection:bg-[#C7F36B]/20 selection:text-[#C7F36B]"
+      className="min-h-screen bg-[#11110F] text-[#F5F5F0] font-sans pb-24 selection:bg-purple-500/20 selection:text-purple-200"
     >
       {/* ========================================================================= */}
       {/* 1. TOP HEADER & TELEMETRY SUMMARY */}
@@ -253,16 +253,13 @@ export default function WhichRoleFitsMe() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#C7F36B]/15 border border-[#C7F36B]/30 flex items-center justify-center text-[#C7F36B] shadow-[0_0_15px_rgba(199,243,107,0.15)]">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
                 <Compass className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                  <h1 className="text-xl font-bold text-white tracking-tight">
                     Which Role Fits Me?
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30">
-                      Multi-Evidence AI
-                    </span>
                   </h1>
                 </div>
                 <p className="text-xs text-[#A8A69E]">
@@ -274,7 +271,7 @@ export default function WhichRoleFitsMe() {
             {/* Candidate Evidence Telemetry Pills */}
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <div className="px-3 py-1.5 rounded-lg bg-[#24231F] border border-[#3A3831] flex items-center gap-2">
-                <Code2 className="w-3.5 h-3.5 text-[#C7F36B]" />
+                <Code2 className="w-3.5 h-3.5 text-purple-400" />
                 <span className="text-zinc-400 font-mono text-[11px]">LeetCode:</span>
                 <span className="font-semibold text-white">
                   {evaluation.candidateSummary.leetcodeSolved} Solved
@@ -282,7 +279,7 @@ export default function WhichRoleFitsMe() {
               </div>
 
               <div className="px-3 py-1.5 rounded-lg bg-[#24231F] border border-[#3A3831] flex items-center gap-2">
-                <FolderGit2 className="w-3.5 h-3.5 text-blue-400" />
+                <FolderGit2 className="w-3.5 h-3.5 text-zinc-300" />
                 <span className="text-zinc-400 font-mono text-[11px]">GitHub:</span>
                 <span className="font-semibold text-white">
                   {evaluation.candidateSummary.githubReposCount} Repos
@@ -324,7 +321,7 @@ export default function WhichRoleFitsMe() {
                   Sparse Profile Data Detected
                 </h4>
                 <p className="text-xs text-amber-200/80">
-                  Connect your GitHub repositories, LeetCode profile, and add self-assessed skills to get 100% accurate evidence matching without estimated fallbacks.
+                  Connect your GitHub repositories, LeetCode profile, and add self-assessed skills to get accurate evidence matching.
                 </p>
               </div>
             </div>
@@ -343,14 +340,12 @@ export default function WhichRoleFitsMe() {
         {/* 3. HERO: TOP MATCH SPOTLIGHT CARD */}
         {/* ========================================================================= */}
         {topRole && (
-          <section className="gsap-fade-in relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C1B17] via-[#24231F] to-[#161513] border border-[#C7F36B]/30 p-6 sm:p-8 shadow-[0_0_30px_rgba(199,243,107,0.06)]">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-[#C7F36B]/5 rounded-full blur-3xl pointer-events-none" />
-
+          <section className="gsap-fade-in relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C1B17] via-[#24231F] to-[#161513] border border-white/10 p-6 sm:p-8 shadow-xl">
             <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               {/* Left Details */}
               <div className="space-y-4 max-w-2xl">
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#C7F36B] text-zinc-950 font-bold text-xs shadow-sm">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500 text-zinc-950 font-bold text-xs shadow-sm">
                     <Sparkles className="w-3.5 h-3.5" />
                     TOP CAREER FIT
                   </span>
@@ -384,7 +379,7 @@ export default function WhichRoleFitsMe() {
                         key={idx}
                         className="flex items-center gap-2 text-xs text-zinc-200 bg-[#161513]/70 px-3 py-1.5 rounded-lg border border-white/[0.04]"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#C7F36B] shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                         <span className="truncate">{item}</span>
                       </div>
                     ))}
@@ -396,7 +391,7 @@ export default function WhichRoleFitsMe() {
                   <div className="flex items-center gap-1.5 text-zinc-300">
                     <Briefcase className="w-4 h-4 text-zinc-400" />
                     <span>Average Package:</span>
-                    <span className="font-semibold text-[#C7F36B] font-mono">
+                    <span className="font-semibold text-emerald-400 font-mono">
                       {topRole.avgCompensation.inrRange}
                     </span>
                   </div>
@@ -413,11 +408,11 @@ export default function WhichRoleFitsMe() {
               {/* Right: Big Score Gauge & Action CTAs */}
               <div className="flex flex-col sm:flex-row lg:flex-col items-center justify-center gap-4 bg-[#161513]/90 border border-[#3A3831] p-6 rounded-2xl shrink-0 min-w-[260px] text-center">
                 <div className="relative flex items-center justify-center">
-                  <div className="w-24 h-24 rounded-full border-4 border-[#C7F36B] flex flex-col items-center justify-center shadow-[0_0_20px_rgba(199,243,107,0.2)] bg-[#11110F]">
+                  <div className="w-24 h-24 rounded-full border-4 border-emerald-400 flex flex-col items-center justify-center bg-[#11110F]">
                     <span className="text-3xl font-black text-white font-mono leading-none">
                       {topRole.matchScore}%
                     </span>
-                    <span className="text-[10px] font-mono font-bold text-[#C7F36B] uppercase tracking-wider mt-1">
+                    <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider mt-1">
                       Match
                     </span>
                   </div>
@@ -435,7 +430,7 @@ export default function WhichRoleFitsMe() {
                 <div className="flex flex-col w-full gap-2 pt-2">
                   <button
                     onClick={() => setInspectedRole(topRole)}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#C7F36B] text-zinc-950 font-bold text-xs hover:bg-[#b5e357] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                    className="w-full py-2.5 px-4 rounded-xl bg-white text-zinc-950 font-bold text-xs hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                   >
                     <span>Inspect Deep Evidence</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -446,11 +441,11 @@ export default function WhichRoleFitsMe() {
                       onClick={() => setConfirmAdoptRole(topRole)}
                       className="w-full py-2 px-3 rounded-xl bg-[#24231F] text-zinc-300 hover:text-white hover:bg-[#2E2C26] border border-[#3A3831] font-medium text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <Target className="w-3.5 h-3.5 text-[#C7F36B]" />
+                      <Target className="w-3.5 h-3.5 text-purple-400" />
                       <span>Make This My Target</span>
                     </button>
                   ) : (
-                    <div className="text-[11px] font-mono text-[#C7F36B] flex items-center justify-center gap-1 py-1.5">
+                    <div className="text-[11px] font-mono text-emerald-400 flex items-center justify-center gap-1 py-1.5">
                       <Check className="w-3.5 h-3.5" /> Active Platform Target
                     </div>
                   )}
@@ -472,7 +467,7 @@ export default function WhichRoleFitsMe() {
                 onClick={() => setActiveCategoryFilter(cat.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
                   activeCategoryFilter === cat.id
-                    ? "bg-[#C7F36B] text-zinc-950 font-semibold shadow-sm"
+                    ? "bg-white text-zinc-950 font-semibold shadow-sm"
                     : "text-zinc-400 hover:text-white hover:bg-[#24231F]"
                 }`}
               >
@@ -490,7 +485,7 @@ export default function WhichRoleFitsMe() {
                 placeholder="Search roles or skills..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#11110F] border border-[#3A3831] rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#C7F36B]/50 transition-colors"
+                className="w-full bg-[#11110F] border border-[#3A3831] rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-400/50 transition-colors"
               />
               {searchQuery && (
                 <button
@@ -513,14 +508,14 @@ export default function WhichRoleFitsMe() {
               }}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-2 cursor-pointer ${
                 isCompareMode
-                  ? "bg-[#C7F36B]/15 text-[#C7F36B] border-[#C7F36B]/40"
+                  ? "bg-purple-500/15 text-purple-300 border-purple-500/40"
                   : "bg-[#24231F] text-zinc-300 border-[#3A3831] hover:text-white hover:bg-[#2E2C26]"
               }`}
             >
               <Columns className="w-3.5 h-3.5" />
               <span>{isCompareMode ? "Exit Comparison" : "Compare Roles"}</span>
               {compareList.length > 0 && (
-                <span className="w-4 h-4 rounded-full bg-[#C7F36B] text-zinc-950 text-[10px] flex items-center justify-center font-bold font-mono">
+                <span className="w-4 h-4 rounded-full bg-purple-500 text-white text-[10px] flex items-center justify-center font-bold font-mono">
                   {compareList.length}
                 </span>
               )}
@@ -536,7 +531,7 @@ export default function WhichRoleFitsMe() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Columns className="w-5 h-5 text-[#C7F36B]" />
+                  <Columns className="w-5 h-5 text-purple-400" />
                   Side-by-Side Role Alignment Matrix
                 </h3>
                 <p className="text-xs text-zinc-400">
@@ -573,7 +568,7 @@ export default function WhichRoleFitsMe() {
                             </button>
                           </div>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#C7F36B]/10 text-[#C7F36B] border border-[#C7F36B]/20">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                               {role.matchScore}% Match
                             </span>
                             {role.isCurrentTarget && (
@@ -597,7 +592,7 @@ export default function WhichRoleFitsMe() {
                           <div className="flex items-center gap-3">
                             <div className="flex-1 bg-zinc-900 rounded-full h-2 overflow-hidden border border-zinc-800">
                               <div
-                                className="bg-[#C7F36B] h-full rounded-full transition-all"
+                                className="bg-emerald-400 h-full rounded-full transition-all"
                                 style={{ width: `${role.matchScore}%` }}
                               />
                             </div>
@@ -619,7 +614,7 @@ export default function WhichRoleFitsMe() {
                         <td key={role.id} className="p-4 border-l border-[#2E2C26] space-y-1.5">
                           {role.strongMatchingEvidence.map((ev, i) => (
                             <div key={i} className="flex items-start gap-1.5 text-zinc-300">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-[#C7F36B] shrink-0 mt-0.5" />
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
                               <span className="leading-tight">{ev}</span>
                             </div>
                           ))}
@@ -677,7 +672,7 @@ export default function WhichRoleFitsMe() {
                       </td>
                       {comparedRoles.map((role) => (
                         <td key={role.id} className="p-4 border-l border-[#2E2C26]">
-                          <div className="font-mono font-bold text-[#C7F36B] text-sm">
+                          <div className="font-mono font-bold text-emerald-400 text-sm">
                             {role.avgCompensation.inrRange}
                           </div>
                           <div className="text-[10px] text-zinc-400">
@@ -715,14 +710,14 @@ export default function WhichRoleFitsMe() {
                           {!role.isCurrentTarget ? (
                             <button
                               onClick={() => setConfirmAdoptRole(role)}
-                              className="w-full py-1.5 px-3 rounded-lg bg-[#C7F36B] text-zinc-950 font-bold text-xs hover:bg-[#b5e357] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                              className="w-full py-1.5 px-3 rounded-lg bg-white text-zinc-950 font-bold text-xs hover:bg-zinc-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                             >
                               <Target className="w-3.5 h-3.5" />
                               <span>Make This Target</span>
                             </button>
                           ) : (
-                            <div className="text-[11px] font-mono text-[#C7F36B] text-center flex items-center justify-center gap-1">
-                              <Check className="w-3 h-3 text-[#C7F36B]" />
+                            <div className="text-[11px] font-mono text-emerald-400 text-center flex items-center justify-center gap-1">
+                              <Check className="w-3 h-3 text-emerald-400" />
                               Active Target
                             </div>
                           )}
@@ -739,12 +734,15 @@ export default function WhichRoleFitsMe() {
         {/* ========================================================================= */}
         {/* 6. RANKED BEST ROLE MATCHES GRID (ALL 9 ROLES) */}
         {/* ========================================================================= */}
+        {/* ========================================================================= */}
+        {/* 6. RANKED BEST ROLE MATCHES GRID */}
+        {/* ========================================================================= */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Award className="w-5 h-5 text-[#C7F36B]" />
+              <Award className="w-5 h-5 text-purple-400" />
               <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-                Ranked Best Role Matches ({filteredRoles.length})
+                Ranked Role Matches
               </h3>
             </div>
             <span className="text-xs text-zinc-400 font-mono">
@@ -762,7 +760,7 @@ export default function WhichRoleFitsMe() {
                   key={role.id}
                   className={`gsap-fade-in group relative rounded-2xl p-5 transition-all duration-200 flex flex-col justify-between border ${
                     isTop
-                      ? "bg-gradient-to-b from-[#1F1E1A] to-[#161513] border-[#C7F36B]/40 shadow-[0_4px_20px_rgba(199,243,107,0.06)]"
+                      ? "bg-gradient-to-b from-[#1F1E1A] to-[#161513] border-white/20 shadow-lg"
                       : "bg-[#181714] border-[#2E2C26] hover:border-[#3A3831] hover:bg-[#1C1B17]"
                   }`}
                 >
@@ -773,19 +771,11 @@ export default function WhichRoleFitsMe() {
                         <span className="font-mono text-xs font-bold text-zinc-500">
                           #{index + 1}
                         </span>
-                        {isTop ? (
-                          <span className="px-2 py-0.5 rounded-full bg-[#C7F36B] text-zinc-950 font-bold text-[10px]">
+                        {isTop && (
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-zinc-950 font-bold text-[10px]">
                             Top Match
                           </span>
-                        ) : index === 1 ? (
-                          <span className="px-2 py-0.5 rounded-full bg-zinc-700 text-zinc-200 font-semibold text-[10px]">
-                            Rank 2
-                          </span>
-                        ) : index === 2 ? (
-                          <span className="px-2 py-0.5 rounded-full bg-amber-700/60 text-amber-200 font-semibold text-[10px]">
-                            Rank 3
-                          </span>
-                        ) : null}
+                        )}
 
                         <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-zinc-400 border border-white/[0.06]">
                           {role.category}
@@ -800,7 +790,7 @@ export default function WhichRoleFitsMe() {
                         }}
                         className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
                           isCheckedForCompare
-                            ? "bg-[#C7F36B] text-zinc-950 border-[#C7F36B]"
+                            ? "bg-purple-500 text-white border-purple-500"
                             : "bg-[#24231F] text-zinc-400 border-[#3A3831] hover:text-white"
                         }`}
                         title={isCheckedForCompare ? "Remove from comparison" : "Add to comparison"}
@@ -815,7 +805,7 @@ export default function WhichRoleFitsMe() {
 
                     <div>
                       <div className="flex items-center justify-between">
-                        <h4 className="text-base font-bold text-white group-hover:text-[#C7F36B] transition-colors">
+                        <h4 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors">
                           {role.title}
                         </h4>
                         <div className="flex items-baseline gap-1">
@@ -833,11 +823,11 @@ export default function WhichRoleFitsMe() {
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[11px] font-mono">
                         <span className="text-zinc-500">Alignment Bar</span>
-                        <span className="text-[#C7F36B] font-semibold">{role.matchGrade}</span>
+                        <span className="text-emerald-400 font-semibold">{role.matchGrade}</span>
                       </div>
                       <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden border border-zinc-800">
                         <div
-                          className="bg-[#C7F36B] h-full rounded-full transition-all duration-500"
+                          className="bg-emerald-400 h-full rounded-full transition-all duration-500"
                           style={{ width: `${role.matchScore}%` }}
                         />
                       </div>
@@ -854,7 +844,7 @@ export default function WhichRoleFitsMe() {
                             key={i}
                             className="flex items-center gap-1.5 text-xs text-zinc-300 truncate"
                           >
-                            <CheckCircle2 className="w-3 h-3 text-[#C7F36B] shrink-0" />
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
                             <span className="truncate">{ev}</span>
                           </div>
                         ))}
@@ -883,7 +873,7 @@ export default function WhichRoleFitsMe() {
                     {/* Package and hiring companies */}
                     <div className="pt-2 border-t border-[#2E2C26] flex items-center justify-between text-xs">
                       <span className="text-zinc-400 font-mono text-[11px]">
-                        Avg: <span className="text-[#C7F36B] font-semibold">{role.avgCompensation.inrRange}</span>
+                        Avg: <span className="text-emerald-400 font-semibold">{role.avgCompensation.inrRange}</span>
                       </span>
                       <span className="text-zinc-500 text-[11px] truncate max-w-[140px]">
                         {role.topHiringCompanies.slice(0, 2).join(", ")}
@@ -904,7 +894,7 @@ export default function WhichRoleFitsMe() {
                     {!role.isCurrentTarget ? (
                       <button
                         onClick={() => setConfirmAdoptRole(role)}
-                        className="py-2 px-3 rounded-xl bg-[#C7F36B] text-zinc-950 font-bold text-xs hover:bg-[#b5e357] transition-all flex items-center justify-center gap-1 cursor-pointer shadow-sm"
+                        className="py-2 px-3 rounded-xl bg-white text-zinc-950 font-bold text-xs hover:bg-zinc-200 transition-all flex items-center justify-center gap-1 cursor-pointer shadow-sm"
                         title="Make this your platform target role"
                       >
                         <Target className="w-3.5 h-3.5" />
@@ -933,7 +923,7 @@ export default function WhichRoleFitsMe() {
             <div className="p-6 border-b border-[#2E2C26] bg-[#1C1B17] flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#C7F36B] text-zinc-950 font-bold text-xs">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500 text-zinc-950 font-bold text-xs">
                     {inspectedRole.matchScore}% Match
                   </span>
                   <span className="px-2 py-0.5 rounded bg-white/[0.06] text-zinc-400 font-mono text-xs">
@@ -967,7 +957,7 @@ export default function WhichRoleFitsMe() {
                 onClick={() => setInspectedTab("evidence")}
                 className={`pb-3 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
                   inspectedTab === "evidence"
-                    ? "border-[#C7F36B] text-[#C7F36B]"
+                    ? "border-purple-400 text-purple-300"
                     : "border-transparent text-zinc-400 hover:text-white"
                 }`}
               >
@@ -977,7 +967,7 @@ export default function WhichRoleFitsMe() {
                 onClick={() => setInspectedTab("bridge")}
                 className={`pb-3 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
                   inspectedTab === "bridge"
-                    ? "border-[#C7F36B] text-[#C7F36B]"
+                    ? "border-purple-400 text-purple-300"
                     : "border-transparent text-zinc-400 hover:text-white"
                 }`}
               >
@@ -987,11 +977,11 @@ export default function WhichRoleFitsMe() {
                 onClick={() => setInspectedTab("jobs")}
                 className={`pb-3 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
                   inspectedTab === "jobs"
-                    ? "border-[#C7F36B] text-[#C7F36B]"
+                    ? "border-purple-400 text-purple-300"
                     : "border-transparent text-zinc-400 hover:text-white"
                 }`}
               >
-                Hiring Loops & Open Positions ({inspectedRole.matchedJobs.length})
+                Hiring Loops & Open Positions
               </button>
             </div>
 
@@ -1093,7 +1083,7 @@ export default function WhichRoleFitsMe() {
                     <ul className="space-y-1.5 text-xs text-zinc-300">
                       {inspectedRole.keyResponsibilities.map((resp, i) => (
                         <li key={i} className="flex items-start gap-2">
-                          <span className="text-[#C7F36B] font-bold">›</span>
+                          <span className="text-purple-400 font-bold">›</span>
                           <span>{resp}</span>
                         </li>
                       ))}
@@ -1116,14 +1106,14 @@ export default function WhichRoleFitsMe() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Link
                       to="/app/dsa"
-                      className="p-4 rounded-xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 transition-all group flex flex-col justify-between space-y-2"
+                      className="p-4 rounded-xl bg-[#24231F] border border-[#3A3831] hover:border-purple-500/50 transition-all group flex flex-col justify-between space-y-2"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-white font-semibold text-xs">
-                          <Code2 className="w-4 h-4 text-[#C7F36B]" />
+                          <Code2 className="w-4 h-4 text-purple-400" />
                           <span>DSA Problem Solving Arena</span>
                         </div>
-                        <ArrowUpRight className="w-4 h-4 text-zinc-500 group-hover:text-[#C7F36B] transition-colors" />
+                        <ArrowUpRight className="w-4 h-4 text-zinc-500 group-hover:text-purple-400 transition-colors" />
                       </div>
                       <p className="text-[11px] text-zinc-400">
                         Target {inspectedRole.targetDsaSolvedCount}+ LeetCode pattern questions required by {inspectedRole.shortTitle} hiring bars.
@@ -1132,14 +1122,14 @@ export default function WhichRoleFitsMe() {
 
                     <Link
                       to="/app/coding"
-                      className="p-4 rounded-xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 transition-all group flex flex-col justify-between space-y-2"
+                      className="p-4 rounded-xl bg-[#24231F] border border-[#3A3831] hover:border-purple-500/50 transition-all group flex flex-col justify-between space-y-2"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-white font-semibold text-xs">
-                          <Layers className="w-4 h-4 text-blue-400" />
+                          <Layers className="w-4 h-4 text-zinc-300" />
                           <span>CS Core & Machine Coding</span>
                         </div>
-                        <ArrowUpRight className="w-4 h-4 text-zinc-500 group-hover:text-blue-400 transition-colors" />
+                        <ArrowUpRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-200 transition-colors" />
                       </div>
                       <p className="text-[11px] text-zinc-400">
                         Practice Low Level Design, SQL indexes, and concurrency for technical machine rounds.
@@ -1148,7 +1138,7 @@ export default function WhichRoleFitsMe() {
 
                     <Link
                       to="/app/roadmap"
-                      className="p-4 rounded-xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 transition-all group flex flex-col justify-between space-y-2"
+                      className="p-4 rounded-xl bg-[#24231F] border border-[#3A3831] hover:border-purple-500/50 transition-all group flex flex-col justify-between space-y-2"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-white font-semibold text-xs">
@@ -1164,7 +1154,7 @@ export default function WhichRoleFitsMe() {
 
                     <Link
                       to="/app/resume"
-                      className="p-4 rounded-xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 transition-all group flex flex-col justify-between space-y-2"
+                      className="p-4 rounded-xl bg-[#24231F] border border-[#3A3831] hover:border-purple-500/50 transition-all group flex flex-col justify-between space-y-2"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-white font-semibold text-xs">
@@ -1191,7 +1181,7 @@ export default function WhichRoleFitsMe() {
                     <div className="space-y-1.5">
                       {inspectedRole.hiringBars.map((bar, i) => (
                         <div key={i} className="flex items-center gap-2 text-xs text-zinc-300">
-                          <span className="w-5 h-5 rounded-full bg-[#24231F] text-[#C7F36B] font-mono text-[10px] font-bold flex items-center justify-center shrink-0 border border-white/[0.04]">
+                          <span className="w-5 h-5 rounded-full bg-[#24231F] text-purple-400 font-mono text-[10px] font-bold flex items-center justify-center shrink-0 border border-white/[0.04]">
                             {i + 1}
                           </span>
                           <span>{bar}</span>
@@ -1203,7 +1193,7 @@ export default function WhichRoleFitsMe() {
                   {/* Matched marketplace jobs */}
                   <div className="space-y-2">
                     <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-400 font-semibold">
-                      Live Matching Openings ({inspectedRole.matchedJobs.length})
+                      Live Matching Openings
                     </h4>
                     {inspectedRole.matchedJobs.length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1214,7 +1204,7 @@ export default function WhichRoleFitsMe() {
                           >
                             <div>
                               <div className="text-xs font-bold text-white">{job.title}</div>
-                              <div className="text-[11px] text-[#C7F36B] font-medium">
+                              <div className="text-[11px] text-purple-300 font-medium">
                                 {job.company || "Leading Employer"} • {job.location || "Remote / Hybrid"}
                               </div>
                             </div>
@@ -1222,7 +1212,7 @@ export default function WhichRoleFitsMe() {
                               <span className="text-zinc-400 font-mono">{job.salary || "Competitive"}</span>
                               <Link
                                 to={`/app/can-i-apply?company=${encodeURIComponent(job.company || "")}&role=${encodeURIComponent(job.title || "")}`}
-                                className="text-[#C7F36B] hover:underline font-semibold flex items-center gap-1"
+                                className="text-purple-300 hover:underline font-semibold flex items-center gap-1"
                               >
                                 Can I Apply?
                                 <ArrowRight className="w-3 h-3" />
@@ -1245,7 +1235,7 @@ export default function WhichRoleFitsMe() {
             <div className="p-6 border-t border-[#2E2C26] bg-[#1C1B17] flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="text-xs text-zinc-400">
                 Avg Compensation:{" "}
-                <span className="text-[#C7F36B] font-mono font-bold">
+                <span className="text-emerald-400 font-mono font-bold">
                   {inspectedRole.avgCompensation.inrRange}
                 </span>
               </div>
@@ -1263,7 +1253,7 @@ export default function WhichRoleFitsMe() {
                     onClick={() => {
                       setConfirmAdoptRole(inspectedRole);
                     }}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-[#C7F36B] text-zinc-950 font-bold text-xs hover:bg-[#b5e357] transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-white text-zinc-950 font-bold text-xs hover:bg-zinc-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
                   >
                     <Target className="w-4 h-4" />
                     <span>Make This My Target Career Role</span>
@@ -1286,7 +1276,7 @@ export default function WhichRoleFitsMe() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-3xl bg-[#181714] border border-[#3A3831] p-6 shadow-2xl space-y-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#C7F36B]/15 text-[#C7F36B] flex items-center justify-center shrink-0 border border-[#C7F36B]/30">
+              <div className="w-10 h-10 rounded-2xl bg-purple-500/15 text-purple-300 flex items-center justify-center shrink-0 border border-purple-500/30">
                 <Target className="w-5 h-5" />
               </div>
               <div>
@@ -1328,7 +1318,7 @@ export default function WhichRoleFitsMe() {
               <button
                 disabled={isAdopting}
                 onClick={handleExecuteAdoption}
-                className="flex-1 py-2 px-4 rounded-xl bg-[#C7F36B] text-zinc-950 hover:bg-[#b5e357] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                className="flex-1 py-2 px-4 rounded-xl bg-white text-zinc-950 hover:bg-zinc-200 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
               >
                 {isAdopting ? (
                   <>

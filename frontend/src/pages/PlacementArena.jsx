@@ -6,23 +6,14 @@ import {
   Trophy,
   Users,
   Flame,
-  Swords,
-  Crown,
   Search,
   MessageSquare,
   Send,
-  Plus,
-  ArrowRight,
-  Shield,
   Zap,
-  Target,
-  Sparkles,
-  CheckCircle2,
   Clock,
   Award,
   Medal,
   X,
-  Compass,
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
 
@@ -167,10 +158,6 @@ export default function PlacementArena() {
         {/* Editorial Wide Header */}
         <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-800/80">
           <div className="space-y-2.5 max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono uppercase tracking-wider">
-              <Swords className="w-3.5 h-3.5 text-zinc-400" />
-              Competitive League
-            </div>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
               Placement Arena & Squads
             </h1>
@@ -218,9 +205,9 @@ export default function PlacementArena() {
         {/* Tab Navigation Pill Bar */}
         <div className="gsap-fade-item flex items-center gap-2 border-b border-zinc-800/80 pb-4">
           {[
-            { key: "leaderboard", label: "National & Campus Leaderboard", icon: Trophy },
-            { key: "squad", label: "Peer Accountability Squad", icon: Users },
-            { key: "challenges", label: "Weekly Sprint Challenges", icon: Zap },
+            { key: "leaderboard", label: "Leaderboard", icon: Trophy },
+            { key: "squad", label: "Peer Squads", icon: Users },
+            { key: "challenges", label: "Sprint Challenges", icon: Zap },
           ].map((tab) => {
             const IconComp = tab.icon;
             return (
@@ -261,14 +248,14 @@ export default function PlacementArena() {
                   placeholder="Filter by college (VIT, IIT, NIT, BITS)..."
                   value={searchCollege}
                   onChange={(e) => setSearchCollege(e.target.value)}
-                  className="w-full bg-zinc-950/80 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-purple-400 transition-colors"
+                  className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors font-mono"
                 />
               </div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="text-zinc-400 border-b border-white/10 font-mono text-[11px] uppercase">
+                <thead className="text-zinc-400 border-b border-zinc-800/80 font-mono text-[11px] uppercase">
                   <tr>
                     <th className="py-3 px-4">Rank</th>
                     <th className="py-3 px-4">Candidate</th>
@@ -280,19 +267,19 @@ export default function PlacementArena() {
                     <th className="py-3 px-4">Placement XP</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 font-medium">
+                <tbody className="divide-y divide-zinc-800/60 font-medium">
                   {topRankers.map((user) => (
                     <tr
                       key={user.rank}
                       className={`transition-colors duration-150 ${
                         user.isCurrentUser
-                          ? "bg-purple-950/30 border-l-2 border-purple-400 font-bold"
+                          ? "bg-zinc-900/80 border-l-2 border-zinc-200 font-bold"
                           : "hover:bg-zinc-950/60"
                       }`}
                     >
                       <td className="py-4 px-4 font-mono font-bold text-white">
                         {user.rank === 1 ? (
-                          <span className="inline-flex items-center gap-1 text-yellow-400">
+                          <span className="inline-flex items-center gap-1 text-amber-400">
                             <Award className="w-4 h-4" /> #1
                           </span>
                         ) : user.rank === 2 ? (
@@ -300,7 +287,7 @@ export default function PlacementArena() {
                             <Medal className="w-4 h-4" /> #2
                           </span>
                         ) : user.rank === 3 ? (
-                          <span className="inline-flex items-center gap-1 text-amber-500">
+                          <span className="inline-flex items-center gap-1 text-zinc-400">
                             <Medal className="w-4 h-4" /> #3
                           </span>
                         ) : (
@@ -313,10 +300,10 @@ export default function PlacementArena() {
                             <img
                               src={user.avatar}
                               alt={user.name}
-                              className="w-8 h-8 rounded-full object-cover border border-purple-500/40"
+                              className="w-8 h-8 rounded-full object-cover border border-zinc-700"
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-300 font-bold flex items-center justify-center text-xs font-mono">
+                            <div className="w-8 h-8 rounded-full bg-zinc-800 text-zinc-200 font-bold flex items-center justify-center text-xs font-mono">
                               {user.name.charAt(0)}
                             </div>
                           )}
@@ -324,7 +311,7 @@ export default function PlacementArena() {
                             <div className="font-semibold">
                               {user.name}{" "}
                               {user.isCurrentUser && (
-                                <span className="text-[10px] font-mono text-purple-400">
+                                <span className="text-[10px] font-mono text-zinc-400">
                                   (You)
                                 </span>
                               )}
@@ -340,7 +327,7 @@ export default function PlacementArena() {
                         {user.readinessScore}%
                       </td>
                       <td className="py-4 px-4">
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800">
                           {user.tier}
                         </span>
                       </td>
@@ -350,7 +337,7 @@ export default function PlacementArena() {
                           <Flame className="w-3.5 h-3.5" /> {user.streakDays}d
                         </span>
                       </td>
-                      <td className="py-4 px-4 font-mono text-yellow-300 font-bold">
+                      <td className="py-4 px-4 font-mono text-zinc-200 font-bold">
                         +{user.xp} XP
                       </td>
                     </tr>
@@ -423,7 +410,7 @@ export default function PlacementArena() {
                   {/* Squad Members Roster */}
                   <div className="rounded-xl bg-[#121215] border border-zinc-800/80 p-6 space-y-4">
                     <h4 className="text-sm font-bold text-white tracking-tight">
-                      Active Squad Members ({squadData.members?.length || 0})
+                      Active Squad Members
                     </h4>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">

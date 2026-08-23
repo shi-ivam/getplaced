@@ -196,7 +196,7 @@ export default function CodingArena() {
       case "hard":
         return "text-rose-400 bg-rose-500/10 border-rose-500/20";
       default:
-        return "text-gray-400 bg-gray-500/10 border-gray-500/20";
+        return "text-zinc-400 bg-zinc-800 border-zinc-700";
     }
   };
 
@@ -207,10 +207,6 @@ export default function CodingArena() {
         {/* Workspace Top Header */}
         <header className="gsap-reveal flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-zinc-800 pb-6">
           <div className="space-y-1.5 max-w-3xl">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-mono">
-              <Terminal className="w-3.5 h-3.5 text-purple-400" />
-              <span>Coding Practice & DSA Catalog</span>
-            </div>
             <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight">
               Coding Arena
             </h1>
@@ -445,7 +441,7 @@ export default function CodingArena() {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-sky-400" />
+                    <Activity className="w-4 h-4 text-purple-400" />
                     <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-white">
                       Submission Activity
                     </h4>
@@ -460,7 +456,7 @@ export default function CodingArena() {
           </div>
         )}
 
-        {/* TAB 2: STUDY PLAN & PLACEMENT SHEETS (28 LISTS) */}
+        {/* TAB 2: STUDY PLAN & PLACEMENT SHEETS */}
         {workspaceTab === "sheets" && (
           <div className="gsap-reveal space-y-6">
             <SheetsHub />
@@ -526,11 +522,11 @@ export default function CodingArena() {
                       className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer font-mono ${
                         selectedDifficulty === d.toLowerCase()
                           ? d === "Easy"
-                            ? "bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/40"
+                            ? "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20"
                             : d === "Medium"
-                            ? "bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/40"
+                            ? "bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20"
                             : d === "Hard"
-                            ? "bg-rose-500/20 text-rose-300 font-semibold border border-rose-500/40"
+                            ? "bg-rose-500/10 text-rose-400 font-semibold border border-rose-500/20"
                             : "bg-zinc-100 text-zinc-950 font-semibold"
                           : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
                       }`}
@@ -577,23 +573,22 @@ export default function CodingArena() {
                         : "bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
                     }`}
                   >
-                    All Topics
+                    All
                   </button>
-                  {tags.map(({ tag, count }) => (
+                  {tags.map(({ tag }) => (
                     <button
                       key={tag}
                       onClick={() => {
                         setSelectedTag(selectedTag === tag ? "all" : tag);
                         setPage(1);
                       }}
-                      className={`px-2.5 py-1 rounded-md text-[11px] flex items-center gap-1.5 transition-colors cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-md text-[11px] transition-colors cursor-pointer ${
                         selectedTag === tag
                           ? "bg-zinc-100 text-zinc-950 font-semibold"
                           : "bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800 hover:border-zinc-700"
                       }`}
                     >
-                      <span>{tag}</span>
-                      <span className="text-[10px] opacity-60">({count})</span>
+                      {tag}
                     </button>
                   ))}
                 </div>

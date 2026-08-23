@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRight, Zap, Github, Twitter, Linkedin, Mail } from "lucide-react";
+import { ArrowRight, Github, Twitter, Linkedin, Mail } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { SUPPORT_EMAIL } from "@/config/api";
 
@@ -7,86 +7,84 @@ export default function Footer() {
   const navigate = useNavigate();
 
   return (
-    <footer className="relative w-full bg-[#12221e] text-[#FFF4E1]/70 pt-20 pb-12 border-t border-[#428475]/30 overflow-hidden">
-      
-      {/* Background Accent Glow */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[250px] bg-[#89D7B7]/10 rounded-full blur-[140px] pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+    <footer className="relative w-full bg-[#09090b] text-zinc-400 pt-16 pb-10 border-t border-zinc-800/80 overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 relative z-10">
         
         {/* Call to Action Banner */}
-        <div className="mb-20 rounded-3xl bg-gradient-to-r from-[#1A312C] via-[#1E3A34] to-[#428475]/40 p-8 md:p-14 border border-[#89D7B7]/30 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="mb-16 rounded-2xl bg-zinc-900/60 p-6 md:p-10 border border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <h3 className="text-3xl md:text-5xl font-extrabold text-[#FFF4E1] tracking-tight mb-3">
-              Start Your Placement Preparation
+            <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight mb-2">
+              Start Placement Preparation
             </h3>
-            <p className="text-[#FFF4E1]/80 text-sm md:text-base max-w-xl">
+            <p className="text-zinc-400 text-sm max-w-lg">
               Practice technical interviews, benchmark resumes against ATS criteria, and track preparation milestones.
             </p>
           </div>
 
           <button
             onClick={() => navigate("/register")}
-            className="shrink-0 px-8 py-4 rounded-full bg-[#89D7B7] text-[#1A312C] font-bold text-sm uppercase tracking-wider hover:bg-[#a6e6ce] transition-all duration-300 transform hover:scale-105 shadow-xl flex items-center gap-2 group cursor-pointer"
+            className="shrink-0 px-6 py-3 rounded-lg bg-zinc-100 text-zinc-950 font-semibold text-xs uppercase tracking-wider hover:bg-white transition-all flex items-center gap-2 group cursor-pointer"
           >
             <span>Get Started</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-[#1A312C]" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform text-zinc-950" />
           </button>
         </div>
 
         {/* Footer Navigation Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-16 border-b border-[#428475]/30">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-zinc-800">
           
           {/* Brand */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center">
-              <span className="text-xl font-black text-[#FFF4E1] tracking-tight">get<span className="text-[#89D7B7]">Placed</span></span>
+              <span className="text-base font-bold text-white tracking-tight font-sans">
+                get<span className="text-purple-400">Placed</span>
+              </span>
             </div>
-            <p className="text-xs text-[#FFF4E1]/70 leading-relaxed">
+            <p className="text-xs text-zinc-400 leading-relaxed">
               Technical interview simulations, resume ATS scoring, and structured preparation roadmaps.
             </p>
           </div>
 
           {/* Links 1 */}
           <div>
-            <h4 className="text-xs font-mono uppercase tracking-widest text-[#89D7B7] font-bold mb-4">Platform</h4>
-            <ul className="space-y-2 text-xs font-medium">
-              <li><a href="#hero" className="hover:text-[#89D7B7] transition-colors">Interview Simulator</a></li>
-              <li><a href="#features" className="hover:text-[#89D7B7] transition-colors">Feature Overview</a></li>
-              <li><a href="#resume" className="hover:text-[#89D7B7] transition-colors">Resume Scoring</a></li>
-              <li><a href="#calendar" className="hover:text-[#89D7B7] transition-colors">Preparation Roadmap</a></li>
+            <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-300 font-semibold mb-3">Platform</h4>
+            <ul className="space-y-2 text-xs">
+              <li><a href="#hero" className="hover:text-white transition-colors">Interview Simulator</a></li>
+              <li><a href="#features" className="hover:text-white transition-colors">Feature Overview</a></li>
+              <li><a href="#resume" className="hover:text-white transition-colors">Resume Scoring</a></li>
+              <li><a href="#calendar" className="hover:text-white transition-colors">Preparation Schedule</a></li>
             </ul>
           </div>
 
           {/* Links 2 */}
           <div>
-            <h4 className="text-xs font-mono uppercase tracking-widest text-[#89D7B7] font-bold mb-4">Security & Architecture</h4>
-            <ul className="space-y-2 text-xs font-medium">
-              <li><a href="#security" className="hover:text-[#89D7B7] transition-colors">AES-256 Encryption</a></li>
-              <li><a href="#security" className="hover:text-[#89D7B7] transition-colors">SOC-2 Controls</a></li>
-              <li><Link to="/privacy" className="hover:text-[#89D7B7] transition-colors">Privacy Policy</Link></li>
-              <li><a href="#hero" className="hover:text-[#89D7B7] transition-colors">System Telemetry</a></li>
+            <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-300 font-semibold mb-3">Security</h4>
+            <ul className="space-y-2 text-xs">
+              <li><a href="#security" className="hover:text-white transition-colors">AES-256 Encryption</a></li>
+              <li><a href="#security" className="hover:text-white transition-colors">SOC-2 Protocols</a></li>
+              <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><a href="#hero" className="hover:text-white transition-colors">System Telemetry</a></li>
             </ul>
           </div>
 
           {/* Connect */}
           <div>
-            <h4 className="text-xs font-mono uppercase tracking-widest text-[#89D7B7] font-bold mb-4">Contact</h4>
-            <div className="flex space-x-4 mb-4 text-[#FFF4E1]/80">
-              <a href="https://github.com/getplaced" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[#1A312C] border border-[#428475]/30 hover:border-[#89D7B7]/50 hover:text-[#89D7B7] transition-colors">
-                <Github className="w-4 h-4" />
+            <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-300 font-semibold mb-3">Contact</h4>
+            <div className="flex space-x-2.5 mb-3 text-zinc-400">
+              <a href="https://github.com/getplaced" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:text-white transition-colors">
+                <Github className="w-3.5 h-3.5" />
               </a>
-              <a href="https://twitter.com/getplaced" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[#1A312C] border border-[#428475]/30 hover:border-[#89D7B7]/50 hover:text-[#89D7B7] transition-colors">
-                <Twitter className="w-4 h-4" />
+              <a href="https://twitter.com/getplaced" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:text-white transition-colors">
+                <Twitter className="w-3.5 h-3.5" />
               </a>
-              <a href="https://linkedin.com/company/getplaced" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-[#1A312C] border border-[#428475]/30 hover:border-[#89D7B7]/50 hover:text-[#89D7B7] transition-colors">
-                <Linkedin className="w-4 h-4" />
+              <a href="https://linkedin.com/company/getplaced" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:text-white transition-colors">
+                <Linkedin className="w-3.5 h-3.5" />
               </a>
-              <a href={`mailto:${SUPPORT_EMAIL}`} className="p-2 rounded-lg bg-[#1A312C] border border-[#428475]/30 hover:border-[#89D7B7]/50 hover:text-[#89D7B7] transition-colors">
-                <Mail className="w-4 h-4" />
+              <a href={`mailto:${SUPPORT_EMAIL}`} className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:text-white transition-colors">
+                <Mail className="w-3.5 h-3.5" />
               </a>
             </div>
-            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-[11px] text-[#89D7B7] font-mono hover:underline">
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-xs text-zinc-400 font-mono hover:text-white transition-colors">
               {SUPPORT_EMAIL}
             </a>
           </div>
@@ -94,12 +92,11 @@ export default function Footer() {
         </div>
 
         {/* Bottom Copyright */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-[#FFF4E1]/60 gap-4">
-          <p>&copy; {new Date().getFullYear()} getPlaced Platform. All rights reserved.</p>
-          <div className="flex space-x-6 text-[11px]">
-            <Link to="/terms" className="hover:text-[#FFF4E1] transition-colors">Terms of Service</Link>
-            <Link to="/privacy" className="hover:text-[#FFF4E1] transition-colors">Privacy Policy</Link>
-            <Link to="/privacy" className="hover:text-[#FFF4E1] transition-colors">Cookie Settings</Link>
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-3">
+          <p>&copy; {new Date().getFullYear()} getPlaced. All rights reserved.</p>
+          <div className="flex space-x-5 text-xs">
+            <Link to="/terms" className="hover:text-zinc-300 transition-colors">Terms</Link>
+            <Link to="/privacy" className="hover:text-zinc-300 transition-colors">Privacy</Link>
           </div>
         </div>
 

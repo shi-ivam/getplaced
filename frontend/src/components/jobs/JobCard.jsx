@@ -38,27 +38,27 @@ export default function JobCard({
   // Match score styling
   const getScoreColor = (score) => {
     if (score == null) return "text-[#A8A59C] border-[#3A3831] bg-[#1A1916]";
-    if (score >= 80) return "text-[#C7F36B] border-[#C7F36B]/40 bg-[#C7F36B]/10";
-    if (score >= 65) return "text-sky-400 border-sky-500/30 bg-sky-500/10";
+    if (score >= 80) return "text-emerald-400 border-emerald-500/40 bg-emerald-500/10";
+    if (score >= 65) return "text-purple-300 border-purple-500/30 bg-purple-500/10";
     return "text-amber-400 border-amber-500/30 bg-amber-500/10";
   };
 
   const getScoreBarGradient = (score) => {
     if (score == null) return "from-zinc-600 to-zinc-700";
-    if (score >= 80) return "from-[#C7F36B] to-emerald-400";
-    if (score >= 65) return "from-sky-400 to-teal-400";
-    return "from-amber-400 to-orange-400";
+    if (score >= 80) return "from-emerald-400 to-emerald-500";
+    if (score >= 65) return "from-purple-400 to-purple-500";
+    return "from-amber-400 to-amber-500";
   };
 
   if (viewMode === "list") {
     return (
       <div
         onClick={() => onSelect(job)}
-        className="group relative rounded-2xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 p-5 shadow-lg hover:shadow-2xl hover:shadow-[#C7F36B]/5 transition-all duration-200 cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between gap-4 backdrop-blur-md"
+        className="group relative rounded-2xl bg-[#24231F] border border-[#3A3831] hover:border-purple-500/40 p-5 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between gap-4 backdrop-blur-md"
       >
         <div className="flex items-start gap-4 flex-1 min-w-0">
           {/* Company Avatar */}
-          <div className="w-12 h-12 rounded-xl bg-[#11110F] border border-[#3A3831] flex items-center justify-center text-[#FAF8F2] font-bold text-base overflow-hidden shrink-0 group-hover:border-[#C7F36B]/40 transition-colors">
+          <div className="w-12 h-12 rounded-xl bg-[#11110F] border border-[#3A3831] flex items-center justify-center text-[#FAF8F2] font-bold text-base overflow-hidden shrink-0 group-hover:border-purple-500/40 transition-colors">
             {job.companyLogo ? (
               <img
                 src={job.companyLogo}
@@ -78,11 +78,6 @@ export default function JobCard({
               <span className="text-xs font-mono font-bold text-[#A8A59C] tracking-wide uppercase">
                 {employerName}
               </span>
-              {isDemo && (
-                <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-[#1A1916] text-[#A8A59C] border border-[#3A3831]">
-                  Demo Listing
-                </span>
-              )}
               {job.fitStatus && (
                 <span
                   className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded border ${
@@ -94,7 +89,7 @@ export default function JobCard({
               )}
             </div>
 
-            <h3 className="text-base font-bold text-[#FAF8F2] group-hover:text-[#C7F36B] transition-colors truncate">
+            <h3 className="text-base font-bold text-[#FAF8F2] group-hover:text-purple-300 transition-colors truncate">
               {job.title}
             </h3>
 
@@ -110,7 +105,7 @@ export default function JobCard({
               {job.salary && (
                 <>
                   <span className="text-[#3A3831]">•</span>
-                  <span className="text-[#C7F36B] font-mono font-semibold">
+                  <span className="text-emerald-400 font-mono font-semibold">
                     {job.salary}
                   </span>
                 </>
@@ -145,7 +140,7 @@ export default function JobCard({
               aria-label={job.isSaved ? "Unsave Job" : "Save Job"}
               className={`p-2.5 rounded-xl border transition-all ${
                 job.isSaved
-                  ? "bg-[#C7F36B] text-[#11110F] border-[#C7F36B] shadow-md shadow-[#C7F36B]/20 font-bold"
+                  ? "bg-purple-500 text-white border-purple-500 font-bold"
                   : "bg-[#11110F] hover:bg-[#1A1916] text-[#A8A59C] hover:text-[#FAF8F2] border-[#3A3831]"
               }`}
             >
@@ -155,7 +150,7 @@ export default function JobCard({
             <button
               type="button"
               onClick={() => onSelect(job)}
-              className="px-3.5 py-2 rounded-xl bg-[#C7F36B] hover:bg-[#bbf055] text-[#11110F] text-xs font-bold transition-all shadow-md shadow-[#C7F36B]/20 flex items-center gap-1"
+              className="px-3.5 py-2 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-bold transition-all shadow-md flex items-center gap-1"
             >
               <span>Details</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -170,13 +165,13 @@ export default function JobCard({
   return (
     <div
       onClick={() => onSelect(job)}
-      className="job-card group relative rounded-3xl bg-[#24231F] border border-[#3A3831] hover:border-[#C7F36B]/50 p-6 shadow-xl hover:shadow-2xl hover:shadow-[#C7F36B]/5 flex flex-col justify-between space-y-5 transition-all duration-300 backdrop-blur-md cursor-pointer"
+      className="job-card group relative rounded-3xl bg-[#24231F] border border-[#3A3831] hover:border-purple-500/40 p-6 shadow-xl hover:shadow-2xl flex flex-col justify-between space-y-5 transition-all duration-300 backdrop-blur-md cursor-pointer"
     >
       <div className="space-y-4">
         {/* Top Header: Company Info + Save Button */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 rounded-2xl bg-[#11110F] border border-[#3A3831] flex items-center justify-center text-[#FAF8F2] font-bold text-base overflow-hidden shrink-0 group-hover:border-[#C7F36B]/40 transition-colors">
+            <div className="w-12 h-12 rounded-2xl bg-[#11110F] border border-[#3A3831] flex items-center justify-center text-[#FAF8F2] font-bold text-base overflow-hidden shrink-0 group-hover:border-purple-500/40 transition-colors">
               {job.companyLogo ? (
                 <img
                   src={job.companyLogo}
@@ -209,11 +204,6 @@ export default function JobCard({
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {isDemo && (
-              <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-[#11110F] text-[#A8A59C] border border-[#3A3831]">
-                Demo
-              </span>
-            )}
             <button
               type="button"
               onClick={(e) => {
@@ -224,7 +214,7 @@ export default function JobCard({
               aria-label={job.isSaved ? "Saved to your list" : "Save Job"}
               className={`p-2 rounded-xl border transition-all ${
                 job.isSaved
-                  ? "bg-[#C7F36B] text-[#11110F] border-[#C7F36B] shadow-md shadow-[#C7F36B]/20 font-bold"
+                  ? "bg-purple-500 text-white border-purple-500 font-bold"
                   : "bg-[#11110F] hover:bg-[#1A1916] text-[#A8A59C] hover:text-[#FAF8F2] border-[#3A3831]"
               }`}
             >
@@ -235,7 +225,7 @@ export default function JobCard({
 
         {/* Job Title & Badges */}
         <div className="space-y-2">
-          <h2 className="text-base font-bold text-[#FAF8F2] group-hover:text-[#C7F36B] transition-colors leading-snug line-clamp-2">
+          <h2 className="text-base font-bold text-[#FAF8F2] group-hover:text-purple-300 transition-colors leading-snug line-clamp-2">
             {job.title}
           </h2>
 
@@ -256,7 +246,7 @@ export default function JobCard({
         <div className="p-3.5 rounded-2xl bg-[#11110F] border border-[#3A3831] space-y-2">
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-1.5 font-mono text-[10px] text-[#A8A59C] uppercase font-semibold">
-              <Sparkles className="w-3 h-3 text-[#C7F36B]" />
+              <Sparkles className="w-3 h-3 text-purple-400" />
               <span>Your Match</span>
             </div>
             <div
@@ -301,7 +291,7 @@ export default function JobCard({
                   className={`text-[10px] font-mono px-2 py-0.5 rounded border transition-colors ${
                     isMissing
                       ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
-                      : "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
+                      : "bg-purple-500/10 text-purple-300 border-purple-500/30"
                   }`}
                 >
                   {skill}
@@ -325,7 +315,7 @@ export default function JobCard({
             {postedDate}
           </span>
           {job.salary && (
-            <span className="text-[#C7F36B] font-semibold truncate max-w-[170px] text-right">
+            <span className="text-emerald-400 font-semibold truncate max-w-[170px] text-right">
               {job.salary}
             </span>
           )}
@@ -335,7 +325,7 @@ export default function JobCard({
           <button
             type="button"
             onClick={() => onSelect(job)}
-            className="py-2.5 px-3 rounded-xl bg-[#C7F36B] hover:bg-[#bbf055] text-[#11110F] text-xs font-bold text-center tracking-wide uppercase shadow-md shadow-[#C7F36B]/20 transition-all flex items-center justify-center gap-1.5"
+            className="py-2.5 px-3 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-bold text-center tracking-wide uppercase shadow-md transition-all flex items-center justify-center gap-1.5"
           >
             <span>View Job</span>
             <ArrowUpRight className="w-3.5 h-3.5" />

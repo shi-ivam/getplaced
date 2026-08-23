@@ -175,7 +175,7 @@ export default function ResumeReportOverview({
                     evaluation.ats_score >= 80
                       ? "text-emerald-400"
                       : evaluation.ats_score >= 65
-                      ? "text-violet-400"
+                      ? "text-purple-400"
                       : "text-amber-400"
                   }
                   strokeDasharray={`${evaluation.ats_score}, 100`}
@@ -205,7 +205,7 @@ export default function ResumeReportOverview({
                     evaluation.ats_score >= 80
                       ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                       : evaluation.ats_score >= 65
-                      ? "bg-violet-500/10 text-violet-300 border-violet-500/30"
+                      ? "bg-purple-500/10 text-purple-300 border-purple-500/30"
                       : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                   }`}
                 >
@@ -263,7 +263,7 @@ export default function ResumeReportOverview({
                   <div className="w-full bg-white/[0.06] rounded-full h-1.5 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
-                        score >= 80 ? "bg-emerald-400" : score >= 65 ? "bg-violet-400" : "bg-amber-400"
+                        score >= 80 ? "bg-emerald-400" : score >= 65 ? "bg-purple-400" : "bg-amber-400"
                       }`}
                       style={{ width: `${score}%` }}
                     />
@@ -302,7 +302,7 @@ export default function ResumeReportOverview({
                   : "text-neutral-400 hover:text-neutral-200"
               }`}
             >
-              All ({totalKeywords})
+              All
             </button>
             <button
               onClick={() => setKeywordFilter("matched")}
@@ -312,7 +312,7 @@ export default function ResumeReportOverview({
                   : "text-neutral-400 hover:text-neutral-200"
               }`}
             >
-              Matched ({matchedKeywords.length})
+              Matched
             </button>
             <button
               onClick={() => setKeywordFilter("missing")}
@@ -322,7 +322,7 @@ export default function ResumeReportOverview({
                   : "text-neutral-400 hover:text-neutral-200"
               }`}
             >
-              Missing ({missingKeywords.length})
+              Missing
             </button>
           </div>
         </div>
@@ -458,7 +458,7 @@ export default function ResumeReportOverview({
                     </span>
                   )}
                   {item.action_verb_used && (
-                    <span className="text-[10px] font-mono bg-violet-500/10 border border-violet-500/20 text-violet-300 px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-mono bg-purple-500/10 border border-purple-500/20 text-purple-300 px-2 py-0.5 rounded">
                       Verb: {item.action_verb_used}
                     </span>
                   )}
@@ -478,7 +478,7 @@ export default function ResumeReportOverview({
       {evaluation.formatting_flags?.length > 0 && (
         <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 space-y-4 backdrop-blur-xl">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-white font-mono flex items-center gap-2">
-            <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+            <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
             Formatting & Structural Flags
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

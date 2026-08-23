@@ -74,7 +74,7 @@ export default function CompanyEligibilityFilter({ academicData }) {
       {/* Header & Stats */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+          <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
             <Building2 className="w-5 h-5" />
           </div>
           <div>
@@ -107,7 +107,7 @@ export default function CompanyEligibilityFilter({ academicData }) {
             placeholder="Filter company name or tier (Google, Microsoft, FinTech, TCS)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-950/80 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-blue-400 transition-colors"
+            className="w-full bg-zinc-950/80 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-purple-400 transition-colors"
           />
         </div>
 

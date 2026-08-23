@@ -582,17 +582,13 @@ export default function AnalyzeResume() {
         <header className="flex flex-col gap-4 border-b border-white/[0.07] pb-6">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="space-y-1.5 max-w-2xl">
-              <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
-                  ATS Evaluation Matrix
-                </span>
-                {isProfileLinked && (
+              {isProfileLinked && (
+                <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                     <ShieldCheck className="w-3 h-3" /> Profile Linked
                   </span>
-                )}
-              </div>
+                </div>
+              )}
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
                 Resume Intelligence & ATS Analysis
               </h1>
@@ -655,7 +651,7 @@ export default function AnalyzeResume() {
               }`}
             >
               <History className="w-3.5 h-3.5" />
-              Version History ({versions.length})
+              Version History
             </button>
 
             <button

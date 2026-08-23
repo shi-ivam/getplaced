@@ -60,12 +60,12 @@ export default function DSAContent({ defaultTab = null }) {
               onClick={() => handleTabSwitch("sheets")}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md transition-all cursor-pointer ${
                 mainTab === "sheets"
-                  ? "bg-zinc-100 text-zinc-950 font-bold shadow-sm"
+                  ? "bg-zinc-100 text-zinc-950 font-bold"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Study Plan (28)</span>
+              <span>Curriculum Sheets</span>
             </button>
 
             <button
@@ -73,7 +73,7 @@ export default function DSAContent({ defaultTab = null }) {
               onClick={() => handleTabSwitch("comparison")}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md transition-all cursor-pointer ${
                 mainTab === "comparison"
-                  ? "bg-zinc-100 text-zinc-950 font-bold shadow-sm"
+                  ? "bg-zinc-100 text-zinc-950 font-bold"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
@@ -86,7 +86,7 @@ export default function DSAContent({ defaultTab = null }) {
               onClick={() => handleTabSwitch("submissions")}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md transition-all cursor-pointer ${
                 mainTab === "submissions"
-                  ? "bg-zinc-100 text-zinc-950 font-bold shadow-sm"
+                  ? "bg-zinc-100 text-zinc-950 font-bold"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >

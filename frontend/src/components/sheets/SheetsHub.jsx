@@ -30,13 +30,13 @@ import SheetArticleModal from "./SheetArticleModal";
 import SheetVideoModal from "./SheetVideoModal";
 
 const CATEGORY_TABS = [
-  { id: "all", label: "All Curricula (28)", icon: Layers },
-  { id: "dsa_sheets", label: "DSA Sheets (4)", icon: Flame },
-  { id: "dsa_playlists", label: "DSA Playlists (9)", icon: Code2 },
-  { id: "tuf_plus_courses", label: "TUF+ Courses (10)", icon: GraduationCap },
-  { id: "core_cs_subjects", label: "Core CS (3)", icon: Cpu },
-  { id: "system_design", label: "System Design (1)", icon: Server },
-  { id: "competitive_programming", label: "CP Sheet (1)", icon: Trophy },
+  { id: "all", label: "All Curricula", icon: Layers },
+  { id: "dsa_sheets", label: "DSA Sheets", icon: Flame },
+  { id: "dsa_playlists", label: "DSA Playlists", icon: Code2 },
+  { id: "tuf_plus_courses", label: "TUF+ Courses", icon: GraduationCap },
+  { id: "core_cs_subjects", label: "Core CS", icon: Cpu },
+  { id: "system_design", label: "System Design", icon: Server },
+  { id: "competitive_programming", label: "CP Sheet", icon: Trophy },
 ];
 
 export default function SheetsHub({ initialSheetId = null, onSelectSheet = null, initialSearch = "" }) {
@@ -140,10 +140,6 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
       <div className="gsap-reveal flex flex-col gap-6 pb-6 border-b border-zinc-800/80">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono">
-              <Layers className="w-3.5 h-3.5 text-zinc-400" />
-              Curriculum & Problem Sets
-            </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight">
               DSA Sheets & Curriculum Tracks
             </h1>
@@ -269,7 +265,7 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
               No problems found matching &quot;{searchQuery}&quot;.
             </div>
           ) : (
-            <div className="divide-y divide-zinc-800/60 rounded-2xl border border-zinc-800 bg-[#0e0e11] overflow-hidden shadow-xl">
+            <div className="divide-y divide-zinc-800/60 rounded-2xl border border-zinc-800 bg-[#0e0e11] overflow-hidden">
               {searchResults.problems.map((prob) => {
                 const diffLower = (prob.difficulty || "").toLowerCase();
                 const diffBadgeColor =
@@ -287,14 +283,14 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
                     <div className="space-y-1 min-w-0 pr-3">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs sm:text-sm font-semibold text-white truncate">
-                          {prob.problem_name}
+                           {prob.problem_name}
                         </span>
                         <span className={`text-[10px] font-mono font-bold px-2 py-0.2 rounded border ${diffBadgeColor}`}>
                           {prob.difficulty}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono">
-                        <span className="text-purple-400">{prob.sheet_title}</span>
+                        <span className="text-zinc-300">{prob.sheet_title}</span>
                         <span>·</span>
                         <span>{prob.section_name}</span>
                       </div>
@@ -307,7 +303,7 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
                           onClick={() => setActiveArticleSlug(prob.article_slug)}
                           className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700/60 transition-colors cursor-pointer"
                         >
-                          <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+                          <BookOpen className="w-3.5 h-3.5 text-zinc-300" />
                           <span>Tutorial</span>
                         </button>
                       )}
@@ -318,7 +314,7 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
                           onClick={() =>
                             setVideoModal({ isOpen: true, url: prob.youtube_url, title: prob.problem_name })
                           }
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs font-medium border border-red-500/20 transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-medium border border-rose-500/20 transition-colors cursor-pointer"
                         >
                           <Play className="w-3.5 h-3.5 fill-current" />
                           <span>Video</span>
@@ -328,7 +324,7 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
                       {prob.is_ide_runnable && prob.leetcode_slug ? (
                         <Link
                           to={`/app/coding/${prob.leetcode_slug}`}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-sm transition-all"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-950 text-xs font-semibold transition-all"
                         >
                           <Terminal className="w-3.5 h-3.5" />
                           <span>Solve</span>
@@ -362,7 +358,7 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
                     <h2 className="text-lg font-bold text-white tracking-tight">{category.title}</h2>
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.2 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
                       {category.sheets_count} Lists
                     </span>
                   </div>

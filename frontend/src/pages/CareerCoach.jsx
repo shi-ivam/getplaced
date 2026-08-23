@@ -149,7 +149,7 @@ export default function CareerCoach() {
         particleCount: 70,
         spread: 60,
         origin: { y: 0.8 },
-        colors: ["#10b981", "#06b6d4", "#6366f1", "#ffffff"],
+        colors: ["#10b981", "#a855f7", "#f59e0b", "#ffffff"],
       });
     } catch (e) {
       // non-fatal

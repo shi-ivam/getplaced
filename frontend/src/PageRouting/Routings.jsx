@@ -57,19 +57,19 @@ function Routings() {
           <Route path="/can-i-apply" element={<CanIApply />} />
           <Route path="/onboarding" element={<CareerCoach />} />
           <Route path="/onboarding/coach" element={<CareerCoach />} />
-          <Route path="/privacy" element={<div className="min-h-screen bg-[#1A312C] text-[#FFF4E1]"><PrivacyProtection /></div>} />
+          <Route path="/privacy" element={<div className="min-h-screen bg-[#09090b] text-zinc-100"><PrivacyProtection /></div>} />
           <Route path="/terms" element={
-            <div className="min-h-screen bg-[#1A312C] text-[#FFF4E1] p-8 max-w-4xl mx-auto space-y-6 pt-20">
-              <h1 className="text-4xl font-extrabold text-[#FFF4E1]">Terms of Service</h1>
-              <p className="text-[#FFF4E1]/80 leading-relaxed text-sm">
+            <div className="min-h-screen bg-[#09090b] text-zinc-100 p-8 max-w-4xl mx-auto space-y-6 pt-24">
+              <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Terms of Service</h1>
+              <p className="text-zinc-400 leading-relaxed text-sm">
                 Welcome to getPlaced. By accessing or using the platform, interview simulation tools, resume analysis, and preparation resources, you agree to these terms.
               </p>
-              <h2 className="text-xl font-bold text-[#89D7B7]">1. User Account & Security</h2>
-              <p className="text-[#FFF4E1]/80 text-sm">
+              <h2 className="text-lg font-semibold text-zinc-200">1. User Account & Security</h2>
+              <p className="text-zinc-400 text-sm">
                 Users are responsible for maintaining credential confidentiality. Session telemetry and simulation data are protected under standard encryption protocols.
               </p>
-              <h2 className="text-xl font-bold text-[#89D7B7]">2. Platform Usage & AI Telemetry</h2>
-              <p className="text-[#FFF4E1]/80 text-sm">
+              <h2 className="text-lg font-semibold text-zinc-200">2. Platform Usage & AI Telemetry</h2>
+              <p className="text-zinc-400 text-sm">
                 The platform provides interview practice, speech analysis, and coding environments for placement preparation. User data is isolated and never used for public model training.
               </p>
             </div>

@@ -157,84 +157,80 @@ const ResumeAnalyzer = () => {
   };
 
   return (
-    <section id="resume" className="py-20 md:py-32 bg-[#1A312C] text-[#FFF4E1] relative overflow-hidden">
-      
-      {/* Background Glow */}
-      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] bg-[#89D7B7]/10 rounded-full blur-[150px] pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
+    <section id="resume" className="py-20 md:py-32 bg-[#09090b] text-zinc-100 relative overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-10">
         
         {/* Section Header */}
-        <div className="flex flex-col items-center text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#428475]/25 border border-[#89D7B7]/30 text-[#89D7B7] text-xs font-mono uppercase tracking-widest">
-            <FileCheck className="w-3.5 h-3.5 text-[#89D7B7]" /> ATS Resume Scoring
+        <div className="flex flex-col items-center text-center max-w-2xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono uppercase tracking-wider">
+            <FileCheck className="w-3.5 h-3.5 text-emerald-400" /> ATS Resume Scoring
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#FFF4E1] break-words">
-            Resume Analysis & Competency Matrix
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
+            Resume Analysis & Skill Matrix
           </h2>
-          <p className="text-[#FFF4E1]/75 text-sm sm:text-base md:text-lg leading-relaxed">
-            Keyword verification, skill mapping, and ATS match scoring against role requirements.
+          <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
+            Keyword verification, skill mapping, and match scoring against role requirements.
           </p>
         </div>
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           
           {/* Left ATS Score Card (5 Cols) */}
           <motion.div 
-            whileHover={{ scale: 1.01 }}
-            transition={{ duration: 0.3 }}
-            className="lg:col-span-5 rounded-3xl bg-gradient-to-b from-[#1E3A34] to-[#12221e] p-6 sm:p-8 border border-[#428475]/40 shadow-2xl flex flex-col justify-between h-auto min-h-[420px]"
+            whileHover={{ y: -2 }}
+            transition={{ duration: 0.2 }}
+            className="lg:col-span-5 rounded-2xl bg-zinc-900/50 p-5 sm:p-7 border border-zinc-800 flex flex-col justify-between h-auto min-h-[400px]"
           >
-            <div className="space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-[#428475]/30 flex-wrap gap-2">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-[#89D7B7]/20 border border-[#89D7B7]/30 flex items-center justify-center text-[#89D7B7] shrink-0">
-                    <Sparkles className="w-5 h-5" />
+            <div className="space-y-5">
+              <div className="flex items-center justify-between pb-3.5 border-b border-zinc-800 flex-wrap gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 shrink-0">
+                    <Sparkles className="w-4 h-4 text-purple-400" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-bold text-[#FFF4E1] text-base truncate">{resumeData.name}</h3>
-                    <p className="text-xs text-[#FFF4E1]/70 truncate">{resumeData.role}</p>
+                    <h3 className="font-semibold text-white text-sm truncate">{resumeData.name}</h3>
+                    <p className="text-xs text-zinc-400 truncate">{resumeData.role}</p>
                   </div>
                 </div>
                 {resumeData.isDemo ? (
-                  <span className="text-[11px] font-mono bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/30 font-semibold shrink-0">
-                    DEMO MODE
+                  <span className="text-[10px] font-mono bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded-md border border-amber-500/20 font-medium shrink-0">
+                    DEMO
                   </span>
                 ) : (
-                  <span className="text-[11px] font-mono bg-[#89D7B7]/15 text-[#89D7B7] px-3 py-1 rounded-full border border-[#89D7B7]/30 font-semibold shrink-0">
-                    VERIFIED ATS
+                  <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-md border border-emerald-500/20 font-medium shrink-0">
+                    VERIFIED
                   </span>
                 )}
               </div>
 
-              {/* Massive Score Display */}
-              <div className="text-center py-4 space-y-1">
-                <div className="text-6xl sm:text-7xl font-black font-mono bg-gradient-to-r from-[#FFF4E1] via-[#89D7B7] to-[#428475] bg-clip-text text-transparent">
+              {/* Score Display */}
+              <div className="text-center py-2 space-y-1">
+                <div className="text-5xl sm:text-6xl font-bold font-mono text-emerald-400">
                   {resumeData.atsScore}%
                 </div>
-                <p className="text-xs uppercase tracking-widest text-[#FFF4E1]/70 font-semibold">
-                  ATS Score vs Industry Benchmarks
+                <p className="text-xs uppercase tracking-wider text-zinc-400 font-medium font-mono">
+                  ATS Match Score
                 </p>
               </div>
 
-              {/* File Uploader for Interactive Demo / New Upload */}
-              <div className="p-4 rounded-2xl bg-[#1A312C]/90 border border-[#428475]/40 space-y-3">
-                <div className="flex items-center justify-between text-xs font-semibold text-[#89D7B7]">
+              {/* File Uploader */}
+              <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-2.5">
+                <div className="flex items-center justify-between text-xs font-medium text-zinc-300">
                   <span>Upload Resume</span>
-                  <UploadCloud className="w-4 h-4 text-[#89D7B7]" />
+                  <UploadCloud className="w-4 h-4 text-zinc-400" />
                 </div>
-                <label className="flex flex-col items-center justify-center p-3 border-2 border-dashed border-[#428475]/60 hover:border-[#89D7B7] rounded-xl bg-[#12221e]/60 cursor-pointer transition text-center group">
+                <label className="flex flex-col items-center justify-center p-3 border border-dashed border-zinc-700 hover:border-zinc-500 rounded-lg bg-zinc-900/40 cursor-pointer transition text-center group">
                   {uploading ? (
-                    <div className="flex items-center gap-2 text-xs text-[#89D7B7] font-mono">
-                      <Loader2 className="w-4 h-4 animate-spin" /> Parsing resume...
+                    <div className="flex items-center gap-2 text-xs text-zinc-300 font-mono">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Parsing resume...
                     </div>
                   ) : (
                     <>
-                      <span className="text-xs text-[#FFF4E1]/80 font-medium group-hover:text-white">
+                      <span className="text-xs text-zinc-300 font-medium group-hover:text-white">
                         Select PDF or DOCX file
                       </span>
-                      <span className="text-[10px] text-[#FFF4E1]/50 mt-0.5">Parses text and scores keywords</span>
+                      <span className="text-[10px] text-zinc-500 mt-0.5">Automated parsing and keyword matching</span>
                     </>
                   )}
                   <input
@@ -246,7 +242,7 @@ const ResumeAnalyzer = () => {
                   />
                 </label>
                 {uploadSuccess && (
-                  <div className="text-xs text-[#89D7B7] font-mono bg-[#89D7B7]/10 p-2 rounded border border-[#89D7B7]/30">
+                  <div className="text-xs text-emerald-400 font-mono bg-emerald-500/10 p-2 rounded border border-emerald-500/20">
                     {uploadSuccess}
                   </div>
                 )}
@@ -258,17 +254,17 @@ const ResumeAnalyzer = () => {
                 )}
               </div>
 
-              {/* Keywords Found Pills */}
-              <div className="pt-4 border-t border-[#428475]/30 space-y-3">
-                <div className="text-xs font-semibold text-[#FFF4E1]/85 uppercase tracking-wider">
-                  Detected Keywords
+              {/* Keywords Found */}
+              <div className="pt-3 border-t border-zinc-800 space-y-2">
+                <div className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                  Verified Keywords
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {resumeData.keywordsFound.map((kw, idx) => {
                     const kwText = typeof kw === "string" ? kw : kw?.keyword || `keyword-${idx}`;
                     return (
-                      <span key={`${kwText}-${idx}`} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#1A312C]/80 border border-[#428475]/40 text-xs text-[#FFF4E1] font-mono">
-                        <CheckCircle2 className="w-3 h-3 text-[#89D7B7] shrink-0" />
+                      <span key={`${kwText}-${idx}`} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 font-mono">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
                         <span className="truncate">{kwText}</span>
                       </span>
                     );
@@ -277,49 +273,49 @@ const ResumeAnalyzer = () => {
               </div>
             </div>
 
-            <div className="pt-6 mt-6 border-t border-[#428475]/30">
+            <div className="pt-4 mt-4 border-t border-zinc-800">
               <Link
                 to="/resume"
-                className="flex items-center justify-center gap-2 w-full py-3 bg-[#89D7B7]/15 hover:bg-[#89D7B7]/25 border border-[#89D7B7]/30 rounded-xl text-xs font-semibold text-[#FFF4E1] hover:text-white transition"
+                className="flex items-center justify-center gap-1.5 w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs font-medium text-zinc-200 hover:text-white transition"
               >
-                <Zap className="w-3.5 h-3.5 text-[#89D7B7]" />
-                Open Detailed Resume View
-                <ArrowUpRight className="w-3.5 h-3.5 text-[#89D7B7]" />
+                <Zap className="w-3.5 h-3.5 text-purple-400" />
+                Detailed Resume Workspace
+                <ArrowUpRight className="w-3.5 h-3.5 text-zinc-400" />
               </Link>
             </div>
           </motion.div>
 
           {/* Right Radar Chart Analysis (7 Cols) */}
           <motion.div 
-            whileHover={{ scale: 1.01 }}
-            transition={{ duration: 0.3 }}
-            className="lg:col-span-7 rounded-3xl bg-[#152824] p-6 sm:p-8 border border-[#428475]/40 shadow-2xl flex flex-col justify-between h-auto min-h-[420px]"
+            whileHover={{ y: -2 }}
+            transition={{ duration: 0.2 }}
+            className="lg:col-span-7 rounded-2xl bg-zinc-900/50 p-5 sm:p-7 border border-zinc-800 flex flex-col justify-between h-auto min-h-[400px]"
           >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-              <div className="flex items-center gap-2 text-sm font-bold text-[#FFF4E1]">
-                <TrendingUp className="w-4 h-4 text-[#89D7B7]" />
-                <span>Skill Competency Matrix</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                <TrendingUp className="w-4 h-4 text-emerald-400" />
+                <span>Competency Radar</span>
               </div>
-              <span className="text-xs font-mono text-[#89D7B7]/80">
-                {resumeData.isDemo ? "BENCHMARK: DEMO CANDIDATE" : `USER: ${resumeData.name.toUpperCase()}`}
+              <span className="text-xs font-mono text-zinc-400">
+                {resumeData.isDemo ? "BENCHMARK: DEMO PROFILE" : `USER: ${resumeData.name.toUpperCase()}`}
               </span>
             </div>
 
-            <div className="w-full h-[300px] sm:h-[340px] flex items-center justify-center">
+            <div className="w-full h-[280px] sm:h-[320px] flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="70%" data={resumeData.insights}>
-                  <PolarGrid stroke="rgba(66, 132, 117, 0.35)" />
-                  <PolarAngleAxis dataKey="skill" stroke="#428475" tick={{ fill: '#FFF4E1', fontSize: 11 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="rgba(66, 132, 117, 0.25)" />
-                  <Radar name="Candidate Score" dataKey="score" stroke="#89D7B7" fill="#428475" fillOpacity={0.5} />
+                  <PolarGrid stroke="rgba(255, 255, 255, 0.08)" />
+                  <PolarAngleAxis dataKey="skill" stroke="#71717a" tick={{ fill: '#d4d4d8', fontSize: 11 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="rgba(255, 255, 255, 0.06)" />
+                  <Radar name="Candidate Score" dataKey="score" stroke="#10b981" fill="#10b981" fillOpacity={0.25} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-[#428475]/30 text-xs text-[#FFF4E1]/70 font-mono">
-              <span>ATS Competency Model</span>
-              <span className="text-[#89D7B7] font-semibold">
-                {resumeData.isDemo ? "Upload a file to recalculate" : "User data loaded"}
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-zinc-800 text-xs text-zinc-400 font-mono">
+              <span>Standard ATS Benchmark</span>
+              <span className="text-emerald-400 font-medium">
+                {resumeData.isDemo ? "Upload resume to recalculate" : "Verified profile active"}
               </span>
             </div>
           </motion.div>

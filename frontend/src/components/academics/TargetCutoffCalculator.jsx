@@ -170,8 +170,8 @@ export default function TargetCutoffCalculator({
         <div
           className={`p-6 rounded-2xl border transition-all duration-300 ${
             analysis.achievable
-              ? "bg-gradient-to-r from-emerald-950/40 via-zinc-900/90 to-zinc-950/90 border-emerald-500/30"
-              : "bg-gradient-to-r from-rose-950/40 via-zinc-900/90 to-zinc-950/90 border-rose-500/30"
+              ? "bg-emerald-950/20 border-emerald-500/30"
+              : "bg-rose-950/20 border-rose-500/30"
           }`}
         >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

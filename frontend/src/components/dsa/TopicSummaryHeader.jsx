@@ -33,22 +33,17 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
   const getLevelColor = (level) => {
     if (level === null || level === undefined) return "text-zinc-500";
     if (level >= 8.5) return "text-emerald-400";
-    if (level >= 7.0) return "text-sky-400";
+    if (level >= 7.0) return "text-zinc-200";
     if (level >= 5.0) return "text-amber-400";
     return "text-rose-400";
   };
 
   return (
-    <div className="rounded-xl bg-[#121215] border border-zinc-800/90 p-5 md:p-6 space-y-6 shadow-sm">
+    <div className="rounded-xl bg-[#121215] border border-zinc-800/90 p-5 md:p-6 space-y-6">
       {/* Top Banner Row: Overall Level & LeetCode Sync */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-300 flex items-center gap-1.5 font-bold">
-              <Code2 className="w-3.5 h-3.5" />
-              Topic Analysis
-            </span>
-
             {isConnected ? (
               <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">
                 <CheckCircle2 className="w-2.5 h-2.5" />
@@ -146,7 +141,7 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
               </p>
               <Link
                 to="/app/profile"
-                className="w-full inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium transition-colors"
+                className="w-full inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md bg-zinc-100 hover:bg-zinc-200 text-zinc-950 text-xs font-medium transition-colors"
               >
                 <span>Connect Profile</span>
                 <ArrowRight className="w-3 h-3" />
@@ -215,7 +210,7 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
         <div className="bg-[#16161a] border border-zinc-800 rounded-xl p-3.5 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-1 font-semibold">
-              <ShieldCheck className="w-3 h-3 text-sky-400" />
+              <ShieldCheck className="w-3 h-3 text-zinc-400" />
               Taxonomy Breadth
             </span>
             <span className="text-[10px] font-mono text-zinc-300 font-bold">{coveragePercent}%</span>
@@ -227,7 +222,7 @@ export default function TopicSummaryHeader({ dsaData, targetCompany = "", target
             </div>
             <div className="w-full bg-zinc-900 rounded-full h-1.5 mt-2 overflow-hidden">
               <div
-                className="bg-sky-400 h-full rounded-full transition-all duration-500"
+                className="bg-zinc-200 h-full rounded-full transition-all duration-500"
                 style={{ width: `${coveragePercent}%` }}
               />
             </div>

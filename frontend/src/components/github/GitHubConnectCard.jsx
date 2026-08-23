@@ -9,23 +9,11 @@ import {
   AlertCircle,
   Star,
   GitFork,
-  Eye,
   Globe,
-  MapPin,
-  Building,
-  Link2,
   Search,
-  Filter,
-  ArrowUpDown,
-  Clock,
   Sparkles,
   ShieldCheck,
   Code2,
-  Layers,
-  Award,
-  ChevronDown,
-  ChevronUp,
-  Radio,
   BookOpen,
   X,
 } from "lucide-react";
@@ -324,19 +312,19 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
 
   const projectScore = profile?.projectScore || 0;
   const getScoreBadgeClass = (score) => {
-    if (score >= 85) return "bg-emerald-950/80 text-emerald-300 border-emerald-700/60";
-    if (score >= 70) return "bg-sky-950/80 text-sky-300 border-sky-700/60";
-    if (score >= 50) return "bg-amber-950/80 text-amber-300 border-amber-700/60";
-    return "bg-rose-950/80 text-rose-300 border-rose-700/60";
+    if (score >= 85) return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+    if (score >= 70) return "bg-purple-500/10 text-purple-400 border-purple-500/20";
+    if (score >= 50) return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+    return "bg-rose-500/10 text-rose-400 border-rose-500/20";
   };
 
   return (
-    <Card className="bg-[#0d0e15] border-zinc-800 shadow-none">
-      <CardHeader className="pb-4 border-b border-zinc-800/80">
+    <Card className="bg-[#121215] border-zinc-800 shadow-none">
+      <CardHeader className="pb-4 border-b border-zinc-800">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
-              <FolderGit2 className="w-4 h-4" />
+              <FolderGit2 className="w-4 h-4 text-emerald-400" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -372,7 +360,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
               </Button>
 
               {showConfirmDisconnect ? (
-                <div className="flex items-center gap-1.5 bg-rose-950/80 border border-rose-800/80 px-2 py-1 rounded-md">
+                <div className="flex items-center gap-1.5 bg-rose-950/80 border border-rose-800 px-2 py-1 rounded-md">
                   <span className="text-[11px] text-rose-200 font-medium">Disconnect?</span>
                   <button
                     type="button"
@@ -412,14 +400,14 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
       <CardContent className="pt-6 space-y-6">
         {/* Alerts & Messages */}
         {successMsg && (
-          <div className="flex items-center gap-2 bg-emerald-950/70 border border-emerald-600/60 text-emerald-200 px-3.5 py-2.5 rounded-lg text-xs font-medium">
+          <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 px-3.5 py-2.5 rounded-lg text-xs font-medium">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}
 
         {errorMsg && (
-          <div className="flex items-center gap-2 bg-rose-950/70 border border-rose-600/60 text-rose-200 px-3.5 py-2.5 rounded-lg text-xs font-medium">
+          <div className="flex items-center gap-2 bg-rose-500/10 border border-rose-500/20 text-rose-300 px-3.5 py-2.5 rounded-lg text-xs font-medium">
             <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
             <span>{errorMsg}</span>
           </div>
@@ -427,7 +415,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
 
         {/* Graceful sync failure alert */}
         {profile?.syncStatus === "failed" && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-950/40 border border-amber-600/50 text-amber-200 p-3.5 rounded-xl text-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/20 text-amber-300 p-3.5 rounded-xl text-xs">
             <div className="flex items-start sm:items-center gap-2.5">
               <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
               <div>
@@ -448,17 +436,15 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
               variant="outline"
               onClick={handleSync}
               disabled={syncing}
-              className="bg-amber-900/40 hover:bg-amber-900/70 border-amber-600 text-amber-100 text-xs h-7 px-3 shrink-0 self-start sm:self-auto cursor-pointer"
+              className="bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-200 text-xs h-7 px-3 shrink-0 self-start sm:self-auto cursor-pointer"
             >
-              <RefreshCw className={`w-3.5 h-3.5 mr-1 ${syncing ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 mr-1 ${syncing ? "animate-spin text-zinc-300" : ""}`} />
               {syncing ? "Retrying..." : "Retry Sync"}
             </Button>
           </div>
         )}
 
-        {/* ------------------------------------------------------------- */}
         {/* DISCONNECTED STATE */}
-        {/* ------------------------------------------------------------- */}
         {!connected && (
           <div className="space-y-6">
             <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-5 md:p-6 space-y-4">
@@ -488,7 +474,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                     type="text"
                     value={inputUsername}
                     onChange={(e) => setInputUsername(e.target.value)}
-                    placeholder="e.g. torvalds, @username, or https://github.com/username"
+                    placeholder="e.g. username, or https://github.com/username"
                     className="bg-[#0f1017] border-zinc-700 text-white placeholder:text-zinc-500 focus:border-zinc-500 text-sm h-10 pr-10 font-mono"
                     disabled={connecting}
                   />
@@ -506,7 +492,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                 <Button
                   type="submit"
                   disabled={connecting || !inputUsername.trim()}
-                  className="bg-white hover:bg-zinc-200 text-zinc-950 font-medium px-5 h-10 rounded-lg flex items-center justify-center gap-2 shrink-0 cursor-pointer text-xs"
+                  className="bg-zinc-100 hover:bg-white text-zinc-950 font-medium px-5 h-10 rounded-lg flex items-center justify-center gap-2 shrink-0 cursor-pointer text-xs"
                 >
                   {connecting ? (
                     <>
@@ -525,9 +511,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
           </div>
         )}
 
-        {/* ------------------------------------------------------------- */}
         {/* CONNECTED STATE DASHBOARD */}
-        {/* ------------------------------------------------------------- */}
         {connected && profile && (
           <div className="space-y-6">
             {/* 1. Header Hero Card with Profile Metadata */}
@@ -560,7 +544,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                       </a>
                     </div>
                     {profile.bio && (
-                      <p className="text-xs text-zinc-300 mt-1 max-w-xl line-clamp-2">
+                      <p className="text-xs text-zinc-400 mt-1 max-w-xl line-clamp-2">
                         {profile.bio}
                       </p>
                     )}
@@ -568,7 +552,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                 </div>
 
                 {/* Readiness Project Score Badge */}
-                <div className="bg-[#0f1017] border border-zinc-800/80 px-3.5 py-2.5 rounded-lg flex items-center gap-3 shrink-0 self-start md:self-auto">
+                <div className="bg-[#0f1017] border border-zinc-800 px-3.5 py-2.5 rounded-lg flex items-center gap-3 shrink-0 self-start md:self-auto">
                   <div>
                     <div className="text-[10px] text-zinc-400 font-mono uppercase">Projects Score</div>
                     <div className="text-lg font-bold font-mono text-white">
@@ -611,9 +595,9 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
               <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 space-y-1">
                 <div className="flex items-center justify-between text-zinc-400">
                   <span className="text-[10px] uppercase font-mono tracking-wider">Total Stars</span>
-                  <Star className="w-4 h-4 text-zinc-400" />
+                  <Star className="w-4 h-4 text-amber-400" />
                 </div>
-                <div className="text-2xl font-bold font-mono text-zinc-200">
+                <div className="text-2xl font-bold font-mono text-amber-400">
                   {profile.totalStars || 0}
                 </div>
               </div>
@@ -642,7 +626,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                 </div>
 
                 {/* Multi-segment Colored Bar */}
-                <div className="w-full h-3 bg-zinc-900 rounded-full overflow-hidden flex shadow-inner">
+                <div className="w-full h-2.5 bg-zinc-900 rounded-full overflow-hidden flex shadow-inner">
                   {languagesList.slice(0, 7).map((lang, idx) => {
                     const color = LANGUAGE_COLORS[lang.languageName] || "#a1a1aa";
                     return (
@@ -666,12 +650,12 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                         className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#0f1017] border border-zinc-800 text-xs font-mono text-zinc-300"
                       >
                         <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          className="w-2 h-2 rounded-full shrink-0"
                           style={{ backgroundColor: color }}
                         />
                         <span className="font-medium text-white">{lang.languageName}</span>
                         <span className="text-zinc-500 text-[11px]">
-                          {lang.percentage}% ({lang.repoCount})
+                          {lang.percentage}%
                         </span>
                       </div>
                     );
@@ -681,19 +665,19 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
             )}
 
             {/* 4. Tab Switcher (Featured Repos vs All Repos Explorer) */}
-            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setActiveTab("featured")}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
                     activeTab === "featured"
-                      ? "bg-zinc-200 text-zinc-950 font-medium"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                      ? "bg-zinc-100 text-zinc-950 font-semibold"
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border border-zinc-800"
                   }`}
                 >
                   <Star className="w-3.5 h-3.5" />
-                  <span>Featured Repositories ({topReposList.length})</span>
+                  <span>Featured Repositories</span>
                 </button>
 
                 <button
@@ -701,12 +685,12 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                   onClick={() => setActiveTab("all")}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
                     activeTab === "all"
-                      ? "bg-zinc-200 text-zinc-950 font-medium"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                      ? "bg-zinc-100 text-zinc-950 font-semibold"
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border border-zinc-800"
                   }`}
                 >
                   <FolderGit2 className="w-3.5 h-3.5" />
-                  <span>All Repositories ({repositories.length})</span>
+                  <span>All Repositories</span>
                 </button>
               </div>
             </div>
@@ -769,7 +753,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                         <option value="all">All Languages</option>
                         {languagesList.map((lang) => (
                           <option key={lang.languageName} value={lang.languageName}>
-                            {lang.languageName} ({lang.repoCount})
+                            {lang.languageName}
                           </option>
                         ))}
                       </select>
@@ -804,7 +788,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] text-zinc-500 font-mono pt-1 border-t border-zinc-800/80">
+                  <div className="flex items-center justify-between text-[11px] text-zinc-500 font-mono pt-1 border-t border-zinc-800">
                     <span>
                       Showing {filteredRepositories.length} of {repositories.length} repositories
                     </span>
@@ -862,7 +846,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
       {selectedRepoModal && (
         <div
           onClick={() => setSelectedRepoModal(null)}
-          className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -907,12 +891,12 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
               </div>
               <div className="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800">
                 <span className="text-[10px] text-zinc-500 block">Forks</span>
-                <span className="font-bold text-sky-400">{selectedRepoModal.forks || 0}</span>
+                <span className="font-bold text-zinc-200">{selectedRepoModal.forks || 0}</span>
               </div>
             </div>
 
             {/* Architecture Verdict */}
-            <div className="p-3.5 bg-zinc-900/60 border border-zinc-800/80 rounded-xl space-y-1 text-xs">
+            <div className="p-3.5 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-1 text-xs">
               <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-semibold block">
                 Repository Assessment
               </span>
@@ -946,7 +930,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                   href={selectedRepoModal.liveDemoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold text-center flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold text-center flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Globe className="w-3.5 h-3.5" />
                   <span>Open Live Demo</span>
@@ -956,7 +940,7 @@ export default function GitHubConnectCard({ onProfileUpdate }) {
                 href={selectedRepoModal.htmlUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium text-center flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium text-center flex items-center justify-center gap-1.5 transition-colors"
               >
                 <FolderGit2 className="w-3.5 h-3.5" />
                 <span>View on GitHub</span>
@@ -1031,7 +1015,7 @@ function RepositoryCard({ repo, onSelectRepo }) {
       </div>
 
       {/* Footer Metrics & Actions */}
-      <div className="pt-2.5 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
+      <div className="pt-2.5 border-t border-zinc-800 flex items-center justify-between text-xs font-mono">
         <div className="flex items-center gap-3 text-zinc-400">
           {repo.language && (
             <span className="flex items-center gap-1.5">
@@ -1044,7 +1028,7 @@ function RepositoryCard({ repo, onSelectRepo }) {
           )}
 
           <span className="flex items-center gap-1 text-zinc-300" title={`${repo.stars} stars`}>
-            <Star className="w-3.5 h-3.5 text-zinc-400 fill-zinc-400/20" />
+            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" />
             <span>{repo.stars || 0}</span>
           </span>
 

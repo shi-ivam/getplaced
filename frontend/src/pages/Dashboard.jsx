@@ -254,9 +254,8 @@ export default function Dashboard() {
   const getStatusBadge = (statusKey) => {
     switch (statusKey) {
       case "highly_ready":
-        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       case "interview_ready":
-        return "bg-sky-500/10 text-sky-400 border-sky-500/20";
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       case "developing":
         return "bg-amber-500/10 text-amber-400 border-amber-500/20";
       case "needs_major_improvement":
@@ -264,22 +263,20 @@ export default function Dashboard() {
       case "not_ready":
         return "bg-rose-500/10 text-rose-400 border-rose-500/20";
       default:
-        return "bg-zinc-800/80 text-zinc-400 border-zinc-700/60";
+        return "bg-zinc-800 text-zinc-400 border-zinc-700";
     }
   };
 
   const getScoreColor = (score) => {
     if (score === null || score === undefined) return "text-zinc-500";
-    if (score >= 90) return "text-emerald-400";
-    if (score >= 75) return "text-sky-400";
+    if (score >= 80) return "text-emerald-400";
     if (score >= 60) return "text-amber-400";
     return "text-rose-400";
   };
 
   const getProgressBarBg = (score) => {
     if (score === null || score === undefined) return "bg-zinc-800";
-    if (score >= 90) return "bg-emerald-400";
-    if (score >= 75) return "bg-sky-400";
+    if (score >= 80) return "bg-emerald-400";
     if (score >= 60) return "bg-amber-400";
     return "bg-rose-400";
   };
@@ -659,7 +656,7 @@ export default function Dashboard() {
               to="/app/role-fit"
               className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400 transition-transform">
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-purple-400 transition-colors">
                 <Compass className="w-4 h-4" />
               </div>
               <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Role Fit</span>
@@ -670,7 +667,7 @@ export default function Dashboard() {
               to="/app/profile"
               className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-purple-400">
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-zinc-200 transition-colors">
                 <Target className="w-4 h-4" />
               </div>
               <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Profile</span>
@@ -681,7 +678,7 @@ export default function Dashboard() {
               to="/app/coach"
               className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-purple-400">
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-purple-400 transition-colors">
                 <Sparkles className="w-4 h-4 text-purple-400" />
               </div>
               <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Career Coach</span>
@@ -692,7 +689,7 @@ export default function Dashboard() {
               to="/app/arena"
               className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-amber-400">
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-amber-400 transition-colors">
                 <Swords className="w-4 h-4 text-amber-400" />
               </div>
               <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Coding Arena</span>
@@ -703,7 +700,7 @@ export default function Dashboard() {
               to="/app/roadmap"
               className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400">
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400 transition-colors">
                 <Compass className="w-4 h-4 text-emerald-400" />
               </div>
               <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Roadmap</span>
@@ -714,8 +711,8 @@ export default function Dashboard() {
               to="/app/job"
               className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-indigo-400">
-                <Briefcase className="w-4 h-4 text-indigo-400" />
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-zinc-200 transition-colors">
+                <Briefcase className="w-4 h-4 text-zinc-400 group-hover:text-zinc-200" />
               </div>
               <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Job Matching</span>
               <span className="text-[10px] text-zinc-500 font-mono">Openings</span>
@@ -725,7 +722,7 @@ export default function Dashboard() {
               to="/app/can-i-apply"
               className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400">
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400 transition-colors">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
               </div>
               <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Eligibility</span>
@@ -736,8 +733,8 @@ export default function Dashboard() {
               to="/app/academics"
               className="p-3 rounded-xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-colors flex flex-col items-center text-center space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-pink-400">
-                <GraduationCap className="w-4 h-4 text-pink-400" />
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-zinc-200 transition-colors">
+                <GraduationCap className="w-4 h-4 text-zinc-400 group-hover:text-zinc-200" />
               </div>
               <span className="text-xs font-medium text-zinc-200 group-hover:text-white">Academics</span>
               <span className="text-[10px] text-zinc-500 font-mono">VTOP Sync</span>
@@ -856,10 +853,6 @@ export default function Dashboard() {
             {/* Modal Header */}
             <div className="flex items-start justify-between relative">
               <div className="space-y-1 pr-6">
-                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-400">
-                  <Sparkles className="w-3 h-3 text-purple-400" />
-                  <span>Placement Audit</span>
-                </div>
                 <h3 className="text-base font-bold text-white tracking-tight">
                   Multi-Pillar Placement Audit
                 </h3>

@@ -450,7 +450,7 @@ export default function CodingWorkspace() {
               }`}
             >
               <History className="w-3.5 h-3.5" />
-              <span>Submissions ({submissionsHistory.length})</span>
+              <span>Submissions</span>
             </button>
           </div>
 

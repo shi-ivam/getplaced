@@ -382,15 +382,11 @@ export default function VtopDetails() {
         {/* Header with VTOP Portal Connection Status */}
         <header className="gsap-vtop-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
           <div className="space-y-3 max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-mono uppercase tracking-widest">
-              <Database className="w-3.5 h-3.5" />
-              VTOP Student Portal Sync • vtopcc.vit.ac.in
-            </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
               VTOP Academic Records & Marksheet
             </h1>
             <p className="text-sm md:text-base text-zinc-400 max-w-3xl leading-relaxed">
-              Sync official marksheets, assessment weightages, attendance margins, and placement cutoffs directly from <strong>vtopcc.vit.ac.in</strong>.
+              Sync marksheets, assessment weightages, attendance margins, and placement cutoffs directly from <strong>vtopcc.vit.ac.in</strong>.
             </p>
           </div>
 
@@ -413,7 +409,7 @@ export default function VtopDetails() {
             <button
               type="button"
               onClick={openLoginModal}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-xs hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-blue-500/20 transition-all duration-300 active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold text-xs hover:bg-zinc-200 shadow-lg hover:shadow-purple-500/10 transition-all duration-300 active:scale-95 cursor-pointer"
             >
               <Lock className="w-3.5 h-3.5" />
               <span>Sync VTOP Portal</span>
@@ -424,7 +420,7 @@ export default function VtopDetails() {
         {/* VTOP Profile Context Banner */}
         <section className="gsap-vtop-item rounded-2xl bg-zinc-900/40 border border-white/10 p-5 backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold font-mono text-base shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold font-mono text-base shrink-0">
               VIT
             </div>
             <div>
@@ -467,10 +463,10 @@ export default function VtopDetails() {
         {/* Bento Grid - Top Placement Affecting Parameters */}
         <section className="gsap-vtop-item grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 grid-flow-dense gap-4">
           {/* CGPA & Placement Cutoff */}
-          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-blue-500/40 transition-all duration-500">
+          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-purple-500/40 transition-all duration-500">
             <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
               <span>VTOP Verified CGPA</span>
-              <span className="text-blue-400 font-mono">Super Dream: 9.0+</span>
+              <span className="text-purple-400 font-mono">Super Dream: 9.0+</span>
             </div>
             <div className="text-4xl font-extrabold text-white font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left">
               {vtopData?.currentCgpa !== undefined && vtopData?.currentCgpa !== null ? vtopData.currentCgpa : "Unassessed"}
@@ -551,7 +547,7 @@ export default function VtopDetails() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/5">
             <div>
               <div className="flex items-center gap-2">
-                <FileSpreadsheet className="w-5 h-5 text-blue-400" />
+                <FileSpreadsheet className="w-5 h-5 text-purple-400" />
                 <h3 className="text-xl font-bold text-white tracking-tight">
                   Course Marksheets & Assessments
                 </h3>
@@ -567,9 +563,12 @@ export default function VtopDetails() {
                 <select
                   value={selectedSemester}
                   onChange={(e) => setSelectedSemester(e.target.value)}
-                  className="bg-zinc-950 border border-white/10 text-white text-xs font-medium rounded-xl px-3.5 py-2 pr-8 focus:outline-none focus:border-blue-500 cursor-pointer appearance-none"
+                  className="bg-zinc-950 border border-white/10 text-white text-xs font-medium rounded-xl px-3.5 py-2 pr-8 focus:outline-none focus:border-purple-500 cursor-pointer appearance-none"
                 >
-                  {vtopData?.availableSemesters?.map((sem) => (
+                  {(vtopData?.availableSemesters && vtopData.availableSemesters.length > 0
+                    ? vtopData.availableSemesters
+                    : vtopData?.semesters?.map((s) => ({ id: s.semesterId, name: s.semesterName })) || []
+                  ).map((sem) => (
                     <option key={sem.id} value={sem.id}>
                       {sem.name}
                     </option>
@@ -589,14 +588,14 @@ export default function VtopDetails() {
                       : "text-zinc-400 hover:text-zinc-200"
                   }`}
                 >
-                  All ({activeCourses.length})
+                  All
                 </button>
                 <button
                   type="button"
                   onClick={() => setCourseFilter("core")}
                   className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     courseFilter === "core"
-                      ? "bg-blue-600 text-white shadow-sm"
+                      ? "bg-purple-600 text-white shadow-sm"
                       : "text-zinc-400 hover:text-zinc-200"
                   }`}
                 >
@@ -619,122 +618,136 @@ export default function VtopDetails() {
 
           {/* Courses List */}
           <div className="space-y-6">
-            {filteredCourses.map((course) => {
-              const attPct = course.attendance?.percentage ?? 90;
-              const isDebarred = attPct < 75;
-              const isWarning = attPct >= 75 && attPct < 80;
+            {filteredCourses.length === 0 ? (
+              <div className="p-8 text-center rounded-2xl bg-zinc-950/60 border border-white/5 text-zinc-400 text-xs">
+                No courses found matching the selected filter for {selectedSemester}.
+              </div>
+            ) : (
+              filteredCourses.map((course) => {
+                const attPct = course.attendance?.percentage ?? 90;
+                const isDebarred = attPct < 75;
+                const isWarning = attPct >= 75 && attPct < 80;
 
-              return (
-                <div
-                  key={course.code}
-                  className="rounded-2xl bg-zinc-950/80 border border-white/10 hover:border-blue-500/40 p-5 md:p-6 transition-all duration-300 space-y-4"
-                >
-                  {/* Top Bar of Course Card */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="flex flex-wrap items-center gap-2.5">
-                        <span className="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-300 font-mono font-bold text-xs">
-                          {course.code}
-                        </span>
-                        <h4 className="text-base font-bold text-white tracking-tight">
-                          {course.title}
-                        </h4>
-                        <span className="text-xs text-zinc-400 font-mono">
-                          • {course.credits} Credits ({course.type})
-                        </span>
+                return (
+                  <div
+                    key={course.code}
+                    className="rounded-2xl bg-zinc-950/80 border border-white/10 hover:border-purple-500/40 p-5 md:p-6 transition-all duration-300 space-y-4"
+                  >
+                    {/* Top Bar of Course Card */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          <span className="px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-300 font-mono font-bold text-xs">
+                            {course.code}
+                          </span>
+                          <h4 className="text-base font-bold text-white tracking-tight">
+                            {course.title}
+                          </h4>
+                          <span className="text-xs text-zinc-400 font-mono">
+                            • {course.credits} Credits ({course.type})
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 font-mono pt-0.5">
+                          <span>Slot: <span className="text-zinc-200">{course.slot || "A1"}</span></span>
+                          <span>• Venue: <span className="text-zinc-200">{course.venue || "AB3-402"}</span></span>
+                          <span>• Faculty: <span className="text-zinc-200">{course.faculty || "Faculty"}</span></span>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 font-mono pt-0.5">
-                        <span>Slot: <span className="text-zinc-200">{course.slot}</span></span>
-                        <span>• Venue: <span className="text-zinc-200">{course.venue}</span></span>
-                        <span>• Faculty: <span className="text-zinc-200">{course.faculty}</span></span>
+
+                      {/* Attendance Pill & Grade Tag */}
+                      <div className="flex items-center gap-3 shrink-0">
+                        <div
+                          className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-semibold flex items-center gap-2 ${
+                            isDebarred
+                              ? "bg-rose-500/10 border-rose-500/30 text-rose-300"
+                              : isWarning
+                              ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
+                              : "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                          }`}
+                        >
+                          <span>Attendance: {attPct}% ({course.attendance?.attended ?? 0}/{course.attendance?.total ?? 0})</span>
+                          {isDebarred && <span className="font-bold uppercase tracking-wider text-[10px] bg-rose-500 text-white px-1.5 py-0.5 rounded">Debarred</span>}
+                        </div>
+
+                        <div className="px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold">
+                          Est Grade: {course.grade || "A"}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Attendance Pill & Grade Tag */}
-                    <div className="flex items-center gap-3 shrink-0">
-                      <div
-                        className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-semibold flex items-center gap-2 ${
-                          isDebarred
-                            ? "bg-rose-500/10 border-rose-500/30 text-rose-300"
-                            : isWarning
-                            ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
-                            : "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
-                        }`}
-                      >
-                        <span>Attendance: {attPct}% ({course.attendance?.attended}/{course.attendance?.total})</span>
-                        {isDebarred && <span className="font-bold uppercase tracking-wider text-[10px] bg-rose-500 text-white px-1.5 py-0.5 rounded">Debarred</span>}
-                      </div>
-
-                      <div className="px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold">
-                        Est Grade: {course.grade || "A"}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Marksheet Components Table */}
-                  <div className="overflow-x-auto rounded-xl border border-white/5 bg-zinc-900/40">
-                    <table className="w-full text-left text-xs">
-                      <thead>
-                        <tr className="border-b border-white/10 bg-zinc-950/60 text-zinc-400 font-mono">
-                          <th className="py-2.5 px-4 font-semibold">Assessment Title</th>
-                          <th className="py-2.5 px-3 font-semibold text-right">Raw Score</th>
-                          <th className="py-2.5 px-3 font-semibold text-right">Max Score</th>
-                          <th className="py-2.5 px-3 font-semibold text-right">Weightage</th>
-                          <th className="py-2.5 px-3 font-semibold text-right">Max Wt</th>
-                          <th className="py-2.5 px-3 font-semibold text-right">Class Avg</th>
-                          <th className="py-2.5 px-4 font-semibold text-center">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5 font-mono">
-                        {course.marks?.map((m, idx) => (
-                          <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
-                            <td className="py-2 px-4 text-zinc-200 font-sans font-medium">
-                              {m.title}
+                    {/* Marksheet Components Table */}
+                    <div className="overflow-x-auto rounded-xl border border-white/5 bg-zinc-900/40">
+                      <table className="w-full text-left text-xs">
+                        <thead>
+                          <tr className="border-b border-white/10 bg-zinc-950/60 text-zinc-400 font-mono">
+                            <th className="py-2.5 px-4 font-semibold">Assessment Title</th>
+                            <th className="py-2.5 px-3 font-semibold text-right">Raw Score</th>
+                            <th className="py-2.5 px-3 font-semibold text-right">Max Score</th>
+                            <th className="py-2.5 px-3 font-semibold text-right">Weightage</th>
+                            <th className="py-2.5 px-3 font-semibold text-right">Max Wt</th>
+                            <th className="py-2.5 px-3 font-semibold text-right">Class Avg</th>
+                            <th className="py-2.5 px-4 font-semibold text-center">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 font-mono">
+                          {course.marks && course.marks.length > 0 ? (
+                            course.marks.map((m, idx) => (
+                              <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
+                                <td className="py-2 px-4 text-zinc-200 font-sans font-medium">
+                                  {m.title}
+                                </td>
+                                <td className="py-2 px-3 text-right text-emerald-400 font-bold">
+                                  {m.score}
+                                </td>
+                                <td className="py-2 px-3 text-right text-zinc-500">
+                                  {m.maxScore ?? "—"}
+                                </td>
+                                <td className="py-2 px-3 text-right text-purple-300 font-bold">
+                                  {m.weightage}
+                                </td>
+                                <td className="py-2 px-3 text-right text-zinc-500">
+                                  {m.maxWeightage ?? "—"}
+                                </td>
+                                <td className="py-2 px-3 text-right text-zinc-400">
+                                  {m.average ?? "—"}
+                                </td>
+                                <td className="py-2 px-4 text-center">
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-800 text-zinc-300">
+                                    {m.status}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={7} className="py-3 px-4 text-center text-zinc-500 font-sans text-xs italic">
+                                Continuous assessments in progress (CAT / DA / Lab marks will reflect upon faculty upload).
+                              </td>
+                            </tr>
+                          )}
+                          {/* Summary Row */}
+                          <tr className="bg-zinc-950/80 font-bold text-white border-t border-white/10">
+                            <td className="py-2.5 px-4 font-sans">
+                              Total Weighted Internal + FAT Score
                             </td>
-                            <td className="py-2 px-3 text-right text-emerald-400 font-bold">
-                              {m.score}
+                            <td colSpan={2} />
+                            <td className="py-2.5 px-3 text-right text-purple-400 font-extrabold text-sm">
+                              {Number(course.totalWeightedMark || 0).toFixed(2)}
                             </td>
-                            <td className="py-2 px-3 text-right text-zinc-500">
-                              {m.maxScore ?? "—"}
+                            <td className="py-2.5 px-3 text-right text-zinc-400">
+                              / {course.maxWeightedTotal || 100}
                             </td>
-                            <td className="py-2 px-3 text-right text-purple-300 font-bold">
-                              {m.weightage}
-                            </td>
-                            <td className="py-2 px-3 text-right text-zinc-500">
-                              {m.maxWeightage ?? "—"}
-                            </td>
-                            <td className="py-2 px-3 text-right text-zinc-400">
-                              {m.average ?? "—"}
-                            </td>
-                            <td className="py-2 px-4 text-center">
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-800 text-zinc-300">
-                                {m.status}
-                              </span>
+                            <td colSpan={2} className="py-2.5 px-4 text-right text-xs font-sans text-zinc-400 font-normal">
+                              Target Threshold for S Grade: 90+
                             </td>
                           </tr>
-                        ))}
-                        {/* Summary Row */}
-                        <tr className="bg-zinc-950/80 font-bold text-white border-t border-white/10">
-                          <td className="py-2.5 px-4 font-sans">
-                            Total Weighted Internal + FAT Score
-                          </td>
-                          <td colSpan={2} />
-                          <td className="py-2.5 px-3 text-right text-purple-400 font-extrabold text-sm">
-                            {course.totalWeightedMark?.toFixed(2)}
-                          </td>
-                          <td className="py-2.5 px-3 text-right text-zinc-400">
-                            / {course.maxWeightedTotal || 100}
-                          </td>
-                          <td colSpan={2} className="py-2.5 px-4 text-right text-xs font-sans text-zinc-400 font-normal">
-                            Target Threshold for S Grade: 90+
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </section>
 
@@ -783,7 +796,7 @@ export default function VtopDetails() {
                 {/* Main SGPA Score */}
                 <div className="my-4">
                   <div className="text-xs text-zinc-400 font-medium">Semester SGPA</div>
-                  <div className="text-3xl font-extrabold text-white font-mono tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 group-hover:scale-105 transition-transform duration-300 origin-left">
+                  <div className="text-3xl font-extrabold text-white font-mono tracking-tight group-hover:scale-105 transition-transform duration-300 origin-left">
                     {Number(sem.sgpa).toFixed(2)}
                   </div>
                   <div className="text-xs text-zinc-400 font-mono mt-1">
@@ -807,7 +820,7 @@ export default function VtopDetails() {
                           grade === "S"
                             ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
                             : grade === "A"
-                            ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                            ? "bg-zinc-800 text-zinc-200 border border-zinc-700"
                             : grade === "B"
                             ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                             : "bg-zinc-800 text-zinc-400"

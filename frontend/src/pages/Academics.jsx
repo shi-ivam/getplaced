@@ -128,10 +128,6 @@ export default function Academics() {
         {/* Editorial Wide Header */}
         <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
           <div className="space-y-3 max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono uppercase tracking-widest">
-              <GraduationCap className="w-3.5 h-3.5" />
-              Academic Performance Matrix
-            </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
               Academic Transcript & Placement Cutoffs
             </h1>
@@ -149,11 +145,11 @@ export default function Academics() {
 
             <Link
               to="/app/vtop"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600/15 border border-blue-500/30 text-blue-300 hover:text-white hover:bg-blue-600/25 text-xs font-semibold transition-all duration-200"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-zinc-300 hover:text-white hover:border-zinc-700 text-xs font-semibold transition-all duration-200"
             >
-              <Database className="w-3.5 h-3.5 text-blue-400" />
+              <Database className="w-3.5 h-3.5 text-purple-400" />
               <span>VTOP Live Sync</span>
-              <ExternalLink className="w-3 h-3 text-blue-400" />
+              <ExternalLink className="w-3 h-3 text-zinc-400" />
             </Link>
 
             <button
@@ -270,9 +266,9 @@ export default function Academics() {
             <div className="flex items-center gap-3">
               <Link
                 to="/app/vtop"
-                className="text-xs font-mono text-blue-400 hover:text-blue-300 flex items-center gap-1.5 bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/20 transition-colors"
+                className="text-xs font-mono text-purple-300 hover:text-white flex items-center gap-1.5 bg-purple-500/10 px-3 py-1.5 rounded-xl border border-purple-500/20 transition-colors"
               >
-                <span>Inspect All 47 Subject Grades</span>
+                <span>Inspect Subject Grades</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
               <div className="text-xs font-mono font-semibold px-3.5 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 self-start sm:self-auto">

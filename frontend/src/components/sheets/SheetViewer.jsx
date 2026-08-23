@@ -321,7 +321,7 @@ export default function SheetViewer({ sheetId, onBack }) {
             placeholder="Search problems in this sheet (e.g., Two Sum, DP, Subarray, Tree)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors"
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
           />
         </div>
 
@@ -330,7 +330,7 @@ export default function SheetViewer({ sheetId, onBack }) {
           <select
             value={difficultyFilter}
             onChange={(e) => setDifficultyFilter(e.target.value)}
-            className="bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-purple-500 font-mono"
+            className="bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-zinc-600 font-mono"
           >
             <option value="all">All Difficulties</option>
             <option value="easy">Easy Only</option>
@@ -342,7 +342,7 @@ export default function SheetViewer({ sheetId, onBack }) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-purple-500 font-mono"
+            className="bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 rounded-xl px-3 py-2 focus:outline-none focus:border-zinc-600 font-mono"
           >
             <option value="all">All Status</option>
             <option value="solved">Solved Only</option>
@@ -381,7 +381,7 @@ export default function SheetViewer({ sheetId, onBack }) {
             return (
               <div
                 key={secKey}
-                className="rounded-2xl bg-[#0e0e11] border border-zinc-800/80 overflow-hidden shadow-lg transition-all"
+                className="rounded-2xl bg-[#0e0e11] border border-zinc-800/80 overflow-hidden transition-all"
               >
                 {/* Section Header Trigger */}
                 <button
@@ -390,7 +390,7 @@ export default function SheetViewer({ sheetId, onBack }) {
                   className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-zinc-900/40 transition-colors cursor-pointer border-b border-zinc-800/40"
                 >
                   <div className="flex items-center gap-3 min-w-0 pr-4">
-                    <span className="w-6 h-6 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-purple-400 shrink-0">
+                    <span className="w-6 h-6 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-zinc-300 shrink-0">
                       {secIdx + 1}
                     </span>
                     <div className="min-w-0">
@@ -418,7 +418,7 @@ export default function SheetViewer({ sheetId, onBack }) {
                       sec.subcategories.map((subcat, subIdx) => (
                         <div key={subcat.subcategory_id || `sub-${subIdx}`} className="space-y-2.5">
                           <div className="flex items-center gap-2 text-xs font-mono font-semibold text-zinc-400 px-1 pt-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                             <span>{subcat.subcategory_name}</span>
                             <span className="text-[10px] text-zinc-600">({subcat.problems.length})</span>
                           </div>
@@ -432,7 +432,7 @@ export default function SheetViewer({ sheetId, onBack }) {
                                 onToggleSolved={() => handleToggleSolved(prob)}
                                 onOpenArticle={() => setActiveArticleSlug(prob.article_slug || prob.problem_name)}
                                 onOpenVideo={(url) =>
-                                  setVideoModal({ isOpen: true, url, title: prob.problem_name })
+                                   setVideoModal({ isOpen: true, url, title: prob.problem_name })
                                 }
                               />
                             ))}
@@ -539,10 +539,10 @@ function ProblemRowItem({ problem, isSolved, onToggleSolved, onOpenArticle, onOp
           <button
             type="button"
             onClick={onOpenArticle}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300 hover:text-purple-300 text-xs font-medium border border-zinc-700/50 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300 hover:text-white text-xs font-medium border border-zinc-700/50 transition-colors cursor-pointer"
             title="Read complete offline tutorial & code snippets"
           >
-            <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+            <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
             <span className="hidden sm:inline">Tutorial</span>
           </button>
         )}
@@ -552,7 +552,7 @@ function ProblemRowItem({ problem, isSolved, onToggleSolved, onOpenArticle, onOp
           <button
             type="button"
             onClick={() => onOpenVideo(problem.youtube_url)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs font-medium border border-red-500/20 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-medium border border-rose-500/20 transition-colors cursor-pointer"
             title="Watch video lecture"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
@@ -564,7 +564,7 @@ function ProblemRowItem({ problem, isSolved, onToggleSolved, onOpenArticle, onOp
         {problem.is_ide_runnable && problem.leetcode_slug ? (
           <Link
             to={`/app/coding/${problem.leetcode_slug}`}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-sm transition-all"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-950 text-xs font-semibold transition-all"
             title="Open in getPlaced live Monaco IDE & sandbox runner"
           >
             <Terminal className="w-3.5 h-3.5" />

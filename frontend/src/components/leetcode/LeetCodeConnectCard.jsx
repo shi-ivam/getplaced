@@ -534,7 +534,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
             {/* 1. LeetCode Profile Summary Banner */}
             <div className="bg-[#14141c] border border-zinc-800 rounded-xl p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-200 font-bold text-xl font-mono shrink-0 shadow-inner">
+                <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-200 font-bold text-xl font-mono shrink-0">
                   {profile.username?.charAt(0)?.toUpperCase() || "L"}
                 </div>
                 <div>
@@ -1124,7 +1124,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
               <form onSubmit={handleConnect} className="space-y-3">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
                   <div className="relative flex-1">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-amber-500/80 font-mono text-xs">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-500 font-mono text-xs">
                       <Code2 className="w-4 h-4" />
                     </div>
                     <Input
@@ -1132,7 +1132,7 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                       value={inputUsername}
                       onChange={(e) => setInputUsername(e.target.value)}
                       placeholder="Enter LeetCode username (e.g. tourist) or profile URL"
-                      className="bg-[#1c1c1c] border-gray-700 text-white placeholder:text-gray-500 focus:border-amber-500 pl-10 text-xs h-10 font-mono"
+                      className="bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-zinc-600 pl-10 text-xs h-10 font-mono"
                       disabled={connecting}
                     />
                   </div>
@@ -1140,17 +1140,17 @@ export default function LeetCodeConnectCard({ onProfileUpdate }) {
                   <Button
                     type="submit"
                     disabled={connecting || !inputUsername.trim()}
-                    className="bg-amber-600 hover:bg-amber-700 text-white font-medium px-5 h-10 rounded-md shadow-md flex items-center justify-center gap-2 transition-colors cursor-pointer text-xs shrink-0"
+                    className="bg-zinc-100 hover:bg-zinc-200 text-zinc-950 font-semibold px-5 h-10 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer text-xs shrink-0"
                   >
                     {connecting ? (
                       <>
                         <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                        <span>Verifying & Connecting...</span>
+                        <span>Connecting...</span>
                       </>
                     ) : (
                       <>
                         <Code2 className="w-4 h-4" />
-                        <span>Connect LeetCode →</span>
+                        <span>Connect LeetCode</span>
                       </>
                     )}
                   </Button>

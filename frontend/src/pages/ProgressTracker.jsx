@@ -37,10 +37,10 @@ import { getProgressTrackerMentorCopy } from "@/utils/dynamicCopy";
 
 const DIMENSIONS = [
   { key: "overallScore", label: "Overall Readiness", color: "#a855f7" },
-  { key: "dsaScore", label: "DSA Proficiency", color: "#3b82f6" },
+  { key: "dsaScore", label: "DSA Proficiency", color: "#e4e4e7" },
   { key: "projectScore", label: "Projects & GitHub", color: "#10b981" },
   { key: "resumeScore", label: "ATS Resume", color: "#f59e0b" },
-  { key: "interviewScore", label: "Mock Interviews", color: "#ec4899" },
+  { key: "interviewScore", label: "Mock Interviews", color: "#c084fc" },
 ];
 
 export default function ProgressTracker() {
@@ -137,10 +137,6 @@ export default function ProgressTracker() {
         {/* Editorial Wide Header */}
         <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
           <div className="space-y-3 max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-mono uppercase tracking-widest">
-              <Activity className="w-3.5 h-3.5" />
-              Velocity & Trajectory Analytics
-            </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
               {trackerMentor.heading}
             </h1>
@@ -218,17 +214,17 @@ export default function ProgressTracker() {
           </div>
 
           {/* Study Hours Bento Card */}
-          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-blue-500/40 transition-all duration-500">
+          <div className="group relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-white/10 p-6 backdrop-blur-md hover:border-zinc-500/40 transition-all duration-500">
             <div className="flex items-center justify-between text-xs text-zinc-400 font-medium mb-3">
               <span>Dedicated Study Time</span>
-              <span className="text-blue-400 font-mono">Sessions & Labs</span>
+              <span className="text-zinc-300 font-mono">Sessions & Labs</span>
             </div>
-            <div className="text-4xl font-extrabold text-blue-400 font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left flex items-center gap-2">
-              <Clock className="w-7 h-7 text-blue-400 shrink-0" />
+            <div className="text-4xl font-extrabold text-white font-mono tracking-tight group-hover:scale-[1.02] transition-transform duration-500 origin-left flex items-center gap-2">
+              <Clock className="w-7 h-7 text-zinc-400 shrink-0" />
               <span>{progressData?.totalStudyHours || 0}h</span>
             </div>
             <div className="text-xs text-zinc-400 mt-3 flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-blue-400" />
+              <Award className="w-3.5 h-3.5 text-zinc-400" />
               <span>{progressData?.totalTasksCompleted || 0} tasks mastered</span>
             </div>
           </div>

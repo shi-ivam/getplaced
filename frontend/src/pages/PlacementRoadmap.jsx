@@ -147,10 +147,6 @@ export default function PlacementRoadmap() {
         {/* Editorial Header */}
         <header className="gsap-fade-item flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-800">
           <div className="space-y-2 max-w-3xl">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-mono">
-              <Compass className="w-3.5 h-3.5 text-purple-400" />
-              <span>Preparation Trajectory</span>
-            </div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
               Placement Roadmap
             </h1>

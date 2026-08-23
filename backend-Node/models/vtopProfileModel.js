@@ -11,30 +11,30 @@ const markItemSchema = new mongoose.Schema({
 });
 
 const vtopCourseSchema = new mongoose.Schema({
-  code: { type: String, required: true }, // e.g. "CSE2005"
-  title: { type: String, required: true }, // e.g. "Operating Systems"
-  type: { type: String, enum: ["theory", "lab", "project", "embedded"], default: "theory" },
-  credits: { type: Number, default: 4 },
-  slot: { type: String, default: "A1" }, // e.g. "A1+TA1", "L45+L46"
-  venue: { type: String, default: "AB3-402" },
-  faculty: { type: String, default: "Dr. K. Ramanathan" },
+  code: { type: String, required: true },
+  title: { type: String, required: true },
+  type: { type: String, default: "theory" },
+  credits: { type: Number, default: 0 },
+  slot: { type: String, default: "" },
+  venue: { type: String, default: "" },
+  faculty: { type: String, default: "" },
   attendance: {
-    attended: { type: Number, default: 36 },
-    total: { type: Number, default: 40 },
-    percentage: { type: Number, default: 90 },
+    attended: { type: Number, default: 0 },
+    total: { type: Number, default: 0 },
+    percentage: { type: Number, default: 0 },
     status: { type: String, enum: ["safe", "warning", "debarred"], default: "safe" },
   },
   marks: [markItemSchema],
-  totalWeightedMark: { type: Number, default: 85.5 },
+  totalWeightedMark: { type: Number, default: 0 },
   maxWeightedTotal: { type: Number, default: 100 },
-  grade: { type: String, default: "A" }, // "S", "A", "B", "C", "D", "E", "F", "N"
+  grade: { type: String, default: "" },
 });
 
 const vtopSemesterSchema = new mongoose.Schema({
-  semesterId: { type: String, required: true }, // e.g. "CH2024251"
-  semesterName: { type: String, required: true }, // e.g. "Fall Semester 2024-25"
+  semesterId: { type: String, required: true },
+  semesterName: { type: String, required: true },
   sgpa: { type: Number, default: null },
-  creditsEarned: { type: Number, default: 21 },
+  creditsEarned: { type: Number, default: 0 },
   courses: [vtopCourseSchema],
 });
 

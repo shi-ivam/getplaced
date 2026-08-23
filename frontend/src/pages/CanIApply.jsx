@@ -224,15 +224,9 @@ export default function CanIApply() {
 
   return (
     <main
-      className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#11110F] text-[#FAF8F2] font-sans selection:bg-[#C7F36B] selection:text-[#11110F]"
+      className="overflow-x-hidden w-full max-w-full min-h-screen bg-[#11110F] text-[#FAF8F2] font-sans selection:bg-purple-500/20 selection:text-purple-200"
       ref={containerRef}
     >
-      {/* Ambient Lighting Background */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-8%] left-1/2 -translate-x-1/2 w-[950px] h-[450px] bg-gradient-to-b from-[#C7F36B]/6 via-[#24231F]/30 to-transparent blur-[140px]" />
-        <div className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[400px] bg-[#C7F36B]/3 blur-[160px]" />
-      </div>
-
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
         {/* ========================================================================= */}
@@ -240,15 +234,12 @@ export default function CanIApply() {
         {/* ========================================================================= */}
         <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[#3A3831]">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-[#24231F] border border-[#3A3831] flex items-center justify-center text-[#C7F36B] shadow-lg shadow-black/40">
+            <div className="w-11 h-11 rounded-2xl bg-[#24231F] border border-[#3A3831] flex items-center justify-center text-purple-400 shadow-lg shadow-black/40">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-[11px] uppercase tracking-widest font-mono text-[#A8A59C] font-semibold flex items-center gap-2">
-                <span>Application Readiness Engine</span>
-                <span className="px-2 py-0.2 rounded-full bg-[#C7F36B]/10 text-[#C7F36B] text-[10px] font-bold border border-[#C7F36B]/20">
-                  Pre-Apply Audit
-                </span>
+              <div className="text-[11px] uppercase tracking-widest font-mono text-[#A8A59C] font-semibold">
+                Application Readiness Engine
               </div>
               <div className="text-base sm:text-lg font-bold text-[#FAF8F2] tracking-tight">
                 "Can I Apply?" Readiness Check
@@ -262,7 +253,7 @@ export default function CanIApply() {
               onClick={() => navigate("/app/company-intel?company=" + encodeURIComponent(selectedCompany))}
               className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#24231F] hover:bg-[#2e2d27] text-[#FAF8F2] border border-[#3A3831] transition-all flex items-center gap-1.5"
             >
-              <Building2 className="w-3.5 h-3.5 text-[#C7F36B]" />
+              <Building2 className="w-3.5 h-3.5 text-zinc-400" />
               <span>{selectedCompany} Intel</span>
             </button>
             <button
@@ -270,13 +261,13 @@ export default function CanIApply() {
               onClick={() => navigate("/app/job?search=" + encodeURIComponent(selectedCompany))}
               className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#24231F] hover:bg-[#2e2d27] text-[#FAF8F2] border border-[#3A3831] transition-all flex items-center gap-1.5"
             >
-              <Briefcase className="w-3.5 h-3.5 text-[#C7F36B]" />
+              <Briefcase className="w-3.5 h-3.5 text-zinc-400" />
               <span>Jobs Marketplace</span>
             </button>
             <button
               type="button"
               onClick={() => navigate("/app/interview")}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-[#C7F36B] hover:bg-[#bbf055] text-[#11110F] shadow-lg shadow-[#C7F36B]/20 transition-all flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-white text-zinc-950 hover:bg-zinc-200 transition-all flex items-center gap-1.5"
             >
               <BrainCog className="w-3.5 h-3.5" />
               <span>Mock Interview</span>
@@ -301,7 +292,7 @@ export default function CanIApply() {
           <div className="p-5 sm:p-6 rounded-3xl bg-[#24231F] border border-[#3A3831] shadow-2xl backdrop-blur-md space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#3A3831]">
               <div className="flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-[#C7F36B]" />
+                <Sliders className="w-4 h-4 text-purple-400" />
                 <span className="text-xs font-mono uppercase tracking-wider font-bold text-[#FAF8F2]">
                   Target Company & Role Calibration
                 </span>
@@ -360,7 +351,7 @@ export default function CanIApply() {
           <div
             className={`eval-card rounded-3xl border p-6 sm:p-8 relative overflow-hidden backdrop-blur-md transition-all duration-300 ${
               decision.state === "READY"
-                ? "bg-gradient-to-br from-[#1b2b18] via-[#24231F] to-[#1a2416] border-[#C7F36B]/40 shadow-xl shadow-[#C7F36B]/5"
+                ? "bg-gradient-to-br from-[#1b2b18] via-[#24231F] to-[#1a2416] border-emerald-500/40 shadow-xl shadow-emerald-500/5"
                 : decision.state === "ALMOST_READY"
                 ? "bg-gradient-to-br from-[#2d2817] via-[#24231F] to-[#1f1c14] border-amber-500/40 shadow-xl shadow-amber-500/5"
                 : "bg-gradient-to-br from-[#30181b] via-[#24231F] to-[#201416] border-rose-500/40 shadow-xl shadow-rose-500/5"
@@ -370,7 +361,7 @@ export default function CanIApply() {
             <div
               className={`absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl pointer-events-none ${
                 decision.state === "READY"
-                  ? "bg-[#C7F36B]/10"
+                  ? "bg-emerald-500/10"
                   : decision.state === "ALMOST_READY"
                   ? "bg-amber-500/10"
                   : "bg-rose-500/10"
@@ -421,7 +412,7 @@ export default function CanIApply() {
                     <span
                       className={`text-2xl font-black font-mono ${
                         decision.state === "READY"
-                          ? "text-[#C7F36B]"
+                          ? "text-emerald-400"
                           : decision.state === "ALMOST_READY"
                           ? "text-amber-300"
                           : "text-rose-400"
@@ -436,7 +427,7 @@ export default function CanIApply() {
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
                         decision.state === "READY"
-                          ? "bg-[#C7F36B]"
+                          ? "bg-emerald-400"
                           : decision.state === "ALMOST_READY"
                           ? "bg-amber-400"
                           : "bg-rose-500"
@@ -462,7 +453,7 @@ export default function CanIApply() {
                     onClick={() => setShowOpeningsDrawer(true)}
                     className="w-full sm:w-auto px-4 py-2 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] text-xs font-semibold text-[#FAF8F2] flex items-center justify-center gap-2 transition-all"
                   >
-                    <Briefcase className="w-3.5 h-3.5 text-[#C7F36B]" />
+                    <Briefcase className="w-3.5 h-3.5 text-zinc-400" />
                     <span>View {matchingMarketplaceJobs.length} Live Openings</span>
                     <ArrowRight className="w-3 h-3 text-[#A8A59C]" />
                   </button>
@@ -481,19 +472,19 @@ export default function CanIApply() {
               onClick={() => setExpandedDimension(expandedDimension === "eligibility" ? "all" : "eligibility")}
               className={`eval-card p-5 rounded-3xl bg-[#24231F] border transition-all cursor-pointer flex flex-col justify-between space-y-4 group ${
                 expandedDimension === "eligibility" || expandedDimension === "all"
-                  ? "border-[#C7F36B]/60 shadow-lg shadow-black/40"
+                  ? "border-emerald-500/60 shadow-lg shadow-black/40"
                   : "border-[#3A3831] hover:border-[#3A3831]/80"
               }`}
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="p-2.5 rounded-xl bg-[#11110F] border border-[#3A3831] text-[#C7F36B] group-hover:scale-105 transition-transform">
+                  <div className="p-2.5 rounded-xl bg-[#11110F] border border-[#3A3831] text-purple-400 group-hover:scale-105 transition-transform">
                     <GraduationCap className="w-5 h-5" />
                   </div>
                   <span
                     className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-full border ${
                       dimensions.eligibility.isPassed
-                        ? "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
+                        ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                         : dimensions.eligibility.hasBlocker
                         ? "bg-rose-500/10 text-rose-400 border-rose-500/30"
                         : "bg-amber-500/10 text-amber-300 border-amber-500/30"
@@ -507,7 +498,7 @@ export default function CanIApply() {
                   <div className="text-[11px] font-mono uppercase text-[#8C8980] font-bold">
                     Dimension 1
                   </div>
-                  <h3 className="text-base font-bold text-[#FAF8F2] tracking-tight group-hover:text-[#C7F36B] transition-colors">
+                  <h3 className="text-base font-bold text-[#FAF8F2] tracking-tight group-hover:text-purple-300 transition-colors">
                     Eligibility Check
                   </h3>
                 </div>
@@ -522,7 +513,7 @@ export default function CanIApply() {
                     <span
                       className={`font-bold ${
                         (academicProfile?.currentCgpa || userProfile?.cgpa || 8.0) >= benchmark.minCgpa
-                          ? "text-[#C7F36B]"
+                          ? "text-emerald-400"
                           : "text-rose-400"
                       }`}
                     >
@@ -538,7 +529,7 @@ export default function CanIApply() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#3A3831] flex items-center justify-between text-[11px] font-mono text-[#C7F36B]">
+              <div className="pt-3 border-t border-[#3A3831] flex items-center justify-between text-[11px] font-mono text-purple-300">
                 <span>{expandedDimension === "eligibility" ? "Hide Checklist" : "Expand Checklist"}</span>
                 <ChevronDown
                   className={`w-3.5 h-3.5 transition-transform ${
@@ -553,19 +544,19 @@ export default function CanIApply() {
               onClick={() => setExpandedDimension(expandedDimension === "technical" ? "all" : "technical")}
               className={`eval-card p-5 rounded-3xl bg-[#24231F] border transition-all cursor-pointer flex flex-col justify-between space-y-4 group ${
                 expandedDimension === "technical" || expandedDimension === "all"
-                  ? "border-[#C7F36B]/60 shadow-lg shadow-black/40"
+                  ? "border-emerald-500/60 shadow-lg shadow-black/40"
                   : "border-[#3A3831] hover:border-[#3A3831]/80"
               }`}
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="p-2.5 rounded-xl bg-[#11110F] border border-[#3A3831] text-[#C7F36B] group-hover:scale-105 transition-transform">
+                  <div className="p-2.5 rounded-xl bg-[#11110F] border border-[#3A3831] text-purple-400 group-hover:scale-105 transition-transform">
                     <Code2 className="w-5 h-5" />
                   </div>
                   <span
                     className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-full border ${
                       dimensions.technical.isPassed
-                        ? "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
+                        ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                         : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                     }`}
                   >
@@ -577,7 +568,7 @@ export default function CanIApply() {
                   <div className="text-[11px] font-mono uppercase text-[#8C8980] font-bold">
                     Dimension 2
                   </div>
-                  <h3 className="text-base font-bold text-[#FAF8F2] tracking-tight group-hover:text-[#C7F36B] transition-colors">
+                  <h3 className="text-base font-bold text-[#FAF8F2] tracking-tight group-hover:text-purple-300 transition-colors">
                     Technical Readiness
                   </h3>
                 </div>
@@ -585,7 +576,7 @@ export default function CanIApply() {
                 <div className="space-y-1.5">
                   <div className="w-full h-1.5 bg-[#11110F] rounded-full overflow-hidden border border-[#3A3831]">
                     <div
-                      className="h-full bg-[#C7F36B] rounded-full"
+                      className="h-full bg-emerald-400 rounded-full"
                       style={{ width: `${Math.min(100, Math.max(5, dimensions.technical.score))}%` }}
                     />
                   </div>
@@ -595,7 +586,7 @@ export default function CanIApply() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#3A3831] flex items-center justify-between text-[11px] font-mono text-[#C7F36B]">
+              <div className="pt-3 border-t border-[#3A3831] flex items-center justify-between text-[11px] font-mono text-purple-300">
                 <span>{expandedDimension === "technical" ? "Hide Checklist" : "Expand Checklist"}</span>
                 <ChevronDown
                   className={`w-3.5 h-3.5 transition-transform ${
@@ -610,19 +601,19 @@ export default function CanIApply() {
               onClick={() => setExpandedDimension(expandedDimension === "profile" ? "all" : "profile")}
               className={`eval-card p-5 rounded-3xl bg-[#24231F] border transition-all cursor-pointer flex flex-col justify-between space-y-4 group ${
                 expandedDimension === "profile" || expandedDimension === "all"
-                  ? "border-[#C7F36B]/60 shadow-lg shadow-black/40"
+                  ? "border-emerald-500/60 shadow-lg shadow-black/40"
                   : "border-[#3A3831] hover:border-[#3A3831]/80"
               }`}
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="p-2.5 rounded-xl bg-[#11110F] border border-[#3A3831] text-[#C7F36B] group-hover:scale-105 transition-transform">
+                  <div className="p-2.5 rounded-xl bg-[#11110F] border border-[#3A3831] text-purple-400 group-hover:scale-105 transition-transform">
                     <FileText className="w-5 h-5" />
                   </div>
                   <span
                     className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-full border ${
                       dimensions.profile.isPassed
-                        ? "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
+                        ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                         : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                     }`}
                   >
@@ -634,7 +625,7 @@ export default function CanIApply() {
                   <div className="text-[11px] font-mono uppercase text-[#8C8980] font-bold">
                     Dimension 3
                   </div>
-                  <h3 className="text-base font-bold text-[#FAF8F2] tracking-tight group-hover:text-[#C7F36B] transition-colors">
+                  <h3 className="text-base font-bold text-[#FAF8F2] tracking-tight group-hover:text-purple-300 transition-colors">
                     Profile & Resume
                   </h3>
                 </div>
@@ -642,7 +633,7 @@ export default function CanIApply() {
                 <div className="space-y-1.5">
                   <div className="w-full h-1.5 bg-[#11110F] rounded-full overflow-hidden border border-[#3A3831]">
                     <div
-                      className="h-full bg-sky-400 rounded-full"
+                      className="h-full bg-zinc-300 rounded-full"
                       style={{ width: `${Math.min(100, Math.max(5, dimensions.profile.score))}%` }}
                     />
                   </div>
@@ -652,7 +643,7 @@ export default function CanIApply() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#3A3831] flex items-center justify-between text-[11px] font-mono text-[#C7F36B]">
+              <div className="pt-3 border-t border-[#3A3831] flex items-center justify-between text-[11px] font-mono text-purple-300">
                 <span>{expandedDimension === "profile" ? "Hide Checklist" : "Expand Checklist"}</span>
                 <ChevronDown
                   className={`w-3.5 h-3.5 transition-transform ${
@@ -667,19 +658,19 @@ export default function CanIApply() {
               onClick={() => setExpandedDimension(expandedDimension === "interview" ? "all" : "interview")}
               className={`eval-card p-5 rounded-3xl bg-[#24231F] border transition-all cursor-pointer flex flex-col justify-between space-y-4 group ${
                 expandedDimension === "interview" || expandedDimension === "all"
-                  ? "border-[#C7F36B]/60 shadow-lg shadow-black/40"
+                  ? "border-emerald-500/60 shadow-lg shadow-black/40"
                   : "border-[#3A3831] hover:border-[#3A3831]/80"
               }`}
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="p-2.5 rounded-xl bg-[#11110F] border border-[#3A3831] text-[#C7F36B] group-hover:scale-105 transition-transform">
+                  <div className="p-2.5 rounded-xl bg-[#11110F] border border-[#3A3831] text-purple-400 group-hover:scale-105 transition-transform">
                     <BrainCog className="w-5 h-5" />
                   </div>
                   <span
                     className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-full border ${
                       dimensions.interview.isPassed
-                        ? "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
+                        ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                         : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                     }`}
                   >
@@ -691,7 +682,7 @@ export default function CanIApply() {
                   <div className="text-[11px] font-mono uppercase text-[#8C8980] font-bold">
                     Dimension 4
                   </div>
-                  <h3 className="text-base font-bold text-[#FAF8F2] tracking-tight group-hover:text-[#C7F36B] transition-colors">
+                  <h3 className="text-base font-bold text-[#FAF8F2] tracking-tight group-hover:text-purple-300 transition-colors">
                     Interview & Soft Skills
                   </h3>
                 </div>
@@ -709,7 +700,7 @@ export default function CanIApply() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#3A3831] flex items-center justify-between text-[11px] font-mono text-[#C7F36B]">
+              <div className="pt-3 border-t border-[#3A3831] flex items-center justify-between text-[11px] font-mono text-purple-300">
                 <span>{expandedDimension === "interview" ? "Hide Checklist" : "Expand Checklist"}</span>
                 <ChevronDown
                   className={`w-3.5 h-3.5 transition-transform ${
@@ -727,7 +718,7 @@ export default function CanIApply() {
           <div className="eval-card p-6 sm:p-8 rounded-3xl bg-[#24231F] border border-[#3A3831] space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#3A3831]">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-[#11110F] border border-[#3A3831] text-[#C7F36B]">
+                <div className="p-2 rounded-xl bg-[#11110F] border border-[#3A3831] text-purple-400">
                   <Layers className="w-4 h-4" />
                 </div>
                 <div>
@@ -758,11 +749,11 @@ export default function CanIApply() {
                       onClick={() => setExpandedDimension(tab.id)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                         isActive
-                          ? "bg-[#C7F36B] text-[#11110F] font-bold shadow-md shadow-[#C7F36B]/20"
+                          ? "bg-white text-zinc-950 font-bold shadow-md"
                           : "text-[#A8A59C] hover:text-[#FAF8F2] hover:bg-[#24231F]"
                       }`}
                     >
-                      <IconComp className={`w-3.5 h-3.5 ${isActive ? "text-[#11110F]" : "text-[#8C8980]"}`} />
+                      <IconComp className={`w-3.5 h-3.5 ${isActive ? "text-zinc-950" : "text-[#8C8980]"}`} />
                       <span>{tab.label}</span>
                     </button>
                   );
@@ -774,14 +765,14 @@ export default function CanIApply() {
             {(expandedDimension === "eligibility" || expandedDimension === "all") && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold uppercase text-[#C7F36B] tracking-wider flex items-center gap-1.5">
+                  <span className="text-xs font-mono font-bold uppercase text-purple-300 tracking-wider flex items-center gap-1.5">
                     <GraduationCap className="w-4 h-4" />
                     <span>Dimension 1: Academic & Recruitment Eligibility Criteria</span>
                   </span>
                   <span
                     className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
                       dimensions.eligibility.isPassed
-                        ? "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
+                        ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                         : "bg-rose-500/10 text-rose-400 border-rose-500/30"
                     }`}
                   >
@@ -806,7 +797,7 @@ export default function CanIApply() {
                         <span
                           className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border shrink-0 ${
                             item.isPassed
-                              ? "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
+                              ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                               : item.isBlocker
                               ? "bg-rose-500/10 text-rose-400 border-rose-500/30"
                               : "bg-amber-500/10 text-amber-300 border-amber-500/30"
@@ -827,7 +818,7 @@ export default function CanIApply() {
                         <div className="pt-2">
                           <Link
                             to={item.fixAction.url}
-                            className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[#C7F36B] hover:underline"
+                            className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-purple-300 hover:underline"
                           >
                             <span>{item.fixAction.label}</span>
                             <ArrowRight className="w-3 h-3" />
@@ -844,7 +835,7 @@ export default function CanIApply() {
             {(expandedDimension === "technical" || expandedDimension === "all") && (
               <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold uppercase text-[#C7F36B] tracking-wider flex items-center gap-1.5">
+                  <span className="text-xs font-mono font-bold uppercase text-purple-300 tracking-wider flex items-center gap-1.5">
                     <Code2 className="w-4 h-4" />
                     <span>Dimension 2: Algorithmic & Computer Science Calibration</span>
                   </span>
@@ -865,7 +856,7 @@ export default function CanIApply() {
                           <span
                             className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                               item.isPassed
-                                ? "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
+                                ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                                 : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                             }`}
                           >
@@ -886,10 +877,10 @@ export default function CanIApply() {
 
                         <Link
                           to={item.fixLink}
-                          className="px-3 py-1.5 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] hover:border-[#C7F36B]/40 text-xs font-semibold text-[#FAF8F2] flex items-center gap-1.5 transition-all"
+                          className="px-3 py-1.5 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] hover:border-purple-500/40 text-xs font-semibold text-[#FAF8F2] flex items-center gap-1.5 transition-all"
                         >
                           <span>{item.fixLabel}</span>
-                          <ArrowRight className="w-3 h-3 text-[#C7F36B]" />
+                          <ArrowRight className="w-3 h-3 text-purple-400" />
                         </Link>
                       </div>
                     </div>
@@ -902,7 +893,7 @@ export default function CanIApply() {
             {(expandedDimension === "profile" || expandedDimension === "all") && (
               <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold uppercase text-[#C7F36B] tracking-wider flex items-center gap-1.5">
+                  <span className="text-xs font-mono font-bold uppercase text-purple-300 tracking-wider flex items-center gap-1.5">
                     <FileText className="w-4 h-4" />
                     <span>Dimension 3: Resume ATS, Projects & Online Presence ({benchmark.primaryLanguage})</span>
                   </span>
@@ -923,7 +914,7 @@ export default function CanIApply() {
                           <span
                             className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                               item.isPassed
-                                ? "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
+                                ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                                 : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                             }`}
                           >
@@ -944,10 +935,10 @@ export default function CanIApply() {
 
                         <Link
                           to={item.fixLink}
-                          className="px-3 py-1.5 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] hover:border-[#C7F36B]/40 text-xs font-semibold text-[#FAF8F2] flex items-center gap-1.5 transition-all"
+                          className="px-3 py-1.5 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] hover:border-purple-500/40 text-xs font-semibold text-[#FAF8F2] flex items-center gap-1.5 transition-all"
                         >
                           <span>{item.fixLabel}</span>
-                          <ArrowRight className="w-3 h-3 text-[#C7F36B]" />
+                          <ArrowRight className="w-3 h-3 text-purple-400" />
                         </Link>
                       </div>
                     </div>
@@ -960,7 +951,7 @@ export default function CanIApply() {
             {(expandedDimension === "interview" || expandedDimension === "all") && (
               <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold uppercase text-[#C7F36B] tracking-wider flex items-center gap-1.5">
+                  <span className="text-xs font-mono font-bold uppercase text-purple-300 tracking-wider flex items-center gap-1.5">
                     <BrainCog className="w-4 h-4" />
                     <span>Dimension 4: Communication & Leadership Principles ({benchmark.behavioralPillars[0]})</span>
                   </span>
@@ -981,7 +972,7 @@ export default function CanIApply() {
                           <span
                             className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                               item.isPassed
-                                ? "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
+                                ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                                 : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                             }`}
                           >
@@ -1002,10 +993,10 @@ export default function CanIApply() {
 
                         <Link
                           to={item.fixLink}
-                          className="px-3 py-1.5 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] hover:border-[#C7F36B]/40 text-xs font-semibold text-[#FAF8F2] flex items-center gap-1.5 transition-all"
+                          className="px-3 py-1.5 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] hover:border-purple-500/40 text-xs font-semibold text-[#FAF8F2] flex items-center gap-1.5 transition-all"
                         >
                           <span>{item.fixLabel}</span>
-                          <ArrowRight className="w-3 h-3 text-[#C7F36B]" />
+                          <ArrowRight className="w-3 h-3 text-purple-400" />
                         </Link>
                       </div>
                     </div>
@@ -1041,7 +1032,7 @@ export default function CanIApply() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-mono uppercase text-[#8C8980] font-bold">
-                        {gap.pillar}
+                         {gap.pillar}
                       </span>
                       <span
                         className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
@@ -1049,14 +1040,14 @@ export default function CanIApply() {
                             ? "bg-rose-500/10 text-rose-400 border-rose-500/30"
                             : gap.color === "amber"
                             ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
-                            : "bg-[#C7F36B]/10 text-[#C7F36B] border-[#C7F36B]/30"
+                            : "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                         }`}
                       >
                         {gap.impact}
                       </span>
                     </div>
 
-                    <h4 className="text-sm font-bold text-[#FAF8F2] tracking-tight group-hover:text-[#C7F36B] transition-colors">
+                    <h4 className="text-sm font-bold text-[#FAF8F2] tracking-tight group-hover:text-purple-300 transition-colors">
                       {gap.title}
                     </h4>
 
@@ -1067,7 +1058,7 @@ export default function CanIApply() {
 
                   <Link
                     to={gap.actionUrl}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#11110F] hover:bg-[#1A1916] border border-[#3A3831] hover:border-[#C7F36B]/50 text-xs font-bold text-[#FAF8F2] hover:text-[#C7F36B] transition-all flex items-center justify-between font-mono"
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#11110F] hover:bg-[#1A1916] border border-[#3A3831] hover:border-purple-500/50 text-xs font-bold text-[#FAF8F2] hover:text-purple-300 transition-all flex items-center justify-between font-mono"
                   >
                     <span>{gap.actionLabel}</span>
                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -1083,8 +1074,8 @@ export default function CanIApply() {
           {coveredStrengths.length > 0 && (
             <div className="eval-card p-6 sm:p-8 rounded-3xl bg-[#24231F]/90 border border-[#3A3831] space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-[#3A3831]">
-                <CheckCircle2 className="w-4 h-4 text-[#C7F36B]" />
-                <h3 className="text-xs font-mono uppercase font-bold text-[#C7F36B] tracking-wider">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <h3 className="text-xs font-mono uppercase font-bold text-emerald-400 tracking-wider">
                   What is already covered? (Your Competitive Strengths)
                 </h3>
               </div>
@@ -1096,7 +1087,7 @@ export default function CanIApply() {
                     className="p-3.5 rounded-2xl bg-[#11110F]/60 border border-[#3A3831] space-y-1"
                   >
                     <div className="text-xs font-bold text-[#FAF8F2] flex items-center gap-1.5">
-                      <Check className="w-3.5 h-3.5 text-[#C7F36B] shrink-0" />
+                      <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                       <span>{item.title}</span>
                     </div>
                     <p className="text-[11px] text-[#A8A59C] leading-relaxed font-mono">
@@ -1115,7 +1106,7 @@ export default function CanIApply() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-[#C7F36B]" />
+                  <Building2 className="w-4 h-4 text-purple-400" />
                   <span className="text-xs font-mono uppercase font-bold text-[#FAF8F2]">
                     Verified Openings & Official Careers Pipeline
                   </span>
@@ -1132,7 +1123,7 @@ export default function CanIApply() {
                     onClick={() => setShowOpeningsDrawer(true)}
                     className="px-4 py-2.5 rounded-xl bg-[#24231F] hover:bg-[#2e2d27] border border-[#3A3831] text-xs font-bold text-[#FAF8F2] transition-all flex items-center gap-1.5"
                   >
-                    <Briefcase className="w-3.5 h-3.5 text-[#C7F36B]" />
+                    <Briefcase className="w-3.5 h-3.5 text-zinc-400" />
                     <span>View {matchingMarketplaceJobs.length} In GetPlaced Marketplace</span>
                   </button>
                 )}
@@ -1141,7 +1132,7 @@ export default function CanIApply() {
                   href={benchmark.careersUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-5 py-2.5 rounded-xl bg-[#C7F36B] hover:bg-[#bbf055] text-[#11110F] text-xs font-bold uppercase tracking-wider shadow-lg shadow-[#C7F36B]/20 transition-all flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-bold uppercase tracking-wider shadow-lg transition-all flex items-center gap-2"
                 >
                   <span>Apply on Official Careers</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -1159,12 +1150,12 @@ export default function CanIApply() {
                   {matchingMarketplaceJobs.slice(0, 3).map((job, idx) => (
                     <div
                       key={job.jobId || idx}
-                      className="p-4 rounded-2xl bg-[#11110F] border border-[#3A3831] hover:border-[#C7F36B]/40 transition-all space-y-2 flex flex-col justify-between"
+                      className="p-4 rounded-2xl bg-[#11110F] border border-[#3A3831] hover:border-purple-500/40 transition-all space-y-2 flex flex-col justify-between"
                     >
                       <div>
                         <div className="flex items-center justify-between text-[10px] font-mono text-[#8C8980]">
                           <span>{job.workMode || "Hybrid"}</span>
-                          <span className="text-[#C7F36B]">{job.salary || "Competitive"}</span>
+                          <span className="text-emerald-400">{job.salary || "Competitive"}</span>
                         </div>
                         <h4 className="text-xs font-bold text-[#FAF8F2] line-clamp-1 mt-1">
                           {job.title}
@@ -1178,7 +1169,7 @@ export default function CanIApply() {
                         <span className="text-[#8C8980]">Min CGPA: {job.cgpaCutoff || benchmark.minCgpa}</span>
                         <Link
                           to={`/app/job?search=${encodeURIComponent(job.company)}`}
-                          className="text-[#C7F36B] hover:underline flex items-center gap-1 font-bold"
+                          className="text-purple-300 hover:underline flex items-center gap-1 font-bold"
                         >
                           <span>Open Listing</span>
                           <ArrowRight className="w-3 h-3" />
@@ -1209,7 +1200,7 @@ export default function CanIApply() {
           >
             <div className="flex items-start justify-between pb-3 border-b border-[#3A3831]">
               <div className="space-y-1">
-                <div className="text-xs font-mono uppercase text-[#C7F36B] font-bold">
+                <div className="text-xs font-mono uppercase text-purple-300 font-bold">
                   GetPlaced Jobs Radar
                 </div>
                 <h3 className="text-lg font-bold text-[#FAF8F2]">
@@ -1239,7 +1230,7 @@ export default function CanIApply() {
                         {job.location} • {job.workMode || "Hybrid"} • {job.experience || "0-2 years"}
                       </p>
                     </div>
-                    <span className="text-xs font-mono font-bold text-[#C7F36B] shrink-0">
+                    <span className="text-xs font-mono font-bold text-emerald-400 shrink-0">
                       {job.salary}
                     </span>
                   </div>
@@ -1256,7 +1247,7 @@ export default function CanIApply() {
                       href={job.applicationUrl || benchmark.careersUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1 rounded-lg bg-[#C7F36B] text-[#11110F] font-bold text-[11px] flex items-center gap-1"
+                      className="px-3 py-1 rounded-lg bg-white text-zinc-950 hover:bg-zinc-200 font-bold text-[11px] flex items-center gap-1 transition-colors"
                     >
                       <span>Apply on Official Portal</span>
                       <ExternalLink className="w-3 h-3" />
@@ -1274,7 +1265,7 @@ export default function CanIApply() {
                   setShowOpeningsDrawer(false);
                   navigate(`/app/job?search=${encodeURIComponent(benchmark.name)}`);
                 }}
-                className="text-[#C7F36B] hover:underline font-bold"
+                className="text-purple-300 hover:underline font-bold"
               >
                 Open in Jobs Center &rarr;
               </button>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Cpu, FileSearch, Code2, Sparkles, Target, BarChart3, Bot, Zap } from "lucide-react";
+import { FileSearch, Code2, BarChart3, Bot, Zap } from "lucide-react";
 import axios from "axios";
 import { NODE_API_URL } from "@/config/api";
 
@@ -80,127 +80,125 @@ const FeaturesGrid = () => {
   }, []);
 
   return (
-    <section id="features" className="py-24 md:py-36 bg-[#1A312C] text-[#FFF4E1] relative overflow-hidden">
-      
-      {/* Background Glow */}
-      <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-[#428475]/15 rounded-full blur-[160px] pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+    <section id="features" className="py-20 md:py-32 bg-[#09090b] text-zinc-100 relative overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 relative z-10">
         
         {/* Section Header */}
-        <div className="flex flex-col items-center text-center mb-16 md:mb-24">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#428475]/25 border border-[#89D7B7]/30 text-[#89D7B7] text-xs font-mono uppercase tracking-widest mb-4">
-            <Zap className="w-3.5 h-3.5 text-[#89D7B7]" /> System Architecture
+        <div className="flex flex-col items-center text-center mb-14 md:mb-20">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono uppercase tracking-wider mb-3">
+            <Zap className="w-3.5 h-3.5 text-purple-400" /> Platform Architecture
           </div>
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight max-w-4xl text-[#FFF4E1]">
-            Core Platform Capabilities
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight max-w-3xl text-white">
+            Core Preparation Capabilities
           </h2>
         </div>
 
-        {/* Gapless Bento Grid with grid-flow-dense */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 grid-flow-dense">
+        {/* Bento Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           
-          {/* Bento Card 1: AI Interview Mesh */}
+          {/* Bento Card 1: AI Interview Simulation */}
           <motion.div
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="col-span-1 md:col-span-2 lg:col-span-2 row-span-2 group relative rounded-3xl bg-gradient-to-b from-[#1E3A34] to-[#12221e] p-8 border border-[#428475]/40 overflow-hidden flex flex-col justify-between shadow-2xl hover:border-[#89D7B7]/60 transition-colors"
+            whileHover={{ y: -2 }}
+            transition={{ duration: 0.2 }}
+            className="col-span-1 md:col-span-2 lg:col-span-2 row-span-2 rounded-2xl bg-zinc-900/50 p-6 md:p-8 border border-zinc-800 overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-colors"
           >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#89D7B7]/12 rounded-full blur-[90px] group-hover:bg-[#89D7B7]/20 transition-all pointer-events-none" />
-            
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-[#89D7B7]/15 border border-[#89D7B7]/30 flex items-center justify-center text-[#89D7B7] mb-6 group-hover:scale-110 transition-transform">
-                <Bot className="w-6 h-6" />
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-5">
+                <Bot className="w-5 h-5" />
               </div>
-              <h3 className="text-2xl md:text-3xl font-bold text-[#FFF4E1] mb-3 tracking-tight">
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-2 tracking-tight">
                 Technical Interview Simulation
               </h3>
-              <p className="text-[#FFF4E1]/75 text-sm md:text-base leading-relaxed mb-6">
+              <p className="text-zinc-400 text-sm leading-relaxed mb-6">
                 Real-time telemetry measuring speech pacing, gaze focus, posture alignment, and technical communication.
               </p>
             </div>
 
             {/* Micro Graphic Component with Dynamic Telemetry */}
-            <div className="rounded-2xl bg-[#1A312C]/90 border border-[#428475]/35 p-5 backdrop-blur-md">
-              <div className="flex items-center justify-between text-xs font-mono text-[#FFF4E1]/70 mb-3">
+            <div className="rounded-xl bg-zinc-950/80 border border-zinc-800 p-4">
+              <div className="flex items-center justify-between text-xs font-mono text-zinc-400 mb-2.5">
                 <span>AUDIO_ANALYSIS</span>
-                <span className="text-[#89D7B7] font-semibold">{telemetryData.accuracy} ACCURACY</span>
+                <span className="text-emerald-400 font-medium">{telemetryData.accuracy} ACCURACY</span>
               </div>
-              <div className="h-2 w-full bg-[#12221e] rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-[#1A312C] via-[#428475] to-[#89D7B7] w-[92%] rounded-full animate-pulse" />
+              <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500 w-[92%] rounded-full" />
               </div>
-              <div className="mt-3 flex justify-between text-[11px] text-[#FFF4E1]/65 font-mono">
+              <div className="mt-3 flex justify-between text-[11px] text-zinc-400 font-mono">
                 <span>Pacing: {telemetryData.pacingWpm} wpm</span>
                 <span>Tone: {telemetryData.tone}</span>
-                <span>Filler Words: {telemetryData.fillerWords}</span>
+                <span>Filler: {telemetryData.fillerWords}</span>
               </div>
             </div>
           </motion.div>
 
-          {/* Bento Card 2: ATS Resume Radar */}
+          {/* Bento Card 2: ATS Resume Analysis */}
           <motion.div
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="col-span-1 md:col-span-2 lg:col-span-2 row-span-1 group relative rounded-3xl bg-[#152824] p-8 border border-[#428475]/35 overflow-hidden flex flex-col justify-between shadow-xl hover:border-[#89D7B7]/50 transition-colors"
+            whileHover={{ y: -2 }}
+            transition={{ duration: 0.2 }}
+            className="col-span-1 md:col-span-2 lg:col-span-2 row-span-1 rounded-2xl bg-zinc-900/50 p-6 md:p-7 border border-zinc-800 overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-colors"
           >
             <div className="flex items-start justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-[#428475]/30 border border-[#89D7B7]/30 flex items-center justify-center text-[#89D7B7] mb-4 group-hover:scale-110 transition-transform">
-                  <FileSearch className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
+                  <FileSearch className="w-5 h-5" />
                 </div>
-                <h3 className="text-xl md:text-2xl font-bold text-[#FFF4E1] mb-2 tracking-tight">
+                <h3 className="text-lg md:text-xl font-bold text-white mb-1.5 tracking-tight">
                   ATS Resume Analysis
                 </h3>
-                <p className="text-[#FFF4E1]/75 text-sm leading-relaxed max-w-md">
-                  Parse and benchmark resume content against industry job requirements with automated keyword matching.
+                <p className="text-zinc-400 text-xs md:text-sm leading-relaxed max-w-md">
+                  Benchmark resume content against technical job requirements with automated keyword matching.
                 </p>
               </div>
               <div className="hidden sm:flex flex-col items-end justify-center">
-                <div className="text-3xl font-mono font-black text-[#89D7B7]">{telemetryData.atsScore}%</div>
-                <div className="text-[10px] text-[#FFF4E1]/60 font-mono">MATCH SCORE</div>
+                <div className="text-2xl font-mono font-bold text-emerald-400">{telemetryData.atsScore}%</div>
+                <div className="text-[10px] text-zinc-500 font-mono">MATCH SCORE</div>
               </div>
             </div>
           </motion.div>
 
-          {/* Bento Card 3: DSA Arena */}
+          {/* Bento Card 3: Coding Arena */}
           <motion.div
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 group relative rounded-3xl bg-[#152824] p-6 border border-[#428475]/35 overflow-hidden flex flex-col justify-between shadow-xl hover:border-[#89D7B7]/50 transition-colors"
+            whileHover={{ y: -2 }}
+            transition={{ duration: 0.2 }}
+            className="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 rounded-2xl bg-zinc-900/50 p-5 md:p-6 border border-zinc-800 overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-colors"
           >
             <div>
-              <div className="w-10 h-10 rounded-xl bg-[#89D7B7]/20 border border-[#89D7B7]/30 flex items-center justify-center text-[#89D7B7] mb-4 group-hover:scale-110 transition-transform">
-                <Code2 className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 mb-3.5">
+                <Code2 className="w-4 h-4" />
               </div>
-              <h3 className="text-lg font-bold text-[#FFF4E1] mb-1.5 tracking-tight">
-                {telemetryData.problemCount.toLocaleString()}+ Problem Arena
+              <h3 className="text-base font-bold text-white mb-1 tracking-tight">
+                Coding Arena
               </h3>
-              <p className="text-[#FFF4E1]/75 text-xs leading-relaxed">
+              <p className="text-zinc-400 text-xs leading-relaxed">
                 Integrated code editor with test runners, execution sandboxes, and structured problem sets.
               </p>
             </div>
-            <div className="mt-4 pt-3 border-t border-[#428475]/25 flex items-center justify-between text-xs text-[#89D7B7]">
-              <span className="font-semibold">Open Arena</span>
-              <Zap className="w-3.5 h-3.5 text-[#89D7B7]" />
+            <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-300">
+              <span className="font-medium">Open Arena</span>
+              <Zap className="w-3.5 h-3.5 text-purple-400" />
             </div>
           </motion.div>
 
           {/* Bento Card 4: Analytics Dashboard */}
           <motion.div
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 group relative rounded-3xl bg-[#152824] p-6 border border-[#428475]/35 overflow-hidden flex flex-col justify-between shadow-xl hover:border-[#89D7B7]/50 transition-colors"
+            whileHover={{ y: -2 }}
+            transition={{ duration: 0.2 }}
+            className="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 rounded-2xl bg-zinc-900/50 p-5 md:p-6 border border-zinc-800 overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-colors"
           >
             <div>
-              <div className="w-10 h-10 rounded-xl bg-[#428475]/30 border border-[#89D7B7]/30 flex items-center justify-center text-[#89D7B7] mb-4 group-hover:scale-110 transition-transform">
-                <BarChart3 className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 mb-3.5">
+                <BarChart3 className="w-4 h-4" />
               </div>
-              <h3 className="text-lg font-bold text-[#FFF4E1] mb-1.5 tracking-tight">
-                Readiness Index ({telemetryData.readinessScore}/100)
+              <h3 className="text-base font-bold text-white mb-1 tracking-tight">
+                Readiness Index
               </h3>
-              <p className="text-[#FFF4E1]/75 text-xs leading-relaxed">
+              <p className="text-zinc-400 text-xs leading-relaxed">
                 Continuous scoring across technical assessments, behavioral rounds, and resume metrics.
               </p>
+            </div>
+            <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-between text-xs font-mono text-emerald-400">
+              <span>SCORE</span>
+              <span className="font-bold">{telemetryData.readinessScore}/100</span>
             </div>
           </motion.div>
 
