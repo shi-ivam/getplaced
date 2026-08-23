@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import mongoose from "mongoose";
 import {
   extractGitHubUsername,
   calculateGitHubProjectScore,
@@ -38,6 +39,7 @@ import {
   getCompanyTargetBenchmark,
 } from "./config/readinessWeights.js";
 import { DSA_TOPICS, DSA_CATEGORIES } from "./config/dsaTaxonomy.js";
+import DsaProgress from "./models/dsaProgressModel.js";
 
 // Group C Services Imports
 import {
@@ -46,7 +48,9 @@ import {
   COMPANY_ACADEMIC_BENCHMARKS,
 } from "./services/academicService.js";
 import { CURATED_STUDY_VIDEOS } from "./services/studyLibraryService.js";
-import { MASTER_MILESTONES } from "./services/milestoneService.js";
+import { MASTER_MILESTONES, checkAndAwardMilestones } from "./services/milestoneService.js";
+import { getProgressAnalytics, logUserActivity } from "./services/progressService.js";
+import { getNextRecommendedActions } from "./services/recommendationService.js";
 import { ACTIVE_WEEKLY_CHALLENGES, getArenaLeaderboard } from "./services/arenaService.js";
 import { queryJobs, normalizeRapidApiJob, calculateJobMatch } from "./services/jobService.js";
 
@@ -205,6 +209,33 @@ async function runAllTests() {
     assert.ok(result.categories.length === DSA_CATEGORIES.length);
   });
 
+  await test("DsaProgress model schema supports sheetProgress items with solved and bookmark states", () => {
+    const dummyProgress = new DsaProgress({
+      userId: new mongoose.Types.ObjectId(),
+      completedLectures: ["lec-1"],
+      completedAssignments: ["assign-1"],
+      sheetProgress: [
+        {
+          sheetId: "strivers-a2z-dsa-sheet",
+          problemId: "two-sum",
+          problemName: "Two Sum",
+          difficulty: "Easy",
+          solved: true,
+          bookmarked: true,
+          solvedAt: new Date(),
+          bookmarkedAt: new Date(),
+          leetcodeSlug: "two-sum",
+        },
+      ],
+    });
+
+    assert.equal(dummyProgress.sheetProgress.length, 1);
+    assert.equal(dummyProgress.sheetProgress[0].problemId, "two-sum");
+    assert.equal(dummyProgress.sheetProgress[0].solved, true);
+    assert.equal(dummyProgress.sheetProgress[0].bookmarked, true);
+    assert.equal(dummyProgress.sheetProgress[0].difficulty, "Easy");
+  });
+
   // 3. LeetCode Service Tests
   console.log("\n[3] LeetCode Service Tests");
 
@@ -253,7 +284,7 @@ async function runAllTests() {
     assert.ok(archetype.badge);
   });
 
-  await test("formatLeetCodeProfileResponse formats profile doc and preserves null contest fields", () => {
+  await test("formatLeetCodeProfileResponse formats profile doc, computes dsaScore/level and preserves null contest fields", () => {
     const formatted = formatLeetCodeProfileResponse({
       username: "test_user",
       totalSolved: 150,
@@ -265,6 +296,8 @@ async function runAllTests() {
     });
     assert.equal(formatted.username, "test_user");
     assert.equal(formatted.totalSolved, 150);
+    assert.ok(formatted.dsaScore >= 80, `Expected dsaScore >= 80, got ${formatted.dsaScore}`);
+    assert.ok(formatted.dsaLevel >= 8.0, `Expected dsaLevel >= 8.0, got ${formatted.dsaLevel}`);
     assert.equal(formatted.contest.rating, null);
     assert.equal(formatted.contest.globalRank, null);
   });
@@ -399,6 +432,54 @@ async function runAllTests() {
     assert.ok(ACTIVE_WEEKLY_CHALLENGES.length >= 3);
     const leaderboard = await getArenaLeaderboard("user123");
     assert.ok(Array.isArray(leaderboard.topRankers));
+  });
+
+  await test("getNextRecommendedActions produces harmonized properties and streakDays", async () => {
+    const dummyUser = {
+      _id: new mongoose.Types.ObjectId(),
+      targetCompany: "Microsoft",
+      targetJobRole: "Software Engineer",
+      cgpa: 8.5,
+    };
+    const result = await getNextRecommendedActions(dummyUser);
+    assert.equal(typeof result.streakDays, "number");
+    assert.ok(Array.isArray(result.recommendations));
+    assert.ok(result.recommendations.length > 0);
+    for (const rec of result.recommendations) {
+      assert.ok(rec.categoryLabel, `rec ${rec.id} missing categoryLabel`);
+      assert.ok(rec.badgeLabel, `rec ${rec.id} missing badgeLabel`);
+      assert.ok(typeof rec.estimatedMinutes === "number", `rec ${rec.id} missing estimatedMinutes`);
+      assert.ok(typeof rec.estimatedTime === "string", `rec ${rec.id} missing estimatedTime`);
+    }
+  });
+
+  await test("checkAndAwardMilestones is exported and runs for users", async () => {
+    assert.equal(typeof checkAndAwardMilestones, "function");
+    const dummyUser = {
+      _id: new mongoose.Types.ObjectId(),
+      targetCompany: "Google",
+      targetJobRole: "Software Engineer",
+      cgpa: 8.8,
+    };
+    const milestonesData = await checkAndAwardMilestones(dummyUser._id.toString(), dummyUser);
+    assert.ok(milestonesData);
+    assert.equal(typeof milestonesData.totalXp, "number");
+    assert.ok(milestonesData.totalMilestonesCount >= 10);
+  });
+
+  await test("getProgressAnalytics generates snapshots and computes overallScore", async () => {
+    assert.equal(typeof getProgressAnalytics, "function");
+    const dummyUser = {
+      _id: new mongoose.Types.ObjectId(),
+      targetCompany: "Microsoft",
+      targetJobRole: "Software Engineer",
+      cgpa: 8.5,
+    };
+    const analytics = await getProgressAnalytics(dummyUser._id.toString(), dummyUser);
+    assert.ok(analytics);
+    assert.equal(typeof analytics.overallScore, "number");
+    assert.ok(Array.isArray(analytics.snapshots));
+    assert.equal(typeof analytics.totalProblemsSolved, "number");
   });
 
   // 7. Group D Feature Tests: Jobs Market & RapidAPI Normalization (#72)

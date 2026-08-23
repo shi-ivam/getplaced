@@ -103,18 +103,35 @@ export default function AnalyzeResume() {
   const [isProfileLinked, setIsProfileLinked] = useState(false);
 
   const recordVersionSnapshot = (evalData, resumeTextVal, filename = "resume.pdf", activeUserId = null) => {
-    if (!evalData || evalData.ats_score === undefined) return;
+    if (!evalData || (evalData.ats_score === undefined && evalData.atsScore === undefined)) return;
+    const ats = evalData.ats_score ?? evalData.atsScore ?? 0;
+    const tier = evalData.score_tier || evalData.scoreTier || evalData.tier || "Competitive (Tier 2)";
+    const catScores = evalData.category_scores || evalData.categoryScores || {};
+
     const newVersion = {
       id: `ver-${Date.now()}`,
+      name: filename || "resume.pdf",
+      filename: filename || "resume.pdf",
       timestamp: new Date().toISOString(),
-      filename: filename,
       targetRole: targetRole || "Software Engineer",
-      atsScore: evalData.ats_score,
-      scoreTier: evalData.score_tier || "Tier 2",
-      matchedKeywords: (evalData.matched_keywords || []).map((k) => (typeof k === "string" ? k : k.keyword || "")),
-      missingKeywords: (evalData.missing_keywords || []).map((k) => (typeof k === "string" ? k : k.keyword || "")),
-      summaryCritique: evalData.summary_critique || "",
-      fullEvaluation: evalData,
+      atsScore: ats,
+      ats_score: ats,
+      scoreTier: tier,
+      tier: tier,
+      categoryScores: catScores,
+      category_scores: catScores,
+      matchedKeywords: (evalData.matched_keywords || evalData.matchedKeywords || []).map((k) => (typeof k === "string" ? k : k.keyword || "")),
+      missingKeywords: (evalData.missing_keywords || evalData.missingKeywords || []).map((k) => (typeof k === "string" ? k : k.keyword || "")),
+      summaryCritique: evalData.summary_critique || evalData.summaryCritique || "",
+      fullEvaluation: {
+        ...evalData,
+        ats_score: ats,
+        atsScore: ats,
+        score_tier: tier,
+        scoreTier: tier,
+        category_scores: catScores,
+        categoryScores: catScores,
+      },
       resumeText: resumeTextVal || rawText,
     };
 
@@ -124,6 +141,7 @@ export default function AnalyzeResume() {
       const userKey = getUserStorageKey(targetUid);
       try {
         localStorage.setItem(userKey, JSON.stringify(updated));
+        localStorage.setItem("getplaced_resume_versions_anon", JSON.stringify(updated));
       } catch (e) {}
       return updated;
     });
@@ -625,25 +643,47 @@ export default function AnalyzeResume() {
               onSelectVersion={(ver) => {
                 const targetEval = ver?.fullEvaluation || ver;
                 if (targetEval) {
-                  setEvaluation(targetEval);
+                  const normalizedEval = {
+                    ...targetEval,
+                    ats_score: targetEval.ats_score ?? targetEval.atsScore ?? ver.atsScore ?? 0,
+                    atsScore: targetEval.ats_score ?? targetEval.atsScore ?? ver.atsScore ?? 0,
+                  };
+                  setEvaluation(normalizedEval);
                   if (targetEval.structured_actions) setActions(targetEval.structured_actions);
+                  if (ver?.resumeText) setRawText(ver.resumeText);
                   setActiveTab("overview");
                 }
               }}
               onRevertVersion={(ver) => {
                 const targetEval = ver?.fullEvaluation || ver;
                 if (targetEval) {
-                  setEvaluation(targetEval);
+                  setPreviousEvaluation(evaluation);
+                  const normalizedEval = {
+                    ...targetEval,
+                    ats_score: targetEval.ats_score ?? targetEval.atsScore ?? ver.atsScore ?? 0,
+                    atsScore: targetEval.ats_score ?? targetEval.atsScore ?? ver.atsScore ?? 0,
+                  };
+                  setEvaluation(normalizedEval);
                   if (targetEval.structured_actions) setActions(targetEval.structured_actions);
+                  if (ver?.resumeText) setRawText(ver.resumeText);
                   setActiveTab("overview");
+                  recordVersionSnapshot(normalizedEval, ver?.resumeText || rawText, `restored_${ver.name || "snapshot.pdf"}`);
                 }
               }}
               onRestoreVersion={(ver) => {
                 const targetEval = ver?.fullEvaluation || ver;
                 if (targetEval) {
-                  setEvaluation(targetEval);
+                  setPreviousEvaluation(evaluation);
+                  const normalizedEval = {
+                    ...targetEval,
+                    ats_score: targetEval.ats_score ?? targetEval.atsScore ?? ver.atsScore ?? 0,
+                    atsScore: targetEval.ats_score ?? targetEval.atsScore ?? ver.atsScore ?? 0,
+                  };
+                  setEvaluation(normalizedEval);
                   if (targetEval.structured_actions) setActions(targetEval.structured_actions);
+                  if (ver?.resumeText) setRawText(ver.resumeText);
                   setActiveTab("overview");
+                  recordVersionSnapshot(normalizedEval, ver?.resumeText || rawText, `restored_${ver.name || "snapshot.pdf"}`);
                 }
               }}
             />

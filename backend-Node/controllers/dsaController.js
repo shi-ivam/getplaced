@@ -70,7 +70,7 @@ export const getDsaReadinessComparison = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Get user's persisted DSA learning progress (completed lectures & assignments)
+ * @desc    Get user's persisted DSA learning progress (completed lectures, assignments, & sheet problem progress)
  * @route   GET /api/dsa/progress
  * @access  Private
  */
@@ -87,6 +87,7 @@ export const getDsaProgress = asyncHandler(async (req, res) => {
       completedLectures: [],
       completedAssignments: [],
       watchProgress: {},
+      sheetProgress: [],
     });
   }
 
@@ -99,11 +100,12 @@ export const getDsaProgress = asyncHandler(async (req, res) => {
     completedLectures: progress.completedLectures || [],
     completedAssignments: progress.completedAssignments || [],
     watchProgress: watchObj,
+    sheetProgress: progress.sheetProgress || [],
   });
 });
 
 /**
- * @desc    Update user's DSA learning progress (lecture complete, assignment toggle, watch progress)
+ * @desc    Update user's DSA learning progress (lecture complete, assignment toggle, watch progress, sheet problem solved/bookmarked)
  * @route   POST /api/dsa/progress
  * @access  Private
  */
@@ -113,7 +115,7 @@ export const updateDsaProgress = asyncHandler(async (req, res) => {
     throw new Error("Not authorized, user missing");
   }
 
-  const { lectureId, assignmentId, completed, progressRatio, type } = req.body;
+  const { lectureId, assignmentId, completed, progressRatio, type, sheetProgress } = req.body;
 
   let progress = await DsaProgress.findOne({ userId: req.user._id });
   if (!progress) {
@@ -122,6 +124,7 @@ export const updateDsaProgress = asyncHandler(async (req, res) => {
       completedLectures: [],
       completedAssignments: [],
       watchProgress: {},
+      sheetProgress: [],
     });
   }
 
@@ -154,6 +157,88 @@ export const updateDsaProgress = asyncHandler(async (req, res) => {
     }
   }
 
+  // Handle batch sheet progress synchronization
+  if (type === "sheet_progress_batch" || Array.isArray(sheetProgress)) {
+    const items = sheetProgress || [];
+    if (!progress.sheetProgress) progress.sheetProgress = [];
+
+    items.forEach((newItem) => {
+      if (!newItem || !newItem.problemId) return;
+      const existingIdx = progress.sheetProgress.findIndex(
+        (p) => p.problemId === newItem.problemId
+      );
+      if (existingIdx !== -1) {
+        const item = progress.sheetProgress[existingIdx];
+        if (newItem.solved !== undefined) {
+          item.solved = Boolean(newItem.solved);
+          item.solvedAt = newItem.solved ? (newItem.solvedAt || new Date()) : null;
+        }
+        if (newItem.bookmarked !== undefined) {
+          item.bookmarked = Boolean(newItem.bookmarked);
+          item.bookmarkedAt = newItem.bookmarked ? (newItem.bookmarkedAt || new Date()) : null;
+        }
+        if (newItem.problemName) item.problemName = newItem.problemName;
+        if (newItem.difficulty) item.difficulty = newItem.difficulty;
+        if (newItem.sheetId) item.sheetId = newItem.sheetId;
+        if (newItem.leetcodeSlug) item.leetcodeSlug = newItem.leetcodeSlug;
+      } else {
+        progress.sheetProgress.push({
+          sheetId: newItem.sheetId || "",
+          problemId: newItem.problemId,
+          problemName: newItem.problemName || newItem.problemId,
+          difficulty: newItem.difficulty || "",
+          solved: newItem.solved !== undefined ? Boolean(newItem.solved) : false,
+          bookmarked: newItem.bookmarked !== undefined ? Boolean(newItem.bookmarked) : false,
+          solvedAt: newItem.solved ? (newItem.solvedAt || new Date()) : null,
+          bookmarkedAt: newItem.bookmarked ? (newItem.bookmarkedAt || new Date()) : null,
+          leetcodeSlug: newItem.leetcodeSlug || "",
+        });
+      }
+    });
+  }
+
+  // Handle single sheet problem update (solved or bookmarked)
+  if (type === "sheet" || (req.body.problemId && (req.body.solved !== undefined || req.body.bookmarked !== undefined))) {
+    const problemId = req.body.problemId || req.body.id;
+    if (problemId) {
+      if (!progress.sheetProgress) progress.sheetProgress = [];
+      const existingIdx = progress.sheetProgress.findIndex(
+        (p) => p.problemId === problemId
+      );
+
+      const solvedVal = req.body.solved;
+      const bookmarkedVal = req.body.bookmarked;
+
+      if (existingIdx !== -1) {
+        const item = progress.sheetProgress[existingIdx];
+        if (solvedVal !== undefined) {
+          item.solved = Boolean(solvedVal);
+          item.solvedAt = item.solved ? (req.body.solvedAt || new Date()) : null;
+        }
+        if (bookmarkedVal !== undefined) {
+          item.bookmarked = Boolean(bookmarkedVal);
+          item.bookmarkedAt = item.bookmarked ? (req.body.bookmarkedAt || new Date()) : null;
+        }
+        if (req.body.problemName) item.problemName = req.body.problemName;
+        if (req.body.difficulty) item.difficulty = req.body.difficulty;
+        if (req.body.sheetId) item.sheetId = req.body.sheetId;
+        if (req.body.leetcodeSlug) item.leetcodeSlug = req.body.leetcodeSlug;
+      } else {
+        progress.sheetProgress.push({
+          sheetId: req.body.sheetId || "",
+          problemId: problemId,
+          problemName: req.body.problemName || problemId,
+          difficulty: req.body.difficulty || "",
+          solved: solvedVal !== undefined ? Boolean(solvedVal) : false,
+          bookmarked: bookmarkedVal !== undefined ? Boolean(bookmarkedVal) : false,
+          solvedAt: solvedVal ? (req.body.solvedAt || new Date()) : null,
+          bookmarkedAt: bookmarkedVal ? (req.body.bookmarkedAt || new Date()) : null,
+          leetcodeSlug: req.body.leetcodeSlug || "",
+        });
+      }
+    }
+  }
+
   await progress.save();
 
   const watchObj = progress.watchProgress
@@ -165,5 +250,6 @@ export const updateDsaProgress = asyncHandler(async (req, res) => {
     completedLectures: progress.completedLectures,
     completedAssignments: progress.completedAssignments,
     watchProgress: watchObj,
+    sheetProgress: progress.sheetProgress || [],
   });
 });

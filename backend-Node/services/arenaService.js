@@ -117,10 +117,61 @@ export async function getUserSquad(userId, user = null) {
     return null;
   }
 
+  // Refresh members' actual readiness scores if available in DB
+  if (mongoose.connection?.readyState === 1 && squad.members?.length > 0) {
+    try {
+      const memberIds = squad.members.map((m) => m.userId);
+      const users = await User.find({ _id: { $in: memberIds } }).select("readinessScore name").lean();
+      const userMap = new Map(users.map((u) => [String(u._id), u]));
+      squad.members.forEach((m) => {
+        const u = userMap.get(String(m.userId));
+        if (u && u.readinessScore !== undefined) {
+          m.readinessScore = u.readinessScore;
+        }
+      });
+    } catch (e) {
+      console.warn("Could not refresh member readiness scores:", e.message);
+    }
+  }
+
   const totalReadiness = squad.members.reduce((acc, m) => acc + (m.readinessScore || 0), 0);
   squad.aggregateReadiness = Math.round(totalReadiness / (squad.members.length || 1));
 
   return squad;
+}
+
+export async function enrollInChallenge(userId, user, challengeId) {
+  const challenge = ACTIVE_WEEKLY_CHALLENGES.find((c) => c.id === challengeId);
+
+  // Record in Progress activityLog if mongo connected
+  if (mongoose.connection?.readyState === 1) {
+    try {
+      await Progress.findOneAndUpdate(
+        { userId },
+        {
+          $push: {
+            activityLog: {
+              type: "roadmap_task",
+              title: `Enrolled in challenge: ${challenge?.title || challengeId}`,
+              xp: challenge?.xpReward || 20,
+              metadata: { challengeId },
+            },
+          },
+        },
+        { upsert: false }
+      );
+    } catch (err) {
+      console.warn("Could not log challenge enrollment activity:", err.message);
+    }
+  }
+
+  return {
+    success: true,
+    challengeId,
+    challenge: challenge || null,
+    message: challenge ? `Successfully enrolled in ${challenge.title}!` : "Successfully enrolled in challenge!",
+    enrolledAt: new Date(),
+  };
 }
 
 export async function postSquadMessage(userId, userName, text, type = "chat") {
@@ -154,15 +205,31 @@ export async function joinSquadByCode(userId, userName, code) {
     return squad;
   }
 
+  let userReadiness = 0;
+  let userStreak = 1;
+  if (mongoose.connection?.readyState === 1) {
+    try {
+      const uDoc = await User.findById(userId).select("readinessScore").lean();
+      if (uDoc) userReadiness = uDoc.readinessScore || 0;
+      const progDoc = await Progress.findOne({ userId }).select("dailyStreak").lean();
+      if (progDoc) userStreak = progDoc.dailyStreak || 1;
+    } catch (e) {
+      console.warn("Could not fetch user readiness for joinSquad:", e.message);
+    }
+  }
+
   squad.members.push({
     userId,
     name: userName || "Candidate",
     role: "member",
     joinedAt: new Date(),
     weeklyContribution: 0,
-    readinessScore: 75,
-    streakDays: 1,
+    readinessScore: userReadiness,
+    streakDays: userStreak,
   });
+
+  const totalReadiness = squad.members.reduce((acc, m) => acc + (m.readinessScore || 0), 0);
+  squad.aggregateReadiness = Math.round(totalReadiness / (squad.members.length || 1));
 
   squad.messages.unshift({
     senderId: userId,
@@ -179,6 +246,19 @@ export async function joinSquadByCode(userId, userName, code) {
 export async function createSquad(userId, userName, squadData) {
   const code = (squadData.name.replace(/[^A-Z0-9]/gi, "").slice(0, 5) + Math.floor(1000 + Math.random() * 9000)).toUpperCase();
 
+  let userReadiness = 0;
+  let userStreak = 1;
+  if (mongoose.connection?.readyState === 1) {
+    try {
+      const uDoc = await User.findById(userId).select("readinessScore").lean();
+      if (uDoc) userReadiness = uDoc.readinessScore || 0;
+      const progDoc = await Progress.findOne({ userId }).select("dailyStreak").lean();
+      if (progDoc) userStreak = progDoc.dailyStreak || 1;
+    } catch (e) {
+      console.warn("Could not fetch user readiness for createSquad:", e.message);
+    }
+  }
+
   const newSquad = await Squad.create({
     name: squadData.name,
     code,
@@ -193,8 +273,8 @@ export async function createSquad(userId, userName, squadData) {
         role: "leader",
         joinedAt: new Date(),
         weeklyContribution: 0,
-        readinessScore: 80,
-        streakDays: 1,
+        readinessScore: userReadiness,
+        streakDays: userStreak,
       },
     ],
     weeklyGoal: {
@@ -212,7 +292,7 @@ export async function createSquad(userId, userName, squadData) {
         createdAt: new Date(),
       },
     ],
-    aggregateReadiness: 80,
+    aggregateReadiness: userReadiness,
   });
 
   return newSquad;

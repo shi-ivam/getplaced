@@ -101,9 +101,10 @@ export default function JobRecommendations() {
         withCredentials: true,
       });
 
-      if (res.data?.success) {
-        setJobs(res.data.jobs || []);
-        setRecommendedJobs(res.data.recommendedJobs || []);
+      if (res.data?.success || res.data?.jobs || Array.isArray(res.data)) {
+        const jobsList = res.data.jobs || (Array.isArray(res.data) ? res.data : []);
+        setJobs(jobsList);
+        setRecommendedJobs(res.data.recommendedJobs || jobsList.slice(0, 6));
         setTargetCompanyJobs(res.data.targetCompanyJobs || []);
         setMeta({
           targetCompany: res.data.meta?.targetCompany ?? res.data.targetCompany ?? "",

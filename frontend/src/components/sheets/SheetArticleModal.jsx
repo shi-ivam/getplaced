@@ -163,7 +163,8 @@ function CopyButton({ text }) {
   );
 }
 
-export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
+export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo, ...props }) {
+  const identifier = slugOrId || props.articleSlug || props.slug;
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -171,14 +172,14 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
   const [isMaximized, setIsMaximized] = useState(false);
 
   useEffect(() => {
-    if (!slugOrId) return;
+    if (!identifier) return;
 
     let isMounted = true;
     setLoading(true);
     setError(null);
 
     sheetsService
-      .getArticle(slugOrId)
+      .getArticle(identifier)
       .then((data) => {
         if (isMounted) {
           setArticle(data);
@@ -203,9 +204,9 @@ export default function SheetArticleModal({ slugOrId, onClose, onOpenVideo }) {
     return () => {
       isMounted = false;
     };
-  }, [slugOrId]);
+  }, [identifier]);
 
-  if (!slugOrId) return null;
+  if (!identifier) return null;
 
   const snippets = article?.code_snippets || {};
   const snippetLangs = Object.keys(snippets);

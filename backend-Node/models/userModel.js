@@ -109,6 +109,18 @@ const userSchema = mongoose.Schema(
       type: [mongoose.Schema.Types.Mixed],
       default: [],
     },
+    behavioralStories: {
+      type: [mongoose.Schema.Types.Mixed],
+      default: [],
+    },
+    behavioralBookmarks: {
+      type: [String],
+      default: [],
+    },
+    behavioralPracticeHistory: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
   },
   {
     timestamps: true,

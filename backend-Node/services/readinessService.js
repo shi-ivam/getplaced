@@ -541,6 +541,28 @@ const evaluateCommunicationDimension = (user) => {
     };
   }
 
+  // Check behavioral practice communication evaluation scores
+  const practiceHistory = user.behavioralPracticeHistory && typeof user.behavioralPracticeHistory === "object"
+    ? Object.values(user.behavioralPracticeHistory)
+    : [];
+  const commScores = practiceHistory
+    .map((p) => p?.evaluationSummary?.commScore)
+    .filter((s) => s !== undefined && s !== null && !isNaN(Number(s)));
+
+  if (commScores.length > 0) {
+    const avgComm = Math.min(100, Math.max(0, Math.round(commScores.reduce((a, b) => a + Number(b), 0) / commScores.length)));
+    const statusObj = getStatusFromScore(avgComm);
+    return {
+      score: avgComm,
+      status: statusObj.key,
+      statusLabel: statusObj.label,
+      dataAvailability: "available",
+      requiredScore: reqScore,
+      gap: Math.max(0, reqScore - avgComm),
+      notes: `Scored from ${commScores.length} behavioral speech/articulation practice session(s).`,
+    };
+  }
+
   return {
     score: null,
     status: "not_analyzed",
@@ -558,17 +580,58 @@ const evaluateCommunicationDimension = (user) => {
 const evaluateInterviewDimension = (user) => {
   const reqScore = 80;
 
-  if (user.interviewScore !== undefined && user.interviewScore !== null && !isNaN(Number(user.interviewScore))) {
-    const score = Math.min(100, Math.max(0, Math.round(Number(user.interviewScore))));
-    const statusObj = getStatusFromScore(score);
+  // Factor in saved master STAR stories and behavioral practice history dynamically
+  const stories = Array.isArray(user.behavioralStories) ? user.behavioralStories : [];
+  const practiceHistory = user.behavioralPracticeHistory && typeof user.behavioralPracticeHistory === "object"
+    ? Object.values(user.behavioralPracticeHistory)
+    : [];
+
+  let behavioralScore = null;
+  if (practiceHistory.length > 0 || stories.length > 0) {
+    let practiceAvg = 0;
+    if (practiceHistory.length > 0) {
+      const totalScore = practiceHistory.reduce((acc, curr) => acc + (Number(curr?.score) || 0), 0);
+      practiceAvg = Math.round(totalScore / practiceHistory.length);
+    }
+    // Story authoring bonus (up to 20 pts based on authoring STAR stories in Story Vault)
+    const storyBonus = Math.min(20, stories.length * 7);
+    if (practiceHistory.length > 0) {
+      behavioralScore = Math.min(100, Math.round(practiceAvg * 0.8 + storyBonus));
+    } else {
+      behavioralScore = Math.min(75, 45 + storyBonus);
+    }
+  }
+
+  const baseInterviewScore = user.interviewScore !== undefined && user.interviewScore !== null && !isNaN(Number(user.interviewScore))
+    ? Math.min(100, Math.max(0, Math.round(Number(user.interviewScore))))
+    : null;
+
+  let finalScore = null;
+  let notes = "";
+
+  if (baseInterviewScore !== null && behavioralScore !== null) {
+    finalScore = Math.round(baseInterviewScore * 0.6 + behavioralScore * 0.4);
+    notes = `Blended score from full mock interview (${baseInterviewScore}%) and HR behavioral prep (${behavioralScore}%).`;
+  } else if (baseInterviewScore !== null) {
+    finalScore = baseInterviewScore;
+    notes = "Scored from latest full technical & behavioral mock interview.";
+  } else if (behavioralScore !== null) {
+    finalScore = behavioralScore;
+    notes = practiceHistory.length > 0
+      ? `Scored dynamically from ${practiceHistory.length} behavioral practice attempt(s) and ${stories.length} STAR story vault entry/entries.`
+      : `Scored from ${stories.length} master STAR story vault entry/entries.`;
+  }
+
+  if (finalScore !== null) {
+    const statusObj = getStatusFromScore(finalScore);
     return {
-      score,
+      score: finalScore,
       status: statusObj.key,
       statusLabel: statusObj.label,
       dataAvailability: "available",
       requiredScore: reqScore,
-      gap: Math.max(0, reqScore - score),
-      notes: "Scored from latest full technical & behavioral mock interview.",
+      gap: Math.max(0, reqScore - finalScore),
+      notes,
     };
   }
 
@@ -579,7 +642,7 @@ const evaluateInterviewDimension = (user) => {
     dataAvailability: "not_started",
     requiredScore: reqScore,
     gap: null,
-    notes: "Complete a full AI mock interview to measure live interview simulation score.",
+    notes: "Complete HR Behavioral Prep or a full AI mock interview to measure live interview simulation score.",
   };
 };
 

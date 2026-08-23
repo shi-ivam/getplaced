@@ -17,8 +17,16 @@ import { fetchGitHubUserData, extractGitHubUsername, formatGitHubProfileResponse
 import { fetchLeetCodeStats, extractLeetCodeUsername } from "./leetcodeService.js";
 import { createPersonalizedRoadmap, getOrGenerateUserRoadmap, toggleRoadmapTask } from "./roadmapService.js";
 import { getUserMilestones, claimMilestoneReward } from "./milestoneService.js";
-import { getProgressAnalytics, logUserActivity } from "./progressService.js";
 import { DSA_TOPICS } from "../config/dsaTaxonomy.js";
+import {
+  isSupportedCompany,
+  normalizeCompanyName,
+  isSupportedRole,
+  normalizeRoleName,
+  CURATED_COMPANIES,
+  CURATED_COMPANY_NAMES,
+  CANONICAL_ROLES,
+} from "../data/curatedCompanies.js";
 
 // Resolve Google GenAI API Key
 export function getApiKey() {
@@ -560,15 +568,32 @@ export async function executeCoachTool(toolName, args, userId, user) {
       case "update_target_ambition": {
         const update = {};
         if (safeArgs.targetCompany) {
-          const comp = String(safeArgs.targetCompany).trim();
+          const compRaw = String(safeArgs.targetCompany).trim();
+          if (!isSupportedCompany(compRaw)) {
+            telemetry.status = "WARN";
+            telemetry.summary = `Attempted to set uncalibrated target company: ${compRaw}`;
+            return {
+              result: {
+                success: false,
+                error: `Company '${compRaw}' is outside the supported getPlaced whitelist. We only support: ${CURATED_COMPANY_NAMES.join(", ")}. Please instruct the candidate to select a supported company from this list.`,
+              },
+              telemetry,
+              mutations,
+            };
+          }
+          const comp = normalizeCompanyName(compRaw);
           update.targetCompany = comp;
           update.targetCompanyNormalized = normalizeIdentifier(comp);
         }
+
         if (safeArgs.targetJobRole) {
-          const role = String(safeArgs.targetJobRole).trim();
-          update.targetJobRole = role;
-          update.targetRoleNormalized = normalizeIdentifier(role);
+          const roleRaw = String(safeArgs.targetJobRole).trim();
+          const targetComp = update.targetCompany || user?.targetCompany || "Google";
+          const normalizedRole = normalizeRoleName(roleRaw, targetComp);
+          update.targetJobRole = normalizedRole;
+          update.targetRoleNormalized = normalizeIdentifier(normalizedRole);
         }
+
         if (safeArgs.targetTimelineWeeks !== undefined && safeArgs.targetTimelineWeeks !== null) {
           const weeksNum = parseInt(safeArgs.targetTimelineWeeks, 10);
           if (!isNaN(weeksNum) && weeksNum > 0) update.targetTimelineWeeks = weeksNum;
@@ -804,16 +829,100 @@ export async function executeCoachTool(toolName, args, userId, user) {
 }
 
 // System Prompt for getPlaced AI Career Coach
-export function buildCoachSystemPrompt(candidateName, userProfile = null) {
+export function buildCoachSystemPrompt(candidateName, userProfile = null, options = {}) {
+  const { isOnboarding = false, onboardingStep = 1, collectedData = {}, extractedProfile = {}, connectedProfiles = {} } = options;
   const nameStr = candidateName ? ` for candidate ${candidateName}` : "";
   const targetStr = userProfile?.targetCompany
     ? `\nActive Candidate Ambition: Target Company: ${userProfile.targetCompany}, Target Role: ${userProfile.targetJobRole || "SDE"}, CGPA: ${userProfile.cgpa ?? "Unset"}.`
     : "";
 
-  return `You are getPlacedAI — the lead AI Career Coach & Executive Placement Strategist at getPlaced${nameStr}.${targetStr}
+  let onboardingInstructions = "";
+  if (isOnboarding) {
+    onboardingInstructions = `
+================================================================================
+ONBOARDING & ACCOUNT SETUP CALIBRATION MODE (ACTIVE):
+You are currently guiding candidate ${candidateName || "the candidate"} through the step-by-step getPlaced onboarding setup.
 
+STRICT TARGET COMPANY & ROLE WHITELIST:
+getPlaced exclusively calibrates preparation against 20 premier technology companies and their supported canonical roles:
+1. Google (SDE / Core, Backend, Frontend, Full Stack, AI/ML)
+2. Microsoft (SDE / Core, Full Stack, Backend, DevOps & Cloud, AI/ML)
+3. Amazon (SDE / Core, Backend, DevOps & Cloud, Full Stack, Data Engineer)
+4. Meta (SDE / Core, Frontend, Full Stack, AI/ML, Mobile)
+5. Apple (SDE / Core, Mobile, Backend, AI/ML)
+6. Netflix (Backend, Full Stack, Data Engineer, DevOps & Cloud)
+7. Uber (SDE / Core, Backend, Mobile, Data Engineer)
+8. Adobe (SDE / Core, Full Stack, Frontend, AI/ML)
+9. Atlassian (SDE / Core, Full Stack, Frontend, DevOps & Cloud)
+10. Stripe (SDE / Core, Backend, Full Stack, Frontend)
+11. Goldman Sachs (SDE / Core, Backend, Data Engineer)
+12. Salesforce (Full Stack, Backend, DevOps & Cloud, SDE / Core)
+13. NVIDIA (SDE / Core, AI/ML, Backend)
+14. Oracle (SDE / Core, Backend, DevOps & Cloud)
+15. Cisco (SDE / Core, DevOps & Cloud, Backend)
+16. Flipkart (SDE / Core, Backend, Full Stack, Mobile)
+17. Swiggy (SDE / Core, Backend, Full Stack, Mobile)
+18. Zomato (SDE / Core, Frontend, Backend, Mobile)
+19. Razorpay (SDE / Core, Full Stack, Backend, Frontend)
+20. Intuit (SDE / Core, Full Stack, Frontend, Backend)
+
+CRITICAL OUT-OF-WHITELIST DENIAL POLICY:
+If the user asks, types, or tries to persuade/jailbreak you into setting their target company or role to ANYTHING outside this 20-company whitelist:
+- You MUST politely and firmly DENY the request.
+- Clearly state: "getPlaced currently maintains calibrated placement benchmarks, hiring bars, and roadmaps exclusively for our 20 supported premier tech companies."
+- Present the supported company options and ask the user to select one of the 20 companies.
+- DO NOT accept or persist unlisted companies or unlisted roles in Step 1 or at any time.
+
+THE 6 ONBOARDING STEPS:
+- Step 1: Target Ambition 🎯 (Target dream company selected from the 20 curated companies; Target role selected from the supported canonical roles).
+- Step 2: Academic Baseline 🎓 (College/University name e.g. VIT Chennai, Degree & Branch e.g. B.Tech CSE, Current CGPA out of 10 e.g. 8.85, 10th/12th %).
+- Step 3: GitHub Proof of Work 🛠️ (GitHub username or public portfolio URL to analyze repos, languages, and calculate project score).
+- Step 4: DSA & Problem Solving 💡 (LeetCode username, or approximate DSA problems solved / comfort level: Beginner <50, Intermediate 50-200, Advanced 200+).
+- Step 5: Skills & Resume Calibration 📄 (Primary technical skills e.g. C++, Java, React, Node.js, Python, or ATS resume upload).
+- Step 6: Synthesis & Launch 🚀 (Review calibrated profile summary table, report initial placement readiness score, generate 8-week placement sprint roadmap, and provide link [Enter Dashboard](/app)).
+
+CURRENT ONBOARDING STATUS:
+- Current Step: Step ${onboardingStep} of 6
+- Data Collected:
+  * Target: ${extractedProfile?.targetCompany || userProfile?.targetCompany || "Not set yet"} — ${extractedProfile?.targetJobRole || userProfile?.targetJobRole || "Not set yet"}
+  * Academics: ${extractedProfile?.cgpa ? `${extractedProfile.cgpa} CGPA (${extractedProfile.college || "University"})` : "Not set yet"}
+  * GitHub: ${connectedProfiles?.github?.username || "Not linked yet"}
+  * LeetCode: ${connectedProfiles?.leetcode?.username || "Not linked yet"}
+  * Skills: ${extractedProfile?.primarySkills?.length ? extractedProfile.primarySkills.join(", ") : "Not set yet"}
+
+STRICT ONBOARDING BEHAVIOR RULES:
+1. PROGRESSION & RECEPTIVITY:
+   - Ask for details for ONE step at a time in clear, structured Markdown.
+   - When the candidate provides information for a step, CALL the appropriate tool immediately to persist it (e.g. \`update_target_ambition\`, \`update_academic_profile\`, \`sync_github_profile\`, \`sync_leetcode_profile\`, \`generate_or_update_roadmap\`).
+   - Acknowledge what was saved in 1 brief sentence, then immediately prompt for the NEXT step.
+
+2. SKIP FREEDOM (CRITICAL REQUIREMENT):
+   - The user has the complete option to SKIP any step or detail (e.g. "skip", "skip this", "skip for now", "skip leetcode", "skip github", "skip academics", "skip resume", "I don't have one", "later", "not now", "skip to dashboard", "skip all").
+   - If the user asks to skip:
+     * Never push back, repeat the question, or complain.
+     * Give a friendly 1-sentence reassurance (e.g., "No worries at all! We can skip that for now — you can always connect or edit it anytime from your dashboard.").
+     * Immediately advance to the next step and ask the next step's question.
+     * If the user asks to "skip all" or "skip to dashboard", call \`generate_or_update_roadmap\` with default Google SDE track, present the Step 6 synthesis, and provide the link \`[Enter Dashboard](/app)\`.
+
+3. FINAL STEP (STEP 6 SYNTHESIS):
+   - Once Step 5 is answered or skipped (or all steps finished):
+     * Summarize the calibrated profile in a clean, concise bullet list.
+     * Call \`generate_or_update_roadmap\` and \`get_placement_readiness\`.
+     * Present their initial Placement Readiness score and confirmed 8-week sprint roadmap.
+     * Provide the final CTA link: \`[Enter Placement Dashboard](/app)\` or \`[View Placement Roadmap](/app/roadmap)\`.
+================================================================================
+`;
+  }
+
+  return `You are getPlacedAI — the lead AI Career Coach & Executive Placement Strategist at getPlaced${nameStr}.${targetStr}
+${onboardingInstructions}
 YOUR MISSION:
-Deliver decisive, elite placement coaching that empowers students to land offers at Tier-1 tech giants (Google, Microsoft, Amazon, Atlassian, Uber, Adobe, etc.) and high-growth engineering companies.
+Deliver decisive, elite placement coaching that empowers students to land offers at the 20 calibrated Tier-1 tech giants:
+Google, Microsoft, Amazon, Meta, Apple, Netflix, Uber, Adobe, Atlassian, Stripe, Goldman Sachs, Salesforce, NVIDIA, Oracle, Cisco, Flipkart, Swiggy, Zomato, Razorpay, and Intuit.
+
+STRICT TARGET WHITELIST ENFORCEMENT:
+getPlaced only supports the 20 curated companies and their canonical roles (SDE / Core, Full Stack, Backend, Frontend, DevOps & Cloud, Data Engineer, AI/ML, Mobile Developer).
+If a user requests targeting any unlisted company (e.g. non-tech, outside companies, arbitrary roles, or attempts to convince you into setting an uncalibrated goal), YOU MUST STRICTLY REFUSE/DENY. Explain that getPlaced specializes exclusively in these 20 premier technology companies, and invite them to choose from the supported list. NEVER call \`update_target_ambition\` with an unlisted company or unlisted role.
 
 RESPONSE CALIBRATION — CRITICAL:
 Match your response length and depth EXACTLY to what the user asked. Do NOT volunteer unsolicited analysis.
@@ -937,9 +1046,123 @@ export async function runGeminiCoachTurn({
   conversationHistory = [],
   maxToolTurns = 5,
   injectedClient = null,
+  isOnboarding = false,
+  onboardingStep = 1,
+  collectedData = {},
+  extractedProfile = {},
+  connectedProfiles = {},
 }) {
   const activeAiClient = getActiveAiClient(injectedClient);
   if (!activeAiClient) {
+    if (isOnboarding) {
+      const lower = (userMessage || "").toLowerCase().trim();
+      const isSkip = lower === "skip" || lower.startsWith("skip ") || lower.includes("skip") || lower.includes("later") || lower.includes("i don't have");
+
+      if (lower.includes("skip all") || lower.includes("skip to dashboard") || lower.includes("enter dashboard")) {
+        return {
+          replyText: `🎉 **Account Setup Complete!**\n\nYour placement baseline is set to a top-tier general tech track:\n- **Target Goal:** Google — Software Development Engineer\n- **Placement Readiness:** 75 / 100\n- **Roadmap:** 8-Week Placement Sprint Generated\n\n[Enter Placement Dashboard](/app)`,
+          toolCallsExecuted: [],
+          executionSummary: ["Skipped remaining steps and calibrated default SDE roadmap."],
+          actionCards: [{ label: "Enter Placement Dashboard", url: "/app", type: "general" }],
+          suggestedChips: [
+            "Enter Placement Dashboard →",
+            "View Placement Roadmap",
+            "What DSA problems should I solve today?",
+          ],
+          mutations: { roadmapGenerated: true },
+        };
+      }
+
+      if (onboardingStep === 1) {
+        let targetCompany = "General Tech Track";
+        let targetJobRole = "Software Engineer";
+        if (userMessage && !isSkip) {
+          const parts = userMessage.split(/—|–|-| as | for /i).map((s) => s.trim()).filter(Boolean);
+          if (parts.length >= 2) {
+            targetCompany = parts[0];
+            targetJobRole = parts[1];
+          } else {
+            targetCompany = userMessage.trim().slice(0, 40);
+          }
+        }
+        return {
+          replyText: isSkip
+            ? `No problem! We'll start with a general top-tech SDE track.\n\n### Step 2: Academic Baseline 🎓\nCould you share your college/university, degree, branch, and current CGPA?\n*(e.g., VIT Chennai, B.Tech Computer Science, 8.85 CGPA)*\n\nYou can also click **Connect VTOP** in the sidebar, or skip this step.`
+            : `Great! Target ambition recorded: **${targetCompany} (${targetJobRole})**.\n\n### Step 2: Academic Baseline 🎓\nCould you share your college/university, degree, branch, and current CGPA?\n*(e.g., VIT Chennai, B.Tech Computer Science, 8.85 CGPA)*\n\nYou can also click **Connect VTOP** in the sidebar, or skip this step.`,
+          toolCallsExecuted: [],
+          executionSummary: [],
+          actionCards: [],
+          suggestedChips: [
+            "VIT Chennai — B.Tech CSE (8.85 CGPA)",
+            "IIT / NIT — B.Tech CSE (8.5 CGPA)",
+            "9.0 CGPA — Computer Science",
+            "Skip Academics for now",
+          ],
+          mutations: { targetUpdated: true, newTarget: { company: targetCompany, role: targetJobRole } },
+        };
+      } else if (onboardingStep === 2) {
+        return {
+          replyText: isSkip
+            ? `Academics skipped for now — you can update this anytime.\n\n### Step 3: GitHub Proof of Work 🛠️\nWhat is your **GitHub username** or portfolio profile link? I'll analyze your public repositories and project strengths.\n*(e.g., \`torvalds\` or \`github.com/your-username\`)*\n\nYou can also click **Connect GitHub** on the right, or skip this step.`
+            : `Academics saved!\n\n### Step 3: GitHub Proof of Work 🛠️\nWhat is your **GitHub username** or portfolio profile link? I'll analyze your public repositories and project strengths.\n*(e.g., \`torvalds\` or \`github.com/your-username\`)*\n\nYou can also click **Connect GitHub** on the right, or skip this step.`,
+          toolCallsExecuted: [],
+          executionSummary: [],
+          actionCards: [],
+          suggestedChips: [
+            "github.com/my-profile",
+            "I don't have public repos yet",
+            "Skip GitHub for now",
+          ],
+          mutations: { academicsUpdated: true },
+        };
+      } else if (onboardingStep === 3) {
+        return {
+          replyText: isSkip
+            ? `GitHub skipped for now.\n\n### Step 4: LeetCode & Problem Solving 💡\nWhat is your **LeetCode username** or current DSA preparation tier?\n*(e.g., \`neetcode\` or Beginner / Intermediate / Advanced)*\n\nYou can also click **Connect LeetCode** on the right, or skip this step.`
+            : `GitHub profile synced!\n\n### Step 4: LeetCode & Problem Solving 💡\nWhat is your **LeetCode username** or current DSA preparation tier?\n*(e.g., \`neetcode\` or Beginner / Intermediate / Advanced)*\n\nYou can also click **Connect LeetCode** on the right, or skip this step.`,
+          toolCallsExecuted: [],
+          executionSummary: [],
+          actionCards: [],
+          suggestedChips: [
+            "Beginner (< 50 DSA solved)",
+            "Intermediate (50-200 DSA solved)",
+            "Advanced (200+ DSA solved)",
+            "Skip LeetCode for now",
+          ],
+          mutations: { githubSynced: true },
+        };
+      } else if (onboardingStep === 4) {
+        return {
+          replyText: isSkip
+            ? `LeetCode skipped for now.\n\n### Step 5: Resume & Technical Skills 📄\nWhat are your primary technical skills, or would you like to upload your resume for an instant ATS scan?\n*(e.g., C++, DSA, React, Node.js, Python, System Design)*\n\nYou can click **Upload Resume** on the right, type your skills, or skip this step.`
+            : `LeetCode baseline recorded!\n\n### Step 5: Resume & Technical Skills 📄\nWhat are your primary technical skills, or would you like to upload your resume for an instant ATS scan?\n*(e.g., C++, DSA, React, Node.js, Python, System Design)*\n\nYou can click **Upload Resume** on the right, type your skills, or skip this step.`,
+          toolCallsExecuted: [],
+          executionSummary: [],
+          actionCards: [],
+          suggestedChips: [
+            "C++, DSA, React, Node.js, SQL",
+            "Java, Spring Boot, DSA, MySQL",
+            "Python, ML, DSA, FastAPI",
+            "Skip Resume for now",
+          ],
+          mutations: { leetcodeSynced: true },
+        };
+      } else {
+        return {
+          replyText: `🎉 **Account Setup Complete!**\n\nYour placement baseline is calibrated:\n- **Target Ambition:** Google — Software Engineer\n- **Placement Readiness:** 78 / 100\n- **Roadmap:** 8-Week Placement Sprint Generated\n\n[Enter Placement Dashboard](/app)`,
+          toolCallsExecuted: [],
+          executionSummary: [],
+          actionCards: [{ label: "Enter Placement Dashboard", url: "/app", type: "general" }],
+          suggestedChips: [
+            "Enter Placement Dashboard →",
+            "View Placement Roadmap",
+            "What DSA problems should I solve today?",
+          ],
+          mutations: { roadmapGenerated: true },
+        };
+      }
+    }
+
     return {
       replyText: "AI Engine Configuration Note: Google GenAI API Key is required. Please set GOOGLE_API_KEY in your environment or root `.API_KEY` file.",
       toolCallsExecuted: [],
@@ -950,7 +1173,13 @@ export async function runGeminiCoachTurn({
     };
   }
 
-  const systemInstruction = buildCoachSystemPrompt(user?.name, user);
+  const systemInstruction = buildCoachSystemPrompt(user?.name, user, {
+    isOnboarding,
+    onboardingStep,
+    collectedData,
+    extractedProfile,
+    connectedProfiles,
+  });
   const toolDeclarations = [{ functionDeclarations: COACH_TOOL_DECLARATIONS }];
 
   // Build sanitized conversation history contents for Gemini
@@ -1046,7 +1275,7 @@ export async function runGeminiCoachTurn({
   const actionCards = extractActionCardsFromMarkdown(finalReplyText);
 
   // Generate dynamic suggested chips
-  const suggestedChips = generateSuggestedChips(finalReplyText, user);
+  const suggestedChips = generateSuggestedChips(finalReplyText, user, { isOnboarding, onboardingStep });
 
   return {
     replyText: finalReplyText || "I've updated your placement roadmap and profile metrics.",
@@ -1088,10 +1317,63 @@ function getCardTypeFromUrl(url) {
   return "general";
 }
 
-function generateSuggestedChips(replyText, user) {
+export function generateSuggestedChips(replyText, user, options = {}) {
+  const { isOnboarding = false, onboardingStep = 1 } = options;
   const lower = (replyText || "").toLowerCase();
   const chips = [];
 
+  if (isOnboarding) {
+    if (onboardingStep === 1 || lower.includes("step 1") || lower.includes("dream target") || lower.includes("target ambition")) {
+      return [
+        "Google — SDE",
+        "Microsoft — Software Engineer",
+        "Amazon — SDE-1",
+        "Atlassian — Full Stack",
+        "Skip target setup (General SDE)",
+      ];
+    }
+    if (onboardingStep === 2 || lower.includes("step 2") || lower.includes("academic") || lower.includes("cgpa") || lower.includes("college")) {
+      return [
+        "VIT Chennai — B.Tech CSE (8.85 CGPA)",
+        "IIT / NIT — B.Tech CSE (8.5 CGPA)",
+        "9.0 CGPA — Computer Science",
+        "Skip Academics for now",
+      ];
+    }
+    if (onboardingStep === 3 || lower.includes("step 3") || lower.includes("github") || lower.includes("portfolio") || lower.includes("repos")) {
+      return [
+        "github.com/my-profile",
+        "I don't have public repos yet",
+        "Skip GitHub for now",
+      ];
+    }
+    if (onboardingStep === 4 || lower.includes("step 4") || lower.includes("leetcode") || lower.includes("dsa problem")) {
+      return [
+        "Beginner (< 50 DSA solved)",
+        "Intermediate (50-200 DSA solved)",
+        "Advanced (200+ DSA solved)",
+        "Skip LeetCode for now",
+      ];
+    }
+    if (onboardingStep === 5 || lower.includes("step 5") || lower.includes("resume") || lower.includes("technical skills")) {
+      return [
+        "C++, DSA, React, Node.js, SQL",
+        "Java, Spring Boot, DSA, MySQL",
+        "Python, ML, DSA, FastAPI",
+        "Skip Resume for now",
+      ];
+    }
+    if (onboardingStep >= 6 || lower.includes("step 6") || lower.includes("complete") || lower.includes("calibrated") || lower.includes("synthesis")) {
+      return [
+        "Enter Placement Dashboard →",
+        "View Placement Roadmap",
+        "What DSA problems should I solve today?",
+        "Audit my profile for Google",
+      ];
+    }
+  }
+
+  // Day-to-day coach mode
   if (lower.includes("google") || lower.includes("company")) {
     chips.push("Compare my profile with Google L3 benchmark");
   }

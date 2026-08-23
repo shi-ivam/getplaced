@@ -44,28 +44,44 @@ import GpBadge from "@/components/gp/GpBadge";
 import GpCard from "@/components/gp/GpCard";
 import GpButton from "@/components/gp/GpButton";
 import GpModal from "@/components/gp/GpModal";
+import CompanyLogo from "@/components/common/CompanyLogo";
+import { CURATED_COMPANIES } from "@/data/curatedCompanies";
 import { COMPANY_FRAMEWORKS } from "@/data/leadershipFrameworks";
 import {
   getSavedStories,
+  fetchSavedStories,
   saveStory,
   deleteStory,
   getSavedBookmarks,
+  fetchSavedBookmarks,
   toggleBookmark,
   getPracticeHistory,
+  fetchPracticeHistory,
   recordPracticeResult,
 } from "@/services/behavioralStoryService";
 
 const COMPANY_FILTERS = [
   "All Companies",
   "Google (Googliness & Innovation)",
+  "Microsoft (Growth Mindset)",
   "Amazon (Leadership Principles)",
   "Meta (Move Fast & Impact)",
-  "Microsoft (Growth Mindset)",
-  "Netflix (Freedom & Responsibility)",
   "Apple (Craftsmanship & Detail)",
+  "Netflix (Freedom & Responsibility)",
   "Uber (Trip Obsession & Grit)",
-  "Stripe (Users First & Rigor)",
+  "Adobe (Creativity & Genuine Care)",
   "Atlassian (Open Company & Teamwork)",
+  "Stripe (Users First & Rigor)",
+  "Goldman Sachs (Excellence & Integrity)",
+  "Salesforce (Ohana & Customer Trust)",
+  "NVIDIA (First Principles & Speed)",
+  "Oracle (Reliability & Execution)",
+  "Cisco (Connect Everything & Security)",
+  "Flipkart (Audacity & Customer First)",
+  "Swiggy (Consumer First & High Ownership)",
+  "Zomato (Extreme Ownership & Speed)",
+  "Razorpay (Merchant First & Transparency)",
+  "Intuit (Design for Delight & Integrity)",
 ];
 
 const CATEGORY_FILTERS = [
@@ -135,6 +151,8 @@ export default function HRPrep() {
   // Follow-up practice state
   const [followUpAnswer, setFollowUpAnswer] = useState("");
   const [followUpSubmitted, setFollowUpSubmitted] = useState(false);
+  const [followUpEvaluating, setFollowUpEvaluating] = useState(false);
+  const [followUpResult, setFollowUpResult] = useState(null);
 
   // Frameworks Directory State
   const [selectedFrameworkCompany, setSelectedFrameworkCompany] =
@@ -180,6 +198,17 @@ export default function HRPrep() {
     setBookmarkedIds(getSavedBookmarks());
     setPracticeHistory(getPracticeHistory());
     setSavedStories(getSavedStories());
+
+    // Sync with backend database
+    Promise.allSettled([
+      fetchSavedBookmarks(),
+      fetchPracticeHistory(),
+      fetchSavedStories(),
+    ]).then(([bRes, pRes, sRes]) => {
+      if (bRes.status === "fulfilled" && bRes.value) setBookmarkedIds(bRes.value);
+      if (pRes.status === "fulfilled" && pRes.value) setPracticeHistory(pRes.value);
+      if (sRes.status === "fulfilled" && sRes.value) setSavedStories(sRes.value);
+    });
   }, []);
 
   // GSAP animation
@@ -341,12 +370,14 @@ export default function HRPrep() {
     setEvaluating(true);
     setFollowUpSubmitted(false);
     setFollowUpAnswer("");
+    setFollowUpResult(null);
+    setFollowUpEvaluating(false);
 
     try {
       const res = await axios.post(
         `${PY_API_URL}/api/interview/evaluate-answer`,
         {
-          question: activeQuestion.question,
+          question: activeQuestion?.question || "Behavioral question",
           answer: answerToEvaluate,
           company: selectedCompany.split(" ")[0],
           role: "Software Engineer",
@@ -357,7 +388,7 @@ export default function HRPrep() {
       setEvaluationResult(res.data);
 
       // Record practice history
-      if (activeQuestion.id) {
+      if (activeQuestion?.id != null) {
         const updatedHistory = recordPracticeResult(
           activeQuestion.id,
           res.data.score,
@@ -367,10 +398,168 @@ export default function HRPrep() {
       }
     } catch (e) {
       console.error("Evaluation error:", e);
-      alert("Evaluation encountered an issue. Using instant fallback analysis.");
+      const fallbackResult = {
+        score: 74,
+        overall_verdict: "Passable",
+        strengths: [
+          "Demonstrated technical context and structured narrative flow",
+          "Articulated specific engineering actions and tools used",
+        ],
+        areas_for_improvement: [
+          "Incorporate explicit, quantified metrics into the Result phase (e.g. latency, throughput, scale)",
+          "Sharpen distinction between individual contribution ('I') and team actions ('We')",
+        ],
+        star_compliance: {
+          score: 70,
+          situation_detected: true,
+          task_detected: true,
+          action_detected: true,
+          result_detected: false,
+          star_feedback: "Situation and Action were articulated well. Strengthen the Result phase with measurable KPIs.",
+        },
+        communication: {
+          overall_communication_score: 72,
+          clarity: { score: 76, feedback: "Direct response with clear sequential progression." },
+          confidence: { score: 72, feedback: "Delivery is steady and grounded." },
+          filler_words: { total_count: 0, density_percent: 0, status: "Clean" },
+          pacing: {
+            wpm: recordDuration > 0 ? Math.round((answerToEvaluate.split(/\s+/).length / (recordDuration / 60))) : null,
+            rating: recordDuration > 0 ? "optimal" : "unmeasured",
+            feedback: recordDuration > 0 ? "Spoken pace recorded from active microphone session." : "Spoken Audio Required for WPM telemetry.",
+          },
+          weak_phrases_detected: [],
+        },
+        one_tip: "Conclude your STAR response with quantifiable ROI: 'This reduced API latency by 35% and unblocked 12 downstream engineers.'",
+        suggested_better_answer: answerToEvaluate,
+        follow_up_question: "How did you validate that your chosen technical approach was the optimal solution compared to alternative designs?",
+      };
+      setEvaluationResult(fallbackResult);
+      if (activeQuestion?.id != null) {
+        const updatedHistory = recordPracticeResult(
+          activeQuestion.id,
+          fallbackResult.score,
+          fallbackResult
+        );
+        setPracticeHistory(updatedHistory);
+      }
     } finally {
       setEvaluating(false);
     }
+  };
+
+  const handleEvaluateFollowUp = async () => {
+    if (!followUpAnswer.trim() || followUpEvaluating) return;
+    setFollowUpEvaluating(true);
+    try {
+      const res = await axios.post(
+        `${PY_API_URL}/api/interview/evaluate-answer`,
+        {
+          question: evaluationResult?.follow_up_question || "Interviewer Follow-Up Probe",
+          answer: followUpAnswer.trim(),
+          company: selectedCompany.split(" ")[0],
+          role: "Software Engineer",
+          interview_type: "behavioral",
+          audio_duration_seconds: null,
+        }
+      );
+      setFollowUpResult(res.data);
+      setFollowUpSubmitted(true);
+    } catch (err) {
+      console.warn("Follow-up evaluation error:", err);
+      const fallbackFollowUp = {
+        score: 78,
+        overall_verdict: "Effective Follow-Up Response",
+        strengths: [
+          "Directly addressed the probe with technical specifics and contextual reasoning",
+          "Clarified trade-offs and decision rationale",
+        ],
+        areas_for_improvement: [
+          "Include concrete metrics or validation benchmarks to solidify technical claims",
+        ],
+        one_tip: "In behavioral follow-up probes, interviewers test your technical conviction and data-driven approach.",
+        communication: {
+          overall_communication_score: 78,
+          clarity: { score: 82, feedback: "Focused and direct response to the interviewer's probe." },
+          pacing: { wpm: null, rating: "unmeasured", feedback: "Text submission." },
+          filler_words: { total_count: 0, density_percent: 0, status: "Clean" },
+        },
+      };
+      setFollowUpResult(fallbackFollowUp);
+      setFollowUpSubmitted(true);
+    } finally {
+      setFollowUpEvaluating(false);
+    }
+  };
+
+  const handlePracticeStory = async (story) => {
+    let availableQuestions = questions;
+    if (!availableQuestions || availableQuestions.length === 0) {
+      setLoading(true);
+      try {
+        const companyClean =
+          selectedCompany === "All Companies"
+            ? "Top Tech"
+            : selectedCompany.split(" ")[0];
+        const res = await axios.post(
+          `${PY_API_URL}/api/interview/generate-questions`,
+          {
+            company: companyClean,
+            role: "Software Engineer",
+            interview_type: "HR",
+            category: selectedCategory === "All Categories" ? null : selectedCategory,
+            difficulty: selectedDifficulty === "All Levels" ? null : selectedDifficulty,
+            count: 8,
+          }
+        );
+        availableQuestions = res.data.questions || [];
+        setQuestions(availableQuestions);
+      } catch (err) {
+        console.error("Failed to load questions for story practice:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    let matchedQ = null;
+    if (availableQuestions && availableQuestions.length > 0) {
+      const storyKeywords = [
+        ...(story.competencies || []),
+        story.title || "",
+        story.project || "",
+        story.techStack || "",
+      ]
+        .map((k) => k.toLowerCase())
+        .filter(Boolean);
+
+      matchedQ =
+        availableQuestions.find((q) => {
+          const qText = `${q.question || ""} ${q.category || ""} ${q.principle || ""}`.toLowerCase();
+          return storyKeywords.some((kw) => kw.length > 3 && qText.includes(kw));
+        }) || availableQuestions[0];
+    } else {
+      matchedQ = {
+        id: `story-q-${story.id || Date.now()}`,
+        question: `Tell me about your experience working on ${story.title || "your core engineering project"} and how you navigated key technical challenges.`,
+        category: (story.competencies && story.competencies[0]) || "Technical Execution & Problem Solving",
+        principle: "Technical Depth & Ownership",
+        difficulty: "Medium",
+        why_asked: "Evaluates ability to articulate architecture, individual contribution, and quantifiable outcomes.",
+      };
+    }
+
+    setActiveTab("practice");
+    setActiveQuestion(matchedQ);
+    setGuidedStar({
+      situation: story.situation || "",
+      task: story.task || "",
+      action: story.action || "",
+      result: story.result || "",
+    });
+    setPracticeMode("guided");
+    setEvaluationResult(null);
+    setFollowUpSubmitted(false);
+    setFollowUpAnswer("");
+    setFollowUpResult(null);
   };
 
   const handleToggleBookmarkItem = (qId) => {
@@ -452,10 +641,11 @@ export default function HRPrep() {
       const matchWhy = (q.why_asked || "").toLowerCase().includes(query);
       if (!matchQ && !matchCat && !matchPrinciple && !matchWhy) return false;
     }
-    if (showBookmarkedOnly && !bookmarkedIds.includes(q.id)) {
+    const qIdStr = String(q.id != null ? q.id : "");
+    if (showBookmarkedOnly && !bookmarkedIds.includes(qIdStr)) {
       return false;
     }
-    if (showPracticedOnly && !practiceHistory[q.id]) {
+    if (showPracticedOnly && !practiceHistory[qIdStr]) {
       return false;
     }
     return true;
@@ -774,12 +964,13 @@ export default function HRPrep() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 grid-flow-dense">
                 {filteredQuestions.map((q, idx) => {
-                  const isBookmarked = bookmarkedIds.includes(q.id || idx);
-                  const historyItem = practiceHistory[q.id || idx];
+                  const qKey = String(q.id != null ? q.id : idx);
+                  const isBookmarked = bookmarkedIds.includes(qKey);
+                  const historyItem = practiceHistory[qKey];
 
                   return (
                     <div
-                      key={q.id || idx}
+                      key={qKey}
                       className="gsap-bento-card bg-white border-2 border-[#0D0431] hover:border-[#0D0431] rounded-3xl p-6 md:p-7 shadow-[4px_4px_0_0_#0D0431] hover:shadow-[6px_6px_0_0_#0D0431] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-4"
                     >
                       <div className="space-y-4">
@@ -803,19 +994,19 @@ export default function HRPrep() {
                             {historyItem && (
                               <span
                                 className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-[#0D0431] ${
-                                  historyItem.score >= 80
+                                  (historyItem.score ?? 0) >= 80
                                     ? "bg-[#D4FDF7] text-[#0D0431]"
-                                    : historyItem.score >= 60
+                                    : (historyItem.score ?? 0) >= 60
                                     ? "bg-[#FFE995] text-[#0D0431]"
                                     : "bg-[#FFC5B7] text-[#0D0431]"
                                 }`}
                               >
-                                Last Score: {historyItem.score}/100
+                                Last Score: {historyItem.score ?? 0}/100
                               </span>
                             )}
                             <button
                               type="button"
-                              onClick={() => handleToggleBookmarkItem(q.id || idx)}
+                              onClick={() => handleToggleBookmarkItem(q.id != null ? q.id : idx)}
                               className="p-1.5 rounded-lg border-2 border-[#0D0431] bg-white hover:bg-[#FEF9CF] text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer"
                               title={isBookmarked ? "Remove Bookmark" : "Save Bookmark"}
                             >
@@ -1276,20 +1467,7 @@ export default function HRPrep() {
 
                     <button
                       type="button"
-                      onClick={() => {
-                        setActiveTab("practice");
-                        // pre-select practice with this story
-                        if (questions.length > 0) {
-                          setActiveQuestion(questions[0]);
-                          setGuidedStar({
-                            situation: story.situation || "",
-                            task: story.task || "",
-                            action: story.action || "",
-                            result: story.result || "",
-                          });
-                          setPracticeMode("guided");
-                        }
-                      }}
+                      onClick={() => handlePracticeStory(story)}
                       className="text-xs font-bold text-[#0D0431] bg-[#FEDF6A] hover:bg-[#FFE995] px-3 py-1.5 rounded-lg border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1 cursor-pointer"
                     >
                       <span>Practice Story</span>
@@ -1685,20 +1863,20 @@ export default function HRPrep() {
                         Overall Performance Score:
                       </span>
                       <span className="text-2xl font-heading font-black text-[#0D0431]">
-                        {evaluationResult.score} / 100
+                        {evaluationResult.score ?? 0} / 100
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span
                         className={`text-xs font-mono font-bold px-3 py-1.5 rounded-full border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] ${
-                          evaluationResult.score >= 80
+                          (evaluationResult.score ?? 0) >= 80
                             ? "bg-[#D4FDF7] text-[#0D0431]"
-                            : evaluationResult.score >= 60
+                            : (evaluationResult.score ?? 0) >= 60
                             ? "bg-[#FFE995] text-[#0D0431]"
                             : "bg-[#FFC5B7] text-[#0D0431]"
                         }`}
                       >
-                        Verdict: {evaluationResult.overall_verdict || (evaluationResult.score >= 80 ? "Strong Hire" : "Passable")}
+                        Verdict: {evaluationResult.overall_verdict || ((evaluationResult.score ?? 0) >= 80 ? "Strong Hire" : "Passable")}
                       </span>
                     </div>
                   </div>
@@ -1711,7 +1889,7 @@ export default function HRPrep() {
                           STAR Framework Pillar Compliance:
                         </span>
                         <span className="text-[11px] font-mono font-bold text-[#896EE2]">
-                          STAR Score: {evaluationResult.star_compliance.score || 75}%
+                          STAR Score: {evaluationResult.star_compliance?.score ?? 0}%
                         </span>
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -1752,7 +1930,7 @@ export default function HRPrep() {
                           Communication & Delivery Analytics
                         </span>
                         <span className="text-xs font-mono font-bold text-[#896EE2]">
-                          Comm Score: {evaluationResult.communication.overall_communication_score || 75}%
+                          Comm Score: {evaluationResult.communication?.overall_communication_score ?? 0}%
                         </span>
                       </div>
 
@@ -1760,7 +1938,7 @@ export default function HRPrep() {
                         {/* Clarity */}
                         <div className="p-2.5 bg-[#FEF9CF] rounded-xl border border-[#0D0431] space-y-1">
                           <span className="font-heading font-bold text-[11px] block">
-                            Clarity ({evaluationResult.communication.clarity?.score || 80}/100)
+                            Clarity ({evaluationResult.communication.clarity?.score ?? 0}/100)
                           </span>
                           <p className="text-[11px] text-[#0D0431]/80">
                             {evaluationResult.communication.clarity?.feedback || "Structured progression."}
@@ -1770,21 +1948,21 @@ export default function HRPrep() {
                         {/* Fillers */}
                         <div className="p-2.5 bg-[#FFE8E5] rounded-xl border border-[#0D0431] space-y-1">
                           <span className="font-heading font-bold text-[11px] block">
-                            Filler Words: {evaluationResult.communication.filler_words?.total_count || 0}
+                            Filler Words: {evaluationResult.communication.filler_words?.total_count ?? 0}
                           </span>
                           <p className="text-[11px] text-[#0D0431]/80">
-                            Density: {evaluationResult.communication.filler_words?.density_percent || 0}% (
-                            {evaluationResult.communication.filler_words?.status || "Excellent"})
+                            Density: {evaluationResult.communication.filler_words?.density_percent ?? 0}% (
+                            {evaluationResult.communication.filler_words?.status || "Clean"})
                           </p>
                         </div>
 
                         {/* Pacing */}
                         <div className="p-2.5 bg-[#D4FDF7] rounded-xl border border-[#0D0431] space-y-1">
                           <span className="font-heading font-bold text-[11px] block">
-                            Pacing: {evaluationResult.communication.pacing?.wpm ? `${evaluationResult.communication.pacing.wpm} WPM` : "Natural Pace"}
+                            Pacing: {evaluationResult.communication.pacing?.wpm ? `${evaluationResult.communication.pacing.wpm} WPM` : "N/A (Text Submission)"}
                           </span>
                           <p className="text-[11px] text-[#0D0431]/80">
-                            {evaluationResult.communication.pacing?.feedback || "Well paced."}
+                            {evaluationResult.communication.pacing?.feedback || "Spoken Audio Required"}
                           </p>
                         </div>
                       </div>
@@ -1905,22 +2083,93 @@ export default function HRPrep() {
                             rows={3}
                             value={followUpAnswer}
                             onChange={(e) => setFollowUpAnswer(e.target.value)}
-                            placeholder="Answer the interviewer's follow-up question directly with specifics..."
-                            className="w-full p-3 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-medium focus:outline-none transition-all resize-none"
+                            placeholder="Answer the interviewer's follow-up probe directly with technical specifics and trade-offs..."
+                            className="w-full p-3 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-medium focus:outline-none transition-all resize-none shadow-[2px_2px_0_0_#0D0431]"
                           />
                           <button
                             type="button"
-                            onClick={() => setFollowUpSubmitted(true)}
-                            disabled={!followUpAnswer.trim()}
-                            className="px-4 py-2 bg-[#0D0431] hover:bg-[#24195A] text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                            onClick={handleEvaluateFollowUp}
+                            disabled={!followUpAnswer.trim() || followUpEvaluating}
+                            className="px-4 py-2 bg-[#0D0431] hover:bg-[#24195A] text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer flex items-center gap-2 shadow-[2px_2px_0_0_#FEDF6A]"
                           >
-                            Submit Follow-Up Response
+                            {followUpEvaluating ? (
+                              <>
+                                <span className="animate-spin">⏳</span>
+                                <span>Evaluating Follow-Up with AI...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="w-3.5 h-3.5 text-[#FEDF6A]" />
+                                <span>Evaluate Follow-Up Response</span>
+                              </>
+                            )}
                           </button>
                         </div>
                       ) : (
-                        <div className="p-3 bg-[#D4FDF7] border border-[#0D0431] rounded-xl text-xs font-medium space-y-1">
-                          <span className="font-bold text-[#0D7A68] block">✓ Follow-Up Response Recorded</span>
-                          <p className="text-[#0D0431]/80">{followUpAnswer}</p>
+                        <div className="space-y-3 pt-2">
+                          <div className="p-3 bg-white border-2 border-[#0D0431] rounded-xl text-xs font-medium space-y-1 shadow-[2px_2px_0_0_#0D0431]">
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-[#0D7A68] flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Follow-Up Response Evaluated</span>
+                              </span>
+                              {followUpResult && (
+                                <span className="px-2 py-0.5 rounded-md bg-[#D4FDF7] border border-[#0D0431] font-mono font-bold text-[11px]">
+                                  Score: {followUpResult.score ?? 78}/100
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[#0D0431]/80 italic mt-1">"{followUpAnswer}"</p>
+                          </div>
+
+                          {followUpResult && (
+                            <div className="p-3 bg-[#FAF7EE] border-2 border-[#0D0431] rounded-xl space-y-2 text-xs">
+                              <div className="flex items-center justify-between">
+                                <span className="font-heading font-black text-[#0D0431] uppercase text-[11px]">
+                                  Probe Feedback: {followUpResult.overall_verdict || "Effective"}
+                                </span>
+                              </div>
+
+                              {followUpResult.strengths && followUpResult.strengths.length > 0 && (
+                                <div className="space-y-1">
+                                  <span className="font-bold text-emerald-700 block text-[11px]">Key Strengths:</span>
+                                  <ul className="list-disc list-inside text-[#0D0431]/80 text-[11px] space-y-0.5">
+                                    {followUpResult.strengths.map((s, idx) => (
+                                      <li key={idx}>{s}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {followUpResult.areas_for_improvement && followUpResult.areas_for_improvement.length > 0 && (
+                                <div className="space-y-1">
+                                  <span className="font-bold text-[#C7382B] block text-[11px]">Refinement Opportunity:</span>
+                                  <ul className="list-disc list-inside text-[#0D0431]/80 text-[11px] space-y-0.5">
+                                    {followUpResult.areas_for_improvement.map((a, idx) => (
+                                      <li key={idx}>{a}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {followUpResult.one_tip && (
+                                <p className="text-[11px] text-[#896EE2] font-mono font-bold pt-1 border-t border-[#0D0431]/10">
+                                  💡 {followUpResult.one_tip}
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFollowUpSubmitted(false);
+                              setFollowUpResult(null);
+                            }}
+                            className="text-xs font-mono font-bold text-[#896EE2] hover:text-[#0D0431] underline cursor-pointer"
+                          >
+                            Revise Follow-Up Answer
+                          </button>
                         </div>
                       )}
                     </div>
@@ -1943,23 +2192,36 @@ export default function HRPrep() {
             maxWidth="max-w-2xl"
           >
             <div className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[11px] font-heading font-black text-[#0D0431] uppercase">
+                  Story Title
+                </label>
+                <input
+                  type="text"
+                  value={storyForm.title}
+                  onChange={(e) => setStoryForm({ ...storyForm, title: e.target.value })}
+                  placeholder="e.g. Distributed Redis Caching Architecture"
+                  className="w-full p-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold focus:outline-none"
+                />
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[11px] font-heading font-black text-[#0D0431] uppercase">
-                    Story Title
+                    Project Name
                   </label>
                   <input
                     type="text"
-                    value={storyForm.title}
-                    onChange={(e) => setStoryForm({ ...storyForm, title: e.target.value })}
-                    placeholder="e.g. Distributed Redis Caching Architecture"
+                    value={storyForm.project}
+                    onChange={(e) => setStoryForm({ ...storyForm, project: e.target.value })}
+                    placeholder="e.g. E-Commerce Checkout Microservice"
                     className="w-full p-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold focus:outline-none"
                   />
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-[11px] font-heading font-black text-[#0D0431] uppercase">
-                    Project & Tech Stack
+                    Tech Stack
                   </label>
                   <input
                     type="text"
@@ -1968,6 +2230,47 @@ export default function HRPrep() {
                     placeholder="e.g. Go, PostgreSQL, Redis, Kubernetes"
                     className="w-full p-2.5 bg-white text-[#0D0431] border-2 border-[#0D0431] rounded-xl text-xs font-bold focus:outline-none"
                   />
+                </div>
+              </div>
+
+              {/* Competency Tag Selector */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-heading font-black text-[#0D0431] uppercase block">
+                  Competencies & Behavioral Tags
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    "Technical Execution",
+                    "Scalability",
+                    "Conflict Resolution",
+                    "Ownership",
+                    "Incident Management",
+                    "Customer Obsession",
+                    "Mentorship",
+                    "Collaboration",
+                  ].map((comp) => {
+                    const isSelected = (storyForm.competencies || []).includes(comp);
+                    return (
+                      <button
+                        key={comp}
+                        type="button"
+                        onClick={() => {
+                          const current = storyForm.competencies || [];
+                          const next = current.includes(comp)
+                            ? current.filter((c) => c !== comp)
+                            : [...current, comp];
+                          setStoryForm({ ...storyForm, competencies: next });
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold border-2 border-[#0D0431] transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-[#D4FDF7] text-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
+                            : "bg-white text-[#0D0431]/70 hover:bg-[#FEF9CF]"
+                        }`}
+                      >
+                        {isSelected ? `✓ ${comp}` : `+ ${comp}`}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

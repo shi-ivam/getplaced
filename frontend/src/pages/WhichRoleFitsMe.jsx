@@ -403,19 +403,25 @@ export default function WhichRoleFitsMe() {
                   <span className="text-[11px] font-mono uppercase tracking-wider text-[#0D0431]/70 font-bold">
                     Strongest Evidence Signals
                   </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {topRole.strongMatchingEvidence.slice(0, 4).map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-2 text-xs font-bold text-[#0D0431] bg-white px-3 py-2 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
-                      >
-                        <div className="w-4 h-4 rounded-md bg-[#D4FDF7] border border-[#0D0431] flex items-center justify-center shrink-0">
-                          <Check className="w-3 h-3 text-[#0D0431]" />
+                  {topRole.strongMatchingEvidence.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {topRole.strongMatchingEvidence.slice(0, 4).map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2 text-xs font-bold text-[#0D0431] bg-white px-3 py-2 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
+                        >
+                          <div className="w-4 h-4 rounded-md bg-[#D4FDF7] border border-[#0D0431] flex items-center justify-center shrink-0">
+                            <Check className="w-3 h-3 text-[#0D0431]" />
+                          </div>
+                          <span className="truncate">{item}</span>
                         </div>
-                        <span className="truncate">{item}</span>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-xs font-bold text-[#0D0431]/80 bg-white px-3.5 py-2.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                      No verified signals yet — connect your GitHub, LeetCode, or add skills in profile.
+                    </div>
+                  )}
                 </div>
 
                 {/* Compensation & Industry Info */}
@@ -676,15 +682,21 @@ export default function WhichRoleFitsMe() {
                           key={role.id}
                           className="p-4 border-l-2 border-[#0D0431] space-y-1.5"
                         >
-                          {role.strongMatchingEvidence.map((ev, i) => (
-                            <div
-                              key={i}
-                              className="flex items-start gap-1.5 text-[#0D0431] font-medium bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] p-1.5 rounded-xl text-xs"
-                            >
-                              <CheckCircle2 className="w-3.5 h-3.5 text-[#0D0431] shrink-0 mt-0.5" />
-                              <span className="leading-tight">{ev}</span>
-                            </div>
-                          ))}
+                          {role.strongMatchingEvidence.length > 0 ? (
+                            role.strongMatchingEvidence.map((ev, i) => (
+                              <div
+                                key={i}
+                                className="flex items-start gap-1.5 text-[#0D0431] font-medium bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] p-1.5 rounded-xl text-xs"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 text-[#0D0431] shrink-0 mt-0.5" />
+                                <span className="leading-tight">{ev}</span>
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-[#0D0431]/70 text-[11px] font-bold bg-white px-2.5 py-1.5 rounded-xl border border-[#0D0431] inline-block">
+                              No verified signals
+                            </span>
+                          )}
                         </td>
                       ))}
                     </tr>
@@ -938,17 +950,23 @@ export default function WhichRoleFitsMe() {
                         Key Alignment Signals
                       </span>
                       <div className="space-y-1">
-                        {role.strongMatchingEvidence.slice(0, 2).map((ev, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center gap-1.5 text-xs font-bold text-[#0D0431] bg-white px-2.5 py-1.5 rounded-xl border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] truncate"
-                          >
-                            <div className="w-3.5 h-3.5 rounded-md bg-[#D4FDF7] border border-[#0D0431] flex items-center justify-center shrink-0">
-                              <Check className="w-2.5 h-2.5 text-[#0D0431]" />
+                        {role.strongMatchingEvidence.length > 0 ? (
+                          role.strongMatchingEvidence.slice(0, 2).map((ev, i) => (
+                            <div
+                              key={i}
+                              className="flex items-center gap-1.5 text-xs font-bold text-[#0D0431] bg-white px-2.5 py-1.5 rounded-xl border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] truncate"
+                            >
+                              <div className="w-3.5 h-3.5 rounded-md bg-[#D4FDF7] border border-[#0D0431] flex items-center justify-center shrink-0">
+                                <Check className="w-2.5 h-2.5 text-[#0D0431]" />
+                              </div>
+                              <span className="truncate">{ev}</span>
                             </div>
-                            <span className="truncate">{ev}</span>
+                          ))
+                        ) : (
+                          <div className="text-[11px] font-bold text-[#0D0431]/60 bg-white px-2.5 py-1.5 rounded-xl border border-[#0D0431]/40 truncate">
+                            0 verified signals
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
 
@@ -1141,15 +1159,21 @@ export default function WhichRoleFitsMe() {
                         <span>You Have (Verified Evidence)</span>
                       </div>
                       <div className="space-y-2">
-                        {inspectedRole.strongMatchingEvidence.map((ev, i) => (
-                          <div
-                            key={i}
-                            className="flex items-start gap-2 text-xs font-bold text-[#0D0431] bg-white p-2.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
-                          >
-                            <Check className="w-3.5 h-3.5 text-[#0D0431] mt-0.5 shrink-0" />
-                            <span>{ev}</span>
+                        {inspectedRole.strongMatchingEvidence.length > 0 ? (
+                          inspectedRole.strongMatchingEvidence.map((ev, i) => (
+                            <div
+                              key={i}
+                              className="flex items-start gap-2 text-xs font-bold text-[#0D0431] bg-white p-2.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
+                            >
+                              <Check className="w-3.5 h-3.5 text-[#0D0431] mt-0.5 shrink-0" />
+                              <span>{ev}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-xs font-bold text-[#0D0431]/80 bg-white p-3 rounded-xl border-2 border-[#0D0431]">
+                            No verified evidence signals for this track yet. Connect your GitHub, LeetCode, or add verified skills in your profile.
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Editor from "@monaco-editor/react";
 import confetti from "canvas-confetti";
@@ -65,6 +65,7 @@ export default function CodingWorkspace() {
   const [fontSize, setFontSize] = useState(14);
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedInput, setCopiedInput] = useState(false);
+  const loadedSlugRef = useRef(null);
 
   // Workspace Navigation Tabs
   const [leftTab, setLeftTab] = useState("description"); // "description" | "editorial" | "ai" | "submissions"
@@ -138,6 +139,7 @@ export default function CodingWorkspace() {
     async function loadProblem() {
       setLoading(true);
       setError(null);
+      loadedSlugRef.current = null;
       setRunResult(null);
       setSubmissionResult(null);
       setSolutionData(null);
@@ -168,6 +170,7 @@ export default function CodingWorkspace() {
           // Load saved draft or starter code
           const saved = leetcodeService.getSavedCode(slug, prob.starter_code);
           setCode(saved);
+          loadedSlugRef.current = slug;
 
           // Check solved status & history
           setIsSolved(leetcodeService.isProblemSolved(slug));
@@ -191,10 +194,10 @@ export default function CodingWorkspace() {
 
   // Auto-save code draft
   useEffect(() => {
-    if (slug && code) {
+    if (slug && code && loadedSlugRef.current === slug && !loading) {
       leetcodeService.saveCode(slug, code);
     }
-  }, [slug, code]);
+  }, [slug, code, loading]);
 
   // Trigger celebration confetti
   const triggerConfetti = () => {
@@ -1004,8 +1007,10 @@ export default function CodingWorkspace() {
           {/* ═══════════════════════════════════════════════════════════════════ */}
           {consoleState !== "collapsed" && (
             <div
-              className={`border-t-2 border-[#0D0431] bg-[#FEF9CF] flex flex-col shrink-0 transition-all duration-150 ${
-                consoleState === "expanded" ? "h-96 sm:h-[420px]" : "h-64 sm:h-72"
+              className={`border-t-2 border-[#0D0431] bg-[#FEF9CF] flex flex-col shrink-0 transition-all duration-150 overflow-hidden ${
+                consoleState === "expanded"
+                  ? "max-h-[70vh] sm:max-h-[65%]"
+                  : "max-h-[50vh] sm:max-h-[45%]"
               }`}
             >
               {/* Console Navigation Header */}
@@ -1363,13 +1368,13 @@ export default function CodingWorkspace() {
                           {submissionResult.status === "Accepted" && (
                             <div className="flex items-center gap-3 text-xs font-mono font-bold text-[#0D0431]">
                               <div className="p-2.5 rounded-xl bg-white border-2 border-[#0D0431] text-center shadow-[2px_2px_0_0_#0D0431]">
-                                <div className="text-[#346538] font-bold">{submissionResult.runtime_ms} ms</div>
-                                <div className="text-[10px] text-[#0D0431]/70 font-sans">Beats {submissionResult.beats_runtime_pct || "84.5"}%</div>
+                                <div className="text-[#346538] font-bold">{submissionResult.runtime_ms ?? "–"} ms</div>
+                                <div className="text-[10px] text-[#0D0431]/70 font-sans">Beats {submissionResult.beats_runtime_pct ?? "–"}%</div>
                               </div>
 
                               <div className="p-2.5 rounded-xl bg-white border-2 border-[#0D0431] text-center shadow-[2px_2px_0_0_#0D0431]">
-                                <div className="text-[#0D0431] font-bold">{submissionResult.memory_mb || "16.4"} MB</div>
-                                <div className="text-[10px] text-[#0D0431]/70 font-sans">Beats {submissionResult.beats_memory_pct || "72.1"}%</div>
+                                <div className="text-[#0D0431] font-bold">{submissionResult.memory_mb ? `${submissionResult.memory_mb} MB` : "–"}</div>
+                                <div className="text-[10px] text-[#0D0431]/70 font-sans">Beats {submissionResult.beats_memory_pct ?? "–"}%</div>
                               </div>
                             </div>
                           )}
@@ -1400,7 +1405,7 @@ export default function CodingWorkspace() {
           )}
 
           {/* ── Bottom Action Footer Bar ── */}
-          <div className="h-14 border-t-2 border-[#0D0431] bg-[#FEF9CF] px-4 flex items-center justify-between shrink-0 shadow-[0_-2px_0_0_#0D0431] z-20">
+          <div className="h-14 border-t-2 border-[#0D0431] bg-[#FEF9CF] px-4 flex items-center justify-between shrink-0 sticky bottom-0 z-30 shadow-[0_-2px_0_0_#0D0431]">
             <div>
               {consoleState === "collapsed" && (
                 <GpButton

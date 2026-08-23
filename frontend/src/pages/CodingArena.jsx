@@ -28,7 +28,6 @@ import {
 } from "lucide-react";
 import { leetcodeService } from "@/services/leetcodeService";
 import LeetCodeSubmissionAnalysis from "@/components/leetcode/LeetCodeSubmissionAnalysis";
-import SheetsHub from "@/components/sheets/SheetsHub";
 import GpCard from "@/components/gp/GpCard";
 import GpBadge from "@/components/gp/GpBadge";
 import GpButton from "@/components/gp/GpButton";
@@ -45,11 +44,12 @@ const CURATED_LISTS = [
 export default function CodingArena() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") || "overview";
+  const rawTab = searchParams.get("tab") || "overview";
+  const initialTab = rawTab === "sheets" ? "overview" : rawTab;
 
   const containerRef = useRef(null);
 
-  // Pillar Workspace Tab: 'overview' | 'practice' | 'sheets' | 'submissions'
+  // Pillar Workspace Tab: 'overview' | 'practice' | 'submissions'
   const [workspaceTab, setWorkspaceTab] = useState(initialTab);
 
   // State for Problems Catalog
@@ -161,20 +161,48 @@ export default function CodingArena() {
     };
   }, [page, pageSize, searchQuery, selectedDifficulty, selectedTag, activeCuratedTrack, sortBy, sortOrder]);
 
-  // Solved Stats calculation
-  const solvedCount = useMemo(() => Object.keys(solvedMap).length, [solvedMap]);
-  const solvedEasy = useMemo(
-    () => Object.values(solvedMap).filter((p) => p.difficulty?.toLowerCase() === "easy").length,
-    [solvedMap]
+  // Solved Stats calculation - combine / prioritize verified LeetCode breakdown with local solvedMap
+  const localSolvedList = useMemo(() => Object.values(solvedMap), [solvedMap]);
+  const localSolvedEasy = useMemo(
+    () => localSolvedList.filter((p) => p.difficulty?.toLowerCase() === "easy").length,
+    [localSolvedList]
   );
-  const solvedMed = useMemo(
-    () => Object.values(solvedMap).filter((p) => p.difficulty?.toLowerCase() === "medium").length,
-    [solvedMap]
+  const localSolvedMed = useMemo(
+    () => localSolvedList.filter((p) => p.difficulty?.toLowerCase() === "medium").length,
+    [localSolvedList]
   );
-  const solvedHard = useMemo(
-    () => Object.values(solvedMap).filter((p) => p.difficulty?.toLowerCase() === "hard").length,
-    [solvedMap]
+  const localSolvedHard = useMemo(
+    () => localSolvedList.filter((p) => p.difficulty?.toLowerCase() === "hard").length,
+    [localSolvedList]
   );
+
+  const totalSolvedCount = useMemo(() => {
+    if (leetcodeProfile?.totalSolved !== undefined && leetcodeProfile?.totalSolved !== null) {
+      return Math.max(leetcodeProfile.totalSolved, Object.keys(solvedMap).length);
+    }
+    return Object.keys(solvedMap).length;
+  }, [leetcodeProfile, solvedMap]);
+
+  const solvedEasy = useMemo(() => {
+    if (leetcodeProfile?.easySolved !== undefined && leetcodeProfile?.easySolved !== null) {
+      return Math.max(leetcodeProfile.easySolved, localSolvedEasy);
+    }
+    return localSolvedEasy;
+  }, [leetcodeProfile, localSolvedEasy]);
+
+  const solvedMed = useMemo(() => {
+    if (leetcodeProfile?.mediumSolved !== undefined && leetcodeProfile?.mediumSolved !== null) {
+      return Math.max(leetcodeProfile.mediumSolved, localSolvedMed);
+    }
+    return localSolvedMed;
+  }, [leetcodeProfile, localSolvedMed]);
+
+  const solvedHard = useMemo(() => {
+    if (leetcodeProfile?.hardSolved !== undefined && leetcodeProfile?.hardSolved !== null) {
+      return Math.max(leetcodeProfile.hardSolved, localSolvedHard);
+    }
+    return localSolvedHard;
+  }, [leetcodeProfile, localSolvedHard]);
 
   // Handle Pick Random
   const handlePickRandom = async () => {
@@ -251,13 +279,12 @@ export default function CodingArena() {
           </div>
         </header>
 
-        {/* 4 Workspace Pillar Tabs */}
+        {/* 3 Workspace Pillar Tabs */}
         <nav className="gsap-reveal flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
           {[
             { id: "overview", label: "Overview", icon: Layers },
-            { id: "sheets", label: "Study Plans", icon: Sparkles },
             { id: "practice", label: "Problem Catalog", icon: Terminal },
-            { id: "submissions", label: "Submissions", icon: Activity },
+            { id: "submissions", label: "LeetCode Analysis", icon: Activity },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = workspaceTab === tab.id;
@@ -302,10 +329,8 @@ export default function CodingArena() {
 
                   <div className="flex items-baseline gap-3">
                     <span className="text-5xl sm:text-6xl font-heading font-black text-[#0D0431] tracking-tight">
-                      {leetcodeProfile?.totalSolved
-                        ? Math.min(100, Math.round((leetcodeProfile.totalSolved / 150) * 100))
-                        : solvedCount > 0
-                        ? Math.min(100, Math.round((solvedCount / 150) * 100))
+                      {totalSolvedCount > 0
+                        ? Math.min(100, Math.round((totalSolvedCount / 150) * 100))
                         : 0}
                     </span>
                     <span className="text-xl font-heading font-bold text-[#0D0431]/50">/ 100</span>
@@ -316,7 +341,7 @@ export default function CodingArena() {
                       </div>
                       <div>
                         Status: <span className="font-bold text-[#346538] bg-[#D4FDF7] px-2 py-0.5 rounded border border-[#0D0431]">
-                          {((leetcodeProfile?.totalSolved || solvedCount) >= 120) ? "Competitive" : "In Progress"}
+                          {totalSolvedCount >= 120 ? "Competitive" : "In Progress"}
                         </span>
                       </div>
                     </div>
@@ -332,7 +357,7 @@ export default function CodingArena() {
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6">
                     <span className="text-[#0D0431]/70 font-bold uppercase text-[10px]">Total Solved</span>
                     <span className="font-heading font-bold text-[#0D0431] text-sm">
-                      {leetcodeProfile?.totalSolved || solvedCount} / {stats.total || "2,800+"}
+                      {totalSolvedCount} / {stats.total || "2,800+"}
                     </span>
                   </div>
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6 border-l-2 lg:border-l-0 lg:border-t-2 border-[#0D0431]/20 pl-3 lg:pl-0 lg:pt-2">
@@ -342,7 +367,7 @@ export default function CodingArena() {
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1 lg:gap-6 border-l-2 lg:border-l-0 lg:border-t-2 border-[#0D0431]/20 pl-3 lg:pl-0 lg:pt-2">
                     <span className="text-[#0D0431]/70 font-bold uppercase text-[10px]">Acceptance</span>
                     <span className="font-heading font-bold text-[#346538] text-sm">
-                      {leetcodeProfile?.acceptanceRate ? `${leetcodeProfile.acceptanceRate}%` : solvedCount > 0 ? "100%" : "Unassessed"}
+                      {leetcodeProfile?.acceptanceRate ? `${leetcodeProfile.acceptanceRate}%` : totalSolvedCount > 0 ? "100%" : "Unassessed"}
                     </span>
                   </div>
                 </div>
@@ -351,13 +376,13 @@ export default function CodingArena() {
               {/* Progress Bar */}
               <div className="space-y-2 pt-4 border-t-2 border-[#0D0431]">
                 <div className="flex justify-between text-xs font-mono font-bold text-[#0D0431]/80">
-                  <span>Solved: {solvedCount} problems</span>
+                  <span>Solved: {totalSolvedCount} problems</span>
                   <span>Target Benchmark: 150 problems</span>
                 </div>
                 <div className="relative w-full bg-white rounded-full h-3.5 overflow-hidden border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                   <div
                     className="h-full rounded-full bg-[#FEDF6A] border-r-2 border-[#0D0431] transition-all duration-500"
-                    style={{ width: `${Math.min(100, Math.max(8, (solvedCount / 150) * 100))}%` }}
+                    style={{ width: `${Math.min(100, Math.max(8, (totalSolvedCount / 150) * 100))}%` }}
                   />
                 </div>
               </div>
@@ -375,7 +400,7 @@ export default function CodingArena() {
                 <div>
                   <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431]/60">Total Solved</div>
                   <div className="text-xl font-heading font-black text-[#0D0431] flex items-baseline gap-1 mt-0.5">
-                    <span>{solvedCount}</span>
+                    <span>{totalSolvedCount}</span>
                     <span className="text-xs font-normal text-[#0D0431]/50">/ {stats.total}</span>
                   </div>
                 </div>
@@ -431,7 +456,7 @@ export default function CodingArena() {
             </section>
 
             {/* Quick Action Matrix Grid */}
-            <section className="gsap-reveal grid grid-cols-1 md:grid-cols-3 gap-4">
+            <section className="gsap-reveal grid grid-cols-1 md:grid-cols-2 gap-4">
               <GpCard
                 theme="white"
                 hoverEffect={true}
@@ -457,28 +482,6 @@ export default function CodingArena() {
               <GpCard
                 theme="white"
                 hoverEffect={true}
-                onClick={() => handleTabChange("sheets")}
-                className="p-5 sm:p-6 space-y-3 cursor-pointer"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-[#D4FDF7] border-2 border-[#0D0431] flex items-center justify-center text-[#0D0431]">
-                      <Sparkles className="w-4 h-4" />
-                    </div>
-                    <h4 className="font-heading font-bold text-sm text-[#0D0431]">
-                      Study Plans
-                    </h4>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-[#0D0431]" />
-                </div>
-                <p className="text-xs text-[#0D0431]/75 leading-relaxed font-sans">
-                  Curated topic study plans with structured milestone tracking.
-                </p>
-              </GpCard>
-
-              <GpCard
-                theme="white"
-                hoverEffect={true}
                 onClick={() => handleTabChange("submissions")}
                 className="p-5 sm:p-6 space-y-3 cursor-pointer"
               >
@@ -488,27 +491,20 @@ export default function CodingArena() {
                       <Activity className="w-4 h-4" />
                     </div>
                     <h4 className="font-heading font-bold text-sm text-[#0D0431]">
-                      Submission Activity
+                      LeetCode Analysis
                     </h4>
                   </div>
                   <ChevronRight className="w-4 h-4 text-[#0D0431]" />
                 </div>
                 <p className="text-xs text-[#0D0431]/75 leading-relaxed font-sans">
-                  Review problem submissions, runtime stats, and execution logs.
+                  Deep-dive into acceptance accuracy, topic mastery, and active practice streaks.
                 </p>
               </GpCard>
             </section>
           </div>
         )}
 
-        {/* TAB 2: STUDY PLAN & PLACEMENT SHEETS */}
-        {workspaceTab === "sheets" && (
-          <div className="gsap-reveal space-y-6">
-            <SheetsHub />
-          </div>
-        )}
-
-        {/* TAB 3: PROBLEM CATALOG (PRACTICE) */}
+        {/* TAB 2: PROBLEM CATALOG (PRACTICE) */}
         {workspaceTab === "practice" && (
           <div className="space-y-6">
             {/* Curated Track Tabs */}

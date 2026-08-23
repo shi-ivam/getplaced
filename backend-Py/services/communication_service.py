@@ -69,7 +69,7 @@ def analyze_communication_skills(
     filler_density = round((total_fillers / max(word_count, 1)) * 100, 1)
 
     # 2. Pacing calculation (Words Per Minute)
-    # If audio duration is provided, use it; otherwise return None
+    # If audio duration is provided, use it; otherwise return None and unmeasured status
     if audio_duration_seconds and audio_duration_seconds > 0:
         wpm = round((word_count / (audio_duration_seconds / 60)), 1)
         if wpm < 110:
@@ -83,8 +83,8 @@ def analyze_communication_skills(
             pacing_feedback = "Your speaking pace is natural, balanced, and easy to follow."
     else:
         wpm = None
-        pacing_rating = "unknown"
-        pacing_feedback = "Audio duration was not provided; WPM calculation unavailable."
+        pacing_rating = "unmeasured"
+        pacing_feedback = "Audio duration was not recorded (Text Submission). Spoken audio is required for pacing telemetry."
 
     # 3. Weak phrasing & power verbs analysis
     weak_found = []
@@ -268,8 +268,8 @@ def get_empty_communication_response() -> Dict[str, Any]:
         },
         "pacing": {
             "wpm": None,
-            "rating": "none",
-            "feedback": "Please speak or enter an answer to evaluate communication skills."
+            "rating": "unmeasured",
+            "feedback": "Spoken audio is required for real-time speech pacing telemetry."
         },
         "clarity": {"score": 0, "feedback": "Awaiting input."},
         "confidence": {"score": 0, "feedback": "Awaiting input."},

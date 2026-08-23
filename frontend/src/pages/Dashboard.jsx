@@ -98,14 +98,14 @@ export default function Dashboard() {
         if (profileRes.status === "fulfilled" && profileRes.value?.data) {
           setUserProfile(profileRes.value.data);
         }
-        if (readinessRes.status === "fulfilled" && readinessRes.value?.data?.readiness) {
-          setReadiness(readinessRes.value.data.readiness);
+        if (readinessRes.status === "fulfilled" && (readinessRes.value?.data?.readiness || readinessRes.value?.data)) {
+          setReadiness(readinessRes.value.data.readiness || readinessRes.value.data);
         }
-        if (gapRes.status === "fulfilled" && gapRes.value?.data?.gapAnalysis) {
-          setGapData(gapRes.value.data.gapAnalysis);
+        if (gapRes.status === "fulfilled" && (gapRes.value?.data?.gapAnalysis || gapRes.value?.data)) {
+          setGapData(gapRes.value.data.gapAnalysis || gapRes.value.data);
         }
-        if (ghRes.status === "fulfilled" && ghRes.value?.data?.profile) {
-          setGithubProfile(ghRes.value.data.profile);
+        if (ghRes.status === "fulfilled" && (ghRes.value?.data?.profile || ghRes.value?.data)) {
+          setGithubProfile(ghRes.value.data.profile || ghRes.value.data);
         }
       } catch (err) {
         console.warn("Could not fetch dashboard data:", err);
@@ -117,21 +117,29 @@ export default function Dashboard() {
     fetchDashboardData();
   }, []);
 
-  const overallScore = readiness?.overallScore ?? 84;
-  const targetCompany = userProfile?.targetCompany || "Microsoft";
-  const targetRole = userProfile?.targetJobRole || "Software Development Engineer";
+  const overallScore = readiness?.overallScore ?? null;
+  const targetCompany = userProfile?.targetCompany || readiness?.targetCompany || "";
+  const targetRole = userProfile?.targetJobRole || userProfile?.targetRole || readiness?.targetJobRole || "";
 
   // 4 Core Pillar Metrics
-  const codingScore = readiness?.dimensions?.dsa?.score ?? 84;
+  const codingScore = readiness?.dimensions?.dsa?.score ?? null;
   const codingTarget = readiness?.dimensions?.dsa?.requiredScore ?? 80;
 
-  const devScore = githubProfile?.projectScore ?? (readiness?.dimensions?.projects?.score ?? 82);
+  const devScore =
+    (githubProfile?.projectScore !== undefined && githubProfile?.projectScore !== null
+      ? githubProfile.projectScore
+      : readiness?.dimensions?.projects?.score) ?? null;
   const devTarget = readiness?.dimensions?.projects?.requiredScore ?? 75;
 
-  const resumeScore = userProfile?.resumeScore ?? (readiness?.dimensions?.resume?.score ?? 78);
+  const resumeScore =
+    (userProfile?.resumeScore !== undefined && userProfile?.resumeScore !== null
+      ? userProfile.resumeScore
+      : (userProfile?.resumeAnalysis?.ats_score ?? userProfile?.resumeAnalysis?.atsScore ?? readiness?.dimensions?.resume?.score)) ?? null;
   const resumeTarget = readiness?.dimensions?.resume?.requiredScore ?? 85;
 
-  const academicScore = userProfile?.cgpa ? Number((userProfile.cgpa * 10).toFixed(0)) : 88;
+  const hasCgpa =
+    userProfile?.cgpa !== null && userProfile?.cgpa !== undefined && !isNaN(Number(userProfile.cgpa));
+  const academicScore = hasCgpa ? Number((userProfile.cgpa * 10).toFixed(0)) : null;
   const academicTarget = 80;
 
   return (
@@ -177,17 +185,19 @@ export default function Dashboard() {
       <div className="bg-white border border-[#E2DEEC] rounded-2xl p-6 sm:p-7 shadow-[0_2px_8px_rgba(23,16,61,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-3 max-w-2xl">
           <div className="flex items-center gap-2 flex-wrap">
-            <GpBadge theme="yellow" size="sm">
-              {targetCompany} Candidate
+            <GpBadge theme={targetCompany ? "yellow" : "gray"} size="sm">
+              {targetCompany ? `${targetCompany} Candidate` : "Ambition Pending"}
             </GpBadge>
           </div>
 
           <div>
             <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#17103D] tracking-tight">
-              {overallScore >= 80 ? "Interview Ready" : "Target Calibrating"} for {targetCompany}
+              {overallScore !== null
+                ? `${overallScore >= 80 ? "Interview Ready" : "Target Calibrating"} for ${targetCompany || "Target Ambition"}`
+                : `Placement Calibration for ${targetCompany || "Target Ambition"}`}
             </h1>
             <p className="text-xs sm:text-sm text-[#6F6A80] mt-1 leading-relaxed">
-              Target role: <span className="font-semibold text-[#17103D]">{targetRole}</span> • Benchmark analysis calibrated across DSA, Projects, Resume ATS, and Academic Cutoffs.
+              Target role: <span className="font-semibold text-[#17103D]">{targetRole || "Role Not Specified"}</span> • Benchmark analysis calibrated across DSA, Projects, Resume ATS, and Academic Cutoffs.
             </p>
           </div>
 
@@ -216,10 +226,14 @@ export default function Dashboard() {
             Overall Readiness
           </span>
           <div className="text-4xl sm:text-5xl font-black text-[#17103D]">
-            {overallScore}%
+            {overallScore !== null ? `${overallScore}%` : "—"}
           </div>
           <span className="text-xs font-bold text-[#0D7A68]">
-            {overallScore >= 80 ? "High Offer Probability" : "Competitive Standing"}
+            {overallScore !== null
+              ? overallScore >= 80
+                ? "High Offer Probability"
+                : "Competitive Standing"
+              : "Calibration Pending"}
           </span>
         </div>
       </div>
@@ -238,20 +252,20 @@ export default function Dashboard() {
               </div>
               <span className="text-xs font-bold text-[#17103D]">Coding & DSA</span>
             </div>
-            <GpBadge theme={codingScore >= codingTarget ? "mint" : "yellow"} size="sm">
-              {codingScore >= codingTarget ? "Ready" : "Gap"}
+            <GpBadge theme={codingScore !== null ? (codingScore >= codingTarget ? "mint" : "yellow") : "yellow"} size="sm">
+              {codingScore !== null ? (codingScore >= codingTarget ? "Ready" : "Gap") : "Unassessed"}
             </GpBadge>
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs font-mono font-bold">
-              <span className="text-[#17103D]">{codingScore}%</span>
+              <span className="text-[#17103D]">{codingScore !== null ? `${codingScore}%` : "Unassessed"}</span>
               <span className="text-[#6F6A80]">Target: {codingTarget}%</span>
             </div>
             <div className="w-full h-1.5 rounded-full bg-[#F2F0FA] overflow-hidden">
               <div
                 className="h-full bg-[#6E44FF] rounded-full"
-                style={{ width: `${Math.min(100, codingScore)}%` }}
+                style={{ width: `${codingScore !== null ? Math.min(100, Math.max(0, codingScore)) : 0}%` }}
               />
             </div>
           </div>
@@ -274,20 +288,20 @@ export default function Dashboard() {
               </div>
               <span className="text-xs font-bold text-[#17103D]">Projects & GitHub</span>
             </div>
-            <GpBadge theme={devScore >= devTarget ? "mint" : "yellow"} size="sm">
-              {devScore >= devTarget ? "Ready" : "Gap"}
+            <GpBadge theme={devScore !== null ? (devScore >= devTarget ? "mint" : "yellow") : "yellow"} size="sm">
+              {devScore !== null ? (devScore >= devTarget ? "Ready" : "Gap") : "Unassessed"}
             </GpBadge>
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs font-mono font-bold">
-              <span className="text-[#17103D]">{devScore}%</span>
+              <span className="text-[#17103D]">{devScore !== null ? `${devScore}%` : "Unassessed"}</span>
               <span className="text-[#6F6A80]">Target: {devTarget}%</span>
             </div>
             <div className="w-full h-1.5 rounded-full bg-[#F2F0FA] overflow-hidden">
               <div
                 className="h-full bg-[#1D58B5] rounded-full"
-                style={{ width: `${Math.min(100, devScore)}%` }}
+                style={{ width: `${devScore !== null ? Math.min(100, Math.max(0, devScore)) : 0}%` }}
               />
             </div>
           </div>
@@ -310,20 +324,20 @@ export default function Dashboard() {
               </div>
               <span className="text-xs font-bold text-[#17103D]">Resume ATS</span>
             </div>
-            <GpBadge theme={resumeScore >= resumeTarget ? "mint" : "yellow"} size="sm">
-              {resumeScore >= resumeTarget ? "Ready" : "Gap"}
+            <GpBadge theme={resumeScore !== null ? (resumeScore >= resumeTarget ? "mint" : "yellow") : "yellow"} size="sm">
+              {resumeScore !== null ? (resumeScore >= resumeTarget ? "Ready" : "Gap") : "Unassessed"}
             </GpBadge>
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs font-mono font-bold">
-              <span className="text-[#17103D]">{resumeScore}%</span>
+              <span className="text-[#17103D]">{resumeScore !== null ? `${resumeScore}%` : "Unassessed"}</span>
               <span className="text-[#6F6A80]">Target: {resumeTarget}%</span>
             </div>
             <div className="w-full h-1.5 rounded-full bg-[#F2F0FA] overflow-hidden">
               <div
                 className="h-full bg-[#9E6700] rounded-full"
-                style={{ width: `${Math.min(100, resumeScore)}%` }}
+                style={{ width: `${resumeScore !== null ? Math.min(100, Math.max(0, resumeScore)) : 0}%` }}
               />
             </div>
           </div>
@@ -346,20 +360,20 @@ export default function Dashboard() {
               </div>
               <span className="text-xs font-bold text-[#17103D]">Academics</span>
             </div>
-            <GpBadge theme="mint" size="sm">
-              Cutoff Clear
+            <GpBadge theme={hasCgpa && academicScore >= academicTarget ? "mint" : "yellow"} size="sm">
+              {hasCgpa ? (academicScore >= academicTarget ? "Cutoff Clear" : "Below Cutoff") : "Pending"}
             </GpBadge>
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs font-mono font-bold">
-              <span className="text-[#17103D]">{userProfile?.cgpa || "8.80"} CGPA</span>
+              <span className="text-[#17103D]">{hasCgpa ? `${Number(userProfile.cgpa).toFixed(2)} CGPA` : "Unset CGPA"}</span>
               <span className="text-[#6F6A80]">Cutoff: 8.00</span>
             </div>
             <div className="w-full h-1.5 rounded-full bg-[#F2F0FA] overflow-hidden">
               <div
                 className="h-full bg-[#0D7A68] rounded-full"
-                style={{ width: `${Math.min(100, academicScore)}%` }}
+                style={{ width: `${academicScore !== null ? Math.min(100, Math.max(0, academicScore)) : 0}%` }}
               />
             </div>
           </div>
@@ -383,7 +397,7 @@ export default function Dashboard() {
               <span>Placement Dimension Benchmarks</span>
             </h3>
             <p className="text-xs text-[#6F6A80] mt-0.5">
-              Comparison between your verified credentials and {targetCompany}&apos;s recruitment cutoff.
+              Comparison between your verified credentials and {targetCompany || "target company"}&apos;s recruitment cutoff.
             </p>
           </div>
 
@@ -396,9 +410,8 @@ export default function Dashboard() {
         </div>
 
         <LevelComparisonTable
-          levelComparison={gapData?.levelComparison}
-          overallGapScore={gapData?.overallGapScore}
-          companyTier={gapData?.companyTier}
+          gapData={gapData}
+          loading={loading}
           targetCompany={targetCompany}
           targetJobRole={targetRole}
         />
@@ -452,7 +465,7 @@ export default function Dashboard() {
                     Target Role & Ambition
                   </span>
                   <div className="font-heading font-black text-base text-[#0D0431]">
-                    {targetCompany} · {targetRole}
+                    {targetCompany || "Target Ambition"} · {targetRole || "Target Role"}
                   </div>
                 </div>
 
@@ -460,7 +473,7 @@ export default function Dashboard() {
                   <Award className="w-5 h-5 text-[#896EE2]" />
                   <div>
                     <span className="text-[10px] font-mono font-bold text-[#0D0431]/70 block">Readiness</span>
-                    <span className="font-heading font-black text-lg text-[#0D0431]">{overallScore}%</span>
+                    <span className="font-heading font-black text-lg text-[#0D0431]">{overallScore !== null ? `${overallScore}%` : "—"}</span>
                   </div>
                 </div>
               </div>
@@ -469,19 +482,19 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 gap-3 font-mono text-xs">
                 <div className="p-3 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                   <span className="text-[10px] text-[#0D0431]/70 block">DSA Benchmark</span>
-                  <span className="font-bold text-[#0D0431]">{codingScore}% score</span>
+                  <span className="font-bold text-[#0D0431]">{codingScore !== null ? `${codingScore}% score` : "Unassessed"}</span>
                 </div>
                 <div className="p-3 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                   <span className="text-[10px] text-[#0D0431]/70 block">Project Evidence</span>
-                  <span className="font-bold text-[#0D0431]">{devScore}% score</span>
+                  <span className="font-bold text-[#0D0431]">{devScore !== null ? `${devScore}% score` : "Unassessed"}</span>
                 </div>
                 <div className="p-3 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                   <span className="text-[10px] text-[#0D0431]/70 block">Resume ATS</span>
-                  <span className="font-bold text-[#0D0431]">{resumeScore}/100</span>
+                  <span className="font-bold text-[#0D0431]">{resumeScore !== null ? `${resumeScore}/100` : "Unassessed"}</span>
                 </div>
                 <div className="p-3 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
                   <span className="text-[10px] text-[#0D0431]/70 block">Academics</span>
-                  <span className="font-bold text-[#0D0431]">{userProfile?.cgpa || "8.80"} CGPA</span>
+                  <span className="font-bold text-[#0D0431]">{hasCgpa ? `${Number(userProfile.cgpa).toFixed(2)} CGPA` : "Unset"}</span>
                 </div>
               </div>
 

@@ -87,6 +87,68 @@ def validate_user_code(user_code: str) -> Optional[str]:
                     return f"Security Restriction: Call to '{node.func.attr}' is not permitted."
     return None
 
+def wrap_data_structures(call_expr: str, is_list_node: bool, is_tree_node: bool) -> str:
+    """
+    Safely wraps argument literals in list_node(...) or tree_node(...)
+    without corrupting nested list/tree brackets (e.g., [[1, 2], [3, 4]]).
+    """
+    if not (is_list_node or is_tree_node):
+        return call_expr
+
+    wrapper = "list_node" if is_list_node else "tree_node"
+    
+    # If the entire call_expr is a single positional list literal like "[1, 2, 3]"
+    stripped = call_expr.strip()
+    if stripped.startswith("[") and stripped.endswith("]") and "=" not in stripped:
+        return f"{wrapper}({stripped})"
+
+    result = []
+    i = 0
+    n = len(call_expr)
+    while i < n:
+        if call_expr[i] == '=':
+            result.append(call_expr[i])
+            i += 1
+            # consume spaces
+            while i < n and call_expr[i].isspace():
+                result.append(call_expr[i])
+                i += 1
+            if i < n and call_expr[i] == '[':
+                start_bracket = i
+                depth = 0
+                in_str = None
+                j = i
+                while j < n:
+                    ch = call_expr[j]
+                    if in_str:
+                        if ch == '\\':
+                            j += 1  # Skip escaped character
+                        elif ch == in_str:
+                            in_str = None
+                    else:
+                        if ch in ('"', "'"):
+                            in_str = ch
+                        elif ch == '[':
+                            depth += 1
+                        elif ch == ']':
+                            depth -= 1
+                            if depth == 0:
+                                break
+                    j += 1
+                if depth == 0 and j < n:
+                    bracket_content = call_expr[start_bracket:j + 1]
+                    result.append(f"{wrapper}({bracket_content})")
+                    i = j + 1
+                else:
+                    result.append(call_expr[i])
+                    i += 1
+            else:
+                continue
+        else:
+            result.append(call_expr[i])
+            i += 1
+    return "".join(result)
+
 def extract_syntax_error(stderr_str: str) -> str:
     """Extracts concise syntax or runtime error message."""
     lines = [l for l in stderr_str.strip().split("\n") if l.strip()]
@@ -136,16 +198,12 @@ def run_sample_tests(
     is_list_node = "ListNode" in starter_code
     is_tree_node = "TreeNode" in starter_code
 
-    # Preprocess test cases
+    # Preprocess test cases with robust nested-bracket handling
     processed_cases = []
     for tc in test_cases_to_run:
         inp = tc.get("input", "")
         out = tc.get("output", "")
-        call_expr = inp
-        if is_list_node:
-            call_expr = re.sub(r'=\s*(\[[^\]]*\])', r'= list_node(\1)', call_expr)
-        if is_tree_node:
-            call_expr = re.sub(r'=\s*(\[[^\]]*\])', r'= tree_node(\1)', call_expr)
+        call_expr = wrap_data_structures(inp, is_list_node, is_tree_node)
         
         processed_cases.append({
             "original_input": inp,
@@ -395,6 +453,17 @@ def submit_solution(
             "error": security_err
         }
 
+    # Instrument test suite to count assertions as they pass
+    instrumented_test_lines = []
+    for l in test_code.split("\n"):
+        instrumented_test_lines.append(l)
+        if l.startswith("def check("):
+            instrumented_test_lines.append("    global _passed_assertions")
+        elif l.strip().startswith("assert "):
+            indent = l[:len(l) - len(l.lstrip())]
+            instrumented_test_lines.append(f"{indent}_passed_assertions += 1")
+    instrumented_test_code = "\n".join(instrumented_test_lines)
+
     script_content = f"""
 import sys, io, time, traceback, resource
 
@@ -404,6 +473,7 @@ for _mod in ["shutil", "socket", "pty", "subprocess", "multiprocessing", "ctypes
 null = None
 true = True
 false = False
+_passed_assertions = 0
 
 {prompt}
 
@@ -412,8 +482,8 @@ false = False
 
 candidate = {entry_point}
 
-# Test suite from dataset
-{test_code}
+# Instrumented test suite
+{instrumented_test_code}
 
 t0 = time.time()
 try:
@@ -421,17 +491,17 @@ try:
     elapsed_ms = round((time.time() - t0) * 1000, 2)
     mem_kb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     mem_mb = round(mem_kb / 1024.0, 2)
-    print("__SUBMISSION_SUCCESS__" + str(elapsed_ms) + "__" + str({total_assertions}) + "__" + str(mem_mb))
+    print("__SUBMISSION_SUCCESS__" + str(elapsed_ms) + "__" + str(_passed_assertions) + "__" + str(mem_mb))
 except AssertionError as e:
     tb = traceback.format_exc()
     lines = [l.strip() for l in tb.split("\\n") if l.strip()]
     failed_assert = lines[-2] if len(lines) >= 2 else "Assertion failed"
-    print("__ASSERTION_FAILED__" + str(failed_assert))
+    print("__ASSERTION_FAILED__" + str(_passed_assertions) + "__" + str(failed_assert))
 except Exception as e:
     tb = traceback.format_exc()
     lines = [l.strip() for l in tb.split("\\n") if l.strip()]
     err = lines[-1] if lines else str(e)
-    print("__RUNTIME_ERROR__" + str(err))
+    print("__RUNTIME_ERROR__" + str(_passed_assertions) + "__" + str(err))
 """
 
     t_start = time.time()
@@ -459,6 +529,7 @@ except Exception as e:
                 memory_mb = round(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024.0, 2)
             
             beats_runtime = round(max(60.0, min(99.4, 100.0 - (run_ms / 50.0) * 20.0)), 1)
+            beats_memory = round(max(55.0, min(99.1, 100.0 - (max(0.0, memory_mb - 10.0) / 20.0) * 25.0)), 1)
             
             return {
                 "status": "Accepted",
@@ -467,22 +538,27 @@ except Exception as e:
                 "runtime_ms": run_ms,
                 "beats_runtime_pct": beats_runtime,
                 "memory_mb": memory_mb,
+                "beats_memory_pct": beats_memory,
                 "error": None
             }
         elif "__ASSERTION_FAILED__" in stdout:
-            failed_msg = stdout.split("__ASSERTION_FAILED__")[1].strip()
+            parts = stdout.split("__ASSERTION_FAILED__")[1].strip().split("__")
+            passed_cnt = int(parts[0]) if len(parts) > 1 and parts[0].isdigit() else 0
+            failed_msg = parts[1] if len(parts) > 1 else parts[0]
             return {
                 "status": "Wrong Answer",
-                "passed_count": 0,
+                "passed_count": passed_cnt,
                 "total_count": total_assertions,
                 "runtime_ms": total_time_ms,
                 "error": f"Failed on test assertion: {failed_msg}"
             }
         elif "__RUNTIME_ERROR__" in stdout:
-            err_msg = stdout.split("__RUNTIME_ERROR__")[1].strip()
+            parts = stdout.split("__RUNTIME_ERROR__")[1].strip().split("__")
+            passed_cnt = int(parts[0]) if len(parts) > 1 and parts[0].isdigit() else 0
+            err_msg = parts[1] if len(parts) > 1 else parts[0]
             return {
                 "status": "Runtime Error",
-                "passed_count": 0,
+                "passed_count": passed_cnt,
                 "total_count": total_assertions,
                 "runtime_ms": total_time_ms,
                 "error": err_msg

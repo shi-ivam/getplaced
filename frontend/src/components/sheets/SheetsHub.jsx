@@ -1,34 +1,24 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import gsap from "gsap";
 import {
   Layers,
   Search,
   BookOpen,
-  Sparkles,
   Flame,
   Trophy,
   Terminal,
   Play,
-  CheckCircle2,
-  Filter,
   ArrowRight,
   Code2,
-  Database,
   Cpu,
-  Network,
   Server,
-  Zap,
   GraduationCap,
   ExternalLink,
-  ChevronRight,
-  Target,
 } from "lucide-react";
 import { sheetsService } from "@/services/sheetsService";
 import SheetViewer from "./SheetViewer";
 import SheetArticleModal from "./SheetArticleModal";
 import SheetVideoModal from "./SheetVideoModal";
-import GpBadge from "@/components/gp/GpBadge";
 
 const CATEGORY_TABS = [
   { id: "all", label: "All Curricula (28)", icon: Layers },
@@ -55,7 +45,20 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
   const [activeArticleSlug, setActiveArticleSlug] = useState(null);
   const [videoModal, setVideoModal] = useState({ isOpen: false, url: "", title: "" });
 
+  // Solved progress tracking
+  const [solvedMap, setSolvedMap] = useState(() => sheetsService.getSolvedMap());
+
   const containerRef = useRef(null);
+
+  // Sync progress from cloud and listen for progress events
+  useEffect(() => {
+    sheetsService.fetchProgressFromCloud();
+    const handleProgressUpdate = (e) => {
+      setSolvedMap(e.detail || sheetsService.getSolvedMap());
+    };
+    window.addEventListener("getplaced_sheet_progress_updated", handleProgressUpdate);
+    return () => window.removeEventListener("getplaced_sheet_progress_updated", handleProgressUpdate);
+  }, []);
 
   // Load sheets overview
   useEffect(() => {
@@ -115,13 +118,49 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
     );
   }
 
+  if (loading && !overviewData) {
+    return (
+      <div className="py-24 flex flex-col items-center justify-center space-y-4">
+        <div className="w-8 h-8 rounded-full border-3 border-[#17103D] border-t-transparent animate-spin" />
+        <p className="text-xs font-mono font-bold text-[#17103D]">Loading curricula catalog...</p>
+      </div>
+    );
+  }
+
+  if (error && !overviewData) {
+    return (
+      <div className="py-16 text-center space-y-4 bg-white border border-[#E2DEEC] rounded-2xl p-8 shadow-sm">
+        <h3 className="text-base font-bold text-[#17103D]">Unable to load curricula</h3>
+        <p className="text-xs text-[#6F6A80]">{error}</p>
+        <button
+          type="button"
+          onClick={() => {
+            setLoading(true);
+            setError(null);
+            sheetsService
+              .getSheetsOverview()
+              .then((data) => {
+                setOverviewData(data);
+                setLoading(false);
+              })
+              .catch(() => {
+                setError("Failed to load curricula sheets.");
+                setLoading(false);
+              });
+          }}
+          className="px-4 py-2 rounded-xl bg-[#17103D] text-white text-xs font-semibold cursor-pointer"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   const allCategories = overviewData?.categories || [];
   const displayedCategories =
     activeCategoryTab === "all"
       ? allCategories
       : allCategories.filter((c) => c.id === activeCategoryTab);
-
-  const solvedMap = sheetsService.getSolvedMap();
 
   return (
     <div ref={containerRef} className="space-y-6">
@@ -251,30 +290,99 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
                     ? "bg-[#FEF6D6] text-[#9E6700]"
                     : "bg-[#FFE8E5] text-[#C7382B]";
 
+                const sheetTitle =
+                  prob.sheet_title || prob.sheet_name || prob.sheetTitle || prob.sheetName || "Curriculum Sheet";
+                const topicTitle =
+                  prob.section_name ||
+                  prob.subcategory_name ||
+                  prob.category ||
+                  prob.topic_title ||
+                  prob.topicTitle ||
+                  "General Topic";
+                const articleSlug = prob.article_slug || prob.articleSlug;
+                const youtubeUrl = prob.youtube_url || prob.youtubeUrl;
+                const leetcodeSlug = prob.leetcode_slug || prob.leetcodeSlug;
+                const isRunnable = prob.is_ide_runnable || prob.isIdeRunnable;
+                const solveUrl =
+                  prob.leetcode_url ||
+                  prob.practice_url ||
+                  prob.problem_url ||
+                  prob.practiceUrl ||
+                  prob.leetcodeUrl;
+
                 return (
                   <div
-                    key={prob.id}
+                    key={prob.id || prob.problem_id || prob.problem_name}
                     className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 hover:bg-[#F8F8F5] transition-colors"
                   >
                     <div className="space-y-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs sm:text-sm font-bold text-[#17103D] truncate">
-                          {prob.problem_name}
+                          {prob.problem_name || prob.problemName || prob.title}
                         </span>
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${diffBadge}`}>
                           {prob.difficulty}
                         </span>
                       </div>
-                      <div className="text-[11px] text-[#6F6A80]">
-                        Sheet: <span className="font-medium text-[#17103D]">{prob.sheet_name}</span>
-                        {prob.category && ` • ${prob.category}`}
+                      <div className="text-[11px] text-[#6F6A80] flex items-center gap-1.5 flex-wrap">
+                        <span>
+                          Sheet: <span className="font-medium text-[#17103D]">{sheetTitle}</span>
+                        </span>
+                        <span>•</span>
+                        <span className="px-1.5 py-0.5 rounded bg-[#F2F0FA] text-[#6E44FF] font-medium">
+                          {topicTitle}
+                        </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                      {prob.problem_url && (
+                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0 flex-wrap">
+                      {/* Tutorial Article Button */}
+                      {(prob.has_article || prob.hasArticle || articleSlug) && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setActiveArticleSlug(articleSlug || prob.problem_name || prob.problemName)
+                          }
+                          className="px-2.5 py-1 text-xs rounded-lg border border-[#E2DEEC] bg-[#EFEAFF] hover:bg-[#E2DEEC] text-[#6E44FF] font-medium flex items-center gap-1 cursor-pointer"
+                          title="Read offline tutorial"
+                        >
+                          <BookOpen className="w-3 h-3 text-[#6E44FF]" />
+                          <span>Tutorial</span>
+                        </button>
+                      )}
+
+                      {/* Video Button */}
+                      {youtubeUrl && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setVideoModal({
+                              isOpen: true,
+                              url: youtubeUrl,
+                              title: prob.problem_name || prob.problemName || prob.title,
+                            })
+                          }
+                          className="px-2.5 py-1 text-xs rounded-lg border border-[#E2DEEC] bg-[#FFE8E5] hover:bg-[#FFD4CE] text-[#C7382B] font-medium flex items-center gap-1 cursor-pointer"
+                          title="Watch video solution"
+                        >
+                          <Play className="w-3 h-3 fill-current" />
+                          <span>Video</span>
+                        </button>
+                      )}
+
+                      {/* Solve in IDE or External Practice */}
+                      {isRunnable && leetcodeSlug ? (
+                        <Link
+                          to={`/app/coding/${leetcodeSlug}`}
+                          className="px-2.5 py-1 text-xs rounded-lg bg-[#FFD84D] hover:bg-[#F2CC3F] text-[#17103D] font-bold flex items-center gap-1 shadow-sm"
+                          title="Solve in live Monaco IDE"
+                        >
+                          <Terminal className="w-3 h-3" />
+                          <span>Solve</span>
+                        </Link>
+                      ) : solveUrl ? (
                         <a
-                          href={prob.problem_url}
+                          href={solveUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="px-2.5 py-1 text-xs rounded-lg border border-[#E2DEEC] bg-white hover:bg-[#F2F0FA] text-[#17103D] flex items-center gap-1"
@@ -282,10 +390,12 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
                           <span>Solve</span>
                           <ExternalLink className="w-3 h-3 text-[#6F6A80]" />
                         </a>
-                      )}
+                      ) : null}
+
+                      {/* Open Sheet */}
                       <button
                         type="button"
-                        onClick={() => setSelectedSheetId(prob.sheet_id)}
+                        onClick={() => setSelectedSheetId(prob.sheet_id || prob.sheetId)}
                         className="px-2.5 py-1 text-xs rounded-lg bg-[#17103D] text-white hover:bg-[#24195A] font-semibold flex items-center gap-1 cursor-pointer"
                       >
                         <span>Open Sheet</span>
@@ -308,20 +418,47 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-[#17103D] flex items-center gap-2">
                   <BookOpen className="w-4 h-4 text-[#6E44FF]" />
-                  <span>{category.name}</span>
+                  <span>{category.title || category.name}</span>
                   <span className="text-xs text-[#6F6A80] font-normal">
-                    ({category.sheets.length} sheets)
+                    ({category.sheets?.length || 0} sheets)
                   </span>
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {category.sheets.map((sheet) => {
-                  const solvedCount = sheet.stats?.total_problems
-                    ? Object.keys(solvedMap).filter((k) => k.startsWith(`${sheet.id}::`)).length
-                    : 0;
-                  const total = sheet.stats?.total_problems || 0;
-                  const pct = total > 0 ? Math.round((solvedCount / total) * 100) : 0;
+                {category.sheets?.map((sheet) => {
+                  const sheetTitle = sheet.title || sheet.name || "Curriculum Sheet";
+                  const total =
+                    sheet.total_items ??
+                    sheet.stats?.total_problems ??
+                    sheet.total_problems ??
+                    sheet.problemsCount ??
+                    sheet.problems_count ??
+                    0;
+                  const topics =
+                    sheet.total_sections ??
+                    sheet.stats?.total_subsections ??
+                    sheet.topicsCount ??
+                    sheet.topics_count ??
+                    sheet.sectionsCount ??
+                    sheet.sections_count ??
+                    0;
+
+                  const solvedCount = Object.values(solvedMap).filter((val) => {
+                    if (!val) return false;
+                    if (typeof val === "object") {
+                      const sId = val.sheetId || val.sheet_id;
+                      return (
+                        sId === sheet.id ||
+                        sId === sheet.sheet_id ||
+                        sId === sheet.title ||
+                        sId === sheet.name ||
+                        sId === sheetTitle
+                      );
+                    }
+                    return false;
+                  }).length;
+                  const pct = total > 0 ? Math.min(100, Math.round((solvedCount / total) * 100)) : 0;
 
                   return (
                     <div
@@ -332,7 +469,7 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#F2F0FA] text-[#6E44FF]">
-                            {sheet.stats?.total_subsections || 0} Topics
+                            {topics} Topics
                           </span>
                           <span className="text-[11px] text-[#6F6A80] font-mono">
                             {solvedCount}/{total} Solved
@@ -340,7 +477,7 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
                         </div>
 
                         <h4 className="text-sm font-bold text-[#17103D] group-hover:text-[#6E44FF] transition-colors line-clamp-1">
-                          {sheet.name}
+                          {sheetTitle}
                         </h4>
                         <p className="text-xs text-[#6F6A80] line-clamp-2 leading-relaxed">
                           {sheet.description || "Structured problem track with video tutorials and practice sandboxes."}
@@ -378,8 +515,12 @@ export default function SheetsHub({ initialSheetId = null, onSelectSheet = null,
       {/* Modals */}
       {activeArticleSlug && (
         <SheetArticleModal
-          articleSlug={activeArticleSlug}
+          slugOrId={activeArticleSlug}
           onClose={() => setActiveArticleSlug(null)}
+          onOpenVideo={(url, title) => {
+            setActiveArticleSlug(null);
+            setVideoModal({ isOpen: true, url, title });
+          }}
         />
       )}
       {videoModal.isOpen && (

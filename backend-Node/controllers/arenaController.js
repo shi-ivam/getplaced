@@ -6,6 +6,7 @@ import {
   postSquadMessage,
   joinSquadByCode,
   createSquad,
+  enrollInChallenge,
   ACTIVE_WEEKLY_CHALLENGES,
 } from "../services/arenaService.js";
 
@@ -86,5 +87,15 @@ export const postMessage = asyncHandler(async (req, res) => {
   }
 
   const result = await postSquadMessage(req.user._id, user?.name, text, type);
+  res.json(result);
+});
+
+// @desc    Enroll in active challenge
+// @route   POST /api/arena/challenges/:id/enroll
+// @access  Private
+export const enrollChallenge = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  const { id } = req.params;
+  const result = await enrollInChallenge(req.user._id, user, id);
   res.json(result);
 });

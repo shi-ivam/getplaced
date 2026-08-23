@@ -149,11 +149,11 @@ function CustomLink({ href = "", children, onNavigate, ...props }) {
   );
 }
 
-export default function MarkdownRenderer({ content, onNavigate }) {
+export default function MarkdownRenderer({ content, onNavigate, className = "" }) {
   if (!content) return null;
 
   return (
-    <div className="max-w-none text-[#17103D] text-xs leading-relaxed space-y-2 font-sans [&_.katex-display]:overflow-x-auto [&_.katex-display]:py-1.5 [&_.katex]:text-[#17103D]">
+    <div className={`max-w-none text-[#17103D] text-sm sm:text-[14.5px] leading-relaxed space-y-2.5 font-sans [&_.katex-display]:overflow-x-auto [&_.katex-display]:py-1.5 [&_.katex]:text-[#17103D] ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
@@ -161,36 +161,36 @@ export default function MarkdownRenderer({ content, onNavigate }) {
           code: (props) => <CodeBlock {...props} onNavigate={onNavigate} />,
           a: (props) => <CustomLink {...props} onNavigate={onNavigate} />,
           h1: ({ node, ...props }) => (
-            <h1 className="text-sm font-bold text-[#17103D] tracking-tight mt-3 mb-1.5 pb-1 border-b border-[#E2DEEC]" {...props} />
+            <h1 className="text-base sm:text-lg font-bold text-[#17103D] tracking-tight mt-3.5 mb-2 pb-1.5 border-b border-[#E2DEEC]" {...props} />
           ),
           h2: ({ node, ...props }) => (
-            <h2 className="text-xs font-bold text-[#17103D] tracking-tight mt-2.5 mb-1" {...props} />
+            <h2 className="text-sm sm:text-base font-bold text-[#17103D] tracking-tight mt-3 mb-1.5" {...props} />
           ),
           h3: ({ node, ...props }) => (
-            <h3 className="text-xs font-bold text-[#17103D] tracking-tight mt-2 mb-0.5" {...props} />
+            <h3 className="text-sm sm:text-[15px] font-bold text-[#17103D] tracking-tight mt-2.5 mb-1" {...props} />
           ),
           p: ({ node, ...props }) => (
-            <p className="my-1 leading-relaxed text-[#17103D] text-xs font-medium" {...props} />
+            <p className="my-1.5 leading-relaxed text-[#17103D] text-sm sm:text-[14.5px] font-normal sm:font-medium" {...props} />
           ),
           ul: ({ node, ...props }) => (
-            <ul className="my-1 space-y-1 text-[#17103D] text-xs list-disc list-inside marker:text-[#6E44FF]" {...props} />
+            <ul className="my-1.5 space-y-1.5 text-[#17103D] text-sm sm:text-[14.5px] list-disc list-inside marker:text-[#6E44FF]" {...props} />
           ),
           ol: ({ node, ...props }) => (
-            <ol className="my-1 space-y-1 text-[#17103D] list-decimal list-inside text-xs marker:text-[#6E44FF] font-mono" {...props} />
+            <ol className="my-1.5 space-y-1.5 text-[#17103D] list-decimal list-inside text-sm sm:text-[14.5px] marker:text-[#6E44FF] font-mono" {...props} />
           ),
           li: ({ node, ...props }) => (
-            <li className="leading-relaxed font-medium" {...props} />
+            <li className="leading-relaxed font-normal sm:font-medium" {...props} />
           ),
           blockquote: ({ node, ...props }) => (
-            <blockquote className="my-2 pl-3 py-1 border-l-2 border-[#6E44FF] bg-[#F2F0FA] text-[#17103D] rounded-r text-xs leading-relaxed font-medium" {...props} />
+            <blockquote className="my-2.5 pl-3.5 py-1.5 border-l-2 border-[#6E44FF] bg-[#F2F0FA] text-[#17103D] rounded-r text-sm sm:text-[14.5px] leading-relaxed font-normal sm:font-medium" {...props} />
           ),
           table: ({ node, ...props }) => (
-            <div className="my-2 overflow-x-auto rounded-xl border border-[#E2DEEC] bg-white">
-              <table className="w-full text-left text-xs font-sans border-collapse" {...props} />
+            <div className="my-2.5 overflow-x-auto rounded-xl border border-[#E2DEEC] bg-white">
+              <table className="w-full text-left text-xs sm:text-sm font-sans border-collapse" {...props} />
             </div>
           ),
           thead: ({ node, ...props }) => (
-            <thead className="bg-[#F8F8F5] text-[#17103D] font-bold text-[11px] uppercase tracking-wider border-b border-[#E2DEEC]" {...props} />
+            <thead className="bg-[#F8F8F5] text-[#17103D] font-bold text-xs sm:text-[13px] uppercase tracking-wider border-b border-[#E2DEEC]" {...props} />
           ),
           tbody: ({ node, ...props }) => (
             <tbody className="divide-y divide-[#E2DEEC]" {...props} />
@@ -199,13 +199,13 @@ export default function MarkdownRenderer({ content, onNavigate }) {
             <tr className="hover:bg-[#F8F8F5] transition-colors" {...props} />
           ),
           th: ({ node, ...props }) => (
-            <th className="px-3 py-1.5 font-bold text-[#17103D]" {...props} />
+            <th className="px-3.5 py-2 font-bold text-[#17103D]" {...props} />
           ),
           td: ({ node, ...props }) => (
-            <td className="px-3 py-1.5 text-[#17103D] font-medium align-top" {...props} />
+            <td className="px-3.5 py-2 text-[#17103D] font-normal sm:font-medium align-top" {...props} />
           ),
           hr: ({ node, ...props }) => (
-            <hr className="my-2 border-[#E2DEEC]" {...props} />
+            <hr className="my-2.5 border-[#E2DEEC]" {...props} />
           ),
         }}
       >

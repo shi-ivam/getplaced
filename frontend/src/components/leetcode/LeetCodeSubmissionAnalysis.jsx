@@ -236,10 +236,6 @@ export default function LeetCodeSubmissionAnalysis({
                 <h3 className="font-heading font-black text-lg sm:text-xl text-[#0D0431]">
                   LeetCode Submission & Consistency Analysis
                 </h3>
-                <GpBadge theme="yellow">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  {consistency?.archetype || "Active Coder"}
-                </GpBadge>
               </div>
               <div className="flex flex-wrap items-center gap-3 text-xs text-[#0D0431]/80 mt-1 font-mono font-bold">
                 <a
@@ -394,8 +390,8 @@ export default function LeetCodeSubmissionAnalysis({
               <Flame className="w-3 h-3 text-[#0D0431]" />
               {consistency?.streak || 0}-day streak
             </span>
-            <span className="text-[10px] bg-white px-2 py-0.5 rounded-full border border-[#0D0431]">
-              {consistency?.archetypeBadge}
+            <span className="text-[10px] text-[#0D0431]/70 uppercase">
+              Current Streak
             </span>
           </div>
         </div>
@@ -550,32 +546,49 @@ export default function LeetCodeSubmissionAnalysis({
               Practice Consistency & Habit Tracking
             </h4>
           </div>
-          <div className="flex items-center gap-2 font-mono text-xs font-bold">
-            <span className="text-[#0D0431]/70">Archetype:</span>
-            <GpBadge theme="light-purple">
-              {consistency?.archetype}
-            </GpBadge>
+          <div className="flex items-center gap-2 font-mono text-xs font-bold text-[#0D0431]/80">
+            <Calendar className="w-3.5 h-3.5 text-[#0D0431]" />
+            <span>30-Day Activity Window</span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Archetype Description & Signals */}
-          <div className="space-y-3 bg-[#FEF9CF] border-2 border-[#0D0431] p-5 rounded-2xl shadow-[3px_3px_0_0_#0D0431]">
-            <div className="text-xs font-heading font-black text-[#0D0431] flex items-center gap-2">
-              <Award className="w-4 h-4 text-[#0D0431]" />
-              <span>{consistency?.archetypeBadge || "Coding Persona"}</span>
+          {/* Practice Cadence & Habit Metrics */}
+          <div className="space-y-3 bg-[#FEF9CF] border-2 border-[#0D0431] p-5 rounded-2xl shadow-[3px_3px_0_0_#0D0431] flex flex-col justify-between">
+            <div className="space-y-1">
+              <div className="text-xs font-heading font-black text-[#0D0431] flex items-center gap-2">
+                <Flame className="w-4 h-4 text-[#0D0431]" />
+                <span>Habit Metrics</span>
+              </div>
+              <p className="text-[11px] text-[#0D0431]/80 font-sans font-medium">
+                Tracking daily practice continuity and problem-solving rhythm.
+              </p>
             </div>
-            <p className="text-xs text-[#0D0431]/90 leading-relaxed font-medium">
-              {consistency?.archetypeDescription}
-            </p>
-            <div className="pt-3 border-t-2 border-[#0D0431]/20 space-y-2 text-xs font-mono font-bold">
+
+            <div className="pt-2 border-t-2 border-[#0D0431]/20 space-y-2 text-xs font-mono font-bold">
               <div className="flex justify-between text-[#0D0431]">
                 <span>Active Coding Days:</span>
-                <span>{consistency?.activeDays || 0} days</span>
+                <span className="bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
+                  {consistency?.activeDays || 0} days
+                </span>
               </div>
               <div className="flex justify-between text-[#0D0431]">
                 <span>Current Streak:</span>
-                <span>{consistency?.streak || 0} days</span>
+                <span className="bg-[#FEDF6A] px-2 py-0.5 rounded-md border border-[#0D0431]">
+                  {consistency?.streak || 0} days
+                </span>
+              </div>
+              <div className="flex justify-between text-[#0D0431]">
+                <span>Problems Solved:</span>
+                <span className="bg-white px-2 py-0.5 rounded-md border border-[#0D0431]">
+                  {overview?.totalSolved || 0}
+                </span>
+              </div>
+              <div className="flex justify-between text-[#0D0431]">
+                <span>Overall Accuracy:</span>
+                <span className="bg-[#D4FDF7] px-2 py-0.5 rounded-md border border-[#0D0431]">
+                  {overview?.overallAcceptanceRate || 0}%
+                </span>
               </div>
             </div>
           </div>

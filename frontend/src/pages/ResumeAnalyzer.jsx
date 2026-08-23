@@ -86,35 +86,57 @@ const ResumeAnalyzer = () => {
       const formData = new FormData();
       formData.append("file", file);
 
-      let parsedScore = 88;
-      let parsedKeywords = ["React.js", "Node.js", "Python", "PostgreSQL", "Docker"];
-      let parsedInsights = [
-        { skill: "System Design", score: 86 },
-        { skill: "Data Structures", score: 84 },
-        { skill: "React & Frontend", score: 90 },
-        { skill: "Cloud Architecture", score: 80 },
-        { skill: "Behavioral Articulation", score: 85 },
-      ];
+      let parsedScore = null;
+      let parsedKeywords = [];
+      let parsedInsights = [];
 
-      try {
-        const pyRes = await axios.post(`${PY_API_URL}/analyze-resume`, formData, {
+      const pyRes = await axios.post(`${PY_API_URL}/api/resume/analyze-upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        timeout: 15000,
+      }).catch(async () => {
+        // Legacy compatibility fallback endpoint
+        return await axios.post(`${PY_API_URL}/analyze-resume`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
-          timeout: 10000,
+          timeout: 15000,
         });
-        if (pyRes.data) {
-          const resObj = pyRes.data.data || pyRes.data;
-          parsedScore = resObj.ats_score || resObj.score || 88;
-          const rawKw = resObj.matched_keywords || pyRes.data.matched_keywords;
-          if (rawKw) {
-            parsedKeywords = Array.isArray(rawKw)
-              ? rawKw.map(k => (typeof k === "string" ? k : k?.keyword || String(k))).filter(Boolean)
-              : [];
-          }
-          if (resObj.skills) parsedInsights = resObj.skills;
+      });
+
+      if (pyRes?.data) {
+        const evalObj = pyRes.data.evaluation || pyRes.data.data || pyRes.data;
+        parsedScore = evalObj.ats_score ?? evalObj.atsScore ?? evalObj.score ?? null;
+        
+        const rawKw = evalObj.matched_keywords || evalObj.matchedKeywords || evalObj.keywords;
+        if (rawKw) {
+          parsedKeywords = Array.isArray(rawKw)
+            ? rawKw.map((k) => (typeof k === "string" ? k : k?.keyword || String(k))).filter(Boolean)
+            : [];
         }
-      } catch (pyErr) {
-        const nameLen = file.name.length;
-        parsedScore = Math.min(96, Math.max(72, 75 + (nameLen % 20)));
+        if (evalObj.skills && Array.isArray(evalObj.skills)) {
+          parsedInsights = evalObj.skills;
+        } else if (evalObj.category_scores || evalObj.categoryScores) {
+          const cat = evalObj.category_scores || evalObj.categoryScores;
+          parsedInsights = [
+            { skill: "System Design", score: cat.experience_relevance || cat.impact_quantification || 75 },
+            { skill: "Data Structures", score: cat.skills_alignment || cat.skills_match || 80 },
+            { skill: "React & Frontend", score: cat.formatting_structure || cat.formatting_readability || 85 },
+            { skill: "Cloud Architecture", score: cat.keyword_relevance || 70 },
+            { skill: "Behavioral Articulation", score: cat.impact_metrics || 80 },
+          ];
+        }
+      }
+
+      if (parsedScore === null || isNaN(Number(parsedScore))) {
+        throw new Error("Unable to extract verified ATS score from document analysis.");
+      }
+
+      if (parsedInsights.length === 0) {
+        parsedInsights = [
+          { skill: "System Design", score: Math.min(100, parsedScore + 2) },
+          { skill: "Data Structures", score: Math.min(100, parsedScore - 3) },
+          { skill: "Frontend/Backend", score: Math.min(100, parsedScore + 4) },
+          { skill: "Cloud Architecture", score: Math.min(100, Math.max(50, parsedScore - 8)) },
+          { skill: "Behavioral Articulation", score: Math.min(100, parsedScore - 1) },
+        ];
       }
 
       if (isLoggedIn) {
@@ -127,6 +149,7 @@ const ResumeAnalyzer = () => {
               filename: file.name,
               resumeAnalysis: {
                 ats_score: parsedScore,
+                atsScore: parsedScore,
                 matched_keywords: parsedKeywords,
                 skills: parsedInsights,
               },
@@ -134,7 +157,7 @@ const ResumeAnalyzer = () => {
             { withCredentials: true }
           );
         } catch (saveErr) {
-          console.warn("Could not save resume score:", saveErr);
+          console.warn("Could not save resume score to profile:", saveErr);
         }
       }
 
@@ -147,10 +170,15 @@ const ResumeAnalyzer = () => {
         isDemo: false,
       });
 
-      setUploadSuccess(`Successfully parsed ${file.name}! ATS Score updated.`);
+      setUploadSuccess(`Successfully parsed ${file.name}! Grounded ATS Score: ${parsedScore}%.`);
     } catch (err) {
       console.error("Resume upload error:", err);
-      setUploadError("Failed to parse resume file. Please try again.");
+      setUploadError(
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to parse resume with AI service. Please upload a clear text or PDF document."
+      );
     } finally {
       setUploading(false);
     }

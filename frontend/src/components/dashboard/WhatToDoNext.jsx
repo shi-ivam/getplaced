@@ -87,8 +87,10 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
             id: "task-1",
             title: "Solve 2 Binary Search / Graph Problems",
             category: "dsa",
+            categoryLabel: "DSA & Problem Solving",
             badgeLabel: "High Impact",
-            description: "Target Microsoft Tier-1 benchmark (currently 78% of requirement).",
+            description: "Target company benchmark algorithms practice.",
+            estimatedMinutes: 25,
             estimatedTime: "25 mins",
             actionUrl: "/app/coding",
             actionLabel: "Start Solving",
@@ -97,8 +99,10 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
             id: "task-2",
             title: "Optimize 3 Action Bullets on Resume",
             category: "resume",
+            categoryLabel: "Resume & ATS Optimization",
             badgeLabel: "ATS Boost",
             description: "Apply XYZ formula to boost ATS score to 85+.",
+            estimatedMinutes: 10,
             estimatedTime: "10 mins",
             actionUrl: "/app/resume",
             actionLabel: "Audit Resume",
@@ -107,8 +111,10 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
             id: "task-3",
             title: "Review Super Dream Cutoffs",
             category: "academics",
+            categoryLabel: "Academics & Eligibility",
             badgeLabel: "Academics",
             description: "Verify standing cutoffs for 35+ Tier-1 companies.",
+            estimatedMinutes: 5,
             estimatedTime: "5 mins",
             actionUrl: "/app/academics",
             actionLabel: "Check Cutoffs",
@@ -128,7 +134,11 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
         <div className="flex items-center gap-2 text-xs text-[#6F6A80]">
           <span className="flex items-center gap-1 font-bold text-[#9E6700] bg-[#FEF6D6] px-2.5 py-0.5 rounded-full border border-[#FFE995]">
             <Flame className="w-3.5 h-3.5 text-[#FFD84D] fill-[#FFD84D]" />
-            <span>{streakDays || 4} Day Prep Streak</span>
+            <span>
+              {streakDays > 0
+                ? `${streakDays} Day Prep Streak`
+                : "Start Prep Streak"}
+            </span>
           </span>
         </div>
       </div>
@@ -137,6 +147,8 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
         {tasksToDisplay.map((task) => {
           const Icon = CATEGORY_ICONS[task.category] || Target;
           const isDone = completedTaskIds.has(task.id);
+          const badgeText = task.badgeLabel || task.categoryLabel || "Next Step";
+          const timeText = task.estimatedTime || (task.estimatedMinutes ? `${task.estimatedMinutes} mins` : "15 mins");
 
           return (
             <div
@@ -150,11 +162,11 @@ export default function WhatToDoNext({ userProfile, readinessScore }) {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <GpBadge theme="light-purple" size="sm">
-                    {task.badgeLabel || "Next Step"}
+                    {badgeText}
                   </GpBadge>
                   <span className="text-[11px] text-[#6F6A80] font-mono flex items-center gap-1">
                     <Clock className="w-3 h-3" />
-                    {task.estimatedTime || "15 mins"}
+                    {timeText}
                   </span>
                 </div>
 

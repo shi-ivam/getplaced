@@ -97,14 +97,7 @@ export default function Layout() {
                 </kbd>
               </button>
 
-              {/* AI Status Badge */}
-              <Link
-                to="/app/coach"
-                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EFEAFF] border border-[#E2DEEC] text-[11px] font-semibold text-[#6E44FF] hover:bg-[#6E44FF] hover:text-white transition-colors"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#6E44FF] animate-pulse" />
-                <span>AI Coach Ready</span>
-              </Link>
+
 
               {/* Avatar Link */}
               <Link

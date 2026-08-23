@@ -48,7 +48,7 @@ export const CANONICAL_ROLES_BENCHMARK = [
     ],
     industryDemand: {
       level: "Very High",
-      sharePercentage: 38,
+      sharePercentage: 24,
       statusLabel: "Top Campus & Off-Campus Hiring Category",
       trend: "Rising demand for TypeScript + Next.js + Node.js/Go full-stack talent.",
     },
@@ -67,8 +67,8 @@ export const CANONICAL_ROLES_BENCHMARK = [
       "Stripe",
       "Flipkart",
       "Amazon",
-      "CRED",
-      "Postman",
+      "Microsoft",
+      "Adobe",
     ],
     hiringBars: [
       "1 DSA & Problem Solving Round (Medium Level - Arrays, Two Pointers, Trees)",
@@ -150,7 +150,7 @@ export const CANONICAL_ROLES_BENCHMARK = [
     ],
     industryDemand: {
       level: "Very High",
-      sharePercentage: 35,
+      sharePercentage: 20,
       statusLabel: "Critical Backbone for All Tech Products",
       trend: "Rising demand for Go, Java/Spring Boot, and Kafka event-driven architectures.",
     },
@@ -252,7 +252,7 @@ export const CANONICAL_ROLES_BENCHMARK = [
     ],
     industryDemand: {
       level: "Highest Prestige",
-      sharePercentage: 30,
+      sharePercentage: 16,
       statusLabel: "Primary Profile for FAANG / Tier-1 Campus Hiring",
       trend: "Stringent evaluation on DSA + Low Level Design (LLD) + Core CS.",
     },
@@ -350,7 +350,7 @@ export const CANONICAL_ROLES_BENCHMARK = [
     ],
     industryDemand: {
       level: "High",
-      sharePercentage: 25,
+      sharePercentage: 14,
       statusLabel: "Essential for Product-Led SaaS & Consumer Tech",
       trend: "Surge in demand for TypeScript, Next.js App Router, and motion/micro-interactions.",
     },
@@ -364,13 +364,13 @@ export const CANONICAL_ROLES_BENCHMARK = [
     topHiringCompanies: [
       "Atlassian",
       "Meta",
-      "Figma",
-      "Canva",
-      "CRED",
+      "Google",
+      "Adobe",
       "Zomato",
       "Swiggy",
-      "Vercel",
       "Stripe",
+      "Microsoft",
+      "Intuit",
     ],
     hiringBars: [
       "1 JavaScript / TypeScript Deep Dive (Closures, Event Loop, Prototypes, Async)",
@@ -447,7 +447,7 @@ export const CANONICAL_ROLES_BENCHMARK = [
     ],
     industryDemand: {
       level: "Very High",
-      sharePercentage: 28,
+      sharePercentage: 9,
       statusLabel: "Critical Talent Shortage in Cloud Infrastructure",
       trend: "Exploding demand for Kubernetes, Terraform, and AWS/Azure Platform Engineering.",
     },
@@ -459,15 +459,14 @@ export const CANONICAL_ROLES_BENCHMARK = [
       medianLpa: 24,
     },
     topHiringCompanies: [
-      "AWS",
-      "Microsoft Azure",
-      "Google Cloud",
+      "Amazon",
+      "Microsoft",
+      "Google",
       "Cisco",
       "Oracle",
-      "Red Hat",
-      "Datadog",
-      "Snowflake",
-      "Akamai",
+      "Atlassian",
+      "Salesforce",
+      "Netflix",
     ],
     hiringBars: [
       "1 Linux Systems, Bash Scripting, and Networking Fundamentals Round",
@@ -502,51 +501,50 @@ export const CANONICAL_ROLES_BENCHMARK = [
       academics: 70,
     },
     idealCoursework: [
-      "Cloud Computing & Virtualization",
-      "Operating Systems & Linux Shell Programming",
-      "Computer Networks & Network Security",
-      "Distributed Computing Systems",
+      "Computer Networks & Distributed Cloud Systems",
+      "Operating Systems & Linux Architecture",
+      "System Administration & Cloud Computing",
+      "Information Security & Cryptography",
     ],
     idealProjectSignatures: [
       "devops",
       "docker",
       "kubernetes",
-      "k8s",
       "terraform",
       "ci-cd",
-      "github-actions",
       "aws",
-      "infrastructure",
-      "monitoring",
-      "helm",
+      "cloud",
+      "prometheus",
+      "grafana",
+      "microservices",
     ],
   },
   {
     id: "data-engineer",
     title: "Data Engineer & Analytics",
-    shortTitle: "Data Engineer",
-    category: "Big Data & Pipelines",
+    shortTitle: "Data Eng",
+    category: "Big Data & Distributed Pipelines",
     summary:
-      "Constructing resilient batch and streaming data pipelines, distributed data warehouses, transformation workflows (dbt/Spark), and analytics backends for data-driven enterprises.",
-    badge: "📈 Data & AI Enabler",
+      "Architecting distributed big data streaming architectures, ETL/ELT pipelines, real-time analytics data warehouses, and multi-terabyte data lakes.",
+    badge: "📊 Data Warehouses & Lakehouses",
     colorTheme: {
-      accent: "#FBBF24",
-      bgSubtle: "rgba(251, 191, 36, 0.08)",
-      border: "rgba(251, 191, 36, 0.25)",
-      textAccent: "#FBBF24",
+      accent: "#A78BFA",
+      bgSubtle: "rgba(167, 139, 250, 0.08)",
+      border: "rgba(167, 139, 250, 0.25)",
+      textAccent: "#A78BFA",
     },
     keyResponsibilities: [
-      "Design robust ETL/ELT data pipelines ingesting terabytes from heterogeneous sources.",
-      "Build and optimize distributed data pipelines using Apache Spark, PySpark, and Kafka.",
-      "Architect analytical data warehouses (Snowflake, BigQuery, ClickHouse) with optimal partitioning.",
-      "Orchestrate complex DAG workflows and data dependencies using Apache Airflow.",
-      "Enforce data quality, schema evolution, lineage tracking, and governance standards.",
+      "Design, build, and optimize scalable data pipelines using Apache Spark, Kafka, and Airflow.",
+      "Model dimensional data warehouses and lakehouses (Snowflake, BigQuery, Databricks).",
+      "Ensure data quality, lineage, governance, and schema evolution across multi-terabyte datasets.",
+      "Write complex, highly-optimized SQL analytical queries and window transformations.",
+      "Implement real-time streaming ingestion pipelines with Kafka and Flink.",
     ],
     industryDemand: {
       level: "High",
-      sharePercentage: 26,
-      statusLabel: "Fundamental Backbone for Enterprise AI & Business Intel",
-      trend: "Rapid expansion driven by Databricks, Snowflake, and streaming architectures.",
+      sharePercentage: 8,
+      statusLabel: "Fundamental for AI & Analytics-Driven Enterprises",
+      trend: "Rising demand for PySpark, dbt, Snowflake, and streaming Kafka pipelines.",
     },
     avgCompensation: {
       inrRange: "₹12 - ₹36 LPA",
@@ -559,11 +557,11 @@ export const CANONICAL_ROLES_BENCHMARK = [
       "Netflix",
       "Uber",
       "Amazon",
-      "Walmart Global Tech",
-      "JPMorgan Chase",
-      "Target",
-      "Fractal",
-      "American Express",
+      "Goldman Sachs",
+      "Google",
+      "Meta",
+      "Microsoft",
+      "Flipkart",
     ],
     hiringBars: [
       "1 Advanced SQL & Data Modeling (Window Functions, CTEs, Joins, Indexing)",
@@ -639,7 +637,7 @@ export const CANONICAL_ROLES_BENCHMARK = [
     ],
     industryDemand: {
       level: "Explosive Surge",
-      sharePercentage: 32,
+      sharePercentage: 5,
       statusLabel: "Highest Growth Domain Across Global Tech",
       trend: "Enormous demand for LLM application engineering, PyTorch, and AI Agent workflows.",
     },
@@ -651,15 +649,13 @@ export const CANONICAL_ROLES_BENCHMARK = [
       medianLpa: 28,
     },
     topHiringCompanies: [
-      "OpenAI",
-      "Microsoft AI",
-      "Google DeepMind",
-      "Meta AI",
-      "Nvidia",
+      "Google",
+      "Microsoft",
+      "Meta",
+      "NVIDIA",
       "Adobe",
-      "Fractal",
-      "Cohere",
-      "Amazon AWS AI",
+      "Amazon",
+      "Apple",
     ],
     hiringBars: [
       "1 Python & Algorithmic Problem Solving (Matrix Math, Recursion, Trees)",
@@ -738,7 +734,7 @@ export const CANONICAL_ROLES_BENCHMARK = [
     ],
     industryDemand: {
       level: "Steady & High",
-      sharePercentage: 20,
+      sharePercentage: 3,
       statusLabel: "Essential for Consumer & FinTech Product Companies",
       trend: "Strong demand for React Native + TypeScript and Kotlin multiplatform skills.",
     },
@@ -753,12 +749,11 @@ export const CANONICAL_ROLES_BENCHMARK = [
       "Uber",
       "Swiggy",
       "Zomato",
-      "PhonePe",
-      "Paytm",
-      "Spotify",
       "Flipkart",
-      "Duolingo",
-      "CRED",
+      "Apple",
+      "Meta",
+      "Amazon",
+      "Google",
     ],
     hiringBars: [
       "1 Problem Solving & DSA (Data Structures, Strings, Arrays, Recursion)",
@@ -831,7 +826,7 @@ export const CANONICAL_ROLES_BENCHMARK = [
     ],
     industryDemand: {
       level: "Critical Priority",
-      sharePercentage: 22,
+      sharePercentage: 2,
       statusLabel: "Ever-Expanding Demand Across Cloud, FinTech, & Defense",
       trend: "Massive demand for Cloud Security Posture (CSPM), DevSecOps, and Zero Trust.",
     },
@@ -843,13 +838,14 @@ export const CANONICAL_ROLES_BENCHMARK = [
       medianLpa: 23,
     },
     topHiringCompanies: [
-      "Palo Alto Networks",
-      "CrowdStrike",
       "Cisco",
-      "Cloudflare",
-      "Microsoft Security",
+      "Google",
+      "Microsoft",
       "Goldman Sachs",
-      "FireEye",
+      "Amazon",
+      "Oracle",
+      "CrowdStrike",
+      "Cloudflare",
       "Qualys",
     ],
     hiringBars: [
@@ -1016,7 +1012,7 @@ export function evaluateRoleFit({
     repoCount: Number(l.repoCount) || 1,
   }));
   const originalReposCount = Number(githubProfile?.originalReposCount ?? githubRepos.length ?? 0);
-  const githubProjectScore = Number(githubProfile?.projectScore ?? 72);
+  const githubProjectScore = hasGitHub ? Number(githubProfile?.projectScore ?? (originalReposCount > 0 ? Math.min(95, originalReposCount * 15 + 30) : 0)) : 0;
   const deployedRepos = githubRepos.filter(
     (r) => r.isDeployed || Boolean(r.liveUrl) || Boolean(r.homepage)
   );
@@ -1025,15 +1021,14 @@ export function evaluateRoleFit({
   const hasLeetCode = Boolean(leetcodeProfile && (leetcodeProfile.username || leetcodeProfile.connected));
   const leetcodeSolved = Number(
     leetcodeProfile?.totalSolved ??
-      (readinessData?.dimensions?.dsa?.score ? Math.round(readinessData.dimensions.dsa.score * 1.8) : 55)
+      (readinessData?.dimensions?.dsa?.score ? Math.round(readinessData.dimensions.dsa.score * 1.8) : 0)
   );
-  const leetcodeMediumSolved = Number(leetcodeProfile?.mediumSolved ?? Math.round(leetcodeSolved * 0.45));
-  const leetcodeHardSolved = Number(leetcodeProfile?.hardSolved ?? Math.round(leetcodeSolved * 0.08));
+  const leetcodeMediumSolved = Number(leetcodeProfile?.mediumSolved ?? (leetcodeSolved > 0 ? Math.round(leetcodeSolved * 0.45) : 0));
+  const leetcodeHardSolved = Number(leetcodeProfile?.hardSolved ?? (leetcodeSolved > 0 ? Math.round(leetcodeSolved * 0.08) : 0));
 
   // Resume ATS signals
-  const resumeAtsScore = Number(
-    userProfile?.resumeScore ?? readinessData?.dimensions?.resume?.score ?? 75
-  );
+  const rawResumeScore = userProfile?.resumeScore ?? readinessData?.dimensions?.resume?.score ?? null;
+  const resumeAtsScore = rawResumeScore !== null ? Number(rawResumeScore) : 0;
   const resumeText = (userProfile?.resumeText || "").toLowerCase();
 
   // Academics signals
@@ -1114,19 +1109,22 @@ export function evaluateRoleFit({
       }
     });
 
-    const skillsCoveragePct = totalCorePoints > 0 ? (matchedCorePoints / totalCorePoints) * 100 : 70;
-    const skillsScore = Math.min(
-      100,
-      Math.round(skillsCoveragePct * 0.85 + Math.min(15, preferredMatchedCount * 4))
-    );
+    let skillsScore = 0;
+    if (candidateSkills.length > 0 || githubLanguages.length > 0 || resumeText.length > 0) {
+      const skillsCoveragePct = totalCorePoints > 0 ? (matchedCorePoints / totalCorePoints) * 100 : 0;
+      skillsScore = Math.min(
+        100,
+        Math.round(skillsCoveragePct * 0.85 + Math.min(15, preferredMatchedCount * 4))
+      );
+    }
 
     // -------------------------------------------------------------
     // 2. GITHUB & PROJECT EVIDENCE ALIGNMENT (24% WEIGHT)
     // -------------------------------------------------------------
-    let githubMatchScore = 60;
+    let githubMatchScore = 0;
     let matchingReposCount = 0;
 
-    if (hasGitHub && githubRepos.length > 0) {
+    if (hasGitHub && (githubRepos.length > 0 || originalReposCount > 0)) {
       githubRepos.forEach((repo) => {
         const textToSearch = `${repo.name || ""} ${repo.description || ""} ${(repo.topics || []).join(" ")} ${
           repo.language || ""
@@ -1155,21 +1153,31 @@ export function evaluateRoleFit({
       const projectBase = githubProjectScore;
       githubMatchScore = Math.min(100, Math.round(projectBase * 0.5 + repoRatio * 40 + (deployedRepos.length > 0 ? 10 : 0)));
     } else {
-      // Default baseline when no GitHub connected
-      githubMatchScore = 65;
+      githubMatchScore = 0;
     }
 
     // -------------------------------------------------------------
     // 3. LEETCODE & PROBLEM SOLVING ALIGNMENT (20% WEIGHT)
     // -------------------------------------------------------------
     const dsaTarget = role.targetDsaSolvedCount;
-    const dsaSolvedRatio = Math.min(1.2, leetcodeSolved / dsaTarget);
-    let dsaScore = Math.min(100, Math.round(dsaSolvedRatio * 85 + (leetcodeMediumSolved > 25 ? 10 : 0) + (leetcodeHardSolved > 5 ? 5 : 0)));
+    let dsaScore = 0;
 
-    if (leetcodeSolved >= dsaTarget * 0.8) {
-      strongMatchingEvidence.push(
-        `${leetcodeSolved} LeetCode problems solved (${leetcodeMediumSolved} Mediums)`
-      );
+    if (leetcodeSolved > 0) {
+      const dsaSolvedRatio = Math.min(1.2, leetcodeSolved / dsaTarget);
+      dsaScore = Math.min(100, Math.round(dsaSolvedRatio * 85 + (leetcodeMediumSolved > 25 ? 10 : 0) + (leetcodeHardSolved > 5 ? 5 : 0)));
+
+      if (leetcodeSolved >= dsaTarget * 0.8) {
+        strongMatchingEvidence.push(
+          `${leetcodeSolved} LeetCode problems solved (${leetcodeMediumSolved} Mediums)`
+        );
+      } else {
+        missingSkills.push({
+          skill: `DSA Bar (${dsaTarget}+ Solved Target)`,
+          category: "Problem Solving",
+          priority: role.id === "sde-core" || role.id === "backend-developer" ? "High" : "Medium",
+          fixLink: "/app/dsa",
+        });
+      }
     } else {
       missingSkills.push({
         skill: `DSA Bar (${dsaTarget}+ Solved Target)`,
@@ -1182,27 +1190,30 @@ export function evaluateRoleFit({
     // -------------------------------------------------------------
     // 4. RESUME ATS & DOMAIN KEYWORDS (16% WEIGHT)
     // -------------------------------------------------------------
-    let resumeScore = resumeAtsScore;
+    let resumeScore = 0;
     let resumeMatchedKeywordsCount = 0;
 
-    role.coreRequiredSkills.forEach((s) => {
-      const tokens = getSkillTokens(s.name);
-      if (resumeText.length > 0 && tokens.some((token) => matchTextToken(resumeText, token))) {
-        resumeMatchedKeywordsCount += 1;
-      }
-    });
+    if (resumeAtsScore > 0 || resumeText.length > 0) {
+      resumeScore = resumeAtsScore;
+      role.coreRequiredSkills.forEach((s) => {
+        const tokens = getSkillTokens(s.name);
+        if (resumeText.length > 0 && tokens.some((token) => matchTextToken(resumeText, token))) {
+          resumeMatchedKeywordsCount += 1;
+        }
+      });
 
-    if (resumeMatchedKeywordsCount >= 3) {
-      strongMatchingEvidence.push(
-        `${resumeMatchedKeywordsCount} core keywords validated in ATS Resume`
-      );
-      resumeScore = Math.min(100, resumeScore + 6);
+      if (resumeMatchedKeywordsCount >= 3) {
+        strongMatchingEvidence.push(
+          `${resumeMatchedKeywordsCount} core keywords validated in ATS Resume`
+        );
+        resumeScore = Math.min(100, resumeScore + 6);
+      }
     }
 
     // -------------------------------------------------------------
     // 5. ACADEMIC COURSEWORK & DOMAIN SPECIALIZATION (12% WEIGHT)
     // -------------------------------------------------------------
-    let academicScore = 75;
+    let academicScore = 0;
     let matchingCourseCount = 0;
 
     role.idealCoursework.forEach((course) => {
@@ -1217,13 +1228,17 @@ export function evaluateRoleFit({
       strongMatchingEvidence.push(
         `Curriculum includes: ${role.idealCoursework.slice(0, 2).join(", ")}`
       );
-      academicScore = Math.min(100, 80 + matchingCourseCount * 6);
+      academicScore = Math.min(100, 60 + matchingCourseCount * 10 + (currentCgpa ? Math.round((currentCgpa / 10) * 20) : 0));
+    } else if (degree || branch || currentCgpa !== null) {
+      academicScore = currentCgpa ? Math.round((currentCgpa / 10) * 70) : 50;
+    } else {
+      academicScore = 0;
     }
 
     // -------------------------------------------------------------
     // COMPOSITE MATCH PERCENTAGE (0 - 100%)
     // -------------------------------------------------------------
-    let rawCompositeScore = Math.round(
+    const rawCompositeScore = Math.round(
       skillsScore * 0.28 +
         githubMatchScore * 0.24 +
         dsaScore * 0.20 +
@@ -1231,27 +1246,25 @@ export function evaluateRoleFit({
         academicScore * 0.12
     );
 
-    // If user has low data, calibrate score realistically
-    if (hasLowData) {
-      rawCompositeScore = Math.min(68, Math.max(45, rawCompositeScore));
-    }
-
-    const matchScore = Math.min(99, Math.max(35, rawCompositeScore));
+    const matchScore = Math.min(100, Math.max(0, rawCompositeScore));
 
     // Match Grade badge
-    let matchGrade = "Moderate Fit";
-    let matchGradeColor = "amber";
+    let matchGrade = "Unassessed";
+    let matchGradeColor = "zinc";
     if (matchScore >= 85) {
       matchGrade = "Exceptional Fit";
       matchGradeColor = "emerald";
-    } else if (matchScore >= 72) {
+    } else if (matchScore >= 70) {
       matchGrade = "Strong Match";
       matchGradeColor = "lime";
-    } else if (matchScore >= 55) {
+    } else if (matchScore >= 50) {
       matchGrade = "Moderate Fit";
       matchGradeColor = "amber";
-    } else {
+    } else if (matchScore > 0) {
       matchGrade = "Growth Area";
+      matchGradeColor = "zinc";
+    } else {
+      matchGrade = "Unassessed";
       matchGradeColor = "zinc";
     }
 

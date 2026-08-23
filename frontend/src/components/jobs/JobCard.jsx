@@ -16,6 +16,52 @@ import {
 } from "lucide-react";
 import GpBadge from "@/components/gp/GpBadge";
 
+export function formatJobSalary(job = {}) {
+  if (
+    job.salary &&
+    typeof job.salary === "string" &&
+    (job.salary.includes("₹") ||
+      job.salary.includes("$") ||
+      job.salary.includes("LPA") ||
+      job.salary.includes("Competitive"))
+  ) {
+    return job.salary;
+  }
+  const min = job.minSalary ?? job.job_min_salary ?? job.salaryMin;
+  const max = job.maxSalary ?? job.job_max_salary ?? job.salaryMax;
+  const currency = job.salaryCurrency || job.job_salary_currency || "INR";
+  const currencySymbol = currency === "USD" ? "$" : "₹";
+  const period = job.salaryPeriod || job.job_salary_period || "year";
+  const periodSuffix = period.toLowerCase().includes("hour")
+    ? "/ hr"
+    : period.toLowerCase().includes("month")
+    ? "/ mo"
+    : "/ year";
+
+  if (min != null && max != null) {
+    const minNum = Number(min);
+    const maxNum = Number(max);
+    if (!isNaN(minNum) && !isNaN(maxNum)) {
+      if (minNum >= 100000 && currency === "INR") {
+        const minL = (minNum / 100000).toFixed(minNum % 100000 === 0 ? 0 : 1);
+        const maxL = (maxNum / 100000).toFixed(maxNum % 100000 === 0 ? 0 : 1);
+        return `₹${minL}L - ₹${maxL}L / yr`;
+      }
+      return `${currencySymbol}${minNum.toLocaleString()} - ${currencySymbol}${maxNum.toLocaleString()} ${periodSuffix}`;
+    }
+  } else if (min != null || max != null) {
+    const valNum = Number(min != null ? min : max);
+    if (!isNaN(valNum)) {
+      if (valNum >= 100000 && currency === "INR") {
+        const valL = (valNum / 100000).toFixed(valNum % 100000 === 0 ? 0 : 1);
+        return `₹${valL}L+ / yr`;
+      }
+      return `${currencySymbol}${valNum.toLocaleString()} ${periodSuffix}`;
+    }
+  }
+  return job.salary || "Competitive CTC";
+}
+
 export default function JobCard({
   job = {},
   onSelect,
@@ -23,15 +69,20 @@ export default function JobCard({
   onLearnSkill,
   viewMode = "grid",
 }) {
+  const [hasImgError, setHasImgError] = React.useState(false);
   const employerName = job.company || job.employer_name || "Technology Company";
   const title = job.title || job.job_title || "Software Engineer";
   const companyLogo = job.companyLogo || job.employer_logo || "";
-  const initial = employerName.charAt(0).toUpperCase();
+  const initial = (employerName.charAt(0) || "C").toUpperCase();
   const city = job.city || job.job_city || job.location || "Bengaluru";
   const isRemote =
     job.workMode === "Remote" ||
     job.job_is_remote === true ||
     (city || "").toLowerCase().includes("remote");
+
+  React.useEffect(() => {
+    setHasImgError(false);
+  }, [companyLogo]);
 
   const postedDate =
     job.postedDate || job.job_posted_at_datetime_utc
@@ -48,11 +99,7 @@ export default function JobCard({
     ? rawSkills.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
 
-  const salary =
-    job.salary ||
-    (job.minSalary && job.maxSalary
-      ? `₹${Number(job.minSalary).toLocaleString()} - ₹${Number(job.maxSalary).toLocaleString()}`
-      : "Competitive CTC");
+  const salary = formatJobSalary(job);
 
   const employmentType = job.employmentType || job.job_employment_type || "Full-time";
   const matchScore = job.matchScore != null ? job.matchScore : null;
@@ -72,18 +119,16 @@ export default function JobCard({
         className="group relative rounded-2xl bg-white border border-[#E2DEEC] hover:border-[#C8C3D8] shadow-sm hover:shadow-md hover:-translate-y-0.5 p-4 transition-all cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
       >
         <div className="flex items-start gap-3.5 flex-1 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-[#F8F8F5] border border-[#E2DEEC] flex items-center justify-center font-bold text-sm text-[#17103D] shrink-0">
-            {companyLogo ? (
+          <div className="w-10 h-10 rounded-xl bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center font-heading font-black text-sm text-[#0D0431] shrink-0 overflow-hidden">
+            {!hasImgError && companyLogo ? (
               <img
                 src={companyLogo}
                 alt={employerName}
-                className="w-full h-full object-contain p-1 rounded-xl"
-                onError={(e) => {
-                  e.target.style.display = "none";
-                }}
+                className="w-full h-full object-contain p-1 rounded-xl bg-white"
+                onError={() => setHasImgError(true)}
               />
             ) : (
-              <span>{initial}</span>
+              <span className="font-heading font-black text-base text-[#0D0431]">{initial}</span>
             )}
           </div>
 
@@ -144,18 +189,16 @@ export default function JobCard({
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#F8F8F5] border border-[#E2DEEC] flex items-center justify-center font-bold text-sm text-[#17103D] shrink-0">
-              {companyLogo ? (
+            <div className="w-10 h-10 rounded-xl bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center font-heading font-black text-sm text-[#0D0431] shrink-0 overflow-hidden">
+              {!hasImgError && companyLogo ? (
                 <img
                   src={companyLogo}
                   alt={employerName}
-                  className="w-full h-full object-contain p-1 rounded-xl"
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                  }}
+                  className="w-full h-full object-contain p-1 rounded-xl bg-white"
+                  onError={() => setHasImgError(true)}
                 />
               ) : (
-                <span>{initial}</span>
+                <span className="font-heading font-black text-base text-[#0D0431]">{initial}</span>
               )}
             </div>
 

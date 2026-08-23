@@ -45,16 +45,26 @@ export default function SheetViewer({ sheetId, onBack }) {
   const [activeArticleSlug, setActiveArticleSlug] = useState(null);
   const [videoModal, setVideoModal] = useState({ isOpen: false, url: "", title: "" });
 
-  // Solved state tracking
+  // Solved and bookmark state tracking
   const [solvedMap, setSolvedMap] = useState(() => sheetsService.getSolvedMap());
+  const [bookmarksMap, setBookmarksMap] = useState(() => sheetsService.getBookmarks());
 
-  // Listen for progress updates
+  // Listen for progress & bookmark updates and sync from cloud
   useEffect(() => {
+    sheetsService.fetchProgressFromCloud();
+
     const handleProgressUpdate = (e) => {
       setSolvedMap(e.detail || sheetsService.getSolvedMap());
     };
+    const handleBookmarksUpdate = (e) => {
+      setBookmarksMap(e.detail || sheetsService.getBookmarks());
+    };
     window.addEventListener("getplaced_sheet_progress_updated", handleProgressUpdate);
-    return () => window.removeEventListener("getplaced_sheet_progress_updated", handleProgressUpdate);
+    window.addEventListener("getplaced_sheet_bookmarks_updated", handleBookmarksUpdate);
+    return () => {
+      window.removeEventListener("getplaced_sheet_progress_updated", handleProgressUpdate);
+      window.removeEventListener("getplaced_sheet_bookmarks_updated", handleBookmarksUpdate);
+    };
   }, []);
 
   // Fetch sheet details
@@ -107,6 +117,15 @@ export default function SheetViewer({ sheetId, onBack }) {
     setSolvedMap(sheetsService.getSolvedMap());
   };
 
+  const handleToggleBookmark = (problem) => {
+    const key = problem.problem_name || problem.problem_id;
+    sheetsService.toggleBookmark(key, {
+      ...problem,
+      sheet_id: sheetId,
+    });
+    setBookmarksMap(sheetsService.getBookmarks());
+  };
+
   // Calculate solved counts for this sheet
   const { totalInSheet, solvedInSheet, solvedPct } = useMemo(() => {
     if (!sheet || !sheet.sections) return { totalInSheet: 0, solvedInSheet: 0, solvedPct: 0 };
@@ -147,12 +166,14 @@ export default function SheetViewer({ sheetId, onBack }) {
               const matchedProbs = (sub.problems || []).filter((p) => {
                 const key = p.problem_name || p.problem_id;
                 const isSolved = !!solvedMap[key];
+                const isBookmarked = !!bookmarksMap[key];
 
                 if (q && !p.problem_name.toLowerCase().includes(q)) return false;
                 if (difficultyFilter !== "all" && p.difficulty?.toLowerCase() !== difficultyFilter.toLowerCase())
                   return false;
                 if (statusFilter === "solved" && !isSolved) return false;
                 if (statusFilter === "unsolved" && isSolved) return false;
+                if (statusFilter === "bookmarked" && !isBookmarked) return false;
                 if (onlyRunnable && !p.is_ide_runnable) return false;
 
                 return true;
@@ -174,12 +195,14 @@ export default function SheetViewer({ sheetId, onBack }) {
           const matchedProbs = (sec.problems || []).filter((p) => {
             const key = p.problem_name || p.problem_id;
             const isSolved = !!solvedMap[key];
+            const isBookmarked = !!bookmarksMap[key];
 
             if (q && !p.problem_name.toLowerCase().includes(q)) return false;
             if (difficultyFilter !== "all" && p.difficulty?.toLowerCase() !== difficultyFilter.toLowerCase())
               return false;
             if (statusFilter === "solved" && !isSolved) return false;
             if (statusFilter === "unsolved" && isSolved) return false;
+            if (statusFilter === "bookmarked" && !isBookmarked) return false;
             if (onlyRunnable && !p.is_ide_runnable) return false;
 
             return true;
@@ -194,7 +217,7 @@ export default function SheetViewer({ sheetId, onBack }) {
         return sec;
       })
       .filter((sec) => sec.visibleCount > 0);
-  }, [sheet, searchQuery, difficultyFilter, statusFilter, onlyRunnable, solvedMap]);
+  }, [sheet, searchQuery, difficultyFilter, statusFilter, onlyRunnable, solvedMap, bookmarksMap]);
 
   if (loading) {
     return (
@@ -348,6 +371,7 @@ export default function SheetViewer({ sheetId, onBack }) {
             <option value="all">All Status</option>
             <option value="solved">Solved Only</option>
             <option value="unsolved">Unsolved Only</option>
+            <option value="bookmarked">Bookmarked Only</option>
           </select>
 
           {/* Only Runnable toggle */}
@@ -434,10 +458,12 @@ export default function SheetViewer({ sheetId, onBack }) {
                                 key={prob.problem_id || prob.problem_name}
                                 problem={prob}
                                 isSolved={!!solvedMap[prob.problem_name || prob.problem_id]}
+                                isBookmarked={!!bookmarksMap[prob.problem_name || prob.problem_id]}
                                 onToggleSolved={() => handleToggleSolved(prob)}
+                                onToggleBookmark={() => handleToggleBookmark(prob)}
                                 onOpenArticle={() => setActiveArticleSlug(prob.article_slug || prob.problem_name)}
                                 onOpenVideo={(url) =>
-                                  setVideoModal({ isOpen: true, url, title: prob.problem_name })
+                                   setVideoModal({ isOpen: true, url, title: prob.problem_name })
                                 }
                               />
                             ))}
@@ -452,7 +478,9 @@ export default function SheetViewer({ sheetId, onBack }) {
                             key={prob.problem_id || prob.problem_name}
                             problem={prob}
                             isSolved={!!solvedMap[prob.problem_name || prob.problem_id]}
+                            isBookmarked={!!bookmarksMap[prob.problem_name || prob.problem_id]}
                             onToggleSolved={() => handleToggleSolved(prob)}
+                            onToggleBookmark={() => handleToggleBookmark(prob)}
                             onOpenArticle={() => setActiveArticleSlug(prob.article_slug || prob.problem_name)}
                             onOpenVideo={(url) =>
                               setVideoModal({ isOpen: true, url, title: prob.problem_name })
@@ -494,7 +522,15 @@ export default function SheetViewer({ sheetId, onBack }) {
 }
 
 // Single Problem Row Component
-function ProblemRowItem({ problem, isSolved, onToggleSolved, onOpenArticle, onOpenVideo }) {
+function ProblemRowItem({
+  problem,
+  isSolved,
+  isBookmarked,
+  onToggleSolved,
+  onToggleBookmark,
+  onOpenArticle,
+  onOpenVideo,
+}) {
   const diffLower = (problem.difficulty || "").toLowerCase();
   const diffBadgeStyle =
     diffLower === "easy"
@@ -543,6 +579,20 @@ function ProblemRowItem({ problem, isSolved, onToggleSolved, onOpenArticle, onOp
 
       {/* Right: Actions */}
       <div className="flex items-center gap-2 self-end sm:self-auto shrink-0 flex-wrap">
+        {/* Bookmark Toggle Button */}
+        <button
+          type="button"
+          onClick={onToggleBookmark}
+          className={`inline-flex items-center gap-1 p-2 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer ${
+            isBookmarked
+              ? "bg-[#FEDF6A] text-[#0D0431]"
+              : "bg-white text-[#0D0431]/40 hover:text-[#0D0431] hover:bg-[#FEF9CF]"
+          }`}
+          title={isBookmarked ? "Remove bookmark" : "Bookmark problem"}
+        >
+          <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? "fill-current text-[#0D0431]" : ""}`} />
+        </button>
+
         {/* Article Tutorial Reader Button */}
         {problem.has_article && (
           <button

@@ -244,21 +244,19 @@ export const queryJobs = async (queryParams, user = null, userReadiness = null) 
   // Ensure seed data exists
   await seedJobsIfNeeded();
 
-  const {
-    search = "",
-    role = "ALL",
-    location = "ALL",
-    workMode = "ALL",
-    experience = "ALL",
-    employmentType = "ALL",
-    skills,
-    skill,
-    minSalary = 0,
-    sort = "recommended",
-    category = "all",
-    page = 1,
-    limit = 50,
-  } = queryParams;
+  const search = queryParams.search || queryParams.query || queryParams.q || "";
+  const role = queryParams.role || queryParams.roleCategory || "ALL";
+  const location = queryParams.location || queryParams.city || "ALL";
+  const workMode = queryParams.workMode || queryParams.work_mode || "ALL";
+  const experience = queryParams.experience || queryParams.experience_level || queryParams.experienceLevel || "ALL";
+  const employmentType = queryParams.employmentType || queryParams.employment_type || queryParams.employment_types || "ALL";
+  const skills = queryParams.skills;
+  const skill = queryParams.skill;
+  const minSalary = queryParams.minSalary ?? queryParams.min_salary ?? 0;
+  const sort = queryParams.sort || "recommended";
+  const category = queryParams.category || "all";
+  const page = Number(queryParams.page) || 1;
+  const limit = Number(queryParams.limit) || 50;
 
   const andClauses = [{ isExpired: false }];
 

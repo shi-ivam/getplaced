@@ -130,6 +130,19 @@ export default function ProgressTracker() {
   };
 
   const snapshots = progressData?.snapshots || [];
+  const filteredSnapshots = useMemo(() => {
+    if (!snapshots.length) return [];
+    if (timeRange === "all") return snapshots;
+    const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    const filtered = snapshots.filter((s) => {
+      if (!s.date) return false;
+      return new Date(s.date) >= cutoffDate;
+    });
+    return filtered.length > 0 ? filtered : snapshots.slice(-days);
+  }, [snapshots, timeRange]);
+
   const selectedDim = DIMENSIONS.find((d) => d.key === activeDimension) || DIMENSIONS[0];
 
   const trackerMentor = getProgressTrackerMentorCopy({
@@ -364,53 +377,65 @@ export default function ProgressTracker() {
 
           {/* Recharts Area Chart */}
           <div className="h-80 w-full pt-4 rounded-2xl bg-[#FEF9CF]/30 border-2 border-[#0D0431] p-4 shadow-[3px_3px_0_0_#0D0431]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={snapshots} margin={{ top: 10, right: 15, left: -15, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorActiveDim" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={selectedDim.color} stopOpacity={0.65} />
-                    <stop offset="95%" stopColor={selectedDim.color} stopOpacity={0.05} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#0D0431" opacity={0.15} />
-                <XAxis
-                  dataKey="date"
-                  stroke="#0D0431"
-                  fontSize={11}
-                  tickLine={false}
-                  fontFamily="monospace"
-                  fontWeight="bold"
-                />
-                <YAxis
-                  stroke="#0D0431"
-                  fontSize={11}
-                  domain={[30, 100]}
-                  tickLine={false}
-                  fontFamily="monospace"
-                  fontWeight="bold"
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#FFFFFF",
-                    borderColor: "#0D0431",
-                    borderWidth: "2px",
-                    borderRadius: "1rem",
-                    fontSize: "12px",
-                    color: "#0D0431",
-                    fontWeight: "bold",
-                    boxShadow: "4px 4px 0 0 #0D0431",
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey={activeDimension}
-                  stroke="#0D0431"
-                  strokeWidth={3}
-                  fillOpacity={1}
-                  fill="url(#colorActiveDim)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            {filteredSnapshots.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={filteredSnapshots} margin={{ top: 10, right: 15, left: -15, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorActiveDim" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={selectedDim.color} stopOpacity={0.65} />
+                      <stop offset="95%" stopColor={selectedDim.color} stopOpacity={0.05} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#0D0431" opacity={0.15} />
+                  <XAxis
+                    dataKey="date"
+                    stroke="#0D0431"
+                    fontSize={11}
+                    tickLine={false}
+                    fontFamily="monospace"
+                    fontWeight="bold"
+                  />
+                  <YAxis
+                    stroke="#0D0431"
+                    fontSize={11}
+                    domain={[0, 100]}
+                    tickLine={false}
+                    fontFamily="monospace"
+                    fontWeight="bold"
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#FFFFFF",
+                      borderColor: "#0D0431",
+                      borderWidth: "2px",
+                      borderRadius: "1rem",
+                      fontSize: "12px",
+                      color: "#0D0431",
+                      fontWeight: "bold",
+                      boxShadow: "4px 4px 0 0 #0D0431",
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey={activeDimension}
+                    stroke="#0D0431"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorActiveDim)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2">
+                <Activity className="w-8 h-8 text-[#0D0431]/40" />
+                <p className="text-sm font-heading font-black text-[#0D0431]">
+                  No Trajectory Snapshots Recorded Yet
+                </p>
+                <p className="text-xs text-[#0D0431]/70 max-w-sm">
+                  Log your practice sessions or connect your LeetCode and GitHub profiles to generate historical progress velocity curves.
+                </p>
+              </div>
+            )}
           </div>
         </GpCard>
 

@@ -26,6 +26,8 @@ import {
 import GpBadge from "@/components/gp/GpBadge";
 import GpButton, { GpArrow } from "@/components/gp/GpButton";
 
+import { formatJobSalary } from "./JobCard";
+
 export default function JobDetailModal({
   job,
   onClose,
@@ -34,6 +36,7 @@ export default function JobDetailModal({
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("overview"); // "overview" | "match" | "preparation" | "company"
+  const [hasImgError, setHasImgError] = useState(false);
 
   // Keyboard accessibility: Close on Escape key
   useEffect(() => {
@@ -46,12 +49,16 @@ export default function JobDetailModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
+  useEffect(() => {
+    setHasImgError(false);
+  }, [job?.companyLogo, job?.employer_logo]);
+
   if (!job) return null;
 
   const employerName = job.company || job.employer_name || "Enterprise Technology";
   const title = job.title || job.job_title || "Software Engineer";
   const companyLogo = job.companyLogo || job.employer_logo || "";
-  const initial = employerName.charAt(0).toUpperCase();
+  const initial = (employerName.charAt(0) || "C").toUpperCase();
   const city = job.city || job.job_city || job.location || "Bengaluru";
   const isRemote =
     job.workMode === "Remote" ||
@@ -87,11 +94,7 @@ export default function JobDetailModal({
   const requirements =
     job.requirements || job.job_highlights?.Qualifications || [];
 
-  const salary =
-    job.salary ||
-    (job.minSalary && job.maxSalary
-      ? `₹${Number(job.minSalary).toLocaleString()} - ₹${Number(job.maxSalary).toLocaleString()}`
-      : "Competitive Market Standard");
+  const salary = formatJobSalary(job);
 
   const postedDate = job.postedDate || job.job_posted_at_datetime_utc
     ? new Date(job.postedDate || job.job_posted_at_datetime_utc).toLocaleDateString("en-US", {
@@ -153,18 +156,16 @@ export default function JobDetailModal({
         {/* Header Ribbon / Titlebar */}
         <div className="p-6 pb-4 border-b-2 border-[#0D0431] bg-[#FEF9CF] flex items-start justify-between gap-4">
           <div className="flex items-start gap-4 min-w-0">
-            <div className="w-14 h-14 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] flex items-center justify-center font-heading font-black text-xl text-[#0D0431] overflow-hidden shrink-0">
-              {companyLogo ? (
+            <div className="w-14 h-14 rounded-2xl bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] flex items-center justify-center font-heading font-black text-xl text-[#0D0431] overflow-hidden shrink-0">
+              {!hasImgError && companyLogo ? (
                 <img
                   src={companyLogo}
                   alt={employerName}
-                  className="w-full h-full object-contain p-2"
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                  }}
+                  className="w-full h-full object-contain p-2 bg-white"
+                  onError={() => setHasImgError(true)}
                 />
               ) : (
-                <span>{initial}</span>
+                <span className="font-heading font-black text-2xl text-[#0D0431]">{initial}</span>
               )}
             </div>
 

@@ -2,11 +2,12 @@ import mongoose from "mongoose";
 import Milestone from "../models/milestoneModel.js";
 import User from "../models/userModel.js";
 import Progress from "../models/progressModel.js";
+import LeetCodeProfile from "../models/leetcodeProfileModel.js";
 import { calculatePlacementReadiness } from "./readinessService.js";
 
 // Canonical Master Milestones Catalog
 export const MASTER_MILESTONES = [
-  // Tier Progression
+  // Tier Progression (Synchronized cutoffs: Silver 40%, Gold 60%, Platinum 75%, Diamond 90%)
   {
     id: "tier-bronze",
     title: "Bronze Explorer",
@@ -23,10 +24,10 @@ export const MASTER_MILESTONES = [
     title: "Silver Contender",
     category: "tier",
     tier: "Silver",
-    description: "Cross 50% placement readiness threshold across core dimensions.",
+    description: "Cross 40% placement readiness threshold across core dimensions.",
     icon: "Award",
     xp: 150,
-    requiredScore: 50,
+    requiredScore: 40,
     dimension: "overall",
   },
   {
@@ -34,10 +35,10 @@ export const MASTER_MILESTONES = [
     title: "Gold Candidate",
     category: "tier",
     tier: "Gold",
-    description: "Reach 70% placement readiness. Solid foundation for Tier-2 & Product roles.",
+    description: "Reach 60% placement readiness. Solid foundation for Tier-2 & Product roles.",
     icon: "Medal",
     xp: 300,
-    requiredScore: 70,
+    requiredScore: 60,
     dimension: "overall",
   },
   {
@@ -45,10 +46,10 @@ export const MASTER_MILESTONES = [
     title: "Platinum Elite",
     category: "tier",
     tier: "Platinum",
-    description: "Cross 85% placement readiness. Competitive for Google, Microsoft, Amazon.",
+    description: "Cross 75% placement readiness. Competitive for Google, Microsoft, Amazon.",
     icon: "Crown",
     xp: 600,
-    requiredScore: 85,
+    requiredScore: 75,
     dimension: "overall",
   },
   {
@@ -56,10 +57,10 @@ export const MASTER_MILESTONES = [
     title: "Diamond Placed",
     category: "tier",
     tier: "Diamond",
-    description: "Attain 92%+ top-percentile placement readiness mastery.",
+    description: "Attain 90%+ top-percentile placement readiness mastery.",
     icon: "Sparkles",
     xp: 1000,
-    requiredScore: 92,
+    requiredScore: 90,
     dimension: "overall",
   },
 
@@ -166,19 +167,39 @@ export const MASTER_MILESTONES = [
  * Get user milestones with live calculation of unlocked status and progress %.
  */
 export async function getUserMilestones(userId, user = null) {
-  let [milestoneDoc, progress] = await Promise.all([
-    Milestone.findOne({ userId }),
-    Progress.findOne({ userId }),
-  ]);
+  let milestoneDoc = null, progress = null, leetcodeProfile = null;
+  if (mongoose.connection?.readyState === 1 && mongoose.isValidObjectId(userId)) {
+    try {
+      [milestoneDoc, progress, leetcodeProfile] = await Promise.all([
+        Milestone.findOne({ userId }),
+        Progress.findOne({ userId }),
+        LeetCodeProfile.findOne({ userId }),
+      ]);
+    } catch (err) {
+      console.warn("Could not query models in getUserMilestones:", err.message);
+    }
+  }
 
-  if (!user && userId) {
-    user = await User.findById(userId);
+  if (!user && userId && mongoose.connection?.readyState === 1 && mongoose.isValidObjectId(userId)) {
+    try {
+      user = await User.findById(userId);
+    } catch (err) {
+      console.warn("Could not find user in getUserMilestones:", err.message);
+    }
   }
 
   const readiness = user ? await calculatePlacementReadiness(user) : null;
   const overallScore = readiness?.overallScore ?? 0;
-  const problemsSolved = progress?.totalProblemsSolved ?? 0;
-  const streak = progress?.dailyStreak ?? 0;
+  const leetcodeSolved = Number(leetcodeProfile?.totalSolved) || 0;
+  const progressSolved = Number(progress?.totalProblemsSolved) || 0;
+  const problemsSolved = Math.max(progressSolved, leetcodeSolved);
+  if (progress && progressSolved < problemsSolved) {
+    progress.totalProblemsSolved = problemsSolved;
+    await progress.save().catch(() => {});
+  }
+  const leetcodeStreak = Number(leetcodeProfile?.streak) || 0;
+  const progressStreak = Number(progress?.dailyStreak) || 0;
+  const streak = Math.max(progressStreak, leetcodeStreak);
   const cgpa = user?.cgpa ?? 0;
   const resumeScore = readiness?.dimensions?.resume?.score ?? 0;
 
@@ -237,15 +258,17 @@ export async function getUserMilestones(userId, user = null) {
     }
   }
 
-  // Determine current tier from overall score
+  // Determine current tier from overall score (Synchronized: Silver 40%, Gold 60%, Platinum 75%, Diamond 90%)
   let currentTier = "Bronze";
   if (overallScore >= 90) currentTier = "Diamond";
   else if (overallScore >= 75) currentTier = "Platinum";
   else if (overallScore >= 60) currentTier = "Gold";
   else if (overallScore >= 40) currentTier = "Silver";
 
+  const resolvedTotalXp = Math.max(totalXp, milestoneDoc?.totalXp || 0);
+
   return {
-    totalXp: milestoneDoc?.totalXp ?? totalXp ?? 0,
+    totalXp: resolvedTotalXp,
     currentTier,
     unlockedCount: unlocked.length,
     claimedCount: unlocked.filter((u) => u.isClaimed).length,
@@ -265,8 +288,15 @@ export async function claimMilestoneReward(userId, milestoneId) {
     User.findById(userId),
   ]);
 
+  const userMilestonesData = await getUserMilestones(userId, user);
+  const totalEarnedXp = userMilestonesData.totalXp;
+
   if (!milestoneDoc) {
-    milestoneDoc = await Milestone.create({ userId, claimedMilestoneIds: [], totalXp: 0 });
+    milestoneDoc = await Milestone.create({
+      userId,
+      claimedMilestoneIds: [],
+      totalXp: totalEarnedXp,
+    });
   }
 
   const milestone = MASTER_MILESTONES.find((m) => m.id === milestoneId);
@@ -274,7 +304,6 @@ export async function claimMilestoneReward(userId, milestoneId) {
     throw new Error("Milestone not found");
   }
 
-  const userMilestonesData = await getUserMilestones(userId, user);
   const targetMilestone =
     userMilestonesData.unlockedMilestones.find((m) => m.id === milestoneId) ||
     userMilestonesData.inProgressMilestones.find((m) => m.id === milestoneId);
@@ -289,12 +318,12 @@ export async function claimMilestoneReward(userId, milestoneId) {
       alreadyClaimed: true,
       milestoneId,
       xpGained: 0,
-      totalXp: milestoneDoc.totalXp || 0,
+      totalXp: Math.max(totalEarnedXp, milestoneDoc.totalXp || 0),
     };
   }
 
   milestoneDoc.claimedMilestoneIds.push(milestoneId);
-  milestoneDoc.totalXp = (milestoneDoc.totalXp || 0) + milestone.xp;
+  milestoneDoc.totalXp = Math.max(totalEarnedXp, (milestoneDoc.totalXp || 0) + milestone.xp);
   await milestoneDoc.save();
 
   return {
@@ -305,3 +334,11 @@ export async function claimMilestoneReward(userId, milestoneId) {
     totalXp: milestoneDoc.totalXp,
   };
 }
+
+/**
+ * Check and evaluate milestones progression for user (supporting connected LeetCode stats)
+ */
+export async function checkAndAwardMilestones(userId, user = null) {
+  return getUserMilestones(userId, user);
+}
+

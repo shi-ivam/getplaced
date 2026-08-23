@@ -23,12 +23,21 @@ import {
   CheckCircle2,
   Briefcase,
   Compass,
+  AlertTriangle,
+  RotateCcw,
+  GraduationCap,
 } from "lucide-react";
 import { PY_API_URL } from "@/config/api";
 import GpCard from "@/components/gp/GpCard";
 import GpBadge from "@/components/gp/GpBadge";
 import GpButton from "@/components/gp/GpButton";
 import GpToggle from "@/components/gp/GpToggle";
+import CompanyLogo from "@/components/common/CompanyLogo";
+import {
+  CURATED_COMPANIES,
+  normalizeCompanyName,
+  isSupportedCompany,
+} from "@/data/curatedCompanies";
 
 function FrequencyBadge({ value }) {
   const map = {
@@ -55,6 +64,7 @@ export default function CompanyIntelligence() {
   const [companyIntel, setCompanyIntel] = useState(null);
   const [featuredCompanies, setFeaturedCompanies] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
 
   const containerRef = useRef(null);
@@ -78,6 +88,7 @@ export default function CompanyIntelligence() {
   const fetchCompanyIntelligence = async (companyName) => {
     if (!companyName?.trim()) return;
     setLoading(true);
+    setError(null);
     try {
       const res = await axios.get(`${PY_API_URL}/api/company/intelligence`, {
         params: { company: companyName.trim() },
@@ -87,6 +98,13 @@ export default function CompanyIntelligence() {
       setSearchParams({ company: companyName.trim() }, { replace: true });
     } catch (e) {
       console.error("Failed to load company intelligence:", e);
+      setError(
+        e.response?.data?.detail ||
+        e.response?.data?.message ||
+        e.message ||
+        `Could not retrieve dossier for "${companyName}". Please verify the company name or check your network connection.`
+      );
+      setCompanyIntel(null);
     } finally {
       setLoading(false);
     }
@@ -143,7 +161,7 @@ export default function CompanyIntelligence() {
               variant="secondary"
               size="sm"
               icon={false}
-              onClick={() => navigate("/app/interview")}
+              onClick={() => navigate(`/app/interview?company=${encodeURIComponent(companyIntel?.name || searchQuery || "Google")}`)}
             >
               <span className="flex items-center gap-1.5 font-bold">
                 <Brain className="w-4 h-4" /> Mock Interview
@@ -231,38 +249,94 @@ export default function CompanyIntelligence() {
               </GpButton>
             </form>
 
-            {featuredCompanies.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t-2 border-[#0D0431]/20">
-                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431]/70 mr-1 flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-[#896EE2]" /> Curated:
-                </span>
-                {featuredCompanies.map((comp) => {
-                  const slug = comp.slug || comp.name?.toLowerCase().replace(/\s+/g, "");
-                  const isSelected =
-                    companyIntel?.slug === slug ||
-                    companyIntel?.name?.toLowerCase().includes(slug);
-                  return (
-                    <button
-                      key={slug}
-                      type="button"
-                      onClick={() => fetchCompanyIntelligence(comp.name)}
-                      className={`px-3.5 py-1 rounded-full text-xs font-bold font-sans transition-all border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] cursor-pointer ${
-                        isSelected
-                          ? "bg-[#0D0431] text-white"
-                          : "bg-white text-[#0D0431] hover:bg-[#FEDF6A] hover:-translate-y-0.5"
-                      }`}
-                    >
-                      {comp.name}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t-2 border-[#0D0431]/20">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#0D0431]/70 mr-1 flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-[#896EE2]" /> 20 Calibrated Companies:
+              </span>
+              {CURATED_COMPANIES.map((comp) => {
+                const isSelected =
+                  companyIntel?.slug === comp.slug ||
+                  companyIntel?.name?.toLowerCase() === comp.name.toLowerCase();
+                return (
+                  <button
+                    key={comp.id}
+                    type="button"
+                    onClick={() => fetchCompanyIntelligence(comp.name)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-sans transition-all border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] cursor-pointer ${
+                      isSelected
+                        ? "bg-[#0D0431] text-white"
+                        : "bg-white text-[#0D0431] hover:bg-[#FEDF6A] hover:-translate-y-0.5"
+                    }`}
+                  >
+                    <CompanyLogo company={comp.name} size="xs" bordered={false} className="bg-transparent" />
+                    <span>{comp.name}</span>
+                  </button>
+                );
+              })}
+            </div>
           </GpCard>
         </section>
 
+        {/* ── Error Banner State ── */}
+        {error && !loading && (
+          <GpCard
+            theme="white"
+            shadow="lg"
+            className="p-6 sm:p-8 space-y-4 border-2 border-[#0D0431] bg-[#FFC5B7]"
+          >
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center text-[#F85B52] shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-[#F85B52]" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-heading font-black text-base text-[#0D0431]">
+                    Company Intelligence Restricted to Curated Whitelist
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#0D0431]/80 font-medium leading-relaxed">
+                    {error}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                <GpButton
+                  variant="stacked-yellow"
+                  size="sm"
+                  icon={false}
+                  onClick={() => fetchCompanyIntelligence("Google")}
+                  className="w-full sm:w-auto"
+                >
+                  <span className="flex items-center justify-center gap-1.5 font-bold text-[#0D0431]">
+                    <RotateCcw className="w-3.5 h-3.5" /> Reset to Google
+                  </span>
+                </GpButton>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t-2 border-[#0D0431]/20 space-y-2">
+              <span className="font-mono font-bold text-xs text-[#0D0431]/80 block">
+                Select one of the 20 supported premier technology companies:
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                {CURATED_COMPANIES.map((comp) => (
+                  <button
+                    key={comp.id}
+                    type="button"
+                    onClick={() => fetchCompanyIntelligence(comp.name)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-[#FEDF6A] text-[#0D0431] text-xs font-bold border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] transition-all cursor-pointer"
+                  >
+                    <CompanyLogo company={comp.name} size="xs" bordered={false} className="bg-transparent" />
+                    <span>{comp.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </GpCard>
+        )}
+
         {/* ── Dossier Content ── */}
-        {companyIntel && (
+        {companyIntel && !loading && (
           <section ref={contentRef} className="space-y-6">
 
             {/* Company Banner Bento Card with Pastel Accents */}
@@ -274,10 +348,12 @@ export default function CompanyIntelligence() {
               {/* Identity Row */}
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 pb-6 border-b-2 border-[#0D0431]">
                 <div className="flex items-start sm:items-center gap-4 sm:gap-5">
-                  <div className="w-16 h-16 rounded-2xl bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] flex items-center justify-center font-heading font-black text-2xl text-[#0D0431] shrink-0">
-                    {companyIntel.name?.charAt(0) || "C"}
-                  </div>
-                  <div className="space-y-1.5">
+                  <CompanyLogo
+                    company={companyIntel.name}
+                    size="xl"
+                    className="w-16 h-16 text-2xl"
+                  />
+                  <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-3">
                       <h2 className="text-2xl sm:text-3xl font-heading font-black text-[#0D0431]">
                         {companyIntel.name}
@@ -285,6 +361,18 @@ export default function CompanyIntelligence() {
                       <GpBadge theme="light-purple">
                         {companyIntel.tier || "Tier-1 Tech"}
                       </GpBadge>
+                      {(companyIntel.avg_package_lpa || companyIntel.avgPackageLpa) && (
+                        <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-[#FEDF6A] border-2 border-[#0D0431] text-xs font-mono font-bold text-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                          <DollarSign className="w-3.5 h-3.5" />
+                          <span>Avg CTC: ₹{companyIntel.avg_package_lpa || companyIntel.avgPackageLpa} LPA</span>
+                        </span>
+                      )}
+                      {(companyIntel.min_cgpa || companyIntel.minCgpa) && (
+                        <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-[#D4FDF7] border-2 border-[#0D0431] text-xs font-mono font-bold text-[#0D0431] shadow-[2px_2px_0_0_#0D0431]">
+                          <GraduationCap className="w-3.5 h-3.5" />
+                          <span>Min CGPA: {companyIntel.min_cgpa || companyIntel.minCgpa}</span>
+                        </span>
+                      )}
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs font-mono font-semibold text-[#0D0431]/70">
                       <span>{companyIntel.industry}</span>
@@ -292,6 +380,12 @@ export default function CompanyIntelligence() {
                       <span>HQ: {companyIntel.headquarters || "Global"}</span>
                       <span>•</span>
                       <span>Founded {companyIntel.founded || "N/A"}</span>
+                      {companyIntel.ctc_range && (
+                        <>
+                          <span>•</span>
+                          <span className="text-[#0D0431] font-bold">CTC Range: {companyIntel.ctc_range}</span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -301,7 +395,7 @@ export default function CompanyIntelligence() {
                     variant="stacked-yellow"
                     size="sm"
                     icon={false}
-                    onClick={() => navigate("/app/interview")}
+                    onClick={() => navigate(`/app/interview?company=${encodeURIComponent(companyIntel.name || searchQuery)}`)}
                   >
                     <span className="flex items-center gap-1.5 font-bold text-[#0D0431]">
                       <Brain className="w-4 h-4" /> Start Mock Session
@@ -517,7 +611,7 @@ export default function CompanyIntelligence() {
                     </span>
                     <button
                       type="button"
-                      onClick={() => navigate("/app/interview")}
+                      onClick={() => navigate(`/app/interview?company=${encodeURIComponent(companyIntel.name || searchQuery)}`)}
                       className="text-xs font-bold text-[#0D0431] hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       <span>Practice Interview Simulation</span>
@@ -527,8 +621,20 @@ export default function CompanyIntelligence() {
                 </GpCard>
               )}
 
+              {(activeTab === "rounds" && (!companyIntel.interview_rounds || companyIntel.interview_rounds.length === 0)) && (
+                <GpCard
+                  theme="white"
+                  shadow="lg"
+                  className="bento-item md:col-span-12 p-8 text-center space-y-2 border-2 border-[#0D0431]"
+                >
+                  <Clock className="w-8 h-8 text-[#0D0431]/40 mx-auto" />
+                  <h4 className="font-heading font-black text-sm text-[#0D0431]">No specific interview rounds documented yet</h4>
+                  <p className="text-xs text-[#0D0431]/70 max-w-sm mx-auto">Interview stages for {companyIntel.name} will appear as verified data is calibrated.</p>
+                </GpCard>
+              )}
+
               {/* 2. BEHAVIORAL EVALUATION */}
-              {(activeTab === "all" || activeTab === "culture") && companyIntel.behavioral_questions && (
+              {(activeTab === "all" || activeTab === "culture") && companyIntel.behavioral_questions && companyIntel.behavioral_questions.length > 0 && (
                 <GpCard
                   theme="white"
                   shadow="lg"
@@ -585,7 +691,7 @@ export default function CompanyIntelligence() {
               )}
 
               {/* 3. DSA PATTERN MATRIX */}
-              {(activeTab === "all" || activeTab === "patterns") && companyIntel.dsa_patterns && (
+              {(activeTab === "all" || activeTab === "patterns") && companyIntel.dsa_patterns && companyIntel.dsa_patterns.length > 0 && (
                 <GpCard
                   theme="white"
                   shadow="lg"
@@ -627,7 +733,7 @@ export default function CompanyIntelligence() {
                             {pat.sample_problems.map((prob, pIdx) => (
                               <Link
                                 key={pIdx}
-                                to="/app/coding"
+                                to={`/app/coding?tab=practice&search=${encodeURIComponent(prob)}`}
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border-2 border-[#0D0431] text-xs font-mono font-bold text-[#0D0431] shadow-[2px_2px_0_0_#0D0431] hover:bg-[#FEDF6A] hover:-translate-y-0.5 transition-all"
                               >
                                 <span>{prob}</span>
@@ -642,8 +748,20 @@ export default function CompanyIntelligence() {
                 </GpCard>
               )}
 
+              {(activeTab === "patterns" && (!companyIntel.dsa_patterns || companyIntel.dsa_patterns.length === 0)) && (
+                <GpCard
+                  theme="white"
+                  shadow="lg"
+                  className="bento-item md:col-span-12 p-8 text-center space-y-2 border-2 border-[#0D0431]"
+                >
+                  <Code2 className="w-8 h-8 text-[#0D0431]/40 mx-auto" />
+                  <h4 className="font-heading font-black text-sm text-[#0D0431]">No DSA patterns indexed yet</h4>
+                  <p className="text-xs text-[#0D0431]/70 max-w-sm mx-auto">Specific algorithmic matrix for {companyIntel.name} is currently being mapped.</p>
+                </GpCard>
+              )}
+
               {/* 4. PRODUCTION TECH STACK */}
-              {(activeTab === "all" || activeTab === "stack") && companyIntel.tech_stack && (
+              {(activeTab === "all" || activeTab === "stack") && companyIntel.tech_stack && Object.keys(companyIntel.tech_stack).length > 0 && (
                 <GpCard
                   theme="white"
                   shadow="lg"
@@ -689,6 +807,18 @@ export default function CompanyIntelligence() {
                 </GpCard>
               )}
 
+              {(activeTab === "stack" && (!companyIntel.tech_stack || Object.keys(companyIntel.tech_stack).length === 0)) && (
+                <GpCard
+                  theme="white"
+                  shadow="lg"
+                  className="bento-item md:col-span-12 p-8 text-center space-y-2 border-2 border-[#0D0431]"
+                >
+                  <Cpu className="w-8 h-8 text-[#0D0431]/40 mx-auto" />
+                  <h4 className="font-heading font-black text-sm text-[#0D0431]">Tech stack under analysis</h4>
+                  <p className="text-xs text-[#0D0431]/70 max-w-sm mx-auto">Production frameworks and architectures for {companyIntel.name} are being indexed.</p>
+                </GpCard>
+              )}
+
               {/* 5. CORE VALUES & PREPARATION ROADMAP */}
               {(activeTab === "all" || activeTab === "culture") && (
                 <GpCard
@@ -729,19 +859,25 @@ export default function CompanyIntelligence() {
                         Evaluated Values & Principles
                       </span>
                       <div className="space-y-2.5">
-                        {companyIntel.core_values?.map((val, idx) => (
-                          <div
-                            key={idx}
-                            className="p-3.5 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] flex items-start gap-3"
-                          >
-                            <div className="w-6 h-6 rounded-full bg-[#FEDF6A] border-2 border-[#0D0431] flex items-center justify-center font-heading font-black text-xs text-[#0D0431] shrink-0 mt-0.5">
-                              {idx + 1}
+                        {companyIntel.core_values?.length > 0 ? (
+                          companyIntel.core_values.map((val, idx) => (
+                            <div
+                              key={idx}
+                              className="p-3.5 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] flex items-start gap-3"
+                            >
+                              <div className="w-6 h-6 rounded-full bg-[#FEDF6A] border-2 border-[#0D0431] flex items-center justify-center font-heading font-black text-xs text-[#0D0431] shrink-0 mt-0.5">
+                                {idx + 1}
+                              </div>
+                              <p className="text-xs font-semibold text-[#0D0431] leading-relaxed">
+                                {val}
+                              </p>
                             </div>
-                            <p className="text-xs font-semibold text-[#0D0431] leading-relaxed">
-                              {val}
-                            </p>
+                          ))
+                        ) : (
+                          <div className="p-4 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] text-xs text-[#0D0431]/70 font-medium">
+                            Core values and leadership principles being indexed.
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
 
@@ -751,19 +887,25 @@ export default function CompanyIntelligence() {
                         Actionable Preparation Milestones
                       </span>
                       <div className="space-y-2.5">
-                        {companyIntel.preparation_roadmap?.map((step, idx) => (
-                          <div
-                            key={idx}
-                            className="p-3.5 rounded-2xl bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] flex items-start gap-3"
-                          >
-                            <div className="w-6 h-6 rounded-full bg-white border-2 border-[#0D0431] flex items-center justify-center font-heading font-black text-xs text-[#0D0431] shrink-0 mt-0.5">
-                              {idx + 1}
+                        {companyIntel.preparation_roadmap?.length > 0 ? (
+                          companyIntel.preparation_roadmap.map((step, idx) => (
+                            <div
+                              key={idx}
+                              className="p-3.5 rounded-2xl bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] flex items-start gap-3"
+                            >
+                              <div className="w-6 h-6 rounded-full bg-white border-2 border-[#0D0431] flex items-center justify-center font-heading font-black text-xs text-[#0D0431] shrink-0 mt-0.5">
+                                {idx + 1}
+                              </div>
+                              <p className="text-xs font-semibold text-[#0D0431] leading-relaxed">
+                                {step}
+                              </p>
                             </div>
-                            <p className="text-xs font-semibold text-[#0D0431] leading-relaxed">
-                              {step}
-                            </p>
+                          ))
+                        ) : (
+                          <div className="p-4 rounded-2xl bg-[#D4FDF7] border-2 border-[#0D0431] text-xs text-[#0D0431]/70 font-medium">
+                            Custom milestone preparation schedule being indexed.
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
                   </div>

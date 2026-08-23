@@ -372,19 +372,47 @@ export const buildLevelComparison = (user, companyRequirement = null, leetcodePr
       ? Math.round((Number(user.projectsScore) / 10) * 10) / 10
       : null;
 
+  const stories = Array.isArray(user?.behavioralStories) ? user.behavioralStories : [];
+  const practiceEntries = user?.behavioralPracticeHistory && typeof user.behavioralPracticeHistory === "object"
+    ? Object.values(user.behavioralPracticeHistory)
+    : [];
+
+  let behavioralCommLevel = null;
+  const commScores = practiceEntries
+    .map((p) => p?.evaluationSummary?.commScore)
+    .filter((s) => s !== undefined && s !== null && !isNaN(Number(s)));
+  if (commScores.length > 0) {
+    const avgComm = commScores.reduce((a, b) => a + Number(b), 0) / commScores.length;
+    behavioralCommLevel = Math.round((avgComm / 10) * 10) / 10;
+  }
+
   const communicationLevel =
     user?.communicationScore !== undefined &&
     user?.communicationScore !== null &&
     !isNaN(Number(user.communicationScore))
       ? Math.round((Number(user.communicationScore) / 10) * 10) / 10
-      : null;
+      : (behavioralCommLevel !== null ? behavioralCommLevel : null);
+
+  let behavioralLevel = null;
+  if (practiceEntries.length > 0 || stories.length > 0) {
+    let avgPractice = 0;
+    if (practiceEntries.length > 0) {
+      avgPractice = practiceEntries.reduce((a, b) => a + (Number(b?.score) || 0), 0) / practiceEntries.length;
+    }
+    const storyBonus = Math.min(2.0, stories.length * 0.7);
+    if (practiceEntries.length > 0) {
+      behavioralLevel = Math.min(10, Math.round(((avgPractice / 10) * 0.8 + storyBonus) * 10) / 10);
+    } else {
+      behavioralLevel = Math.min(7.5, Math.round((4.5 + storyBonus) * 10) / 10);
+    }
+  }
 
   const interviewLevel =
     user?.interviewScore !== undefined &&
     user?.interviewScore !== null &&
     !isNaN(Number(user.interviewScore))
       ? Math.round((Number(user.interviewScore) / 10) * 10) / 10
-      : null;
+      : (behavioralLevel !== null ? behavioralLevel : null);
 
   // Custom company requirement adjustments if DB entry exists
   let dsaReqBenchmark = tierReq(8.5);
@@ -813,16 +841,20 @@ export const buildLevelComparison = (user, companyRequirement = null, leetcodePr
           id: "comm-star",
           name: "STAR Method Problem Delivery",
           requiredLevel: tierReq(7.5),
-          currentLevel: communicationLevel !== null ? Math.max(0, communicationLevel - 0.2) : null,
+          currentLevel: behavioralLevel !== null
+            ? behavioralLevel
+            : (communicationLevel !== null ? Math.max(0, communicationLevel - 0.2) : null),
           importance: "Required",
-          evidence: communicationLevel !== null
+          evidence: stories.length > 0 || practiceEntries.length > 0
+            ? [`${stories.length} Master STAR stories in Story Vault; ${practiceEntries.length} behavioral responses practiced.`]
+            : communicationLevel !== null
             ? ["Structured formulation of Situation, Task, Action, Result."]
             : ["STAR method behavioral delivery not yet assessed."],
           improvementSteps: [
             "Frame every behavioral answer using: Situation (15%), Task (15%), Action (50%), and Result (20%).",
             "Prepare 5 concrete project stories highlighting challenges and resolutions.",
           ],
-          actionLink: "/app/interview",
+          actionLink: "/app/hr-prep",
           actionLabel: "Practice STAR Method",
         },
       ],
@@ -845,14 +877,16 @@ export const buildLevelComparison = (user, companyRequirement = null, leetcodePr
           currentLevel: interviewLevel !== null ? interviewLevel : null,
           importance: "Required",
           evidence: interviewLevel !== null
-            ? [`Behavioral alignment benchmarked from mock HR evaluation: ${interviewLevel}/10.`]
+            ? (practiceEntries.length > 0 || stories.length > 0
+                ? [`Behavioral alignment benchmarked from HR prep & Story Vault: ${interviewLevel}/10.`]
+                : [`Behavioral alignment benchmarked from mock HR evaluation: ${interviewLevel}/10.`])
             : [`Company research and culture alignment for ${targetCompany} not yet assessed.`],
           improvementSteps: [
             `Research ${targetCompany}'s core values (e.g. Amazon Leadership Principles, Microsoft Growth Mindset).`,
             "Align your personal narrative and career motivations with target company missions.",
           ],
-          actionLink: "/app/interview",
-          actionLabel: "Start HR Mock",
+          actionLink: "/app/hr-prep",
+          actionLabel: "Start HR Prep",
         },
         {
           id: "hr-conflict-resolution",

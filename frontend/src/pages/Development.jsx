@@ -46,9 +46,9 @@ const DEV_LEARNING_TRACKS = [
     category: "System Design",
     level: "Advanced",
     duration: "4.5 hrs",
+    targetRoute: "/app/roadmap?track=system-design",
     topics: ["Event-Driven Architectures", "Circuit Breaker Pattern", "Kafka / RabbitMQ", "Service Mesh Basics"],
     description: "Design decoupled distributed systems with high availability, idempotent consumer APIs, and graceful degradation.",
-    progress: 75,
   },
   {
     id: "docker-k8s",
@@ -56,9 +56,9 @@ const DEV_LEARNING_TRACKS = [
     category: "DevOps & Cloud",
     level: "Intermediate",
     duration: "3.5 hrs",
+    targetRoute: "/app/roadmap?track=devops",
     topics: ["Multi-Stage Dockerfiles", "Pod Scheduling & Services", "Ingress & TLS", "Helm Charts"],
     description: "Package production services into lightweight containers and deploy scalable clusters on cloud infrastructure.",
-    progress: 90,
   },
   {
     id: "caching-db",
@@ -66,9 +66,9 @@ const DEV_LEARNING_TRACKS = [
     category: "Backend & Data",
     level: "Intermediate",
     duration: "3.0 hrs",
+    targetRoute: "/app/roadmap?track=backend",
     topics: ["Redis Write-Through / Cache-Aside", "B-Tree vs Hash Indexing", "Query Execution Plans", "Connection Pooling"],
     description: "Eliminate API latency bottlenecks by optimizing PostgreSQL / MySQL schema indexes and distributed Redis memory tiers.",
-    progress: 60,
   },
   {
     id: "security-auth",
@@ -76,9 +76,9 @@ const DEV_LEARNING_TRACKS = [
     category: "Security",
     level: "Intermediate",
     duration: "2.5 hrs",
+    targetRoute: "/app/roadmap?track=security",
     topics: ["JWT Refresh Rotation", "OAuth2 PKCE Flow", "CSRF & CORS Hardening", "Rate Limiting & WAF"],
     description: "Implement enterprise-grade authentication with cryptographically secure token lifecycles and OWASP top-10 defense.",
-    progress: 40,
   },
   {
     id: "frontend-perf",
@@ -86,9 +86,9 @@ const DEV_LEARNING_TRACKS = [
     category: "Frontend",
     level: "Advanced",
     duration: "3.8 hrs",
+    targetRoute: "/app/roadmap?track=frontend",
     topics: ["Code Splitting & Lazy Loading", "Core Web Vitals (LCP, INP, CLS)", "Server-Side Rendering (SSR)", "State Architecture"],
     description: "Build zero-layout-shift UI experiences with minimal JavaScript bundle sizes and sub-100ms interaction latency.",
-    progress: 85,
   },
   {
     id: "ci-cd",
@@ -96,9 +96,9 @@ const DEV_LEARNING_TRACKS = [
     category: "DevOps",
     level: "Intermediate",
     duration: "2.0 hrs",
+    targetRoute: "/app/roadmap?track=ci-cd",
     topics: ["GitHub Actions Workflows", "Automated Linting & Test Suites", "Staging Environments", "Semantic Versioning"],
     description: "Automate continuous testing, image building, and zero-downtime deployment pipelines triggered on main branch merges.",
-    progress: 100,
   },
 ];
 
@@ -108,6 +108,38 @@ export default function Development() {
 
   // Tab State: 'overview' | 'projects' | 'technologies' | 'requirements' | 'deployment' | 'learning'
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Dynamic Learning Tracks Progress State
+  const [completedTopics, setCompletedTopics] = useState(() => {
+    try {
+      const saved = localStorage.getItem("getplaced_dev_completed_topics");
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+
+  const toggleTopicCompletion = (trackId, topic) => {
+    setCompletedTopics((prev) => {
+      const trackSet = new Set(prev[trackId] || []);
+      if (trackSet.has(topic)) {
+        trackSet.delete(topic);
+      } else {
+        trackSet.add(topic);
+      }
+      const updated = { ...prev, [trackId]: Array.from(trackSet) };
+      try {
+        localStorage.setItem("getplaced_dev_completed_topics", JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  const getTrackProgress = (track) => {
+    const userTopics = completedTopics[track.id] || [];
+    if (!track.topics || track.topics.length === 0) return 0;
+    return Math.min(100, Math.round((userTopics.length / track.topics.length) * 100));
+  };
 
   // Data State
   const [userProfile, setUserProfile] = useState(null);
@@ -955,55 +987,76 @@ export default function Development() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {DEV_LEARNING_TRACKS.map((track) => (
-                <div
-                  key={track.id}
-                  className="bg-white border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] hover:shadow-[6px_6px_0_0_#0D0431] hover:-translate-x-0.5 hover:-translate-y-0.5 rounded-3xl p-6 space-y-4 flex flex-col justify-between transition-all"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <GpBadge theme="light-purple" size="sm">
-                        {track.category}
-                      </GpBadge>
-                      <span className="text-xs font-mono font-bold text-[#0D0431]/70">{track.duration}</span>
+              {DEV_LEARNING_TRACKS.map((track) => {
+                const progressVal = getTrackProgress(track);
+                const userTopics = new Set(completedTopics[track.id] || []);
+
+                return (
+                  <div
+                    key={track.id}
+                    className="bg-white border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] hover:shadow-[6px_6px_0_0_#0D0431] hover:-translate-x-0.5 hover:-translate-y-0.5 rounded-3xl p-6 space-y-4 flex flex-col justify-between transition-all"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <GpBadge theme="light-purple" size="sm">
+                          {track.category}
+                        </GpBadge>
+                        <span className="text-xs font-mono font-bold text-[#0D0431]/70">{track.duration}</span>
+                      </div>
+
+                      <h4 className="text-sm font-heading font-black text-[#0D0431] leading-snug">{track.title}</h4>
+                      <p className="text-xs text-[#0D0431]/80 leading-relaxed font-medium">{track.description}</p>
+
+                      <div className="space-y-1.5 pt-1">
+                        <div className="text-[10px] font-heading font-bold uppercase text-[#0D0431]/70 tracking-wider">
+                          Module Topics (Click to mark complete):
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {track.topics.map((t, idx) => {
+                            const isDone = userTopics.has(t);
+                            return (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => toggleTopicCompletion(track.id, t)}
+                                title={isDone ? "Mark topic incomplete" : "Mark topic complete"}
+                                className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold border border-[#0D0431] transition-all flex items-center gap-1 cursor-pointer ${
+                                  isDone
+                                    ? "bg-[#D4FDF7] text-[#0D0431] shadow-[1px_1px_0_0_#0D0431]"
+                                    : "bg-[#FEF9CF] text-[#0D0431] hover:bg-[#FFE995]"
+                                }`}
+                              >
+                                {isDone && <Check className="w-2.5 h-2.5 text-[#0D0431] stroke-[3]" />}
+                                <span>{t}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
 
-                    <h4 className="text-sm font-heading font-black text-[#0D0431] leading-snug">{track.title}</h4>
-                    <p className="text-xs text-[#0D0431]/80 leading-relaxed font-medium">{track.description}</p>
-
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {track.topics.map((t, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2.5 py-1 bg-[#FEF9CF] text-[#0D0431] rounded-lg text-[10px] font-mono font-bold border border-[#0D0431]"
-                        >
-                          {t}
-                        </span>
-                      ))}
+                    <div className="space-y-2 pt-3 border-t-2 border-[#0D0431]/10">
+                      <div className="flex justify-between text-xs font-mono font-bold text-[#0D0431]/70">
+                        <span>Dynamic Progress</span>
+                        <span className="text-[#896EE2] font-black">{progressVal}%</span>
+                      </div>
+                      <div className="w-full bg-[#FEF9CF] border border-[#0D0431] rounded-full h-2 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-[#896EE2] transition-all duration-300"
+                          style={{ width: `${progressVal}%` }}
+                        />
+                      </div>
+                      <Link
+                        to={track.targetRoute || "/app/roadmap"}
+                        className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431] border-2 border-[#0D0431] text-xs font-heading font-black uppercase tracking-wide shadow-[2px_2px_0_0_#0D0431] transition-all mt-1 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+                      >
+                        <Play className="w-3 h-3 fill-current text-[#0D0431]" />
+                        <span>Start Track</span>
+                      </Link>
                     </div>
                   </div>
-
-                  <div className="space-y-2 pt-3 border-t-2 border-[#0D0431]/10">
-                    <div className="flex justify-between text-xs font-mono font-bold text-[#0D0431]/70">
-                      <span>Progress</span>
-                      <span className="text-[#896EE2] font-black">{track.progress}%</span>
-                    </div>
-                    <div className="w-full bg-[#FEF9CF] border border-[#0D0431] rounded-full h-2 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-[#896EE2]"
-                        style={{ width: `${track.progress}%` }}
-                      />
-                    </div>
-                    <Link
-                      to="/app/dsa"
-                      className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-[#FEDF6A] hover:bg-[#FFE995] text-[#0D0431] border-2 border-[#0D0431] text-xs font-heading font-black uppercase tracking-wide shadow-[2px_2px_0_0_#0D0431] transition-all mt-1 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
-                    >
-                      <Play className="w-3 h-3 fill-current text-[#0D0431]" />
-                      <span>Start Track</span>
-                    </Link>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}

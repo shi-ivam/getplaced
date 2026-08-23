@@ -2,6 +2,7 @@ import express from "express";
 import {
   getLeaderboard,
   getChallenges,
+  enrollChallenge,
   getMySquad,
   createNewSquad,
   joinSquad,
@@ -13,6 +14,8 @@ const router = express.Router();
 
 router.route("/leaderboard").get(protect, getLeaderboard);
 router.route("/challenges").get(protect, getChallenges);
+router.route("/challenges/:id/enroll").post(protect, enrollChallenge);
+router.route("/challenges/:id/join").post(protect, enrollChallenge);
 router.route("/squads/my-squad").get(protect, getMySquad);
 router.route("/squads/create").post(protect, createNewSquad);
 router.route("/squads/join").post(protect, joinSquad);

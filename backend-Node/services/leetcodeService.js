@@ -1109,6 +1109,8 @@ export const formatLeetCodeProfileResponse = (profile) => {
     hardSolved: hard,
     totalQuestions: Number(doc.totalQuestions) || 0,
     acceptanceRate: rate,
+    dsaScore: isFailedUnsynced ? null : calculateLeetCodeDsaScore({ easySolved: easy, mediumSolved: medium, hardSolved: hard, totalSolved: total }),
+    dsaLevel: isFailedUnsynced ? null : calculateLeetCodeDsaLevel({ easySolved: easy, mediumSolved: medium, hardSolved: hard, totalSolved: total }),
     problemsSolved,
     submissions,
     submissionStats,

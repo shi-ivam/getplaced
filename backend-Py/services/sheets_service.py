@@ -128,12 +128,33 @@ def get_all_sheets_overview() -> Dict[str, Any]:
             sheets_list.append({
                 "id": sheet_id,
                 "title": sheet_title,
+                "name": sheet_title,
                 "type": sheet_type,
                 "category_id": cat_key,
+                "categoryId": cat_key,
                 "category_title": cat_meta["title"],
+                "categoryTitle": cat_meta["title"],
+                "category_name": cat_meta["title"],
+                "categoryName": cat_meta["title"],
                 "description": sheet_desc,
                 "total_sections": len(sections),
+                "sections_count": len(sections),
+                "sectionsCount": len(sections),
+                "topics_count": len(sections),
+                "topicsCount": len(sections),
                 "total_items": items_count,
+                "total_problems": items_count,
+                "problems_count": items_count,
+                "problemsCount": items_count,
+                "stats": {
+                    "total_problems": items_count,
+                    "total_subsections": len(sections),
+                    "total_sections": len(sections),
+                    "topics_count": len(sections),
+                    "easy": easy_count,
+                    "medium": medium_count,
+                    "hard": hard_count,
+                },
                 "difficulty_breakdown": {
                     "easy": easy_count,
                     "medium": medium_count,
@@ -141,12 +162,15 @@ def get_all_sheets_overview() -> Dict[str, Any]:
                     "other": max(0, items_count - (easy_count + medium_count + hard_count))
                 },
                 "ide_runnable_count": ide_runnable_count,
+                "ideRunnableCount": ide_runnable_count,
                 "original_url": item.get("url")
             })
 
         grouped_results.append({
             **cat_meta,
+            "name": cat_meta["title"],
             "sheets_count": len(sheets_list),
+            "sheetsCount": len(sheets_list),
             "sheets": sheets_list
         })
 
@@ -193,7 +217,8 @@ def get_sheet_details(sheet_id: str) -> Optional[Dict[str, Any]]:
     for sec in found_sheet.get("sections", []):
         sec_copy = {
             "section_id": sec.get("section_id"),
-            "section_name": sec.get("section_name")
+            "section_name": sec.get("section_name"),
+            "sectionName": sec.get("section_name")
         }
 
         if "subcategories" in sec:
@@ -215,18 +240,31 @@ def get_sheet_details(sheet_id: str) -> Optional[Dict[str, Any]]:
                     if is_runnable:
                         ide_runnable_count += 1
 
+                    practice_link = p.get("practice_url") or p.get("link") or p.get("leetcode_url")
+
                     sub_probs.append({
                         "problem_id": p.get("problem_id"),
+                        "problemId": p.get("problem_id"),
                         "problem_name": p.get("problem_name"),
+                        "problemName": p.get("problem_name"),
+                        "title": p.get("problem_name"),
                         "difficulty": diff if diff and diff != "$undefined" else "Medium",
                         "article_slug": p.get("article_slug"),
+                        "articleSlug": p.get("article_slug"),
                         "has_article": bool(p.get("article_slug")),
+                        "hasArticle": bool(p.get("article_slug")),
                         "youtube_url": None if p.get("youtube_url") == "$undefined" else p.get("youtube_url"),
+                        "youtubeUrl": None if p.get("youtube_url") == "$undefined" else p.get("youtube_url"),
                         "leetcode_url": None if p.get("leetcode_url") == "$undefined" else p.get("leetcode_url"),
+                        "leetcodeUrl": None if p.get("leetcode_url") == "$undefined" else p.get("leetcode_url"),
                         "leetcode_slug": lc_slug,
+                        "leetcodeSlug": lc_slug,
                         "is_ide_runnable": is_runnable,
+                        "isIdeRunnable": is_runnable,
                         "codeforces_url": p.get("codeforces_url"),
-                        "practice_url": p.get("practice_url") or p.get("link"),
+                        "practice_url": practice_link,
+                        "practiceUrl": practice_link,
+                        "problem_url": practice_link,
                         "plus_url": p.get("plus_url"),
                         "editorial_url": p.get("editorial_url"),
                         "problem_type": p.get("problem_type", "problem")
@@ -235,11 +273,14 @@ def get_sheet_details(sheet_id: str) -> Optional[Dict[str, Any]]:
                 subcats.append({
                     "subcategory_id": sub.get("subcategory_id"),
                     "subcategory_name": sub.get("subcategory_name"),
+                    "subcategoryName": sub.get("subcategory_name"),
                     "problems_count": len(sub_probs),
+                    "problemsCount": len(sub_probs),
                     "problems": sub_probs
                 })
             sec_copy["subcategories"] = subcats
             sec_copy["problems_count"] = sum(s["problems_count"] for s in subcats)
+            sec_copy["problemsCount"] = sec_copy["problems_count"]
 
         elif "problems" in sec:
             direct_probs = []
@@ -258,36 +299,72 @@ def get_sheet_details(sheet_id: str) -> Optional[Dict[str, Any]]:
                 if is_runnable:
                     ide_runnable_count += 1
 
+                practice_link = p.get("practice_url") or p.get("link") or p.get("leetcode_url")
+
                 direct_probs.append({
                     "problem_id": p.get("problem_id"),
+                    "problemId": p.get("problem_id"),
                     "problem_name": p.get("problem_name"),
+                    "problemName": p.get("problem_name"),
+                    "title": p.get("problem_name"),
                     "difficulty": diff if diff and diff != "$undefined" else "Medium",
                     "article_slug": p.get("article_slug"),
+                    "articleSlug": p.get("article_slug"),
                     "has_article": bool(p.get("article_slug")),
+                    "hasArticle": bool(p.get("article_slug")),
                     "youtube_url": None if p.get("youtube_url") == "$undefined" else p.get("youtube_url"),
+                    "youtubeUrl": None if p.get("youtube_url") == "$undefined" else p.get("youtube_url"),
                     "leetcode_url": None if p.get("leetcode_url") == "$undefined" else p.get("leetcode_url"),
+                    "leetcodeUrl": None if p.get("leetcode_url") == "$undefined" else p.get("leetcode_url"),
                     "leetcode_slug": lc_slug,
+                    "leetcodeSlug": lc_slug,
                     "is_ide_runnable": is_runnable,
+                    "isIdeRunnable": is_runnable,
                     "codeforces_url": p.get("codeforces_url"),
-                    "practice_url": p.get("practice_url") or p.get("link"),
+                    "practice_url": practice_link,
+                    "practiceUrl": practice_link,
+                    "problem_url": practice_link,
                     "plus_url": p.get("plus_url"),
                     "editorial_url": p.get("editorial_url"),
                     "problem_type": p.get("problem_type", "problem")
                 })
             sec_copy["problems"] = direct_probs
             sec_copy["problems_count"] = len(direct_probs)
+            sec_copy["problemsCount"] = len(direct_probs)
 
         enriched_sections.append(sec_copy)
 
+    sheet_title = found_sheet.get("title")
     return {
         "id": found_sheet.get("id"),
-        "title": found_sheet.get("title"),
+        "title": sheet_title,
+        "name": sheet_title,
         "type": found_sheet.get("type", "sheet"),
         "category_id": category_id,
+        "categoryId": category_id,
         "category_title": category_title,
+        "categoryTitle": category_title,
+        "category_name": category_title,
+        "categoryName": category_title,
         "description": found_sheet.get("description", ""),
         "total_sections": len(enriched_sections),
+        "sections_count": len(enriched_sections),
+        "sectionsCount": len(enriched_sections),
+        "topics_count": len(enriched_sections),
+        "topicsCount": len(enriched_sections),
         "total_problems": total_problems,
+        "problems_count": total_problems,
+        "problemsCount": total_problems,
+        "total_items": total_problems,
+        "stats": {
+            "total_problems": total_problems,
+            "total_subsections": len(enriched_sections),
+            "total_sections": len(enriched_sections),
+            "topics_count": len(enriched_sections),
+            "easy": easy_count,
+            "medium": medium_count,
+            "hard": hard_count,
+        },
         "difficulty_breakdown": {
             "easy": easy_count,
             "medium": medium_count,
@@ -295,6 +372,7 @@ def get_sheet_details(sheet_id: str) -> Optional[Dict[str, Any]]:
             "other": max(0, total_problems - (easy_count + medium_count + hard_count))
         },
         "ide_runnable_count": ide_runnable_count,
+        "ideRunnableCount": ide_runnable_count,
         "original_url": found_sheet.get("url"),
         "sections": enriched_sections
     }
@@ -318,7 +396,25 @@ def get_article_content(slug_or_id: str) -> Optional[Dict[str, Any]]:
             article = dict(row)
 
     if not article:
-        cur.execute("SELECT * FROM articles WHERE slug LIKE ? LIMIT 1", (f"%{slug_or_id}%",))
+        # Check by problem_name or article_slug in problems table
+        try:
+            cur.execute("""
+                SELECT article_slug FROM problems 
+                WHERE (problem_name = ? OR problem_id = ? OR article_slug = ?) 
+                  AND article_slug IS NOT NULL AND article_slug != '' 
+                LIMIT 1
+            """, (slug_or_id, slug_or_id, slug_or_id))
+            p_row = cur.fetchone()
+            if p_row and p_row[0]:
+                cur.execute("SELECT * FROM articles WHERE slug = ?", (p_row[0],))
+                row = cur.fetchone()
+                if row:
+                    article = dict(row)
+        except Exception:
+            pass
+
+    if not article:
+        cur.execute("SELECT * FROM articles WHERE slug LIKE ? OR title LIKE ? LIMIT 1", (f"%{slug_or_id}%", f"%{slug_or_id}%"))
         row = cur.fetchone()
         if row:
             article = dict(row)
@@ -347,19 +443,29 @@ def get_article_content(slug_or_id: str) -> Optional[Dict[str, Any]]:
     for rp in related_probs:
         slug = extract_leetcode_slug(rp.get("leetcode_url"))
         rp["leetcode_slug"] = slug
+        rp["leetcodeSlug"] = slug
         rp["is_ide_runnable"] = bool(slug and slug in lc_slugs)
+        rp["isIdeRunnable"] = bool(slug and slug in lc_slugs)
 
     return {
         "id": article["id"],
         "slug": article["slug"],
+        "article_slug": article["slug"],
+        "articleSlug": article["slug"],
         "title": article["title"],
+        "problem_title": article["title"],
+        "problemTitle": article["title"],
         "category": article["category"],
         "original_url": article["original_url"],
         "summary": article["summary"],
         "problem_statement": article["problem_statement"],
+        "problemStatement": article["problem_statement"],
         "content_markdown": article["content_markdown"],
+        "contentMarkdown": article["content_markdown"],
         "code_snippets": code_snippets,
-        "related_problems": related_probs
+        "codeSnippets": code_snippets,
+        "related_problems": related_probs,
+        "relatedProblems": related_probs
     }
 
 
@@ -412,22 +518,45 @@ def search_all_problems(
     results = []
     for r in rows:
         slug = extract_leetcode_slug(r.get("leetcode_url"))
+        topic_title = r["section_name"] or r["subcategory_name"] or "General"
+        practice_url = r.get("practice_url") or r.get("leetcode_url")
+
         results.append({
             "id": r["id"],
             "problem_id": r["problem_id"],
+            "problemId": r["problem_id"],
             "problem_name": r["problem_name"],
+            "problemName": r["problem_name"],
+            "title": r["problem_name"],
             "sheet_id": r["sheet_id"],
+            "sheetId": r["sheet_id"],
             "sheet_title": r["sheet_title"],
+            "sheetTitle": r["sheet_title"],
+            "sheet_name": r["sheet_title"],
+            "sheetName": r["sheet_title"],
             "section_name": r["section_name"],
+            "sectionName": r["section_name"],
             "subcategory_name": r["subcategory_name"],
+            "subcategoryName": r["subcategory_name"],
+            "topic_title": topic_title,
+            "topicTitle": topic_title,
+            "category": topic_title,
             "difficulty": r["difficulty"] if r["difficulty"] != "$undefined" else "Medium",
             "article_slug": r["article_slug"],
+            "articleSlug": r["article_slug"],
             "has_article": bool(r["article_slug"]),
+            "hasArticle": bool(r["article_slug"]),
             "youtube_url": None if r["youtube_url"] == "$undefined" else r["youtube_url"],
+            "youtubeUrl": None if r["youtube_url"] == "$undefined" else r["youtube_url"],
             "leetcode_url": None if r["leetcode_url"] == "$undefined" else r["leetcode_url"],
+            "leetcodeUrl": None if r["leetcode_url"] == "$undefined" else r["leetcode_url"],
             "leetcode_slug": slug,
+            "leetcodeSlug": slug,
             "is_ide_runnable": bool(slug and slug in lc_slugs),
-            "practice_url": r.get("practice_url")
+            "isIdeRunnable": bool(slug and slug in lc_slugs),
+            "practice_url": practice_url,
+            "practiceUrl": practice_url,
+            "problem_url": practice_url
         })
 
     return {

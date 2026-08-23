@@ -21,11 +21,18 @@ export async function getNextRecommendedActions(user) {
   }
 
   // 2. Load supporting profile data
-  let [progress, academic, roadmap] = await Promise.all([
-    Progress.findOne({ userId }).lean(),
-    AcademicProfile.findOne({ userId }).lean(),
-    Roadmap.findOne({ userId }).lean(),
-  ]);
+  let progress = null, academic = null, roadmap = null;
+  if (mongoose.connection?.readyState === 1 && mongoose.isValidObjectId(userId)) {
+    try {
+      [progress, academic, roadmap] = await Promise.all([
+        Progress.findOne({ userId }).lean(),
+        AcademicProfile.findOne({ userId }).lean(),
+        Roadmap.findOne({ userId }).lean(),
+      ]);
+    } catch (err) {
+      console.warn("Could not query supporting models in recommendationService:", err.message);
+    }
+  }
 
   const targetCompany = user.targetCompany || "Tier 1 Tech";
   const targetRole = user.targetJobRole || "Software Development Engineer";
@@ -44,10 +51,12 @@ export async function getNextRecommendedActions(user) {
       id: "rec-dsa-patterns",
       category: "dsa",
       categoryLabel: "DSA & Problem Solving",
+      badgeLabel: dsaScore < 65 ? "Critical DSA" : "High Impact",
       priority: dsaScore < 65 ? "CRITICAL" : "HIGH",
       title: "Solve 2 Medium Dynamic Programming Problems",
       description: `Boost your DSA Readiness from ${dsaScore}% to target 85%+. Focus on 0/1 Knapsack & Longest Common Subsequence patterns targeted by ${targetCompany}.`,
       estimatedMinutes: 45,
+      estimatedTime: "45 mins",
       impactReadinessBoost: "+3.5%",
       actionUrl: "/app/coding",
       actionLabel: "Launch Coding Arena",
@@ -63,10 +72,12 @@ export async function getNextRecommendedActions(user) {
       id: "rec-resume-ats",
       category: "resume",
       categoryLabel: "Resume & ATS Optimization",
+      badgeLabel: "ATS Boost",
       priority: resumeScore < 70 ? "CRITICAL" : "HIGH",
       title: "Optimize Resume Keywords for " + targetRole,
       description: "Add quantifiable impact metrics (e.g. reduced latency by 35%) and verify 85%+ ATS keyword alignment.",
       estimatedMinutes: 20,
+      estimatedTime: "20 mins",
       impactReadinessBoost: "+4.0%",
       actionUrl: "/app/resume",
       actionLabel: "Analyze Resume with AI",
@@ -82,10 +93,12 @@ export async function getNextRecommendedActions(user) {
       id: "rec-github-live-demo",
       category: "projects",
       categoryLabel: "Projects & System Architecture",
+      badgeLabel: "Project Depth",
       priority: "HIGH",
       title: "Add Live Deployment URL & Architecture Diagram to GitHub",
       description: "Recruiters and hiring managers at product companies prioritize repositories with live deployed demos and system architecture explanations.",
       estimatedMinutes: 30,
+      estimatedTime: "30 mins",
       impactReadinessBoost: "+3.0%",
       actionUrl: "/app/profile",
       actionLabel: "Sync GitHub Profile",
@@ -101,10 +114,12 @@ export async function getNextRecommendedActions(user) {
       id: "rec-academics-target",
       category: "academics",
       categoryLabel: "Academics & Eligibility",
+      badgeLabel: "Academics",
       priority: academic.activeBacklogs > 0 ? "CRITICAL" : "MEDIUM",
       title: `Target ${academic.targetCgpa || 8.5} CGPA Academic Benchmark`,
       description: `Maintain target SGPA in current semester (${academic.currentSemester || 6}) to remain 100% eligible for ${targetCompany} campus placement rounds.`,
       estimatedMinutes: 15,
+      estimatedTime: "15 mins",
       impactReadinessBoost: "+2.0%",
       actionUrl: "/app/academics",
       actionLabel: "View Academic Calculator",
@@ -119,10 +134,12 @@ export async function getNextRecommendedActions(user) {
     id: "rec-study-system-design",
     category: "study",
     categoryLabel: "Study Library & Core CS",
+    badgeLabel: "Video Lesson",
     priority: "MEDIUM",
     title: "Watch: System Design Basics & Microservices Scalability",
     description: "Curated 28-min deep-dive on Caching, Load Balancing, and Database Sharding from our Study Library.",
     estimatedMinutes: 28,
+    estimatedTime: "28 mins",
     impactReadinessBoost: "+2.5%",
     actionUrl: "/app/library",
     actionLabel: "Open Video Lesson",
@@ -137,10 +154,12 @@ export async function getNextRecommendedActions(user) {
       id: "rec-mock-behavioral",
       category: "interview",
       categoryLabel: "Mock Interview & Behavioral",
+      badgeLabel: "Interview Prep",
       priority: "MEDIUM",
       title: "Practice STAR Method for Behavioral Questions",
       description: `Prepare 3 impactful project conflict and leadership stories aligned with ${targetCompany} leadership tenets.`,
       estimatedMinutes: 25,
+      estimatedTime: "25 mins",
       impactReadinessBoost: "+3.0%",
       actionUrl: "/app/interview",
       actionLabel: "Start AI Interview",
@@ -156,14 +175,17 @@ export async function getNextRecommendedActions(user) {
     const currentWeek = currentPhase?.weeks?.[0];
     const pendingTask = currentWeek?.tasks?.find((t) => !t.completed);
     if (pendingTask) {
+      const minutes = pendingTask.estimatedMinutes || 40;
       recommendations.unshift({
         id: "rec-roadmap-task-" + pendingTask.id,
         category: "roadmap",
         categoryLabel: `Week ${currentWeek.weekNumber} Milestone`,
+        badgeLabel: `Week ${currentWeek.weekNumber}`,
         priority: "CRITICAL",
         title: pendingTask.title,
         description: pendingTask.description || `Crucial step in your ${roadmap.timelineWeeks}-week roadmap for ${roadmap.targetCompany}.`,
-        estimatedMinutes: pendingTask.estimatedMinutes || 40,
+        estimatedMinutes: minutes,
+        estimatedTime: `${minutes} mins`,
         impactReadinessBoost: `+${pendingTask.impactScore || 3}%`,
         actionUrl: pendingTask.actionUrl || "/app/roadmap",
         actionLabel: "Continue Roadmap",

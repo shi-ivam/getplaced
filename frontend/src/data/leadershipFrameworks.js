@@ -324,6 +324,30 @@ export const COMPANY_FRAMEWORKS = {
           "Tell me about a time you had to deliver difficult, direct feedback to a peer or manager.",
           "Describe a high-stakes technical debate where direct communication prevented a costly architecture mistake."
         ]
+      },
+      {
+        id: "live-in-the-future",
+        name: "Live in the Future",
+        summary: "Be the first to adopt and pioneer the future of computing and collaboration. Cultivate high appetite for early-stage disruption and breakthrough technologies.",
+        greenFlags: ["Prototyping with cutting-edge developer tooling and AI primitives", "Embracing distributed and remote-first collaboration models", "Designing systems anticipating 5-10 year tech shifts"],
+        redFlags: ["Clinging dogmatically to legacy frameworks out of habit", "Dismissing emerging tech trends as passing fads", "Resistance to modern developer workflow paradigms"],
+        starTip: "Explain how you anticipated an emerging technical capability and built a forward-looking prototype that gave your team an unfair competitive advantage.",
+        sampleQuestions: [
+          "Tell me about a time you experimented with an emerging or unproven technology and applied it to solve a production problem.",
+          "Describe how you navigate rapid technological shifts when making foundational architecture decisions."
+        ]
+      },
+      {
+        id: "be-bold-build-scale",
+        name: "Be Bold / Build Distributed Scale",
+        summary: "Building transformative products requires taking calculated risks and engineering for billions of users. Playing safe guarantees obsolescence.",
+        greenFlags: ["Taking ambitious architectural bets with robust fallback safeguards", "Architecting systems for multi-region planetary scale", "Failing fast and extracting structural institutional insights"],
+        redFlags: ["Excessive timidity that stalls innovation", "Designing systems that bottleneck at moderate scale", "Hesitation to take responsibility for bold technical initiatives"],
+        starTip: "Highlight a high-stakes architectural bet where you deviated from standard convention to unlock massive scalability or step-function performance.",
+        sampleQuestions: [
+          "Tell me about the boldest technical or architectural risk you took and how you managed the downside.",
+          "Describe a system architecture you designed to handle 10x-100x traffic surges under strict latency bounds."
+        ]
       }
     ]
   },
@@ -557,6 +581,42 @@ export const COMPANY_FRAMEWORKS = {
         sampleQuestions: [
           "Tell me about a time you put your personal tasks on hold to help a teammate hit a critical deadline.",
           "How do you cultivate a supportive, highly collaborative engineering culture on your team?"
+        ]
+      },
+      {
+        id: "build-with-heart-and-balance",
+        name: "Build with Heart & Balance",
+        summary: "Passion and urgency must be balanced with sustainability, user empathy, and craft. We build products and teams designed to thrive for the long run.",
+        greenFlags: ["Balancing rapid delivery velocity with long-term codebase health", "Advocating for team well-being and sustainable on-call rotations", "Empathy for end-user accessibility and emotional experience"],
+        redFlags: ["Promoting burnout crunch habits", "Shipping brittle hacks that create insurmountable technical debt", "Indifference to UI/UX craft"],
+        starTip: "Describe how you met an aggressive project milestone while ensuring modular architecture and maintaining team sustainability.",
+        sampleQuestions: [
+          "Tell me about a time you balanced urgent business deadlines with technical excellence and team health.",
+          "Describe a situation where you pushed back against a short-term shortcut to protect the system's long-term maintainability."
+        ]
+      },
+      {
+        id: "dont-fuck-the-customer",
+        name: "Don't #@!% the Customer",
+        summary: "Customers are our lifeblood. Protect customer trust, data integrity, security, and uptime ruthlessly in every technical decision.",
+        greenFlags: ["Designing zero-downtime database migrations", "Refusing to compromise on user security and privacy", "Championing swift root-cause fixes for customer-facing bugs"],
+        redFlags: ["Treating customer-impacting outages with indifference", "Deprecating APIs without migration paths or backwards compatibility", "Blaming users for system friction"],
+        starTip: "Highlight a high-risk production rollout or incident where you engineered strict safety nets to prevent customer disruption.",
+        sampleQuestions: [
+          "Tell me about a time you made a difficult engineering decision specifically to safeguard customer trust or uptime.",
+          "Describe how you handled a production defect that affected end users and what permanent safeguards you put in place."
+        ]
+      },
+      {
+        id: "be-the-change-you-seek",
+        name: "Be the Change You Seek",
+        summary: "Continuous improvement is everyone's responsibility. Identify broken processes or tooling and fix them without waiting for permission.",
+        greenFlags: ["Proactively automating tedious developer workflows or flaky test suites", "Authoring internal tooling and comprehensive onboarding docs", "Driving positive cultural and engineering standards"],
+        redFlags: ["Complaining about team friction without proposing solutions", "Accepting subpar processes as unchangeable", "Waiting for management instructions before fixing clear bugs"],
+        starTip: "Detail a major operational friction or developer toil point that you took the initiative to eliminate through automation or process refactoring.",
+        sampleQuestions: [
+          "Tell me about a time you noticed an inefficiency in team tooling or pipelines and independently resolved it.",
+          "Describe an engineering standard or best practice that you championed and successfully rolled out across your organization."
         ]
       }
     ]

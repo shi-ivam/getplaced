@@ -17,7 +17,8 @@ import {
 // @access  Private
 export const getSession = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
-  const session = await getOrCreateCoachSession(req.user._id, user);
+  const mode = req.query.mode || (req.query.context === "onboarding" ? "onboarding" : null);
+  const session = await getOrCreateCoachSession(req.user._id, user, { mode });
   res.json(session);
 });
 
@@ -26,14 +27,14 @@ export const getSession = asyncHandler(async (req, res) => {
 // @access  Private
 export const sendMessage = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
-  const { message } = req.body;
+  const { message, mode } = req.body;
 
   if (!message) {
     res.status(400);
     throw new Error("Message is required");
   }
 
-  const result = await processCoachMessage(req.user._id, message, user);
+  const result = await processCoachMessage(req.user._id, message, user, { mode });
   res.json(result);
 });
 
@@ -41,7 +42,8 @@ export const sendMessage = asyncHandler(async (req, res) => {
 // @route   POST /api/coach/clear-chat
 // @access  Private
 export const clearChat = asyncHandler(async (req, res) => {
-  const session = await clearCoachChatHistory(req.user._id);
+  const mode = req.body.mode || req.query.mode;
+  const session = await clearCoachChatHistory(req.user._id, { mode });
   res.json({ success: true, message: "Chat history cleared", session });
 });
 

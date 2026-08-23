@@ -210,7 +210,7 @@ The **getPlaced** platform is a polyglot microservice/monorepo application organ
 ### Surface 7: DSA Analytics & Striver Placement Curricula Hub (`/app/dsa`, `/app/sheets`)
 * **Files:**
   * Page: `frontend/src/pages/DSAcontent.jsx`, `frontend/src/pages/CodingArena.jsx`
-  * Components: `frontend/src/components/sheets/SheetsHub.jsx`, `SheetViewer.jsx`, `SheetArticleModal.jsx`, `SheetVideoModal.jsx`, `components/dsa_content/*`
+  * Components: `frontend/src/components/sheets/SheetsHub.jsx`, `SheetViewer.jsx`, `SheetArticleModal.jsx`, `SheetVideoModal.jsx`
   * Datasets & DBs: `backend-Py/data/articles.db` (2,088 offline tutorials), `backend-Py/data/takeuforward_sheets_and_playlists.json` (28 lists, 3,150 problems)
   * Service: `frontend/src/services/sheetsService.js`, `backend-Py/services/sheets_service.py`
 * **Current Status:** **Fully Functional & Production Ready**.

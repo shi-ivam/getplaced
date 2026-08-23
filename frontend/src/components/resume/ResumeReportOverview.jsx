@@ -57,8 +57,9 @@ export default function ResumeReportOverview({
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.setTextColor(23, 16, 61);
+    const scoreVal = evaluation.ats_score ?? evaluation.atsScore ?? 0;
     doc.text(
-      `ATS Score: ${evaluation.ats_score}/100 (${evaluation.score_tier || "Competitive"})`,
+      `ATS Score: ${scoreVal}/100 (${evaluation.score_tier || evaluation.scoreTier || "Competitive"})`,
       marginLeft,
       yPos
     );
@@ -67,7 +68,11 @@ export default function ResumeReportOverview({
     doc.save(`GetPlaced-ATS-Report-${targetRole.replace(/\s+/g, "_")}.pdf`);
   };
 
-  const score = typeof evaluation.ats_score === "number" ? evaluation.ats_score : Number(evaluation.ats_score) || 0;
+  const score = typeof evaluation.ats_score === "number"
+    ? evaluation.ats_score
+    : typeof evaluation.atsScore === "number"
+    ? evaluation.atsScore
+    : Number(evaluation.ats_score ?? evaluation.atsScore) || 0;
   const matchedKeywords = Array.isArray(evaluation.matched_keywords) ? evaluation.matched_keywords : [];
   const missingKeywords = Array.isArray(evaluation.missing_keywords) ? evaluation.missing_keywords : [];
 

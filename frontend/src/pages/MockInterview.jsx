@@ -84,16 +84,12 @@ export default function MockInterview() {
   const [answersHistory, setAnswersHistory] = useState([]);
   const [sessionReport, setSessionReport] = useState(null);
 
-  // Media & Telemetry State
+  // Media State
   const [cameraActive, setCameraActive] = useState(true);
   const [isRecordingAudio, setIsRecordingAudio] = useState(false);
   const [interviewerSpeaking, setInterviewerSpeaking] = useState(false);
   const [audioMuted, setAudioMuted] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(120);
-
-  // Telemetry indicators
-  const [postureStatus, setPostureStatus] = useState("Optimal Posture");
-  const [eyeContactScore, setEyeContactScore] = useState(94);
 
   // Live Feedback & Error State
   const [evaluatingAnswer, setEvaluatingAnswer] = useState(false);
@@ -234,15 +230,7 @@ export default function MockInterview() {
     };
   }, [phase, currentIndex, questions, audioMuted, evaluatingAnswer, liveFeedback]);
 
-  // Eye contact score subtle simulation
-  useEffect(() => {
-    if (phase === "room") {
-      const interval = setInterval(() => {
-        setEyeContactScore(Math.floor(91 + Math.random() * 6));
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [phase]);
+
 
   const speakQuestion = (text) => {
     if (!synthRef.current || audioMuted) return;
@@ -1030,13 +1018,27 @@ export default function MockInterview() {
 
                   {/* Telemetry HUD Badges */}
                   <div className="absolute top-3 left-3 flex flex-wrap items-center gap-2">
-                    <span className="px-2.5 py-1 bg-[#0D0431]/80 backdrop-blur-md rounded-lg text-[11px] font-mono font-bold text-[#D4FDF7] border border-[#D4FDF7]/40 flex items-center gap-1.5 shadow">
-                      <span className="w-2 h-2 rounded-full bg-[#0D7A68] animate-pulse" />
-                      {postureStatus}
-                    </span>
-                    <span className="px-2.5 py-1 bg-[#0D0431]/80 backdrop-blur-md rounded-lg text-[11px] font-mono font-bold text-[#FEDF6A] border border-[#FEDF6A]/40 shadow">
-                      Gaze: {eyeContactScore}%
-                    </span>
+                    {cameraActive ? (
+                      <>
+                        <span className="px-2.5 py-1 bg-[#0D0431]/80 backdrop-blur-md rounded-lg text-[11px] font-mono font-bold text-[#D4FDF7] border border-[#D4FDF7]/40 flex items-center gap-1.5 shadow">
+                          <span className="w-2 h-2 rounded-full bg-[#0D7A68] animate-pulse" />
+                          Visual Stream Active
+                        </span>
+                        <span className="px-2.5 py-1 bg-[#0D0431]/80 backdrop-blur-md rounded-lg text-[11px] font-mono font-bold text-[#FEDF6A] border border-[#FEDF6A]/40 shadow">
+                          Camera Calibrated
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="px-2.5 py-1 bg-[#0D0431]/80 backdrop-blur-md rounded-lg text-[11px] font-mono font-bold text-[#FFC5B7] border border-[#FFC5B7]/40 flex items-center gap-1.5 shadow">
+                          <span className="w-2 h-2 rounded-full bg-[#E57373]" />
+                          Telemetry Inactive / Visual Standby
+                        </span>
+                        <span className="px-2.5 py-1 bg-[#0D0431]/80 backdrop-blur-md rounded-lg text-[11px] font-mono font-bold text-[#FEDF6A] border border-[#FEDF6A]/40 shadow">
+                          Audio/Text Mode
+                        </span>
+                      </>
+                    )}
                   </div>
 
                   {/* Camera Toggle Button */}

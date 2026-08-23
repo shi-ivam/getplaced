@@ -35,24 +35,30 @@ export default function TargetCutoffCalculator({
   }, [currentCgpa, completedSemesters, totalSemesters, targetCgpa]);
 
   useEffect(() => {
-    const remaining = total - completed;
+    const currNum = currCgpa === "" || isNaN(Number(currCgpa)) ? 0 : Number(currCgpa);
+    const targetNum = target === "" || isNaN(Number(target)) ? 0 : Number(target);
+    const totalNum = total === "" || isNaN(Number(total)) ? 8 : Math.max(1, Number(total));
+    const completedNum = completed === "" || isNaN(Number(completed)) ? 0 : Math.max(0, Math.min(Number(completed), totalNum));
+    const remaining = Math.max(0, totalNum - completedNum);
+
     if (remaining <= 0) {
+      const isAchieved = currNum >= targetNum;
       setAnalysis({
-        achievable: currCgpa >= target,
+        achievable: isAchieved,
         requiredSgpaPerSem: 0,
         remainingSemesters: 0,
-        maxPossibleCgpa: currCgpa,
-        difficultyLevel: currCgpa >= target ? "Already Achieved" : "No Semesters Remaining",
+        maxPossibleCgpa: currNum,
+        difficultyLevel: isAchieved ? "Already Achieved" : "No Semesters Remaining",
         statusMessage:
-          currCgpa >= target
+          isAchieved
             ? "Target already satisfied based on current transcript."
             : "No remaining semesters to adjust cumulative CGPA.",
       });
       return;
     }
 
-    const required = Number(((target * total - currCgpa * completed) / remaining).toFixed(2));
-    const maxPossible = Number(((currCgpa * completed + 10.0 * remaining) / total).toFixed(2));
+    const required = Number(((targetNum * totalNum - currNum * completedNum) / remaining).toFixed(2));
+    const maxPossible = Number(((currNum * completedNum + 10.0 * remaining) / totalNum).toFixed(2));
     const isAchievable = required <= 10.0;
 
     let difficulty = "Moderate";
@@ -60,7 +66,7 @@ export default function TargetCutoffCalculator({
 
     if (!isAchievable) {
       difficulty = "Impossible";
-      message = `Target ${target} is mathematically impossible. Maximum reachable CGPA with straight 10.0s is ${maxPossible}.`;
+      message = `Target ${targetNum} is mathematically impossible. Maximum reachable CGPA with straight 10.0s is ${maxPossible}.`;
     } else if (required > 9.2) {
       difficulty = "Extreme (9.2+ SGPA Needed)";
       message = `Requires near-perfect academic performance (average ${required} SGPA) across all ${remaining} remaining semesters.`;
@@ -85,7 +91,7 @@ export default function TargetCutoffCalculator({
     });
 
     if (onTargetChange) {
-      onTargetChange(target);
+      onTargetChange(targetNum);
     }
   }, [currCgpa, completed, total, target]);
 
@@ -130,11 +136,14 @@ export default function TargetCutoffCalculator({
             min="0"
             max="10"
             value={currCgpa}
-            onChange={(e) => setCurrCgpa(parseFloat(e.target.value) || 0)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setCurrCgpa(val === "" ? "" : parseFloat(val) || 0);
+            }}
             className="w-full bg-white text-[#0D0431] text-3xl font-heading font-black rounded-xl px-4 py-2 border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] focus:bg-[#FEDF6A] focus:outline-none transition-all"
           />
           <span className="text-[11px] text-[#0D0431]/70 font-mono font-bold block pt-1">
-            Across {completed} completed semesters
+            Across {completed === "" ? 0 : completed} completed semesters
           </span>
         </div>
 
@@ -146,16 +155,19 @@ export default function TargetCutoffCalculator({
           <div className="flex items-center gap-3">
             <input
               type="number"
-              min="1"
-              max={total - 1}
+              min="0"
+              max={total}
               value={completed}
-              onChange={(e) => setCompleted(parseInt(e.target.value) || 1)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setCompleted(val === "" ? "" : Math.max(0, parseInt(val, 10) || 0));
+              }}
               className="w-full bg-white text-[#0D0431] text-3xl font-heading font-black rounded-xl px-4 py-2 border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] focus:bg-[#FEDF6A] focus:outline-none transition-all"
             />
             <span className="text-[#0D0431] text-xl font-heading font-black">/ {total}</span>
           </div>
           <span className="text-[11px] text-[#0D0431]/70 font-mono font-bold block pt-1">
-            {total - completed} semesters remaining
+            {Math.max(0, (Number(total) || 8) - (completed === "" ? 0 : Number(completed)))} semesters remaining
           </span>
         </div>
 
@@ -170,7 +182,10 @@ export default function TargetCutoffCalculator({
             min="0"
             max="10"
             value={target}
-            onChange={(e) => setTarget(parseFloat(e.target.value) || 0)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setTarget(val === "" ? "" : parseFloat(val) || 0);
+            }}
             className="w-full bg-white text-[#0D0431] text-3xl font-heading font-black rounded-xl px-4 py-2 border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] focus:bg-[#FEDF6A] focus:outline-none transition-all"
           />
           <span className="text-[11px] text-[#0D0431]/70 font-mono font-bold block pt-1">

@@ -48,6 +48,8 @@ import {
 import GpCard from "@/components/gp/GpCard";
 import GpBadge from "@/components/gp/GpBadge";
 import GpButton from "@/components/gp/GpButton";
+import CompanyLogo from "@/components/common/CompanyLogo";
+import { isSupportedCompany, CURATED_COMPANIES } from "@/data/curatedCompanies";
 
 /**
  * Theme-styled Searchable Combobox with retro 2px border and hard drop shadow
@@ -283,6 +285,7 @@ function GpCombobox({
                   value.toLowerCase() === option.toLowerCase();
                 const isHighlighted = highlightedIndex === itemIndex;
 
+                const hasCompanyLogo = isSupportedCompany(option);
                 return (
                   <button
                     key={option}
@@ -296,7 +299,12 @@ function GpCombobox({
                         : "text-[#0D0431] hover:bg-[#FEF9CF]"
                     }`}
                   >
-                    <span className="truncate">{option}</span>
+                    <div className="flex items-center gap-2 truncate">
+                      {hasCompanyLogo && (
+                        <CompanyLogo company={option} size="xs" bordered={false} className="bg-transparent" />
+                      )}
+                      <span className="truncate">{option}</span>
+                    </div>
                     {isSelected && (
                       <Check className="w-4 h-4 text-[#0D0431] shrink-0 ml-2 font-bold" />
                     )}
@@ -320,18 +328,22 @@ function GpCombobox({
           </span>
           {quickSuggestions.map((item) => {
             const isSelected = value.toLowerCase() === item.toLowerCase();
+            const hasLogo = isSupportedCompany(item);
             return (
               <button
                 key={item}
                 type="button"
                 onClick={() => handleSelect(item)}
-                className={`text-xs px-2.5 py-0.5 rounded-full font-bold transition-all border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] cursor-pointer ${
+                className={`inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold transition-all border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] cursor-pointer ${
                   isSelected
                     ? "bg-[#0D0431] text-[#FEF9CF]"
                     : "bg-[#FEF9CF] hover:bg-[#FEDF6A] text-[#0D0431]"
                 }`}
               >
-                {item}
+                {hasLogo && (
+                  <CompanyLogo company={item} size="xs" bordered={false} className="bg-transparent" />
+                )}
+                <span>{item}</span>
               </button>
             );
           })}
@@ -365,6 +377,7 @@ export default function CanIApply() {
   const [academicProfile, setAcademicProfile] = useState(null);
   const [readinessData, setReadinessData] = useState(null);
   const [githubProfile, setGithubProfile] = useState(null);
+  const [leetcodeProfile, setLeetCodeProfile] = useState(null);
   const [marketplaceJobs, setMarketplaceJobs] = useState([]);
   const [companyIntel, setCompanyIntel] = useState(null);
 
@@ -385,6 +398,7 @@ export default function CanIApply() {
           academicRes,
           readinessRes,
           githubRes,
+          leetcodeRes,
           jobsRes,
         ] = await Promise.allSettled([
           axios.get(`${NODE_API_URL}/api/users/profile`, {
@@ -397,6 +411,9 @@ export default function CanIApply() {
             withCredentials: true,
           }),
           axios.get(`${NODE_API_URL}/api/github/profile`, {
+            withCredentials: true,
+          }),
+          axios.get(`${NODE_API_URL}/api/leetcode/profile`, {
             withCredentials: true,
           }),
           axios.get(`${NODE_API_URL}/api/jobs`, { withCredentials: true }),
@@ -427,6 +444,10 @@ export default function CanIApply() {
 
         if (githubRes.status === "fulfilled" && githubRes.value?.data?.profile) {
           setGithubProfile(githubRes.value.data.profile);
+        }
+
+        if (leetcodeRes.status === "fulfilled" && leetcodeRes.value?.data?.profile) {
+          setLeetCodeProfile(leetcodeRes.value.data.profile);
         }
 
         if (jobsRes.status === "fulfilled" && jobsRes.value?.data?.jobs) {
@@ -500,6 +521,7 @@ export default function CanIApply() {
       academicProfile,
       readinessData,
       githubProfile,
+      leetcodeProfile,
       companyIntelligence: companyIntel,
     });
   }, [
@@ -509,6 +531,7 @@ export default function CanIApply() {
     academicProfile,
     readinessData,
     githubProfile,
+    leetcodeProfile,
     companyIntel,
   ]);
 
@@ -694,7 +717,7 @@ export default function CanIApply() {
             theme={
               decision.state === "READY"
                 ? "light-green"
-                : decision.state === "ALMOST_READY"
+                : decision.state === "ALMOST_READY" || decision.state === "INCOMPLETE_ASSESSMENT" || decision.state === "UNASSESSED"
                 ? "light-yellow"
                 : "white"
             }
@@ -712,7 +735,7 @@ export default function CanIApply() {
                     theme={
                       decision.state === "READY"
                         ? "mint"
-                        : decision.state === "ALMOST_READY"
+                        : decision.state === "ALMOST_READY" || decision.state === "INCOMPLETE_ASSESSMENT" || decision.state === "UNASSESSED"
                         ? "yellow"
                         : "coral"
                     }
@@ -722,7 +745,9 @@ export default function CanIApply() {
                       {decision.state === "READY" && (
                         <CheckCircle2 className="w-4 h-4" />
                       )}
-                      {decision.state === "ALMOST_READY" && (
+                      {(decision.state === "ALMOST_READY" ||
+                        decision.state === "INCOMPLETE_ASSESSMENT" ||
+                        decision.state === "UNASSESSED") && (
                         <AlertTriangle className="w-4 h-4" />
                       )}
                       {(decision.state === "NOT_READY" ||
@@ -747,6 +772,8 @@ export default function CanIApply() {
                     ? `You currently have strict eligibility constraints (e.g. CGPA < ${benchmark.minCgpa} or standing backlogs). Address eligibility requirements before submitting official applications.`
                     : decision.state === "READY"
                     ? `Your composite readiness score meets ${benchmark.name}'s hiring standard across DSA, Projects, ATS Resume, and Behavioral interview dimensions.`
+                    : decision.state === "INCOMPLETE_ASSESSMENT" || decision.state === "UNASSESSED"
+                    ? `You meet initial eligibility criteria, but complete your LeetCode/DSA coding and ATS resume evaluation to unlock a verified readiness verdict for ${benchmark.name}.`
                     : decision.state === "ALMOST_READY"
                     ? `You meet academic eligibility and have strong baseline skills, but 3 targeted risk areas should be resolved to maximize your interview conversion rate.`
                     : `Your baseline score is currently developing. Follow the prioritized fix triggers below to build your foundation before applying.`}
@@ -765,7 +792,7 @@ export default function CanIApply() {
                       Composite Readiness
                     </span>
                     <span className="text-3xl font-heading font-black text-[#0D0431]">
-                      {decision.compositeScore}%
+                      {decision.compositeScore !== null ? `${decision.compositeScore}%` : "N/A"}
                     </span>
                   </div>
 
@@ -780,10 +807,11 @@ export default function CanIApply() {
                           : "bg-[#FFC5B7]"
                       }`}
                       style={{
-                        width: `${Math.min(
-                          100,
-                          Math.max(5, decision.compositeScore)
-                        )}%`,
+                        width: `${
+                          decision.compositeScore !== null
+                            ? Math.min(100, Math.max(5, decision.compositeScore))
+                            : 0
+                        }%`,
                       }}
                     />
                   </div>
@@ -791,9 +819,11 @@ export default function CanIApply() {
                   <div className="flex items-center justify-between text-[11px] font-mono font-bold text-[#0D0431]/80">
                     <span>Target Bar: {benchmark.targetDsaScore}%</span>
                     <span>
-                      {decision.compositeScore >= benchmark.targetDsaScore
-                        ? "Bar Met (+0)"
-                        : `-${benchmark.targetDsaScore - decision.compositeScore} pts`}
+                      {decision.compositeScore !== null
+                        ? decision.compositeScore >= benchmark.targetDsaScore
+                          ? "Bar Met (+0)"
+                          : `-${benchmark.targetDsaScore - decision.compositeScore} pts`
+                        : "Unassessed"}
                     </span>
                   </div>
                 </GpCard>
@@ -872,25 +902,25 @@ export default function CanIApply() {
                     <span>Your CGPA:</span>
                     <span
                       className={`font-black ${
-                        (academicProfile?.currentCgpa ||
-                          userProfile?.cgpa ||
-                          8.0) >= benchmark.minCgpa
+                        (userProfile?.cgpa ?? academicProfile?.currentCgpa) !== null &&
+                        (userProfile?.cgpa ?? academicProfile?.currentCgpa) !== undefined &&
+                        Number(userProfile?.cgpa ?? academicProfile?.currentCgpa) >= benchmark.minCgpa
                           ? "text-[#0D0431]"
                           : "text-[#F85B52]"
                       }`}
                     >
-                      {(
-                        academicProfile?.currentCgpa ||
-                        userProfile?.cgpa ||
-                        8.0
-                      ).toFixed(2)}
+                      {(userProfile?.cgpa ?? academicProfile?.currentCgpa) !== null &&
+                      (userProfile?.cgpa ?? academicProfile?.currentCgpa) !== undefined &&
+                      !isNaN(Number(userProfile?.cgpa ?? academicProfile?.currentCgpa))
+                        ? Number(userProfile?.cgpa ?? academicProfile?.currentCgpa).toFixed(2)
+                        : "Not Provided"}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Backlogs:</span>
                     <span className="text-[#0D0431]">
-                      {academicProfile?.activeBacklogs ||
-                        userProfile?.activeBacklogs ||
+                      {userProfile?.activeBacklogs ??
+                        academicProfile?.activeBacklogs ??
                         0}{" "}
                       (Max {benchmark.maxActiveBacklogs})
                     </span>
@@ -938,11 +968,15 @@ export default function CanIApply() {
                     theme={
                       dimensions.technical.isPassed
                         ? "mint"
-                        : "yellow"
+                        : dimensions.technical.score !== null
+                        ? "yellow"
+                        : "coral"
                     }
                     size="sm"
                   >
-                    {dimensions.technical.score}% Readiness
+                    {dimensions.technical.score !== null
+                      ? `${dimensions.technical.score}% Readiness`
+                      : "Unassessed"}
                   </GpBadge>
                 </div>
 
@@ -960,10 +994,11 @@ export default function CanIApply() {
                     <div
                       className="h-full bg-[#FEDF6A] rounded-full"
                       style={{
-                        width: `${Math.min(
-                          100,
-                          Math.max(5, dimensions.technical.score)
-                        )}%`,
+                        width: `${
+                          dimensions.technical.score !== null
+                            ? Math.min(100, Math.max(5, dimensions.technical.score))
+                            : 0
+                        }%`,
                       }}
                     />
                   </div>
@@ -1013,11 +1048,15 @@ export default function CanIApply() {
                     theme={
                       dimensions.profile.isPassed
                         ? "mint"
-                        : "yellow"
+                        : dimensions.profile.score !== null
+                        ? "yellow"
+                        : "coral"
                     }
                     size="sm"
                   >
-                    {dimensions.profile.score}% Readiness
+                    {dimensions.profile.score !== null
+                      ? `${dimensions.profile.score}% Readiness`
+                      : "Unassessed"}
                   </GpBadge>
                 </div>
 
@@ -1035,10 +1074,11 @@ export default function CanIApply() {
                     <div
                       className="h-full bg-[#E4CDFB] rounded-full"
                       style={{
-                        width: `${Math.min(
-                          100,
-                          Math.max(5, dimensions.profile.score)
-                        )}%`,
+                        width: `${
+                          dimensions.profile.score !== null
+                            ? Math.min(100, Math.max(5, dimensions.profile.score))
+                            : 0
+                        }%`,
                       }}
                     />
                   </div>
@@ -1088,11 +1128,15 @@ export default function CanIApply() {
                     theme={
                       dimensions.interview.isPassed
                         ? "mint"
-                        : "yellow"
+                        : dimensions.interview.score !== null
+                        ? "yellow"
+                        : "coral"
                     }
                     size="sm"
                   >
-                    {dimensions.interview.score}% Readiness
+                    {dimensions.interview.score !== null
+                      ? `${dimensions.interview.score}% Readiness`
+                      : "Unassessed"}
                   </GpBadge>
                 </div>
 
@@ -1110,10 +1154,11 @@ export default function CanIApply() {
                     <div
                       className="h-full bg-[#D4FDF7] rounded-full"
                       style={{
-                        width: `${Math.min(
-                          100,
-                          Math.max(5, dimensions.interview.score)
-                        )}%`,
+                        width: `${
+                          dimensions.interview.score !== null
+                            ? Math.min(100, Math.max(5, dimensions.interview.score))
+                            : 0
+                        }%`,
                       }}
                     />
                   </div>
@@ -1280,7 +1325,7 @@ export default function CanIApply() {
                     <span>Dimension 2: Algorithmic & Computer Science Calibration</span>
                   </span>
                   <span className="text-[11px] font-mono font-bold text-[#0D0431]">
-                    Benchmarked: {dimensions.technical.score}% / {benchmark.targetDsaScore}%
+                    Benchmarked: {dimensions.technical.score !== null ? `${dimensions.technical.score}%` : "Unassessed"} / {benchmark.targetDsaScore}%
                   </span>
                 </div>
 
@@ -1299,12 +1344,16 @@ export default function CanIApply() {
                             className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-[#0D0431] ${
                               item.isPassed
                                 ? "bg-[#D4FDF7] text-[#0D0431]"
-                                : "bg-[#FFC5B7] text-[#0D0431]"
+                                : item.currentScore !== null
+                                ? "bg-[#FFC5B7] text-[#0D0431]"
+                                : "bg-white text-[#0D0431]"
                             }`}
                           >
                             {item.isPassed
                               ? "Benchmarked"
-                              : `-${item.gap} pts Deficit`}
+                              : item.currentScore !== null
+                              ? `-${item.gap} pts Deficit`
+                              : "Unassessed"}
                           </span>
                         </div>
                         <p className="text-xs text-[#0D0431]/80 font-medium">
@@ -1318,10 +1367,10 @@ export default function CanIApply() {
                       <div className="flex items-center gap-3 shrink-0">
                         <div className="text-right hidden sm:block">
                           <div className="text-base font-heading font-black text-[#0D0431]">
-                            {item.currentScore}%
+                            {item.currentScore !== null ? `${item.currentScore}%` : "N/A"}
                           </div>
                           <div className="text-[10px] font-mono font-bold text-[#0D0431]/70">
-                            Current
+                            {item.currentScore !== null ? "Current" : "Unassessed"}
                           </div>
                         </div>
 
@@ -1348,11 +1397,11 @@ export default function CanIApply() {
                   <span className="text-xs font-heading font-black uppercase text-[#0D0431] tracking-wider flex items-center gap-1.5">
                     <FileText className="w-4 h-4" />
                     <span>
-                      Dimension 3: Resume ATS, Projects & Online Presence ({benchmark.primaryLanguage})
+                      Dimension 3: Resume ATS, Projects & Online Presence ({benchmark.requiredSkills?.[0] || "Core Stack"})
                     </span>
                   </span>
                   <span className="text-[11px] font-mono font-bold text-[#0D0431]">
-                    Benchmarked: {dimensions.profile.score}% / {benchmark.targetResumeScore}%
+                    Benchmarked: {dimensions.profile.score !== null ? `${dimensions.profile.score}%` : "Unassessed"} / {benchmark.targetResumeAtsScore || 80}%
                   </span>
                 </div>
 
@@ -1371,12 +1420,16 @@ export default function CanIApply() {
                             className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-[#0D0431] ${
                               item.isPassed
                                 ? "bg-[#D4FDF7] text-[#0D0431]"
-                                : "bg-[#FFC5B7] text-[#0D0431]"
+                                : item.currentScore !== null
+                                ? "bg-[#FFC5B7] text-[#0D0431]"
+                                : "bg-white text-[#0D0431]"
                             }`}
                           >
                             {item.isPassed
                               ? "Benchmarked"
-                              : `-${item.gap} pts Deficit`}
+                              : item.currentScore !== null
+                              ? `-${item.gap} pts Deficit`
+                              : "Unassessed"}
                           </span>
                         </div>
                         <p className="text-xs text-[#0D0431]/80 font-medium">
@@ -1390,10 +1443,10 @@ export default function CanIApply() {
                       <div className="flex items-center gap-3 shrink-0">
                         <div className="text-right hidden sm:block">
                           <div className="text-base font-heading font-black text-[#0D0431]">
-                            {item.currentScore}%
+                            {item.currentScore !== null ? `${item.currentScore}%` : "N/A"}
                           </div>
                           <div className="text-[10px] font-mono font-bold text-[#0D0431]/70">
-                            Current
+                            {item.currentScore !== null ? "Current" : "Unassessed"}
                           </div>
                         </div>
 
@@ -1420,11 +1473,11 @@ export default function CanIApply() {
                   <span className="text-xs font-heading font-black uppercase text-[#0D0431] tracking-wider flex items-center gap-1.5">
                     <BrainCog className="w-4 h-4" />
                     <span>
-                      Dimension 4: Communication & Leadership Principles ({benchmark.behavioralPillars[0]})
+                      Dimension 4: Communication & Leadership Principles ({benchmark.behavioralPillars?.[0] || "Core Values"})
                     </span>
                   </span>
                   <span className="text-[11px] font-mono font-bold text-[#0D0431]">
-                    Benchmarked: {dimensions.interview.score}% / {benchmark.targetBehavioralScore}%
+                    Benchmarked: {dimensions.interview.score !== null ? `${dimensions.interview.score}%` : "Unassessed"} / {benchmark.targetBehavioralScore}%
                   </span>
                 </div>
 
@@ -1443,12 +1496,16 @@ export default function CanIApply() {
                             className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-[#0D0431] ${
                               item.isPassed
                                 ? "bg-[#D4FDF7] text-[#0D0431]"
-                                : "bg-[#FFC5B7] text-[#0D0431]"
+                                : item.currentScore !== null
+                                ? "bg-[#FFC5B7] text-[#0D0431]"
+                                : "bg-white text-[#0D0431]"
                             }`}
                           >
                             {item.isPassed
                               ? "Benchmarked"
-                              : `-${item.gap} pts Deficit`}
+                              : item.currentScore !== null
+                              ? `-${item.gap} pts Deficit`
+                              : "Unassessed"}
                           </span>
                         </div>
                         <p className="text-xs text-[#0D0431]/80 font-medium">
@@ -1462,10 +1519,10 @@ export default function CanIApply() {
                       <div className="flex items-center gap-3 shrink-0">
                         <div className="text-right hidden sm:block">
                           <div className="text-base font-heading font-black text-[#0D0431]">
-                            {item.currentScore}%
+                            {item.currentScore !== null ? `${item.currentScore}%` : "N/A"}
                           </div>
                           <div className="text-[10px] font-mono font-bold text-[#0D0431]/70">
-                            Current
+                            {item.currentScore !== null ? "Current" : "Unassessed"}
                           </div>
                         </div>
 

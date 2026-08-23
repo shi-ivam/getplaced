@@ -92,63 +92,18 @@ app.get("/api/resume/latest", protect, (req, res) => {
 })
 
 
-const handleJobRecommendations = async (req, res) => {
-  const query = req.query.query || "software engineer";
-  const location = req.query.location || "India";
-  const page = req.query.page || "1";
-  const employmentType = req.query.employment_type;
+import { getJobsList } from "./controllers/jobController.js"
 
-  if (process.env.RAPIDAPI_KEY) {
-    try {
-      const url = "https://jsearch.p.rapidapi.com/search";
-      const response = await axios.get(url, {
-        headers: {
-          "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
-          "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
-        },
-        params: {
-          query: `${query} in ${location}`,
-          page,
-          num_pages: "2",
-          ...(employmentType ? { employment_types: employmentType } : {})
-        },
-        timeout: 4000
-      });
-
-      if (response.data?.data && response.data.data.length > 0) {
-        const normalizedJobs = response.data.data.map(normalizeRapidApiJob);
-        return res.json({ jobs: normalizedJobs, source: "live_rapidapi" });
-      }
-    } catch (error) {
-      console.warn("RapidAPI lookup failed or rate limited, falling back to MongoDB Job queries:", error.message);
-    }
-  }
-
-  try {
-    const filterQuery = { isExpired: false };
-    if (query && query !== "software engineer") {
-      const qLower = query.toLowerCase();
-      const regex = new RegExp(qLower, "i");
-      filterQuery.$or = [
-        { title: regex },
-        { company: regex },
-        { skills: regex },
-        { description: regex }
-      ];
-    }
-    if (employmentType) {
-      filterQuery.employmentType = new RegExp(employmentType, "i");
-    }
-
-    const dbJobs = await Job.find(filterQuery).lean();
-    return res.json({ jobs: dbJobs, source: "mongodb" });
-  } catch (error) {
-    console.error("MongoDB Job recommendation lookup error:", error.message);
-    return res.status(500).json({ error: "Failed to fetch job recommendations", jobs: [], source: "error" });
-  }
-};
-
-app.get("/job-recommendations", handleJobRecommendations);
+// Canonical jobs endpoints are mounted at /api/jobs and /api/jobs/recommendations
+// Legacy alias routes for backwards compatibility
+app.get("/job-recommendations", (req, res) => {
+  const queryStr = req.url.includes("?") ? req.url.substring(req.url.indexOf("?")) : "";
+  res.redirect(307, `/api/jobs${queryStr}`);
+});
+app.get("/api/job-recommendations", (req, res) => {
+  const queryStr = req.url.includes("?") ? req.url.substring(req.url.indexOf("?")) : "";
+  res.redirect(307, `/api/jobs${queryStr}`);
+});
 
 // Error Handler Middleware (ensures JSON errors for registration and auth)
 app.use((err, req, res, next) => {

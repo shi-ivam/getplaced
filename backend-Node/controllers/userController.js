@@ -3,6 +3,13 @@ import User from "../models/userModel.js"
 import AcademicProfile from "../models/academicProfileModel.js"
 import generateToken from "../utils/generateToken.js"
 import { normalizeIdentifier } from "../models/companyRequirementModel.js"
+import {
+  isSupportedCompany,
+  normalizeCompanyName,
+  isSupportedRole,
+  normalizeRoleName,
+  CURATED_COMPANY_NAMES,
+} from "../data/curatedCompanies.js"
 
 // @desc user token
 // route /api/users/auth
@@ -285,22 +292,29 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 
   const roleInput = targetJobRole !== undefined ? targetJobRole : targetRole
-  if (roleInput !== undefined) {
-    if (typeof roleInput !== "string" || !roleInput.trim()) {
-      res.status(400)
-      throw new Error("Target job role is required")
-    }
-    user.targetJobRole = roleInput.trim()
-    user.targetRoleNormalized = normalizeIdentifier(roleInput)
-  }
-
   if (targetCompany !== undefined) {
     if (typeof targetCompany !== "string" || !targetCompany.trim()) {
       res.status(400)
       throw new Error("Target company is required")
     }
-    user.targetCompany = targetCompany.trim()
-    user.targetCompanyNormalized = normalizeIdentifier(targetCompany)
+    const cleanComp = targetCompany.trim()
+    const normComp = isSupportedCompany(cleanComp) ? normalizeCompanyName(cleanComp) : "Google"
+    user.targetCompany = normComp
+    user.targetCompanyNormalized = normalizeIdentifier(normComp)
+
+    if (roleInput !== undefined && typeof roleInput === "string" && roleInput.trim()) {
+      const normRole = normalizeRoleName(roleInput.trim(), normComp)
+      user.targetJobRole = normRole
+      user.targetRoleNormalized = normalizeIdentifier(normRole)
+    }
+  } else if (roleInput !== undefined) {
+    if (typeof roleInput !== "string" || !roleInput.trim()) {
+      res.status(400)
+      throw new Error("Target job role is required")
+    }
+    const normRole = normalizeRoleName(roleInput.trim(), user.targetCompany || "Google")
+    user.targetJobRole = normRole
+    user.targetRoleNormalized = normalizeIdentifier(normRole)
   }
 
   if (locationPreference !== undefined) {
@@ -368,4 +382,187 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   })
 })
 
-export { authUser, registerUser, logoutUser, getUserProfile, updateUserProfile }
+// @desc get saved behavioral master stories
+// route /api/users/behavioral-stories
+// @method get
+const getBehavioralStories = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select("behavioralStories")
+  res.status(200).json({
+    success: true,
+    stories: user?.behavioralStories || [],
+  })
+})
+
+// @desc save or update a master behavioral story
+// route /api/users/behavioral-stories
+// @method post
+const saveBehavioralStory = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id)
+  if (!user) {
+    res.status(404)
+    throw new Error("User not found")
+  }
+
+  const story = req.body
+  if (!story || !story.title) {
+    res.status(400)
+    throw new Error("Story title is required")
+  }
+
+  const stories = Array.isArray(user.behavioralStories) ? [...user.behavioralStories] : []
+  const existingIdx = stories.findIndex((s) => s.id === story.id)
+  const updatedStory = {
+    ...story,
+    id: story.id || `story-${Date.now()}`,
+    updatedAt: new Date().toISOString(),
+  }
+
+  if (existingIdx >= 0) {
+    stories[existingIdx] = updatedStory
+  } else {
+    stories.unshift(updatedStory)
+  }
+
+  user.behavioralStories = stories
+  user.markModified("behavioralStories")
+  await user.save()
+
+  res.status(200).json({
+    success: true,
+    stories: user.behavioralStories,
+    story: updatedStory,
+  })
+})
+
+// @desc delete a master behavioral story
+// route /api/users/behavioral-stories/:id
+// @method delete
+const deleteBehavioralStory = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id)
+  if (!user) {
+    res.status(404)
+    throw new Error("User not found")
+  }
+
+  const { id } = req.params
+  const stories = Array.isArray(user.behavioralStories) ? user.behavioralStories : []
+  user.behavioralStories = stories.filter((s) => s.id !== id)
+  user.markModified("behavioralStories")
+  await user.save()
+
+  res.status(200).json({
+    success: true,
+    stories: user.behavioralStories,
+  })
+})
+
+// @desc get behavioral question bookmarks
+// route /api/users/behavioral-bookmarks
+// @method get
+const getBehavioralBookmarks = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select("behavioralBookmarks")
+  res.status(200).json({
+    success: true,
+    bookmarks: user?.behavioralBookmarks || [],
+  })
+})
+
+// @desc toggle behavioral question bookmark
+// route /api/users/behavioral-bookmarks
+// @method post
+const toggleBehavioralBookmark = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id)
+  if (!user) {
+    res.status(404)
+    throw new Error("User not found")
+  }
+
+  const { questionId } = req.body
+  if (questionId === undefined || questionId === null) {
+    res.status(400)
+    throw new Error("questionId is required")
+  }
+
+  const qIdStr = String(questionId)
+  let bookmarks = Array.isArray(user.behavioralBookmarks) ? [...user.behavioralBookmarks] : []
+  if (bookmarks.includes(qIdStr)) {
+    bookmarks = bookmarks.filter((id) => id !== qIdStr)
+  } else {
+    bookmarks.push(qIdStr)
+  }
+
+  user.behavioralBookmarks = bookmarks
+  user.markModified("behavioralBookmarks")
+  await user.save()
+
+  res.status(200).json({
+    success: true,
+    bookmarks: user.behavioralBookmarks,
+  })
+})
+
+// @desc get behavioral practice history
+// route /api/users/behavioral-practice
+// @method get
+const getBehavioralPractice = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select("behavioralPracticeHistory")
+  res.status(200).json({
+    success: true,
+    history: user?.behavioralPracticeHistory || {},
+  })
+})
+
+// @desc record behavioral practice evaluation result
+// route /api/users/behavioral-practice
+// @method post
+const recordBehavioralPractice = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id)
+  if (!user) {
+    res.status(404)
+    throw new Error("User not found")
+  }
+
+  const { questionId, score, evaluation } = req.body
+  if (questionId === undefined || questionId === null) {
+    res.status(400)
+    throw new Error("questionId is required")
+  }
+
+  const history = user.behavioralPracticeHistory && typeof user.behavioralPracticeHistory === "object"
+    ? { ...user.behavioralPracticeHistory }
+    : {}
+  const qIdStr = String(questionId)
+  history[qIdStr] = {
+    score: score ?? 0,
+    timestamp: new Date().toISOString(),
+    evaluationSummary: {
+      verdict: evaluation?.overall_verdict || (score >= 80 ? "Strong" : score >= 60 ? "Passable" : "Needs Improvement"),
+      starScore: evaluation?.star_compliance?.score,
+      commScore: evaluation?.communication?.overall_communication_score,
+    },
+  }
+
+  user.behavioralPracticeHistory = history
+  user.markModified("behavioralPracticeHistory")
+  await user.save()
+
+  res.status(200).json({
+    success: true,
+    history: user.behavioralPracticeHistory,
+  })
+})
+
+export {
+  authUser,
+  registerUser,
+  logoutUser,
+  getUserProfile,
+  updateUserProfile,
+  getBehavioralStories,
+  saveBehavioralStory,
+  deleteBehavioralStory,
+  getBehavioralBookmarks,
+  toggleBehavioralBookmark,
+  getBehavioralPractice,
+  recordBehavioralPractice,
+}

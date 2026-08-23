@@ -1,10 +1,25 @@
 import json
 import logging
+import hashlib
+import re
 from typing import Dict, Any, List, Optional
 from services.gemini_client import query_gemini, extract_json
 from services.communication_service import analyze_communication_skills
 
 logger = logging.getLogger("interview_service")
+
+def generate_deterministic_question_id(company: Optional[str], category: Optional[str], question_text: str, idx: int) -> str:
+    """
+    Generates a unique, deterministic string ID namespaced to company, category, and prompt hash.
+    Avoids collision and bookmark pollution across different companies.
+    """
+    comp_slug = re.sub(r'[^a-z0-9]+', '-', (company or "tech").lower()).strip('-') or "tech"
+    cat_slug = re.sub(r'[^a-z0-9]+', '-', (category or "general").lower()).strip('-')[:16].strip('-') or "gen"
+    if question_text and len(question_text.strip()) > 0:
+        q_hash = hashlib.md5(question_text.strip().lower().encode("utf-8")).hexdigest()[:8]
+    else:
+        q_hash = f"q{idx + 1}"
+    return f"{comp_slug}-{cat_slug}-{q_hash}"
 
 # Comprehensive Curated Bank of Behavioral & Leadership Questions
 CURATED_HR_QUESTIONS: List[Dict[str, Any]] = [
@@ -280,7 +295,14 @@ Respond strictly in valid JSON matching this schema:
         raw = query_gemini(prompt, json_mode=True)
         res = extract_json(raw)
         if isinstance(res, dict) and "questions" in res and len(res["questions"]) > 0:
-            return res["questions"]
+            formatted_questions = []
+            for idx, q in enumerate(res["questions"]):
+                q_copy = dict(q)
+                q_text = q_copy.get("question", "")
+                q_cat = q_copy.get("category") or category
+                q_copy["id"] = generate_deterministic_question_id(company, q_cat, q_text, idx)
+                formatted_questions.append(q_copy)
+            return formatted_questions
     except Exception as e:
         logger.warning(f"AI question generation failed ({e}). Falling back to curated questions.")
 
@@ -310,7 +332,9 @@ Respond strictly in valid JSON matching this schema:
     for idx in range(count):
         source_q = matched_questions[idx % len(matched_questions)]
         copied = dict(source_q)
-        copied["id"] = idx + 1
+        q_text = copied.get("question", "")
+        q_cat = copied.get("category") or category
+        copied["id"] = generate_deterministic_question_id(company, q_cat, q_text, idx)
         if difficulty and difficulty != "All Levels":
             copied["difficulty"] = difficulty
         result.append(copied)

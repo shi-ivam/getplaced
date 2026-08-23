@@ -49,6 +49,7 @@ export default function Academics() {
   const [twelfthPct, setTwelfthPct] = useState(null);
   const [activeBacklogs, setActiveBacklogs] = useState(0);
   const [branch, setBranch] = useState("");
+  const [targetCgpa, setTargetCgpa] = useState(8.5);
   const [isEditingSemesters, setIsEditingSemesters] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -69,6 +70,9 @@ export default function Academics() {
           setTwelfthPct(res.data.academic.twelfthPercentage ?? null);
           setActiveBacklogs(res.data.academic.activeBacklogs || 0);
           setBranch(res.data.academic.branch || "");
+          if (res.data.academic.targetCgpa !== null && res.data.academic.targetCgpa !== undefined) {
+            setTargetCgpa(res.data.academic.targetCgpa);
+          }
         } else {
           setSemesters(DEFAULT_SEMESTERS);
         }
@@ -128,6 +132,7 @@ export default function Academics() {
         {
           semesters: currentList,
           currentCgpa: computedCgpa,
+          targetCgpa: targetCgpa !== null && targetCgpa !== undefined && !isNaN(Number(targetCgpa)) ? Number(targetCgpa) : null,
           tenthPercentage: tenthPct,
           twelfthPercentage: twelfthPct,
           activeBacklogs,
@@ -173,7 +178,6 @@ export default function Academics() {
   }
 
   const currentCgpa = academicData?.currentCgpa ?? derivedCgpa;
-  const targetCgpa = academicData?.targetCgpa ?? (currentCgpa ? Math.min(10.0, Number((currentCgpa + 0.5).toFixed(2))) : 9.0);
   const completedCount = completedSems.length;
 
   return (
@@ -357,6 +361,7 @@ export default function Academics() {
         completedSemesters={completedCount}
         totalSemesters={8}
         targetCgpa={targetCgpa}
+        onTargetChange={setTargetCgpa}
       />
 
       {/* 35+ Company Eligibility Matrix */}

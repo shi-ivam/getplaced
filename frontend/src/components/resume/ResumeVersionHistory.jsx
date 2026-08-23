@@ -31,9 +31,28 @@ export default function ResumeVersionHistory({
     setCompareModalOpen(true);
   };
 
+  const getVerScore = (v) => {
+    if (!v) return 0;
+    const raw = v.atsScore ?? v.ats_score ?? v.fullEvaluation?.ats_score ?? v.fullEvaluation?.atsScore ?? v.score ?? 0;
+    const num = Number(raw);
+    return !isNaN(num) ? num : 0;
+  };
+
+  const getVerName = (v) => (v ? (v.name || v.filename || "Resume Snapshot") : "Resume Snapshot");
+  const getVerTier = (v) => (v ? (v.tier || v.scoreTier || v.fullEvaluation?.score_tier || v.fullEvaluation?.scoreTier || "Evaluated") : "Evaluated");
+
+  const getVerCategoryScores = (v) => {
+    if (!v) return {};
+    const raw = v.categoryScores || v.category_scores || v.fullEvaluation?.category_scores || v.fullEvaluation?.categoryScores || {};
+    if (typeof raw !== "object" || raw === null) return {};
+    return raw;
+  };
+
   const baselineVersion = versions.length > 0 ? versions[versions.length - 1] : null;
   const latestVersion = versions.length > 0 ? versions[0] : null;
-  const overallImprovement = latestVersion && baselineVersion ? latestVersion.atsScore - baselineVersion.atsScore : 0;
+  const latestScore = latestVersion ? getVerScore(latestVersion) : 0;
+  const baselineScore = baselineVersion ? getVerScore(baselineVersion) : 0;
+  const overallImprovement = latestVersion && baselineVersion && !isNaN(latestScore - baselineScore) ? latestScore - baselineScore : 0;
 
   return (
     <div className="space-y-6">
@@ -82,6 +101,10 @@ export default function ResumeVersionHistory({
           ) : (
             versions.map((ver, idx) => {
               const isLatest = idx === 0;
+              const vScore = getVerScore(ver);
+              const vName = getVerName(ver);
+              const vTier = getVerTier(ver);
+
               return (
                 <div
                   key={ver.id || idx}
@@ -95,7 +118,7 @@ export default function ResumeVersionHistory({
                     {/* Score Dial Tag */}
                     <div className="w-14 h-14 rounded-2xl bg-[#FEF9CF] border-2 border-[#0D0431] flex flex-col items-center justify-center shrink-0 shadow-[2px_2px_0_0_#0D0431]">
                       <span className="text-xl font-heading font-black text-[#0D0431] leading-none">
-                        {ver.atsScore}
+                        {vScore}
                       </span>
                       <span className="text-[9px] font-heading font-bold text-[#0D0431]/60 uppercase mt-0.5">ATS</span>
                     </div>
@@ -103,7 +126,7 @@ export default function ResumeVersionHistory({
                     <div className="space-y-1.5 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <h4 className="text-sm font-heading font-bold text-[#0D0431] truncate">
-                          {ver.name}
+                          {vName}
                         </h4>
                         {isLatest && (
                           <GpBadge theme="mint" size="sm">
@@ -111,33 +134,31 @@ export default function ResumeVersionHistory({
                           </GpBadge>
                         )}
                         <span className={`px-2.5 py-0.5 text-[9px] font-heading font-bold uppercase rounded-full border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] ${
-                          ver.atsScore >= 80
+                          vScore >= 80
                             ? "bg-[#E4CDFB] text-[#0D0431]"
                             : "bg-[#FEDF6A] text-[#0D0431]"
                         }`}>
-                          {ver.tier || "Evaluated"}
+                          {vTier}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2 text-xs text-[#0D0431]/70 font-mono font-medium">
-                        <span>Role: {ver.targetRole}</span>
+                        <span>Role: {ver.targetRole || "Software Engineer"}</span>
                         <span>•</span>
-                        <span>{new Date(ver.timestamp).toLocaleString()}</span>
+                        <span>{ver.timestamp ? new Date(ver.timestamp).toLocaleString() : "Recently Saved"}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Actions */}
                   <div className="flex items-center gap-2 self-end md:self-auto shrink-0">
-                    {ver.fullEvaluation && (
-                      <button
-                        type="button"
-                        onClick={() => onSelectVersion(ver.fullEvaluation)}
-                        className="px-3.5 py-1.5 bg-white hover:bg-[#FEF9CF] border-2 border-[#0D0431] text-[#0D0431] rounded-xl text-xs font-heading font-bold transition shadow-[2px_2px_0_0_#0D0431] cursor-pointer"
-                      >
-                        Inspect
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => onSelectVersion(ver)}
+                      className="px-3.5 py-1.5 bg-white hover:bg-[#FEF9CF] border-2 border-[#0D0431] text-[#0D0431] rounded-xl text-xs font-heading font-bold transition shadow-[2px_2px_0_0_#0D0431] cursor-pointer"
+                    >
+                      Inspect
+                    </button>
 
                     {!isLatest && (
                       <>
@@ -150,7 +171,7 @@ export default function ResumeVersionHistory({
                         </button>
                         <button
                           type="button"
-                          onClick={() => onRevertVersion(ver)}
+                          onClick={() => (onRestoreVersion ? onRestoreVersion(ver) : onRevertVersion(ver))}
                           className="flex items-center gap-1 px-3.5 py-1.5 bg-[#FFC5B7] hover:bg-[#F85B52] hover:text-white border-2 border-[#0D0431] text-[#0D0431] rounded-xl text-xs font-heading font-bold transition shadow-[2px_2px_0_0_#0D0431] cursor-pointer"
                         >
                           <RotateCcw className="w-3 h-3" />
@@ -189,22 +210,22 @@ export default function ResumeVersionHistory({
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-[#FEF9CF] p-4 rounded-2xl border-2 border-[#0D0431] space-y-1 shadow-[2px_2px_0_0_#0D0431]">
                   <span className="text-[10px] font-heading font-bold uppercase text-[#0D0431]/70 block">Baseline Version</span>
-                  <h4 className="text-xs font-heading font-bold text-[#0D0431] truncate">{versionA.name}</h4>
-                  <div className="text-3xl font-heading font-black text-[#0D0431]">{versionA.atsScore}</div>
+                  <h4 className="text-xs font-heading font-bold text-[#0D0431] truncate">{getVerName(versionA)}</h4>
+                  <div className="text-3xl font-heading font-black text-[#0D0431]">{getVerScore(versionA)}</div>
                 </div>
 
                 <div className="bg-[#D4FDF7] p-4 rounded-2xl border-2 border-[#0D0431] space-y-1 shadow-[2px_2px_0_0_#0D0431]">
                   <span className="text-[10px] font-heading font-bold uppercase text-[#0D0431]/70 block">Comparison Version</span>
-                  <h4 className="text-xs font-heading font-bold text-[#0D0431] truncate">{versionB.name}</h4>
+                  <h4 className="text-xs font-heading font-bold text-[#0D0431] truncate">{getVerName(versionB)}</h4>
                   <div className="text-3xl font-heading font-black text-[#0D0431] flex items-center gap-2">
-                    {versionB.atsScore}
+                    {getVerScore(versionB)}
                     <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full border border-[#0D0431] ${
-                      versionB.atsScore >= versionA.atsScore
+                      getVerScore(versionB) >= getVerScore(versionA)
                         ? "bg-[#FEDF6A] text-[#0D0431]"
                         : "bg-[#FFC5B7] text-[#0D0431]"
                     }`}>
-                      {versionB.atsScore >= versionA.atsScore ? "+" : ""}
-                      {versionB.atsScore - versionA.atsScore} pts
+                      {getVerScore(versionB) >= getVerScore(versionA) ? "+" : ""}
+                      {getVerScore(versionB) - getVerScore(versionA)} pts
                     </span>
                   </div>
                 </div>
@@ -215,10 +236,20 @@ export default function ResumeVersionHistory({
                 <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-[#0D0431]/70 block">
                   Category Score Breakdown Deltas:
                 </span>
-                {versionB.categoryScores &&
-                  Object.keys(versionB.categoryScores).map((key) => {
-                    const valA = versionA.categoryScores?.[key] || 0;
-                    const valB = versionB.categoryScores?.[key] || 0;
+                {(() => {
+                  const catA = getVerCategoryScores(versionA);
+                  const catB = getVerCategoryScores(versionB);
+                  const allKeys = Array.from(new Set([...Object.keys(catA), ...Object.keys(catB)]));
+                  if (allKeys.length === 0) {
+                    return (
+                      <div className="text-xs text-[#0D0431]/60 py-2">
+                        No category breakdown differences recorded for these versions.
+                      </div>
+                    );
+                  }
+                  return allKeys.map((key) => {
+                    const valA = Number(catA[key]) || 0;
+                    const valB = Number(catB[key]) || 0;
                     const diff = valB - valA;
                     const label = key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
                     return (
@@ -241,7 +272,8 @@ export default function ResumeVersionHistory({
                         </div>
                       </div>
                     );
-                  })}
+                  });
+                })()}
               </div>
 
               <div className="pt-3 border-t-2 border-[#0D0431] flex justify-end">

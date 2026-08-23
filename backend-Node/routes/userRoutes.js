@@ -5,9 +5,15 @@ import {
   logoutUser,
   getUserProfile,
   updateUserProfile,
+  getBehavioralStories,
+  saveBehavioralStory,
+  deleteBehavioralStory,
+  getBehavioralBookmarks,
+  toggleBehavioralBookmark,
+  getBehavioralPractice,
+  recordBehavioralPractice,
 } from "../controllers/userController.js"
 import { protect } from "../middlewares/authMiddleware.js"
-import axios from "axios"
 import dotenv from "dotenv"
 dotenv.config()
 
@@ -38,7 +44,24 @@ router.get("/resume/latest", protect, (req, res) => {
   })
 })
 
+// Behavioral STAR Matrix & Practice History Endpoints
+router
+  .route("/behavioral-stories")
+  .get(protect, getBehavioralStories)
+  .post(protect, saveBehavioralStory)
 
+router
+  .route("/behavioral-stories/:id")
+  .delete(protect, deleteBehavioralStory)
 
+router
+  .route("/behavioral-bookmarks")
+  .get(protect, getBehavioralBookmarks)
+  .post(protect, toggleBehavioralBookmark)
+
+router
+  .route("/behavioral-practice")
+  .get(protect, getBehavioralPractice)
+  .post(protect, recordBehavioralPractice)
 
 export default router

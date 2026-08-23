@@ -12,6 +12,8 @@ import {
   DollarSign,
   TrendingUp,
   Tag,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 import GpBadge from "@/components/gp/GpBadge";
 
@@ -92,6 +94,9 @@ export default function JobFiltersBar({
   onMinSalaryChange,
   selectedSkill = "ALL",
   onSelectSkill = () => {},
+  viewMode = "grid",
+  onViewModeChange = () => {},
+  totalResults,
   onResetFilters,
   hasActiveFilters,
 }) {
@@ -99,7 +104,7 @@ export default function JobFiltersBar({
 
   return (
     <div className="space-y-3">
-      {/* Search Input Bar + Quick Sort */}
+      {/* Search Input Bar + Quick Sort + View Mode */}
       <div className="p-4 sm:p-5 rounded-3xl bg-white border-2 border-[#0D0431] shadow-[4px_4px_0_0_#0D0431] space-y-3">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {/* Main Search Input */}
@@ -124,7 +129,7 @@ export default function JobFiltersBar({
             )}
           </div>
 
-          {/* Sort Dropdown */}
+          {/* Sort Dropdown & View Mode Toggle */}
           <div className="flex items-center gap-2">
             <div className="relative shrink-0 w-full sm:w-auto">
               <select
@@ -139,6 +144,36 @@ export default function JobFiltersBar({
                 ))}
               </select>
               <ChevronDown className="w-3.5 h-3.5 text-[#0D0431] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+
+            {/* View Mode Toggle Buttons (Grid vs List) */}
+            <div className="hidden sm:flex items-center p-1 rounded-2xl bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] shrink-0">
+              <button
+                type="button"
+                onClick={() => onViewModeChange("grid")}
+                aria-label="Grid View"
+                title="Grid View"
+                className={`p-2 rounded-xl transition-all cursor-pointer ${
+                  viewMode === "grid"
+                    ? "bg-[#0D0431] text-white shadow-sm font-bold"
+                    : "text-[#0D0431]/60 hover:text-[#0D0431] hover:bg-[#FEF9CF]"
+                }`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onViewModeChange("list")}
+                aria-label="List View"
+                title="List View"
+                className={`p-2 rounded-xl transition-all cursor-pointer ${
+                  viewMode === "list"
+                    ? "bg-[#0D0431] text-white shadow-sm font-bold"
+                    : "text-[#0D0431]/60 hover:text-[#0D0431] hover:bg-[#FEF9CF]"
+                }`}
+              >
+                <List className="w-4 h-4" />
+              </button>
             </div>
 
             {/* Mobile Filter Toggle Button */}
@@ -236,6 +271,30 @@ export default function JobFiltersBar({
               <option value={2400000} className="bg-white text-[#0D0431]">Salary: ₹24L+ / yr</option>
             </select>
             <ChevronDown className="w-3 h-3 text-[#0D0431] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
+          {/* View Mode Toggle (Visible in Mobile Expanded View) */}
+          <div className="flex sm:hidden items-center p-1 rounded-xl bg-white border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] shrink-0">
+            <button
+              type="button"
+              onClick={() => onViewModeChange("grid")}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                viewMode === "grid" ? "bg-[#0D0431] text-white" : "text-[#0D0431]/70"
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Grid</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onViewModeChange("list")}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                viewMode === "list" ? "bg-[#0D0431] text-white" : "text-[#0D0431]/70"
+              }`}
+            >
+              <List className="w-3.5 h-3.5" />
+              <span>List</span>
+            </button>
           </div>
 
           {/* Reset Filters Pill */}

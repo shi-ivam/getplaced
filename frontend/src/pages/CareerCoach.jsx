@@ -44,6 +44,14 @@ import ActionCard from "@/components/coach/ActionCard";
 import GpButton, { GpArrow } from "@/components/gp/GpButton";
 import GpBadge from "@/components/gp/GpBadge";
 import GpCard from "@/components/gp/GpCard";
+import CompanyLogo from "@/components/common/CompanyLogo";
+import {
+  CURATED_COMPANIES,
+  getRolesForCompany,
+  normalizeCompanyName,
+  normalizeRoleName,
+  getCompanyDetails,
+} from "@/data/curatedCompanies";
 
 const STEPS_MAP = [
   { step: 1, label: "Target Ambition", shortLabel: "Ambition" },
@@ -56,6 +64,9 @@ const STEPS_MAP = [
 
 export default function CareerCoach() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [chips, setChips] = useState([]);
@@ -73,6 +84,10 @@ export default function CareerCoach() {
   const [applyingProfile, setApplyingProfile] = useState(false);
   const [showSummaryDrawer, setShowSummaryDrawer] = useState(false);
   const [mobileActiveTab, setMobileActiveTab] = useState("chat");
+
+  const isOnboardingParam = searchParams.get("onboarding") === "true";
+  const isOnboardingPath = location.pathname.startsWith("/onboarding");
+  const isOnboardingMode = isOnboardingPath || (isOnboardingParam && !isCompleted);
 
   // Voice States
   const [isListening, setIsListening] = useState(false);
@@ -215,40 +230,52 @@ export default function CareerCoach() {
 
   const syncSessionData = (data) => {
     if (!data) return;
-    setMessages(data.messages || []);
-    setOnboardingStep(data.onboardingStep || 1);
-    setIsCompleted(Boolean(data.isCompleted));
-    setExtractedProfile(data.extractedProfile || {});
-    setCollectedData(data.collectedData || {});
-    setConnectedProfiles(data.connectedProfiles || {});
-    setDiscoveredProjects(data.discoveredProjects || []);
-    setEvidenceSkills(data.evidenceSkills || []);
-    if (data.readinessSnapshot) setReadinessSnapshot(data.readinessSnapshot);
-    if (data.profileCompletion !== undefined) setProfileCompletion(data.profileCompletion);
+    const sessionObj = data.session || data;
+    setMessages(sessionObj.messages || data.messages || []);
+    const step = data.onboardingStep ?? sessionObj.onboardingStep ?? 1;
+    setOnboardingStep(step);
+    setIsCompleted(Boolean(data.isCompleted ?? sessionObj.isCompleted));
+    setExtractedProfile(sessionObj.extractedProfile || data.extractedProfile || {});
+    setCollectedData(sessionObj.collectedData || data.collectedData || {});
+    setConnectedProfiles(sessionObj.connectedProfiles || data.connectedProfiles || {});
+    setDiscoveredProjects(sessionObj.discoveredProjects || data.discoveredProjects || []);
+    setEvidenceSkills(sessionObj.evidenceSkills || data.evidenceSkills || []);
+    if (sessionObj.readinessSnapshot || data.readinessSnapshot) {
+      setReadinessSnapshot(sessionObj.readinessSnapshot || data.readinessSnapshot);
+    }
+    const comp = data.profileCompletion ?? sessionObj.profileCompletion;
+    if (comp !== undefined && comp !== null) {
+      setProfileCompletion(comp);
+    } else {
+      setProfileCompletion(Math.min(100, Math.max(15, Math.round((step / STEPS_MAP.length) * 100))));
+    }
 
     if (data.chips && data.chips.length > 0) {
       setChips(data.chips);
     } else {
-      const lastMsg = data.messages?.[data.messages.length - 1];
+      const msgs = sessionObj.messages || data.messages || [];
+      const lastMsg = msgs[msgs.length - 1];
       if (lastMsg && lastMsg.chips) {
         setChips(lastMsg.chips);
       }
     }
 
+    const ext = sessionObj.extractedProfile || data.extractedProfile || {};
     setEditForm({
-      targetCompany: data.extractedProfile?.targetCompany || "",
-      targetJobRole: data.extractedProfile?.targetJobRole || "",
-      cgpa: data.extractedProfile?.cgpa ?? "",
-      graduationYear: data.extractedProfile?.graduationYear ?? "",
-      college: data.extractedProfile?.college || "",
-      degree: data.extractedProfile?.degree || "",
+      targetCompany: ext.targetCompany || "",
+      targetJobRole: ext.targetJobRole || "",
+      cgpa: ext.cgpa ?? "",
+      graduationYear: ext.graduationYear ?? "",
+      college: ext.college || "",
+      degree: ext.degree || "",
     });
   };
 
   useEffect(() => {
     const initCoachSession = async () => {
       try {
-        const res = await axios.get(`${NODE_API_URL}/api/coach/session`, {
+        const mode = isOnboardingMode ? "onboarding" : "coach";
+        const res = await axios.get(`${NODE_API_URL}/api/coach/session?mode=${mode}`, {
           withCredentials: true,
         });
         if (res.data) {
@@ -262,7 +289,7 @@ export default function CareerCoach() {
     };
 
     initCoachSession();
-  }, []);
+  }, [isOnboardingMode]);
 
   useEffect(() => {
     scrollToBottom();
@@ -352,9 +379,10 @@ export default function CareerCoach() {
     setSending(true);
 
     try {
+      const mode = isOnboardingMode ? "onboarding" : "coach";
       const res = await axios.post(
         `${NODE_API_URL}/api/coach/message`,
-        { message: trimmed },
+        { message: trimmed, mode },
         { withCredentials: true }
       );
       if (res.data) {
@@ -370,7 +398,12 @@ export default function CareerCoach() {
   const handleClearChat = async () => {
     if (!window.confirm("Are you sure you want to reset the getPlaced conversation?")) return;
     try {
-      const res = await axios.post(`${NODE_API_URL}/api/coach/clear-chat`, {}, { withCredentials: true });
+      const mode = isOnboardingMode ? "onboarding" : "coach";
+      const res = await axios.post(
+        `${NODE_API_URL}/api/coach/clear-chat`,
+        { mode },
+        { withCredentials: true }
+      );
       if (res.data?.session) {
         syncSessionData(res.data.session);
       }
@@ -522,9 +555,13 @@ export default function CareerCoach() {
   const handleSaveProfileEdits = async (e) => {
     e?.preventDefault();
     setShowEditModal(false);
+    const comp = normalizeCompanyName(editForm.targetCompany || "Google");
+    const role = normalizeRoleName(editForm.targetJobRole, comp);
     const updated = {
       ...extractedProfile,
       ...editForm,
+      targetCompany: comp,
+      targetJobRole: role,
     };
     setExtractedProfile(updated);
     try {
@@ -538,23 +575,6 @@ export default function CareerCoach() {
       triggerCelebration();
     } catch (err) {
       console.error("Failed to save edited profile:", err);
-    }
-  };
-
-  const handleApplyProfile = async () => {
-    setApplyingProfile(true);
-    try {
-      await axios.post(
-        `${NODE_API_URL}/api/coach/apply-profile`,
-        { extractedProfile },
-        { withCredentials: true }
-      );
-      navigate("/app/roadmap");
-    } catch (err) {
-      console.error("Failed to apply profile:", err);
-      navigate("/app/roadmap");
-    } finally {
-      setApplyingProfile(false);
     }
   };
 
@@ -585,12 +605,6 @@ export default function CareerCoach() {
   const isVtopConnected = Boolean(connectedProfiles?.vtop?.connected || extractedProfile?.vtopConnected);
   const isGhConnected = Boolean(connectedProfiles?.github?.connected);
   const isLcConnected = Boolean(connectedProfiles?.leetcode?.connected);
-
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
-  const isOnboardingParam = searchParams.get("onboarding") === "true";
-  const isOnboardingPath = location.pathname.startsWith("/onboarding");
-  const isOnboardingMode = isOnboardingPath || (isOnboardingParam && !isCompleted);
 
   const dynamicStepPercent = Math.round((onboardingStep / STEPS_MAP.length) * 100);
   const rawProgress = profileCompletion > 0 ? profileCompletion : dynamicStepPercent;
@@ -639,7 +653,7 @@ export default function CareerCoach() {
                   Autonomous Coach
                 </GpBadge>
                 <span className="text-xs font-mono font-bold text-[#0D0431]/70">
-                  Target: {extractedProfile?.targetCompany || "Google"} · {extractedProfile?.targetJobRole || "SDE"}
+                  Target: {extractedProfile?.targetCompany ? `${extractedProfile.targetCompany} · ${extractedProfile?.targetJobRole || "SDE"}` : "Unset"}
                 </span>
               </div>
             )}
@@ -647,6 +661,18 @@ export default function CareerCoach() {
 
           {/* Action Controls */}
           <div className="flex items-center gap-2">
+            {isOnboardingMode && (
+              <button
+                type="button"
+                onClick={() => handleSendMessage("Skip this step for now")}
+                title="Skip Current Calibration Step"
+                className="p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold text-[#0D0431] border-2 border-[#0D0431] bg-white hover:bg-[#FEDF6A] transition-all shadow-[2px_2px_0_0_#0D0431] flex items-center gap-1.5 font-mono cursor-pointer"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Skip Step</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={handleClearChat}
@@ -722,7 +748,7 @@ export default function CareerCoach() {
               })}
             </div>
             <span className="text-[10px] text-[#0D0431]/60">
-              Calibration {profileCompletion}% Complete
+              Calibration {progressPercent}% Complete
             </span>
           </div>
         )}
@@ -797,7 +823,7 @@ export default function CareerCoach() {
                     <span>Step {onboardingStep} of 6</span>
                     <span>·</span>
                     <span className="px-2 py-0.5 rounded-full bg-[#E4CDFB] border border-[#0D0431]">
-                      {profileCompletion}% calibrated
+                      {progressPercent}% calibrated
                     </span>
                   </>
                 ) : (
@@ -878,7 +904,7 @@ export default function CareerCoach() {
                           </div>
                         </div>
                       ) : (
-                        <p className="whitespace-pre-line text-sm text-[#0D0431] font-bold">{msg.text}</p>
+                        <p className="whitespace-pre-line text-sm sm:text-[15px] text-[#0D0431] font-bold leading-relaxed">{msg.text}</p>
                       )}
                     </div>
                   </div>
@@ -890,7 +916,7 @@ export default function CareerCoach() {
                   <div className="w-9 h-9 rounded-2xl bg-[#E4CDFB] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] text-[#0D0431] flex items-center justify-center shrink-0 text-xs font-mono font-black mt-0.5">
                     <Sparkles className="w-4 h-4 text-[#0D0431]" />
                   </div>
-                  <div className="bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] rounded-2xl px-4 py-3 text-xs text-[#0D0431] flex items-center gap-2.5 font-mono font-bold">
+                  <div className="bg-white border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] rounded-2xl px-4 py-3 text-xs sm:text-sm text-[#0D0431] flex items-center gap-2.5 font-mono font-bold">
                     <Loader2 className="w-4 h-4 animate-spin text-[#896EE2]" />
                     <span>Analyzing context and preparing advice...</span>
                   </div>
@@ -906,7 +932,7 @@ export default function CareerCoach() {
                     key={idx}
                     type="button"
                     onClick={() => handleSendMessage(chip)}
-                    className="text-xs px-3.5 py-1.5 rounded-xl bg-white hover:bg-[#FEDF6A] text-[#0D0431] border-2 border-[#0D0431] font-bold font-mono shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer flex items-center gap-1.5"
+                    className="text-xs sm:text-sm px-4 py-2 rounded-xl bg-white hover:bg-[#FEDF6A] text-[#0D0431] border-2 border-[#0D0431] font-bold font-mono shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer flex items-center gap-1.5"
                   >
                     <span>{chip}</span>
                   </button>
@@ -926,7 +952,7 @@ export default function CareerCoach() {
                 type="button"
                 onClick={toggleSpeechRecognition}
                 title={isListening ? "Listening..." : "Dictate via Microphone"}
-                className={`p-3 rounded-2xl border-2 border-[#0D0431] transition-all cursor-pointer shadow-[2px_2px_0_0_#0D0431] ${
+                className={`p-3 sm:p-3.5 rounded-2xl border-2 border-[#0D0431] transition-all cursor-pointer shadow-[2px_2px_0_0_#0D0431] ${
                   isListening
                     ? "bg-[#FFC5B7] text-[#0D0431] animate-pulse"
                     : "bg-[#FEF9CF] text-[#0D0431] hover:bg-[#FEDF6A]"
@@ -939,19 +965,19 @@ export default function CareerCoach() {
                 type="text"
                 placeholder={
                   isOnboardingMode
-                    ? "Answer coach questions, confirm target role, link GitHub/LeetCode..."
+                    ? "Answer coach questions, type your details, or click a chip / type 'skip' to skip..."
                     : "Ask about target company requirements, today's DSA drills, roadmap sprints..."
                 }
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 disabled={sending}
-                className="flex-1 bg-[#FEF9CF] text-xs sm:text-sm text-[#0D0431] placeholder-[#0D0431]/50 px-4 py-2.5 rounded-2xl border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] focus:outline-none focus:bg-white transition-all font-sans font-medium"
+                className="flex-1 bg-[#FEF9CF] text-sm sm:text-base text-[#0D0431] placeholder-[#0D0431]/50 px-4 py-2.5 sm:py-3 rounded-2xl border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] focus:outline-none focus:bg-white transition-all font-sans font-medium"
               />
 
               <button
                 type="submit"
                 disabled={sending || !inputMessage.trim()}
-                className="px-5 py-2.5 rounded-2xl bg-[#FEDF6A] hover:bg-[#FFE995] disabled:opacity-50 disabled:cursor-not-allowed text-[#0D0431] text-xs font-bold font-mono border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                className="px-5 py-2.5 sm:py-3 rounded-2xl bg-[#FEDF6A] hover:bg-[#FFE995] disabled:opacity-50 disabled:cursor-not-allowed text-[#0D0431] text-xs sm:text-sm font-bold font-mono border-2 border-[#0D0431] shadow-[3px_3px_0_0_#0D0431] transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
               >
                 <span>Send</span>
                 <Send className="w-3.5 h-3.5" />
@@ -989,13 +1015,25 @@ export default function CareerCoach() {
                 <div className="flex items-center justify-between text-[11px] font-mono font-bold">
                   <span className="text-[#0D0431]/70 uppercase tracking-wider">Target Goal</span>
                   <span className="text-[#0D0431] bg-[#FEDF6A] px-2 py-0.5 rounded-md border border-[#0D0431]">
-                    {readinessSnapshot?.targetBenchmark || 80}/100 Bar
+                    {extractedProfile?.targetCompany
+                      ? `${readinessSnapshot?.targetBenchmark || 80}/100 Bar`
+                      : "Pending"}
                   </span>
                 </div>
-                <div className="text-sm font-bold text-[#0D0431] flex items-center gap-2 font-heading">
-                  <Target className="w-4 h-4 text-[#0D0431] shrink-0" />
+                <div className="text-sm font-bold text-[#0D0431] flex items-center gap-2.5 font-heading">
+                  {extractedProfile?.targetCompany ? (
+                    <CompanyLogo company={extractedProfile.targetCompany} size="sm" />
+                  ) : (
+                    <Target className="w-4 h-4 text-[#0D0431] shrink-0" />
+                  )}
                   <span className="truncate">
-                    {extractedProfile?.targetCompany || "Google"} · {extractedProfile?.targetJobRole || "Software Engineer"}
+                    {extractedProfile?.targetCompany ? (
+                      `${extractedProfile.targetCompany} · ${extractedProfile?.targetJobRole || "Software Engineer"}`
+                    ) : (
+                      <span className="text-[#0D0431]/60 font-sans font-normal italic">
+                        {isOnboardingMode ? "Not set yet (Calibrating in chat...)" : "Not set"}
+                      </span>
+                    )}
                   </span>
                 </div>
               </div>
@@ -1235,17 +1273,26 @@ export default function CareerCoach() {
                       size="md"
                       fullWidth
                     >
-                      {applyingProfile ? "Applying Profile..." : "Apply Inferred Profile & Continue to Dashboard"}
+                      {applyingProfile ? "Entering Dashboard..." : "Enter Dashboard →"}
                     </GpButton>
 
-                    <GpButton
-                      onClick={handleApplyProfile}
-                      variant="outline"
-                      size="sm"
-                      fullWidth
-                    >
-                      View Milestone Roadmap
-                    </GpButton>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSendMessage("Skip this step for now")}
+                        className="flex-1 py-2 px-2.5 rounded-xl bg-white hover:bg-[#FEDF6A] text-xs font-mono font-bold text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer text-center"
+                      >
+                        Skip Step ⏭
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleFinalizeAndEnterDashboard}
+                        className="flex-1 py-2 px-2.5 rounded-xl bg-[#FAF7EE] hover:bg-[#FFC5B7] text-xs font-mono font-bold text-[#0D0431] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] transition-all cursor-pointer text-center"
+                      >
+                        Skip All
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <>
@@ -1380,7 +1427,7 @@ export default function CareerCoach() {
                   disabled={vtopLoading || !vtopUsername}
                   variant="stacked"
                   size="sm"
-                  className="flex-1"
+                  className="flex-1 py-2.5"
                 >
                   {vtopLoading ? "Verifying..." : "Verify VTOP"}
                 </GpButton>
@@ -1448,7 +1495,7 @@ export default function CareerCoach() {
                   disabled={ghLoading || !ghInput.trim()}
                   variant="stacked"
                   size="sm"
-                  className="flex-1"
+                  className="flex-1 py-2.5"
                 >
                   {ghLoading ? "Linking..." : "Link GitHub"}
                 </GpButton>
@@ -1516,7 +1563,7 @@ export default function CareerCoach() {
                   disabled={lcLoading || !lcInput.trim()}
                   variant="stacked-yellow"
                   size="sm"
-                  className="flex-1"
+                  className="flex-1 py-2.5"
                 >
                   {lcLoading ? "Linking..." : "Link LeetCode"}
                 </GpButton>
@@ -1586,7 +1633,7 @@ export default function CareerCoach() {
                   disabled={resumeUploading || !resumeFile}
                   variant="stacked"
                   size="sm"
-                  className="flex-1"
+                  className="flex-1 py-2.5"
                 >
                   {resumeUploading ? "Analyzing..." : "Analyze ATS"}
                 </GpButton>
@@ -1621,25 +1668,48 @@ export default function CareerCoach() {
 
             <form onSubmit={handleSaveProfileEdits} className="space-y-3.5">
               <div>
-                <label className="text-[11px] font-mono font-bold text-[#0D0431] block mb-1 uppercase">Target Company</label>
-                <input
-                  type="text"
-                  value={editForm.targetCompany}
-                  onChange={(e) => setEditForm({ ...editForm, targetCompany: e.target.value })}
-                  placeholder="e.g. Google, Microsoft, Amazon"
-                  className="w-full bg-white text-xs font-bold text-[#0D0431] px-3.5 py-2.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] font-mono"
-                />
+                <label className="text-[11px] font-mono font-bold text-[#0D0431] block mb-1 uppercase">
+                  Target Company (Curated Premier Tech Whitelist)
+                </label>
+                <div className="flex items-center gap-2">
+                  <CompanyLogo company={editForm.targetCompany || "Google"} size="md" />
+                  <select
+                    value={normalizeCompanyName(editForm.targetCompany || "Google")}
+                    onChange={(e) => {
+                      const selectedComp = e.target.value;
+                      const validRoles = getRolesForCompany(selectedComp);
+                      setEditForm({
+                        ...editForm,
+                        targetCompany: selectedComp,
+                        targetJobRole: validRoles.includes(editForm.targetJobRole) ? editForm.targetJobRole : validRoles[0],
+                      });
+                    }}
+                    className="flex-1 bg-white text-xs font-bold text-[#0D0431] px-3.5 py-2.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] font-mono cursor-pointer"
+                  >
+                    {CURATED_COMPANIES.map((c) => (
+                      <option key={c.id} value={c.name}>
+                        {c.name} ({c.tier.split("/")[0].trim()})
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div>
-                <label className="text-[11px] font-mono font-bold text-[#0D0431] block mb-1 uppercase">Target Role</label>
-                <input
-                  type="text"
-                  value={editForm.targetJobRole}
+                <label className="text-[11px] font-mono font-bold text-[#0D0431] block mb-1 uppercase">
+                  Target Role ({getRolesForCompany(editForm.targetCompany || "Google").length} Calibrated Roles)
+                </label>
+                <select
+                  value={normalizeRoleName(editForm.targetJobRole || "", editForm.targetCompany || "Google")}
                   onChange={(e) => setEditForm({ ...editForm, targetJobRole: e.target.value })}
-                  placeholder="e.g. Software Development Engineer"
-                  className="w-full bg-white text-xs font-bold text-[#0D0431] px-3.5 py-2.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] font-mono"
-                />
+                  className="w-full bg-white text-xs font-bold text-[#0D0431] px-3.5 py-2.5 rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] focus:outline-none focus:bg-[#FEF9CF] font-mono cursor-pointer"
+                >
+                  {getRolesForCompany(editForm.targetCompany || "Google").map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
