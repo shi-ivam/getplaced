@@ -300,3 +300,33 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: #B4AFD0;
 }
+
+/* getPlaced Coach Floating Button Glow Animation */
+@keyframes coach-glow-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes coach-glow-pulse {
+  0%, 100% {
+    opacity: 0.65;
+    transform: scale(0.97);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.animate-coach-glow-spin {
+  animation: coach-glow-spin 3s linear infinite;
+}
+
+.animate-coach-glow-pulse {
+  animation: coach-glow-pulse 2.2s ease-in-out infinite;
+}
+

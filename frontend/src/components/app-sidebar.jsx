@@ -41,7 +41,7 @@ const NAV_SECTIONS = [
     items: [
       { title: "Overview", url: "/app", icon: Home },
       { title: "Career Roadmap", url: "/app/roadmap", icon: Target },
-      { title: "Career Coach", url: "/app/coach", icon: Sparkles, badge: "AI" },
+      { title: "getPlaced Coach", url: "/app/coach", icon: Sparkles, badge: "AI" },
       { title: "Progress Tracker", url: "/app/progress", icon: TrendingUp },
     ],
   },
@@ -49,7 +49,7 @@ const NAV_SECTIONS = [
     label: "Prepare",
     items: [
       { title: "Coding IDE", url: "/app/coding", icon: Terminal },
-      { title: "Study Sheets", url: "/app/sheets", icon: Layers, badge: "28" },
+      { title: "Study Sheets", url: "/app/sheets", icon: Layers },
       { title: "Dev Projects", url: "/app/development", icon: FolderGit2 },
       { title: "Resume ATS", url: "/app/resume", icon: FileText },
       { title: "Interview Prep", url: "/app/interview", icon: Sparkles },
@@ -228,23 +228,27 @@ export default function AppSidebar({ className = "" }) {
                             }`}
                           >
                             <Link to={item.url} onClick={handleNavClick} className="flex items-center gap-2.5">
-                              <Icon
-                                className={`w-4 h-4 shrink-0 ${
-                                  active ? "text-[#FFD84D]" : "text-[#6F6A80]"
-                                }`}
-                              />
-                              <span className="truncate">{item.title}</span>
-                              {item.badge && (
-                                <span
-                                  className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                                    active
-                                      ? "bg-white/20 text-white"
-                                      : "bg-[#EFEAFF] text-[#6E44FF]"
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <Icon
+                                  className={`w-4 h-4 shrink-0 ${
+                                    active ? "text-[#FFD84D]" : "text-[#6F6A80]"
                                   }`}
-                                >
-                                  {item.badge}
-                                </span>
-                              )}
+                                />
+                                {item.badge && (
+                                  <span
+                                    className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold shrink-0 tracking-tight leading-none ${
+                                      active
+                                        ? "bg-white/20 text-[#FFD84D]"
+                                        : item.badge === "Live"
+                                        ? "bg-[#D8FAF4] text-[#0D7A68] border border-[#0D7A68]/20"
+                                        : "bg-[#EFEAFF] text-[#6E44FF] border border-[#E2DEEC]"
+                                    }`}
+                                  >
+                                    {item.badge}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="truncate">{item.title}</span>
                             </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>

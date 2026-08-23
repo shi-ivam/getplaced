@@ -164,9 +164,9 @@ export default function SplitAuthLayout({ mode = "login" }) {
   return (
     <div className="min-h-screen w-full bg-[#F8F8F5] text-[#17103D] flex flex-col lg:flex-row overflow-x-hidden font-sans selection:bg-[#FFD84D] selection:text-[#17103D]">
       {/* ========================================================================= */}
-      {/* LEFT PANEL: Clean Feature Showcase (50% on Desktop)                       */}
+      {/* LEFT PANEL: Clean Feature Showcase (50% on Desktop, 2nd on Mobile)        */}
       {/* ========================================================================= */}
-      <div className="w-full lg:w-1/2 min-h-screen bg-[#F8F8F5] flex flex-col justify-between p-8 sm:p-12 lg:p-16 border-b lg:border-b-0 lg:border-r border-[#E2DEEC] overflow-y-auto">
+      <div className="w-full lg:w-1/2 min-h-screen bg-[#F8F8F5] flex flex-col justify-between p-8 sm:p-12 lg:p-16 border-t lg:border-t-0 lg:border-r border-[#E2DEEC] overflow-y-auto order-2 lg:order-1">
         <div className="space-y-8 w-full max-w-xl mx-auto">
           {/* Top Brand Header */}
           <div className="flex items-center justify-between">
@@ -275,10 +275,30 @@ export default function SplitAuthLayout({ mode = "login" }) {
       </div>
 
       {/* ========================================================================= */}
-      {/* RIGHT PANEL: Minimal Auth Form (50% on Desktop)                           */}
+      {/* RIGHT PANEL: Minimal Auth Form (50% on Desktop, 1st on Mobile)            */}
       {/* ========================================================================= */}
-      <div className="w-full lg:w-1/2 min-h-screen bg-white text-[#17103D] flex flex-col justify-center items-center p-8 sm:p-12 lg:p-16 overflow-y-auto">
+      <div className="w-full lg:w-1/2 min-h-screen bg-white text-[#17103D] flex flex-col justify-center items-center p-6 sm:p-12 lg:p-16 overflow-y-auto order-1 lg:order-2">
         <div className="w-full max-w-md space-y-6">
+          {/* Mobile Top Brand Header */}
+          <div className="flex lg:hidden items-center justify-between pb-3 border-b border-[#E2DEEC]">
+            <Link to="/" className="flex items-center gap-2.5 group select-none">
+              <div className="w-8 h-8 rounded-xl bg-[#FFD84D] text-[#17103D] flex items-center justify-center font-heading font-black text-sm shadow-sm">
+                GP
+              </div>
+              <span className="text-lg font-heading font-black text-[#17103D] tracking-tight">
+                Get<span className="text-[#6E44FF]">Placed</span>
+              </span>
+            </Link>
+
+            <Link
+              to="/"
+              className="text-xs font-semibold text-[#6F6A80] hover:text-[#17103D] transition-colors flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#F8F8F5] border border-[#E2DEEC] shadow-sm"
+            >
+              <span>Home</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
           {/* Mode Switcher Tabs */}
           <div className="flex items-center p-1 rounded-xl bg-[#F8F8F5] border border-[#E2DEEC] w-full text-xs font-medium">
             <Link

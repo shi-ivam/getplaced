@@ -28,7 +28,7 @@ import {
 const SEARCH_ITEMS = [
   { id: "dashboard", title: "Placement Overview", category: "Main", url: "/app", icon: Home, keywords: "overview metrics stats readiness dashboard home" },
   { id: "roadmap", title: "Career Roadmap", category: "Main", url: "/app/roadmap", icon: Target, keywords: "timeline milestones steps career path" },
-  { id: "coach", title: "AI Career Coach", category: "Main", url: "/app/coach", icon: Sparkles, keywords: "assistant mentor chat advice ai coach sidekick" },
+  { id: "coach", title: "getPlaced Coach", category: "Main", url: "/app/coach", icon: Sparkles, keywords: "assistant mentor chat advice ai coach sidekick getplaced coach" },
   { id: "progress", title: "Progress Tracker", category: "Main", url: "/app/progress", icon: TrendingUp, keywords: "analytics stats progress tracker trajectory readiness score" },
   { id: "coding", title: "Coding IDE Workspace", category: "Prepare", url: "/app/coding", icon: Terminal, keywords: "leetcode problems editor python js cpp java dsa compiler sandbox" },
   { id: "sheets", title: "DSA Curriculum Sheets", category: "Prepare", url: "/app/sheets", icon: Layers, keywords: "striver tuf blind75 neetcode dsa study sheets questions" },

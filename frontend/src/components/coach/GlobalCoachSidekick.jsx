@@ -86,6 +86,7 @@ export default function GlobalCoachSidekick() {
   const [chips, setChips] = useState([]);
   const [isListening, setIsListening] = useState(false);
   const [speakingMsgIdx, setSpeakingMsgIdx] = useState(null);
+  const [showGlow, setShowGlow] = useState(true);
 
   const chatScrollRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -128,6 +129,15 @@ export default function GlobalCoachSidekick() {
       }
     }
   }, [location.pathname, isOpen]);
+
+  // Glowing gradient animation runs for 5.5 seconds on page load, then smoothly stops
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowGlow(false);
+    }, 5500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Contextual chips when route changes
   useEffect(() => {
@@ -429,28 +439,68 @@ export default function GlobalCoachSidekick() {
           ref={triggerBtnRef}
           className="fixed bottom-4 left-1/2 -translate-x-1/2 sm:bottom-6 z-50 flex items-center gap-2 group select-none"
         >
-          <button
-            id="global-ai-coach-trigger"
-            type="button"
-            onClick={() => setIsOpen(true)}
-            className="relative flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-[#17103D] hover:bg-[#24195A] active:scale-95 text-white font-medium text-xs sm:text-sm shadow-[0_12px_32px_rgba(23,16,61,0.28),0_2px_8px_rgba(23,16,61,0.12)] hover:shadow-[0_16px_40px_rgba(23,16,61,0.36)] transition-all duration-200 cursor-pointer border border-[#2E245E] hover:border-[#6E44FF]/40 backdrop-blur-md"
-            title="Open AI Career Coach (⌘J)"
-          >
-            {/* Glowing Accent Badge */}
-            <div className="w-5 h-5 rounded-full bg-[#FFD84D]/20 border border-[#FFD84D]/30 flex items-center justify-center">
-              <Sparkles className="w-3 h-3 text-[#FFD84D] group-hover:rotate-12 transition-transform duration-300" />
+          <div className="relative inline-flex items-center justify-center">
+            {/* Glowing Gradient Aura & Border (Active on page load for a few seconds) */}
+            <div
+              className={`absolute -inset-[3px] rounded-full pointer-events-none transition-opacity duration-1000 ease-out ${
+                showGlow ? "opacity-100" : "opacity-0"
+              }`}
+              aria-hidden="true"
+            >
+              {/* Soft Ambient Diffused Pulsing Glow */}
+              <div className="absolute -inset-2.5 rounded-full bg-gradient-to-r from-[#6E44FF]/70 via-[#FFD84D]/50 to-[#00D2FF]/70 blur-xl animate-coach-glow-pulse" />
+
+              {/* Rotating Gradient Blur Aura */}
+              <div className="absolute -inset-1 rounded-full blur-md flex items-center justify-center overflow-hidden opacity-90">
+                <div
+                  className="w-[360px] h-[360px] shrink-0 animate-coach-glow-spin"
+                  style={{
+                    background:
+                      "conic-gradient(from 0deg, #6E44FF 0%, #FFD84D 25%, #00D2FF 50%, #EC4899 75%, #6E44FF 100%)",
+                  }}
+                />
+              </div>
+
+              {/* Sharp Rotating Gradient Border Ring */}
+              <div className="absolute inset-0 rounded-full overflow-hidden flex items-center justify-center">
+                <div
+                  className="w-[360px] h-[360px] shrink-0 animate-coach-glow-spin"
+                  style={{
+                    background:
+                      "conic-gradient(from 0deg, #6E44FF 0%, #FFD84D 25%, #00D2FF 50%, #EC4899 75%, #6E44FF 100%)",
+                  }}
+                />
+              </div>
             </div>
 
-            {/* Floater Label */}
-            <span className="font-heading font-bold tracking-tight text-white">
-              AI Career Coach
-            </span>
+            {/* Main Interactive Button */}
+            <button
+              id="global-ai-coach-trigger"
+              type="button"
+              onClick={() => setIsOpen(true)}
+              className="relative z-10 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-[#17103D] hover:bg-[#24195A] active:scale-95 text-white font-medium text-xs sm:text-sm shadow-[0_12px_32px_rgba(23,16,61,0.28),0_2px_8px_rgba(23,16,61,0.12)] hover:shadow-[0_16px_40px_rgba(23,16,61,0.36)] transition-all duration-200 cursor-pointer border border-[#2E245E] hover:border-[#6E44FF]/40 backdrop-blur-md"
+              title="Open getPlaced Coach (⌘J)"
+            >
+              {/* Glowing Accent Badge */}
+              <div className="w-5 h-5 rounded-full bg-[#FFD84D]/20 border border-[#FFD84D]/30 flex items-center justify-center">
+                <Sparkles
+                  className={`w-3 h-3 text-[#FFD84D] group-hover:rotate-12 transition-transform duration-300 ${
+                    showGlow ? "animate-pulse" : ""
+                  }`}
+                />
+              </div>
 
-            {/* Keyboard Shortcut Pill */}
-            <span className="hidden sm:inline-flex items-center text-[10px] font-mono font-semibold text-[#FFD84D] bg-white/10 px-2 py-0.5 rounded-md border border-white/15">
-              ⌘J
-            </span>
-          </button>
+              {/* Floater Label */}
+              <span className="font-heading font-bold tracking-tight text-white">
+                getPlaced Coach
+              </span>
+
+              {/* Keyboard Shortcut Pill */}
+              <span className="hidden sm:inline-flex items-center text-[10px] font-mono font-semibold text-[#FFD84D] bg-white/10 px-2 py-0.5 rounded-md border border-white/15">
+                ⌘J
+              </span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -484,7 +534,7 @@ export default function GlobalCoachSidekick() {
                 <Sparkles className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="font-heading font-bold text-sm text-white">AI Career Coach</h3>
+                <h3 className="font-heading font-bold text-sm text-white">getPlaced Coach</h3>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className="text-[10px] font-mono text-[#FFD84D] bg-white/10 px-2 py-0.5 rounded-md border border-white/15 font-medium">
                     Surface: {currentSurfaceName}

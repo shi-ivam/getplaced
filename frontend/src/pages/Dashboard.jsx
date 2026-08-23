@@ -20,7 +20,6 @@ import {
   FolderGit2,
   Info,
   X,
-  ShieldCheck,
   Zap,
   Flame,
   RefreshCw,
@@ -110,10 +109,6 @@ export default function Dashboard() {
       <div className="bg-white border border-[#E2DEEC] rounded-2xl p-6 sm:p-7 shadow-[0_2px_8px_rgba(23,16,61,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-3 max-w-2xl">
           <div className="flex items-center gap-2 flex-wrap">
-            <GpBadge theme="mint" size="sm">
-              <ShieldCheck className="w-3.5 h-3.5 mr-1" />
-              Verified Readiness Matrix
-            </GpBadge>
             <GpBadge theme="yellow" size="sm">
               {targetCompany} Candidate
             </GpBadge>
