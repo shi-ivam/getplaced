@@ -25,7 +25,23 @@ export default function ResumeReportOverview({
   const [copiedIndex, setCopiedIndex] = useState(null);
   const [keywordFilter, setKeywordFilter] = useState("all");
 
-  if (!evaluation) return null;
+  if (!evaluation || (evaluation.ats_score === undefined && evaluation.atsScore === undefined)) {
+    return (
+      <div className="bg-white border-2 border-dashed border-[#0D0431] rounded-3xl p-10 sm:p-14 text-center space-y-4 shadow-[4px_4px_0_0_#0D0431]">
+        <div className="w-14 h-14 rounded-2xl bg-[#D4FDF7] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center mx-auto text-[#0D0431]">
+          <Award className="w-7 h-7 text-[#0D0431]" />
+        </div>
+        <div className="max-w-md mx-auto space-y-1.5">
+          <h3 className="text-base font-heading font-black text-[#0D0431]">
+            No ATS Evaluation Report Available
+          </h3>
+          <p className="text-xs text-[#0D0431]/75 font-sans leading-relaxed">
+            Upload your resume above to get a full ATS score breakdown, matched vs missing keyword analysis, and quantifiable impact scoring.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const handleCopyBullet = (text, index) => {
     navigator.clipboard.writeText(text);

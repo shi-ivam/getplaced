@@ -21,7 +21,8 @@ import {
   RefreshCw,
   ShieldAlert,
   Info,
-  Check
+  Check,
+  FileText
 } from "lucide-react";
 import axios from "axios";
 import { PY_API_URL } from "@/config/api";
@@ -129,6 +130,24 @@ export default function ResumeActionCenter({
       : actions.filter((a) => a.status === "OPEN");
     return targetSet.reduce((acc, a) => acc + (a.estimatedImpact?.max || 5), 0);
   }, [actions, selectedIds]);
+
+  if (!actions || actions.length === 0) {
+    return (
+      <div className="bg-white border-2 border-dashed border-[#0D0431] rounded-3xl p-10 sm:p-14 text-center space-y-4 shadow-[4px_4px_0_0_#0D0431]">
+        <div className="w-14 h-14 rounded-2xl bg-[#FEDF6A] border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center mx-auto text-[#0D0431]">
+          <Sparkles className="w-7 h-7 text-[#0D0431]" />
+        </div>
+        <div className="max-w-md mx-auto space-y-1.5">
+          <h3 className="text-base font-heading font-black text-[#0D0431]">
+            No Pending Actions
+          </h3>
+          <p className="text-xs text-[#0D0431]/75 font-sans leading-relaxed">
+            Upload your resume PDF or paste your resume text above to generate real-time AI action items, missing ATS keywords, and 1-click bullet point enhancements.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Selection handlers
   const handleToggleSelect = (id) => {

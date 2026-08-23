@@ -15,7 +15,6 @@ from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
-import google.generativeai as genai
 
 # Import LeetCode service modules
 from services.leetcode_service import (
@@ -59,14 +58,6 @@ from services.company_intelligence_service import (
 # Load environment variables
 load_dotenv(override=True)
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"), override=True)
-
-# Configure Gemini AI
-api_key = (os.getenv("GOOGLE_API_KEY") or "").strip()
-if api_key:
-    try:
-        genai.configure(api_key=api_key)
-    except Exception as e:
-        print(f"Warning: Gemini config error: {e}")
 
 # Initialize FastAPI app
 app = FastAPI(title="getPlaced AI & Intelligence Platform API")

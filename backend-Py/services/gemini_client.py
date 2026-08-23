@@ -13,11 +13,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"), overrid
 logger = logging.getLogger("gemini_client")
 
 MODELS_PRIORITY = [
-    "gemini-3.7-flash",
-    "gemini-2.5-flash",
-    "gemini-2.5-pro",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash",
+    "gemini-3.6-flash",
 ]
 
 def get_configured_api_key() -> str:

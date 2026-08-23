@@ -31,45 +31,6 @@ const getUserStorageKey = (userId) => {
   return userId ? `getplaced_resume_versions_${userId}` : "getplaced_resume_versions_anon";
 };
 
-const DEMO_STRUCTURED_ACTIONS = [
-  {
-    id: "act-1",
-    section: "experience",
-    targetItemIndex: 0,
-    bulletIndex: 0,
-    impact: "high",
-    currentText: "Worked on backend APIs and improved performance.",
-    proposedText: "Engineered 8 RESTful microservices with Node.js & Redis, reducing P99 latency by 42% at 10k RPM peak.",
-    reason: "Quantifies technical scope using the XYZ formula (Accomplished [X], measured by [Y], by doing [Z]).",
-    pointsGain: 6,
-    status: "pending",
-  },
-  {
-    id: "act-2",
-    section: "skills",
-    targetItemIndex: 0,
-    bulletIndex: null,
-    impact: "high",
-    currentText: "JavaScript, Python, HTML, CSS",
-    proposedText: "Languages: TypeScript, JavaScript, Python, SQL • Frameworks: React, Node.js, Express, FastAPI • Cloud/DevOps: Docker, Redis, Git, CI/CD",
-    reason: "Injects critical high-demand ATS keywords required for modern Software Engineer listings.",
-    pointsGain: 5,
-    status: "pending",
-  },
-  {
-    id: "act-3",
-    section: "experience",
-    targetItemIndex: 0,
-    bulletIndex: 1,
-    impact: "medium",
-    currentText: "Responsible for building the user interface using React.",
-    proposedText: "Spearheaded modular frontend architecture using React 19 and Tailwind CSS, increasing user onboarding conversion by 28%.",
-    reason: "Replaces passive duty description with active leadership verbs and measurable business impact.",
-    pointsGain: 4,
-    status: "pending",
-  },
-];
-
 export default function AnalyzeResume() {
   const containerRef = useRef(null);
   const [searchParams] = useSearchParams();
@@ -81,9 +42,7 @@ export default function AnalyzeResume() {
 
   // Input state
   const [file, setFile] = useState(null);
-  const [rawText, setRawText] = useState(
-    "Alex Rivera\nSoftware Engineer with 2+ years designing resilient web platforms and microservices.\n\nExperience:\n- Worked on backend APIs and improved performance.\n- Responsible for building the user interface using React.\n\nSkills: JavaScript, Python, HTML, CSS, Git, VS Code\n\nProjects:\n- Distributed Task Scheduler (Go, Redis)"
-  );
+  const [rawText, setRawText] = useState("");
   const [inputMode, setInputMode] = useState("pdf"); // 'pdf' | 'text'
   const [jobDescription, setJobDescription] = useState(jdFromUrl || "");
   const [targetRole, setTargetRole] = useState(targetRoleFromUrl || "Software Engineer");
@@ -204,37 +163,16 @@ export default function AnalyzeResume() {
           setTargetRole(userTargetRole);
         }
 
-        if (liveAnalysis && liveAnalysis.ats_score !== undefined) {
+        if (liveAnalysis && (liveAnalysis.ats_score !== undefined || liveAnalysis.atsScore !== undefined)) {
           setEvaluation(liveAnalysis);
-          setActions(liveAnalysis.structured_actions || DEMO_STRUCTURED_ACTIONS);
+          setActions(liveAnalysis.structured_actions || []);
           if (liveText) setRawText(liveText);
           setIsProfileLinked(true);
         } else {
-          // Default initial benchmark evaluation
-          const defaultEval = {
-            ats_score: 74,
-            score_tier: "Competitive (Tier 2)",
-            category_scores: {
-              impact_quantification: 62,
-              skills_match: 78,
-              action_verbs: 82,
-              formatting_readability: 90,
-            },
-            matched_keywords: ["JavaScript", "Python", "React", "Git", "REST APIs"],
-            missing_keywords: ["TypeScript", "Docker", "CI/CD", "Redis", "System Design"],
-            bullet_improvements: [
-              {
-                original: "Worked on backend APIs and improved performance.",
-                improved: "Engineered 8 RESTful microservices with Node.js & Redis, reducing P99 latency by 42% at 10k RPM peak.",
-                reason: "Quantifies technical scope using XYZ format.",
-              },
-            ],
-            structured_actions: DEMO_STRUCTURED_ACTIONS,
-            summary_critique: "Your resume scores 74/100. Applying the recommended XYZ impact rewrites and injecting missing keywords will elevate your score into top ATS tiers.",
-          };
-
-          setEvaluation(defaultEval);
-          setActions(defaultEval.structured_actions || DEMO_STRUCTURED_ACTIONS);
+          setEvaluation(null);
+          setActions([]);
+          setRawText(liveText || "");
+          setIsProfileLinked(false);
         }
       } catch (err) {
         console.warn("Could not sync profile resume:", err);
@@ -289,7 +227,7 @@ export default function AnalyzeResume() {
 
       setPreviousEvaluation(evaluation);
       setEvaluation(evalData);
-      const actionItems = evalData.structured_actions || DEMO_STRUCTURED_ACTIONS;
+      const actionItems = evalData.structured_actions || [];
       setActions(actionItems);
       setActiveTab("actions");
 
@@ -355,7 +293,7 @@ export default function AnalyzeResume() {
       const evalData = res.data.evaluation;
       setPreviousEvaluation(evaluation);
       setEvaluation(evalData);
-      const actionItems = evalData.structured_actions || DEMO_STRUCTURED_ACTIONS;
+      const actionItems = evalData.structured_actions || [];
       setActions(actionItems);
       setActiveTab("overview");
 
@@ -552,7 +490,9 @@ export default function AnalyzeResume() {
               }`}
             >
               <Zap className="w-3.5 h-3.5 text-[#FFD84D]" />
-              <span>Action Center ({actions.filter((a) => a.status === "pending").length})</span>
+              <span>
+                Action Center{actions && actions.length > 0 ? ` (${actions.filter((a) => a.status === "pending" || a.status === "OPEN").length})` : ""}
+              </span>
             </button>
 
             <button
