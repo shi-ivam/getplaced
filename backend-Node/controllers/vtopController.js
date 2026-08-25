@@ -12,6 +12,7 @@ import {
   getLiveVtopCaptcha,
   authenticateAndScrapeVtop,
 } from "../services/vtopLiveAuthService.js";
+import { getStudyMaterialUrl } from "../services/vtopStudyMaterialService.js";
 
 // @desc    Get user's synced VTOP profile and placement parameter impact
 // @route   GET /api/vtop/profile
@@ -79,6 +80,35 @@ export const syncVtopProfile = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Set active viewed semester
+// @route   PUT /api/vtop/active-semester
+// @access  Private
+export const setActiveSemester = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { semesterId } = req.body;
+
+  if (!semesterId) {
+    res.status(400);
+    throw new Error("semesterId is required.");
+  }
+
+  const vtop = await VtopProfile.findOne({ userId });
+  if (!vtop) {
+    return res.status(404).json({ message: "VTOP profile not found" });
+  }
+
+  vtop.activeSemesterId = semesterId;
+  await vtop.save();
+  const placementImpact = computeVtopPlacementImpact(vtop);
+
+  res.json({
+    success: true,
+    message: `Active semester updated to ${semesterId}`,
+    vtop,
+    placementImpact,
+  });
+});
+
 // @desc    Update specific course marks or attendance parameters manually
 // @route   PUT /api/vtop/course-update
 // @access  Private
@@ -91,7 +121,6 @@ export const updateCourseMarks = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "VTOP profile not found" });
   }
 
-  // Find course in active semester
   const sem = vtop.semesters.find((s) => s.semesterId === vtop.activeSemesterId) || vtop.semesters[0];
   if (sem) {
     const course = sem.courses.find((c) => c.code === courseCode);
@@ -189,6 +218,54 @@ export const liveLoginHandler = asyncHandler(async (req, res) => {
   }
 
   res.json(result);
+});
+
+// @desc    Get detailed academic data for a specific semester
+// @route   GET /api/vtop/semesters/:semesterId
+// @access  Private
+export const getSemesterData = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { semesterId } = req.params;
+
+  const vtop = await VtopProfile.findOne({ userId });
+  if (!vtop) {
+    return res.status(404).json({
+      success: false,
+      message: "No connected VTOP profile found.",
+    });
+  }
+
+  const semester = vtop.semesters?.find(
+    (s) => s.semesterId === semesterId || s.semesterName === semesterId
+  );
+
+  if (!semester) {
+    return res.status(404).json({
+      success: false,
+      message: `No records found for semester: ${semesterId}`,
+      semesterId,
+      semesterName: semesterId,
+      courses: [],
+    });
+  }
+
+  const enrichedCourses = (semester.courses || []).map((c) => {
+    const obj = c.toObject ? c.toObject() : c;
+    return {
+      ...obj,
+      studyMaterialUrl: obj.studyMaterialUrl || getStudyMaterialUrl(obj.code, obj.title),
+    };
+  });
+
+  res.json({
+    success: true,
+    semesterId: semester.semesterId,
+    semesterName: semester.semesterName,
+    sgpa: semester.sgpa,
+    runningCgpa: semester.runningCgpa,
+    creditsEarned: semester.creditsEarned,
+    courses: enrichedCourses,
+  });
 });
 
 // @desc    Get the technical login protocol breakdown

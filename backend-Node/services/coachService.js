@@ -807,9 +807,10 @@ export async function connectVtopInCoach(userId, params = {}) {
         campus: "",
         program: "",
         currentCgpa: null,
-        totalCreditsEarned: 0,
+        totalCreditsEarned: null,
         activeBacklogs: 0,
         historyOfBacklogs: 0,
+        syncStatus: "pending",
         lastSyncedAt: null,
       });
       vtopResult = {

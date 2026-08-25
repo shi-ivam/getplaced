@@ -3,6 +3,8 @@ import { protect } from "../middlewares/authMiddleware.js";
 import {
   getVtopProfile,
   syncVtopProfile,
+  setActiveSemester,
+  getSemesterData,
   updateCourseMarks,
   getPlacementImpact,
   getAuthProtocol,
@@ -14,6 +16,8 @@ const router = express.Router();
 
 router.get("/profile", protect, getVtopProfile);
 router.post("/sync", protect, syncVtopProfile);
+router.put("/active-semester", protect, setActiveSemester);
+router.get("/semesters/:semesterId", protect, getSemesterData);
 router.get("/live-captcha", getLiveCaptchaHandler);
 router.post("/live-login", protect, liveLoginHandler);
 router.put("/course-update", protect, updateCourseMarks);

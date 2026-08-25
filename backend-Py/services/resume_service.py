@@ -194,16 +194,23 @@ def analyze_resume_comprehensive(resume_text: str, job_description: Optional[str
     if not resume_text or len(resume_text.strip()) < 20:
         return get_fallback_analysis("Resume content appears empty or too brief to extract meaningful insights.", job_description)
 
+    if job_description:
+        target_benchmark_section = f"Job Description:\n\"\"\"\n{job_description[:3000]}\n\"\"\""
+    else:
+        target_benchmark_section = "Target Benchmark: Top-Tier Software Engineering / Tech Placement"
+
+    jd_clause = " and the provided Job Description" if job_description else ""
+
     prompt = f"""
 You are an expert Fortune 500 Technical Recruiter and ATS (Applicant Tracking System) Evaluation Specialist.
-Evaluate the following resume thoroughly against industry benchmarks{" and the provided Job Description" if job_description else ""}.
+Evaluate the following resume thoroughly against industry benchmarks{jd_clause}.
 
 Resume Content:
 \"\"\"
 {resume_text[:6000]}
 \"\"\"
 
-{"Job Description:" + chr(10) + '\"\"\"' + chr(10) + job_description[:3000] + chr(10) + '\"\"\"' if job_description else "Target Benchmark: Top-Tier Software Engineering / Tech Placement"}
+{target_benchmark_section}
 
 Provide your evaluation strictly as valid JSON matching this exact structure:
 {{

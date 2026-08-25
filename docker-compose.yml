@@ -33,6 +33,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-secretkey123}
       - RAPIDAPI_KEY=${RAPIDAPI_KEY:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
     depends_on:
       mongodb:
         condition: service_healthy

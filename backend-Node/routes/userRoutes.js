@@ -13,14 +13,17 @@ import {
   getBehavioralPractice,
   recordBehavioralPractice,
 } from "../controllers/userController.js"
-import { protect } from "../middlewares/authMiddleware.js"
 import dotenv from "dotenv"
 dotenv.config()
 
 const router = express.Router()
 
 router.post("/", registerUser)
+router.post("/register", registerUser)
+router.post("/signup", registerUser)
 router.post("/auth", authUser)
+router.post("/login", authUser)
+router.post("/signin", authUser)
 router.post("/logout", logoutUser)
 router
   .route("/profile")
