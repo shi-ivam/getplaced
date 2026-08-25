@@ -43,16 +43,15 @@ export default function TopicSkillCard({ topic, targetCompany = "", targetJobRol
   };
 
   const getGapBadge = () => {
-    if (topic.currentLevel === null || topic.dataAvailability === "not_available") {
+    if (topic.dataAvailability === "not_available" || typeof topic.currentLevel !== "number" || isNaN(topic.currentLevel)) {
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full bg-[#FEF9CF] text-[#0D0431] border-2 border-[#0D0431] font-mono font-bold shadow-[1px_1px_0_0_#0D0431]">
-          <HelpCircle className="w-3 h-3 text-[#0D0431]" />
+        <span className="inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full bg-[#E2DEEC] text-[#0D0431]/70 border-2 border-[#0D0431] font-mono font-bold shadow-[1px_1px_0_0_#0D0431]">
           Unassessed
         </span>
       );
     }
 
-    if (topic.gap === null) {
+    if (typeof topic.gap !== "number" || isNaN(topic.gap)) {
       return (
         <span className="inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full bg-[#CDE1FF] text-[#0D0431] border-2 border-[#0D0431] font-mono font-bold shadow-[1px_1px_0_0_#0D0431]">
           Assessed
@@ -173,11 +172,11 @@ export default function TopicSkillCard({ topic, targetCompany = "", targetJobRol
             <div className="flex items-center gap-1.5">
               <span className="text-[#0D0431]/70 font-bold text-[11px]">Level:</span>
               <span className="font-black text-[#0D0431]">
-                {topic.currentLevel !== null ? `${topic.currentLevel.toFixed(1)} / 10` : "—"}
+                {typeof topic.currentLevel === "number" && !isNaN(topic.currentLevel) ? `${topic.currentLevel.toFixed(1)} / 10` : "—"}
               </span>
             </div>
 
-            {topic.requiredLevel !== null ? (
+            {typeof topic.requiredLevel === "number" && !isNaN(topic.requiredLevel) ? (
               <div className="text-[#0D0431]/70 text-[11px] font-bold">
                 Target: <span className="text-[#0D0431] font-black">{topic.requiredLevel.toFixed(1)}</span>
               </div>

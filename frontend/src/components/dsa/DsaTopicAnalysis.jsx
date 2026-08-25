@@ -386,7 +386,7 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
                         </td>
 
                         <td className="py-3.5 px-3 font-bold">
-                          {topic.currentLevel !== null ? (
+                          {typeof topic.currentLevel === "number" && !isNaN(topic.currentLevel) ? (
                             <span
                               className={`px-2 py-0.5 rounded-full border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] ${
                                 topic.currentLevel >= 8.0
@@ -404,11 +404,11 @@ export default function DsaTopicAnalysis({ initialData = null, targetCompany = "
                         </td>
 
                         <td className="py-3.5 px-3 text-[#0D0431] font-bold">
-                          {topic.requiredLevel !== null ? `${topic.requiredLevel.toFixed(1)} / 10` : "—"}
+                          {typeof topic.requiredLevel === "number" && !isNaN(topic.requiredLevel) ? `${topic.requiredLevel.toFixed(1)} / 10` : "—"}
                         </td>
 
                         <td className="py-3.5 px-3">
-                          {topic.gap !== null ? (
+                          {typeof topic.gap === "number" && !isNaN(topic.gap) ? (
                             <span
                               className={`inline-block text-[10px] px-2.5 py-0.5 rounded-full font-bold border-2 border-[#0D0431] shadow-[1px_1px_0_0_#0D0431] ${
                                 topic.gap > 0

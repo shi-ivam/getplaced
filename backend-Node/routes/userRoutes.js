@@ -13,6 +13,7 @@ import {
   getBehavioralPractice,
   recordBehavioralPractice,
 } from "../controllers/userController.js"
+import { protect } from "../middlewares/authMiddleware.js"
 import dotenv from "dotenv"
 dotenv.config()
 
