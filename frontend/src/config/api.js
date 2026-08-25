@@ -1,4 +1,3 @@
-export const NODE_API_URL = import.meta.env.VITE_NODE_API_URL || "http://localhost:3000";
-export const PY_API_URL = import.meta.env.VITE_PY_API_URL || "http://localhost:8000";
+export const NODE_API_URL = (import.meta.env.VITE_NODE_API_URL || "http://localhost:3000").replace(/\/$/, "");
+export const PY_API_URL = (import.meta.env.VITE_PY_API_URL || "http://localhost:8000").replace(/\/$/, "");
 export const SUPPORT_EMAIL = import.meta.env.VITE_SUPPORT_EMAIL || "support@getplaced.ai";
-

@@ -388,6 +388,79 @@ async function runAllTests() {
     assert.ok(Array.isArray(leaderboard.topRankers));
   });
 
+  // 7. VTOP Integration & Study Material Service Tests
+  console.log("\n[7] VTOP Integration & Study Material Service Tests");
+
+  const { getGradePoints, computeSemesterWiseGPA } = await import("./services/vtopLiveAuthService.js");
+  const { computeVtopPlacementImpact, getVtopAuthProtocolSummary } = await import("./services/vtopService.js");
+  const { getStudyMaterialUrl } = await import("./services/vtopStudyMaterialService.js");
+
+  await test("getGradePoints maps VIT grades accurately to 10-point scale", () => {
+    assert.equal(getGradePoints("S"), 10.0);
+    assert.equal(getGradePoints("A"), 9.0);
+    assert.equal(getGradePoints("B"), 8.0);
+    assert.equal(getGradePoints("C"), 7.0);
+    assert.equal(getGradePoints("D"), 6.0);
+    assert.equal(getGradePoints("E"), 5.0);
+    assert.equal(getGradePoints("F"), 0.0);
+    assert.equal(getGradePoints("N"), 0.0);
+    assert.equal(getGradePoints("P"), null);
+  });
+
+  await test("computeSemesterWiseGPA groups courses and calculates SGPA and CGPA accurately", () => {
+    const records = [
+      { courseCode: "CSE1001", courseTitle: "Python", courseType: "Lab", credits: 4, grade: "S", semester: "Fall 2023" },
+      { courseCode: "MAT1011", courseTitle: "Calculus", courseType: "Theory", credits: 4, grade: "A", semester: "Fall 2023" },
+      { courseCode: "CSE2004", courseTitle: "DBMS", courseType: "Theory", credits: 4, grade: "A", semester: "Winter 2024" },
+      { courseCode: "CSE2005", courseTitle: "OS", courseType: "Theory", credits: 4, grade: "B", semester: "Winter 2024" },
+    ];
+
+    const result = computeSemesterWiseGPA(records);
+    assert.equal(result.semesters.length, 2);
+    // Fall 2023: (10*4 + 9*4) / 8 = 76 / 8 = 9.5
+    assert.equal(result.semesters[0].sgpa, 9.5);
+    assert.equal(result.semesters[0].creditsEarned, 8);
+    // Winter 2024: (9*4 + 8*4) / 8 = 68 / 8 = 8.5
+    assert.equal(result.semesters[1].sgpa, 8.5);
+    // Cumulative: (76 + 68) / 16 = 144 / 16 = 9.0
+    assert.equal(result.cumulative.overallCgpa, 9.0);
+    assert.equal(result.cumulative.totalEarnedCredits, 16);
+  });
+
+  await test("getStudyMaterialUrl routes subjects to exact vhelpcc.com study material pages", () => {
+    assert.equal(getStudyMaterialUrl("CSE2004", "Database Management Systems"), "https://www.vhelpcc.com/study-material/dbms");
+    assert.equal(getStudyMaterialUrl("CSE2005", "Operating Systems"), "https://www.vhelpcc.com/study-material/operating-systems");
+    assert.equal(getStudyMaterialUrl("CSE3001", "Computer Networks"), "https://www.vhelpcc.com/study-material/computer-networks");
+    assert.equal(getStudyMaterialUrl("CSE2003", "Data Structures and Algorithms"), "https://www.vhelpcc.com/study-material/data-structures-and-algorithms");
+    assert.equal(getStudyMaterialUrl("CSE3002", "Theory of Computation"), "https://www.vhelpcc.com/study-material/theory-of-computation");
+    assert.equal(getStudyMaterialUrl("BCSE302L", "Database Systems"), "https://www.vhelpcc.com/study-material/dbms");
+  });
+
+  await test("computeVtopPlacementImpact safely handles missing or non-synced profiles without mock assumptions", () => {
+    assert.equal(computeVtopPlacementImpact(null), null);
+
+    const emptyProfile = {
+      currentCgpa: null,
+      activeBacklogs: 0,
+      historyOfBacklogs: 0,
+      overallAttendancePercentage: null,
+      totalCreditsEarned: null,
+      totalCreditsRequired: null,
+      semesters: [],
+    };
+    const impact = computeVtopPlacementImpact(emptyProfile);
+    assert.equal(impact.cgpa, null);
+    assert.equal(impact.overallAttendance, null);
+    assert.equal(impact.superDreamEligible, false);
+    assert.equal(impact.placementAcademicScore, null);
+  });
+
+  await test("getVtopAuthProtocolSummary returns multi-step technical workflow", () => {
+    const summary = getVtopAuthProtocolSummary();
+    assert.ok(summary.steps.length >= 6);
+    assert.equal(summary.steps[0].endpoint, "POST /vtop/prelogin/setup");
+  });
+
   console.log("\n==========================================");
   console.log(`ALL ${passedTests}/${totalTests} TESTS PASSED SUCCESSFULLY!`);
   console.log("==========================================\n");

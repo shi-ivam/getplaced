@@ -498,14 +498,15 @@ export async function connectVtopInCoach(userId, params = {}) {
         userId,
         regNo: rawRegNo,
         campus: "VIT Chennai",
-        program: "B.Tech Computer Science & Engineering",
-        currentCgpa: 8.85,
-        totalCreditsEarned: 142,
+        program: "",
+        currentCgpa: null,
+        totalCreditsEarned: null,
         activeBacklogs: 0,
         historyOfBacklogs: 0,
+        syncStatus: "pending",
         lastSyncedAt: new Date(),
       });
-      vtopResult = { success: true, profile: created, message: "VTOP academic profile initialized" };
+      vtopResult = { success: true, profile: created, message: "VTOP academic profile linked (pending live sync)" };
     }
   } else {
     throw new Error("Please provide VTOP credentials or Registration Number to link academic profile");
