@@ -10,6 +10,7 @@ import { createPersonalizedRoadmap } from "./roadmapService.js";
 import { calculatePlacementReadiness } from "./readinessService.js";
 import { buildLevelComparison } from "./levelGapService.js";
 import { fetchGitHubUserData, extractGitHubUsername, formatGitHubProfileResponse } from "./githubService.js";
+import { fetchLeetCodeStats, extractLeetCodeUsername, formatLeetCodeProfileResponse } from "./leetcodeService.js";
 import { authenticateAndScrapeVtop } from "./vtopLiveAuthService.js";
 import { runGeminiCoachTurn } from "./geminiCoachEngine.js";
 import {
@@ -770,8 +771,7 @@ export async function connectVtopInCoach(userId, params = {}) {
   const { username, password, captchaStr, sessionId, semesterId, regNo } = params || {};
   let vtopResult;
   if (password && captchaStr && sessionId) {
-    vtopResult = await authenticateAndScrapeVtop({
-      userId,
+    vtopResult = await authenticateAndScrapeVtop(userId, {
       username,
       password,
       captchaStr,

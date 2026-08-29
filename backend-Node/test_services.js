@@ -40,6 +40,7 @@ import {
 } from "./config/readinessWeights.js";
 import { DSA_TOPICS, DSA_CATEGORIES } from "./config/dsaTaxonomy.js";
 import DsaProgress from "./models/dsaProgressModel.js";
+import { connectLeetCodeInCoach } from "./services/coachService.js";
 
 // Group C Services Imports
 import {
@@ -248,6 +249,13 @@ async function runAllTests() {
     assert.equal(extractLeetCodeUsername("https://leetcode.com/u/john_doe?tab=overview#solutions"), "john_doe");
     assert.equal(extractLeetCodeUsername("   tourist   "), "tourist");
     assert.equal(extractLeetCodeUsername(""), "");
+  });
+
+  await test("coach LeetCode connector resolves its username helper", async () => {
+    await assert.rejects(
+      () => connectLeetCodeInCoach(new mongoose.Types.ObjectId(), ""),
+      /Invalid LeetCode username or URL format/
+    );
   });
 
   await test("calculateLeetCodeDsaScore computes balanced placement score", () => {

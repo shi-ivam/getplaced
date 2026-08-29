@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { NODE_API_URL } from "@/config/api";
 import GpBadge from "@/components/gp/GpBadge";
+import { normalizeCaptchaImageSrc } from "@/utils/captchaImage";
 import { getSubjectStudyMaterialUrl } from "@/utils/vtopStudyMaterial";
 
 export default function VtopDetails() {
@@ -1390,7 +1391,7 @@ export default function VtopDetails() {
                   <div className="h-10 w-28 bg-[#F8F8F5] border border-[#E2DEEC] rounded-xl flex items-center justify-center overflow-hidden shrink-0">
                     {captchaImage ? (
                       <img
-                        src={captchaImage}
+                        src={normalizeCaptchaImageSrc(captchaImage)}
                         alt="VTOP Captcha"
                         className="h-full w-full object-contain"
                       />

@@ -45,6 +45,7 @@ import GpButton, { GpArrow } from "@/components/gp/GpButton";
 import GpBadge from "@/components/gp/GpBadge";
 import GpCard from "@/components/gp/GpCard";
 import CompanyLogo from "@/components/common/CompanyLogo";
+import { normalizeCaptchaImageSrc } from "@/utils/captchaImage";
 import {
   CURATED_COMPANIES,
   getRolesForCompany,
@@ -1435,7 +1436,7 @@ export default function CareerCoach() {
                 {vtopCaptchaImage && (
                   <div className="mb-2 p-2 bg-white rounded-xl border-2 border-[#0D0431] shadow-[2px_2px_0_0_#0D0431] flex items-center justify-center">
                     <img
-                      src={`data:image/png;base64,${vtopCaptchaImage}`}
+                      src={normalizeCaptchaImageSrc(vtopCaptchaImage)}
                       alt="VTOP Captcha"
                       className="h-10 rounded object-contain"
                     />
