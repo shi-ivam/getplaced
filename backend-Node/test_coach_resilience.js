@@ -41,7 +41,7 @@ try {
     assert.equal(requests.length, 4);
     for (const request of requests) {
       assert.equal(request.config.httpOptions.retryOptions.attempts, 1);
-      assert.ok(request.config.httpOptions.timeout <= 50);
+      assert.equal(request.config.httpOptions.timeout, 10_000);
       assert.ok(request.config.abortSignal instanceof AbortSignal);
     }
     assert.equal(result.modelUsed, "getPlacedAI-fallback");

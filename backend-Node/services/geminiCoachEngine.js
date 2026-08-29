@@ -92,7 +92,8 @@ function positiveInteger(value, fallback) {
 // Keep the full coach request below Nginx's 60-second upstream timeout. The
 // SDK retries transient failures five times by default, so each application
 // level model attempt explicitly disables those nested retries.
-const DEFAULT_GEMINI_MODEL_TIMEOUT_MS = 8_000;
+const MIN_GEMINI_SDK_TIMEOUT_MS = 10_000;
+const DEFAULT_GEMINI_MODEL_TIMEOUT_MS = 10_000;
 const DEFAULT_GEMINI_RESPONSE_BUDGET_MS = 45_000;
 
 async function generateContentWithDeadline(aiClient, request, timeoutMs) {
@@ -116,7 +117,10 @@ async function generateContentWithDeadline(aiClient, request, timeoutMs) {
           ...request.config,
           httpOptions: {
             ...request.config?.httpOptions,
-            timeout: timeoutMs,
+            // Google rejects manually configured deadlines below 10 seconds.
+            // The local abort timer can still enforce a smaller remaining
+            // request budget near the end of the overall coach deadline.
+            timeout: Math.max(timeoutMs, MIN_GEMINI_SDK_TIMEOUT_MS),
             retryOptions: {
               ...request.config?.httpOptions?.retryOptions,
               attempts: 1,
