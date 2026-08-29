@@ -287,12 +287,14 @@ Provide your evaluation strictly as valid JSON matching this exact structure:
         if isinstance(result, dict) and "ats_score" in result:
             result["ats_score"] = max(0, min(100, int(result.get("ats_score", 70))))
             result["structured_actions"] = _ensure_structured_actions(result, resume_text)
+            result["analysis_source"] = "gemini"
             return result
     except Exception as e:
-        logger.error(f"Gemini resume analysis failed or errored: {e}")
-        raise RuntimeError(f"Resume analysis failed: {e}")
+        logger.warning("Gemini resume analysis unavailable; using ATS fallback: %s", e)
+        return get_fallback_analysis(resume_text, job_description)
 
-    raise RuntimeError("Resume analysis returned invalid data from AI model.")
+    logger.warning("Gemini resume analysis returned invalid data; using ATS fallback")
+    return get_fallback_analysis(resume_text, job_description)
 
 def get_fallback_analysis(resume_text: str, job_description: Optional[str] = None) -> Dict[str, Any]:
     """
@@ -338,6 +340,7 @@ def get_fallback_analysis(resume_text: str, job_description: Optional[str] = Non
     tier = "Exceptional" if overall_ats >= 90 else "Strong" if overall_ats >= 78 else "Competitive" if overall_ats >= 65 else "Needs Work"
 
     raw_data = {
+        "analysis_source": "deterministic_fallback",
         "ats_score": overall_ats,
         "score_tier": tier,
         "category_scores": {
@@ -598,4 +601,3 @@ Return strictly valid JSON:
         raise RuntimeError(f"Section optimization failed: {e}")
 
     raise RuntimeError("Failed to optimize resume section from AI model.")
-

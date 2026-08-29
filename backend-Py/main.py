@@ -145,7 +145,7 @@ class SectionOptimizeRequest(BaseModel):
 
 @app.post("/analyze-resume")
 @app.post("/analyze-resume/")
-async def analyze_resume_legacy(file: UploadFile = File(...), job_description: str = Form("")):
+def analyze_resume_legacy(file: UploadFile = File(...), job_description: str = Form("")):
     """Legacy compatibility endpoint returning analysis and detailed JSON payload."""
     temp_dir = tempfile.mkdtemp()
     try:
@@ -202,7 +202,7 @@ Top Recommendations:
 
 @app.post("/api/resume/analyze-upload")
 @app.post("/api/resume/analyze-upload/")
-async def analyze_resume_upload_api(
+def analyze_resume_upload_api(
     file: UploadFile = File(...),
     job_description: str = Form(""),
     target_role: str = Form("")

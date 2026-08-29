@@ -16,6 +16,24 @@ MODELS_PRIORITY = [
     "gemini-3.6-flash",
 ]
 
+DEFAULT_GEMINI_REQUEST_TIMEOUT_MS = 20_000
+
+
+def get_request_timeout_ms() -> int:
+    """Keep AI work comfortably inside the origin proxy timeout."""
+    configured = os.getenv("PY_GEMINI_REQUEST_TIMEOUT_MS", "").strip()
+    try:
+        timeout_ms = int(configured) if configured else DEFAULT_GEMINI_REQUEST_TIMEOUT_MS
+    except ValueError:
+        logger.warning(
+            "Invalid PY_GEMINI_REQUEST_TIMEOUT_MS=%r; using %dms",
+            configured,
+            DEFAULT_GEMINI_REQUEST_TIMEOUT_MS,
+        )
+        return DEFAULT_GEMINI_REQUEST_TIMEOUT_MS
+
+    return max(10_000, min(timeout_ms, 45_000))
+
 def get_configured_api_key() -> str:
     load_dotenv(override=True)
     load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"), override=True)
@@ -30,7 +48,17 @@ def query_gemini(prompt: str, system_instruction: Optional[str] = None, json_mod
     if not api_key:
         raise ValueError("GOOGLE_API_KEY environment variable is not configured.")
 
-    client = genai.Client(api_key=api_key)
+    request_timeout_ms = get_request_timeout_ms()
+    client = genai.Client(
+        api_key=api_key,
+        http_options=types.HttpOptions(
+            timeout=request_timeout_ms,
+            # The SDK defaults to five attempts. Retrying here can outlive the
+            # reverse-proxy request, so availability is handled by the ATS
+            # service's deterministic fallback instead.
+            retry_options=types.HttpRetryOptions(attempts=1),
+        ),
+    )
 
     generate_config_kwargs = {}
     if json_mode:
@@ -41,28 +69,36 @@ def query_gemini(prompt: str, system_instruction: Optional[str] = None, json_mod
     config = types.GenerateContentConfig(**generate_config_kwargs) if generate_config_kwargs else None
 
     last_error = None
-    for model_name in MODELS_PRIORITY:
-        try:
-            kwargs = {"model": model_name, "contents": prompt}
-            if config:
-                kwargs["config"] = config
+    try:
+        for model_name in MODELS_PRIORITY:
+            try:
+                kwargs = {"model": model_name, "contents": prompt}
+                if config:
+                    kwargs["config"] = config
 
-            response = client.models.generate_content(**kwargs)
+                response = client.models.generate_content(**kwargs)
 
-            text_content = ""
-            if hasattr(response, "text") and response.text:
-                text_content = response.text
-            elif hasattr(response, "candidates") and response.candidates:
-                parts = response.candidates[0].content.parts
-                text_content = "".join(getattr(p, "text", "") for p in parts)
+                text_content = ""
+                if hasattr(response, "text") and response.text:
+                    text_content = response.text
+                elif hasattr(response, "candidates") and response.candidates:
+                    parts = response.candidates[0].content.parts
+                    text_content = "".join(getattr(p, "text", "") for p in parts)
 
-            if text_content.strip():
-                return text_content.strip()
+                if text_content.strip():
+                    return text_content.strip()
 
-        except Exception as e:
-            last_error = e
-            logger.warning(f"Model '{model_name}' failed: {e}")
-            continue
+            except Exception as e:
+                last_error = e
+                logger.warning(
+                    "Model '%s' failed within the %dms request budget: %s",
+                    model_name,
+                    request_timeout_ms,
+                    e,
+                )
+                continue
+    finally:
+        client.close()
 
     raise RuntimeError(f"All Gemini models failed. Last error: {last_error}")
 

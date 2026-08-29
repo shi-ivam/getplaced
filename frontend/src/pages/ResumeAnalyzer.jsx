@@ -92,13 +92,7 @@ const ResumeAnalyzer = () => {
 
       const pyRes = await axios.post(`${PY_API_URL}/api/resume/analyze-upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
-        timeout: 15000,
-      }).catch(async () => {
-        // Legacy compatibility fallback endpoint
-        return await axios.post(`${PY_API_URL}/analyze-resume`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-          timeout: 15000,
-        });
+        timeout: 45000,
       });
 
       if (pyRes?.data) {
