@@ -84,6 +84,54 @@ const MODEL_CASCADE = [
   "gemini-3.1-flash-lite",
 ];
 
+function positiveInteger(value, fallback) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+// Keep the full coach request below Nginx's 60-second upstream timeout. The
+// SDK retries transient failures five times by default, so each application
+// level model attempt explicitly disables those nested retries.
+const DEFAULT_GEMINI_MODEL_TIMEOUT_MS = 8_000;
+const DEFAULT_GEMINI_RESPONSE_BUDGET_MS = 45_000;
+
+async function generateContentWithDeadline(aiClient, request, timeoutMs) {
+  const controller = new AbortController();
+  let timeoutId;
+
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      controller.abort();
+      const error = new Error(`Gemini attempt exceeded ${timeoutMs}ms`);
+      error.code = "GEMINI_ATTEMPT_TIMEOUT";
+      reject(error);
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([
+      aiClient.models.generateContent({
+        ...request,
+        config: {
+          ...request.config,
+          httpOptions: {
+            ...request.config?.httpOptions,
+            timeout: timeoutMs,
+            retryOptions: {
+              ...request.config?.httpOptions?.retryOptions,
+              attempts: 1,
+            },
+          },
+          abortSignal: controller.signal,
+        },
+      }),
+      timeoutPromise,
+    ]);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 // Tool Declarations for Google GenAI Function Calling (18 Canonical Tools)
 export const COACH_TOOL_DECLARATIONS = [
   {
@@ -1051,10 +1099,10 @@ export async function runGeminiCoachTurn({
   collectedData = {},
   extractedProfile = {},
   connectedProfiles = {},
+  modelAttemptTimeoutMs = positiveInteger(process.env.GEMINI_MODEL_TIMEOUT_MS, DEFAULT_GEMINI_MODEL_TIMEOUT_MS),
+  responseBudgetMs = positiveInteger(process.env.GEMINI_RESPONSE_BUDGET_MS, DEFAULT_GEMINI_RESPONSE_BUDGET_MS),
 }) {
-  const activeAiClient = getActiveAiClient(injectedClient);
-  if (!activeAiClient) {
-    if (isOnboarding) {
+  const buildOnboardingFallback = () => {
       const lower = (userMessage || "").toLowerCase().trim();
       const isSkip = lower === "skip" || lower.startsWith("skip ") || lower.includes("skip") || lower.includes("later") || lower.includes("i don't have");
 
@@ -1161,8 +1209,11 @@ export async function runGeminiCoachTurn({
           mutations: { roadmapGenerated: true },
         };
       }
-    }
+  };
 
+  const activeAiClient = getActiveAiClient(injectedClient);
+  if (!activeAiClient) {
+    if (isOnboarding) return buildOnboardingFallback();
     return {
       replyText: "AI Engine Configuration Note: Google GenAI API Key is required. Please set GOOGLE_API_KEY in your environment or root `.API_KEY` file.",
       toolCallsExecuted: [],
@@ -1190,6 +1241,8 @@ export async function runGeminiCoachTurn({
   let accumulatedMutations = {};
   let finalReplyText = "";
   let finalModelUsed = "";
+  const requestDeadline = Date.now() + positiveInteger(responseBudgetMs, DEFAULT_GEMINI_RESPONSE_BUDGET_MS);
+  const configuredAttemptTimeout = positiveInteger(modelAttemptTimeoutMs, DEFAULT_GEMINI_MODEL_TIMEOUT_MS);
 
   // Multi-Turn Tool Execution Loop with Model Cascade
   for (let turn = 0; turn < maxToolTurns; turn++) {
@@ -1197,16 +1250,24 @@ export async function runGeminiCoachTurn({
     let successfulModel = null;
 
     for (const modelName of MODEL_CASCADE) {
+      const remainingBudgetMs = requestDeadline - Date.now();
+      if (remainingBudgetMs <= 0) break;
+
+      const attemptTimeoutMs = Math.max(1, Math.min(configuredAttemptTimeout, remainingBudgetMs));
       try {
-        response = await activeAiClient.models.generateContent({
-          model: modelName,
-          contents,
-          config: {
-            systemInstruction,
-            tools: toolDeclarations,
-            temperature: 0.6,
+        response = await generateContentWithDeadline(
+          activeAiClient,
+          {
+            model: modelName,
+            contents,
+            config: {
+              systemInstruction,
+              tools: toolDeclarations,
+              temperature: 0.6,
+            },
           },
-        });
+          attemptTimeoutMs
+        );
         successfulModel = modelName;
         break;
       } catch (err) {
@@ -1215,6 +1276,19 @@ export async function runGeminiCoachTurn({
     }
 
     if (!response) {
+      if (isOnboarding) {
+        const fallback = buildOnboardingFallback();
+        return {
+          ...fallback,
+          toolCallsExecuted,
+          executionSummary: [
+            ...executionSummary,
+            "Gemini was temporarily unavailable; continued with the deterministic onboarding flow.",
+          ],
+          mutations: { ...accumulatedMutations, ...fallback.mutations },
+          modelUsed: finalModelUsed || "getPlacedAI-fallback",
+        };
+      }
       finalReplyText = "I encountered a transient connection issue with Google GenAI. Your request has been recorded.";
       break;
     }

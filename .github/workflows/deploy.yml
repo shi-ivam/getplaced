@@ -74,6 +74,9 @@ jobs:
 
             # 6. Restart & reload services
             echo "[6/6] Reloading systemd services and Nginx..."
+            sudo mkdir -p /etc/systemd/system/getplaced-node.service.d
+            printf '[Service]\nEnvironment=NODE_ENV=production\n' | sudo tee /etc/systemd/system/getplaced-node.service.d/production.conf >/dev/null
+            sudo systemctl daemon-reload
             sudo systemctl restart getplaced-node
             sudo systemctl restart getplaced-py
             sudo systemctl reload nginx

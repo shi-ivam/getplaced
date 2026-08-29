@@ -6,7 +6,8 @@
     "start": "node --watch index.js",
     "dev": "node --watch index.js",
     "seed:user": "node utils/seedTestUser.js",
-    "test": "node test_services.js"
+    "test": "node test_services.js && node test_coach_resilience.js",
+    "test:coach-resilience": "node test_coach_resilience.js"
   },
   "keywords": [],
   "author": "",

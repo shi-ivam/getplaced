@@ -81,6 +81,7 @@ export default function CareerCoach() {
   const [profileCompletion, setProfileCompletion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [messageError, setMessageError] = useState("");
   const [applyingProfile, setApplyingProfile] = useState(false);
   const [showSummaryDrawer, setShowSummaryDrawer] = useState(false);
   const [mobileActiveTab, setMobileActiveTab] = useState("chat");
@@ -376,10 +377,11 @@ export default function CareerCoach() {
     setMessages((prev) => [...prev, tempUserMsg]);
     setInputMessage("");
     setChips([]);
+    setMessageError("");
     setSending(true);
 
+    const mode = isOnboardingMode ? "onboarding" : "coach";
     try {
-      const mode = isOnboardingMode ? "onboarding" : "coach";
       const res = await axios.post(
         `${NODE_API_URL}/api/coach/message`,
         { message: trimmed, mode },
@@ -390,6 +392,21 @@ export default function CareerCoach() {
       }
     } catch (err) {
       console.error("Could not send message to coach:", err);
+      setInputMessage(trimmed);
+      setMessageError(
+        err.response?.status === 504
+          ? "The coach took too long to respond. Your answer has been restored so you can retry."
+          : err.response?.data?.message || "The coach is temporarily unavailable. Your answer has been restored."
+      );
+
+      try {
+        const sessionRes = await axios.get(`${NODE_API_URL}/api/coach/session?mode=${mode}`, {
+          withCredentials: true,
+        });
+        if (sessionRes.data) syncSessionData(sessionRes.data);
+      } catch (syncError) {
+        console.warn("Could not resync coach session after message failure:", syncError.message);
+      }
     } finally {
       setSending(false);
     }
@@ -937,6 +954,26 @@ export default function CareerCoach() {
                     <span>{chip}</span>
                   </button>
                 ))}
+              </div>
+            )}
+
+            {messageError && (
+              <div
+                role="alert"
+                className="mx-3.5 mt-3 flex items-center justify-between gap-3 rounded-2xl border-2 border-[#0D0431] bg-[#FFC5B7] px-4 py-3 text-xs font-bold text-[#0D0431] shadow-[2px_2px_0_0_#0D0431]"
+              >
+                <span className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  {messageError}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setMessageError("")}
+                  aria-label="Dismiss message error"
+                  className="rounded-lg border border-[#0D0431] bg-white p-1 hover:bg-[#FEDF6A]"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
               </div>
             )}
 
